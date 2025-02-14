@@ -1,66 +1,148 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://cdn.devdojo.com/assets/svg/laravel-react-logo.svg" width="300" alt="Laravel Logo"></a></p>
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://github.com/laravel/react-starter-kit/actions/workflows/tests.yml"><img src="https://github.com/laravel/react-starter-kit/workflows/tests/badge.svg" alt="Test Status"></a>
+<a href="https://github.com/laravel/react-starter-kit/actions/workflows/lint.yml"><img src="https://github.com/laravel/react-starter-kit/actions/workflows/lint.yml/badge.svg" alt="Lint Status"></a>
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About Laravel
+<img src="https://cdn.devdojo.com/images/december2024/screenshot.png" />
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Introduction
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Welcome to the <a href="https://laravel.com" target="_blank">Laravel</a> React</a> Starter Kit. This starter kit utilizes <a href="https://inertiajs.com/" target="_blank">Intertia v2</a>, <a href="https://tailwindcss.com/" target="_blank">Tailwind CSS</a>,V3 (soon to be V4), <a href="https://reactjs.dev" target="_blank">React 19</a>, and <a href="https://ui.shadcn.com/" target="_blank">ShadCN UI</a>.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Installation
 
-## Learning Laravel
+To install the React Starter Kit, run the following command:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```
+git clone https://github.com/laravel/react-starter-kit.git
+cd react-starter-kit
+git checkout develop
+chmod +x install.sh && ./install.sh
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+This shell file will run the following commands, which you may wish to run manually:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. cp .env.example .env
+2. composer install
+3. php artisan key:generate
+4. php artisan migrate
+5. npm install
+6. npm run dev
 
-## Laravel Sponsors
+## Features
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+This Starter Kit includes the following features:
 
-### Premium Partners
+- **User Authentication** (login, register, password reset, email verify, and password confirmation)
+- **Dashboard Page** (Auth Protected User Dashboard Page)
+- **Settings Page** (Profile Update/Delete, Password Update, Appearance)
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Front-end App Structure
 
-## Contributing
+The majority of the front-end code is located in the `resources/js` folder. In this folder we'll be using **kebab-case** throughout. You may wish to change this to any other convention if you perfer. Below is an example of how this folder is structured:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+**Folders**
 
-## Code of Conduct
+```
+resources/js/
+├── components/    # Reusable React components
+├── hooks/         # Custom React hooks
+├── layouts/       # Application layouts
+├── lib/           # Utility functions and configurations
+├── pages/         # Page components
+└── types/         # Typescript definitions and interfaces
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+**Components**
 
-## Security Vulnerabilities
+```
+components/
+└── appearance-tabs.tsx
+└── navigation-menu.tsx
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+**Hooks/Utilities**
 
-## License
+```
+hooks/
+└── use-auth.tsx
+└── use-mobile.tsx
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Components
+
+In the components folder is where all your React components will live. Inside this folder you'll also notice a sub-folder called `ui`. This is where you'll find all the ShadCN UI components. More documentation about this below.
+
+### Pages
+
+Most of your application pages will live in this folder. Here you will find the Page templates for Log in, Register, Dashboard, etc. These pages are rendered via Inertia. Here's an example, located inside of `routes/web.php`, of how the dashboard page is rendered:
+
+```php
+Route::get('/dashboard', function () {
+    return Inertia::render('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+```
+
+This code will load the `resources/js/pages/dashboard.tsx` file.
+
+### Layouts
+
+All your pages will utilize a layout as the structure for each page. These layout files are located in the `resources/js/layouts` folder. Currently, there will be two layouts. An `app` layout and an `auth` layout.
+
+1. **app-layout** - This layout will be used for all authenticated users.
+2. **auth\auth-base** - This is the main layout for your authentication pages, more info below.
+
+### Authentication Layouts
+
+The Authentication layouts are used specifically for all the Authentication views. You'll notice that there are a few different layouts in the `resources/js/layouts/auth` folder. This is because we provide you with three layouts to choose from.
+
+#### AuthSimpleLayout.tsx
+
+A clean and simple layout for your authentication pages.
+
+![Simple Auth Layout Screenshot](https://cdn.devdojo.com/images/december2024/simple-layout.png)
+
+#### AuthCardLayout.tsx
+
+A layout with a slightly darker background and with the auth form inside a card.
+
+![Simple Auth Layout Screenshot](https://cdn.devdojo.com/images/december2024/card-layout.png)
+
+#### SplitLayout.tsx
+
+A split view authentication layout screen
+
+![Simple Auth Layout Screenshot](https://cdn.devdojo.com/images/december2024/split-layout.png)
+
+---
+
+To change the Layout you would like to use, simply change the Layout file that is imported in either the `resources/js/layouts/auth-layout.tsx` or `resources/js/layouts/app-layout.tsx`. As an example, to use the `AuthSplitLayout.tsx`, the first line of `resources/js/layouts/auth-layout.tsx` would be modified to look like the following:
+
+```tsx
+import AuthLayoutTemplate from '@/layouts/auth/auth-split-layout';
+```
+
+---
+
+## ShadCN UI
+
+All the ShadCN components will be installed inside of the `resources/js/components/ui` folder.
+
+When you install a UI component, such as the button component:
+
+```bash
+npx shadcn@latest add button
+```
+
+You'll now have a button component in your `resources/js/components/ui` folder. You can then use the button component inside of any page.
+
+```tsx
+import { Button } from '@/components/ui/button';
+
+export default function Home() {
+    return <Button>Button</Button>;
+}
+```
