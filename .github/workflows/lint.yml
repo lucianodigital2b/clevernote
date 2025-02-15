@@ -32,10 +32,10 @@ jobs:
       - name: Run Pint
         run: vendor/bin/pint
 
-      - name: Frontend Format Check
+      - name: Format Frontend
         run: npm run format
 
-      - name: Frontend Lint
+      - name: Lint Frontend
         run: npm run lint
 
       - name: Commit Changes
