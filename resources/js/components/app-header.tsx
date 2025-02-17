@@ -3,13 +3,7 @@ import { Icon } from '@/components/icon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import {
-    NavigationMenu,
-    NavigationMenuItem,
-    NavigationMenuLink,
-    NavigationMenuList,
-    navigationMenuTriggerStyle,
-} from '@/components/ui/navigation-menu';
+import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { UserMenuContent } from '@/components/user-menu-content';
@@ -109,13 +103,12 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                             <NavigationMenuList className="flex h-full items-stretch space-x-2">
                                 {mainNavItems.map((item, index) => (
                                     <NavigationMenuItem key={index} className="relative flex h-full items-center">
-                                        <Link href={item.url}>
-                                            <NavigationMenuLink
-                                                className={cn(navigationMenuTriggerStyle(), activeItemStyles, 'h-9 cursor-pointer px-3')}
-                                            >
-                                                {item.icon && <Icon iconNode={item.icon} className="mr-2 h-4 w-4" />}
-                                                {item.title}
-                                            </NavigationMenuLink>
+                                        <Link
+                                            href={item.url}
+                                            className={cn(navigationMenuTriggerStyle(), activeItemStyles, 'h-9 cursor-pointer px-3')}
+                                        >
+                                            {item.icon && <Icon iconNode={item.icon} className="mr-2 h-4 w-4" />}
+                                            {item.title}
                                         </Link>
                                         <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
                                     </NavigationMenuItem>
@@ -126,20 +119,25 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
                     <div className="ml-auto flex items-center space-x-2">
                         <div className="relative flex items-center space-x-1">
-                            <Button variant="ghost" size="icon" className="h-9 w-9 cursor-pointer">
-                                <Search className="h-5 w-5" />
+                            <Button variant="ghost" size="icon" className="group h-9 w-9 cursor-pointer">
+                                <Search className="h-5 w-5 opacity-80 group-hover:opacity-100" />
                             </Button>
                             <div className="hidden space-x-1 lg:flex">
                                 {rightNavItems.map((item) => (
-                                    <TooltipProvider delayDuration={0}>
+                                    <TooltipProvider key={item.title} delayDuration={0}>
                                         <Tooltip>
                                             <TooltipTrigger>
-                                                <Button key={item.title} variant="ghost" size="icon" asChild className="h-9 w-9 cursor-pointer">
-                                                    <a href={item.url} target="_blank" rel="noopener noreferrer">
-                                                        <span className="sr-only">{item.title}</span>
-                                                        {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
-                                                    </a>
-                                                </Button>
+                                                <a
+                                                    href={item.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="group inline-flex h-9 w-9 items-center justify-center rounded-md bg-transparent p-0 text-sm font-medium text-accent-foreground ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                                                >
+                                                    <span className="sr-only">{item.title}</span>
+                                                    {item.icon && (
+                                                        <Icon iconNode={item.icon} className="h-4 w-4 opacity-80 group-hover:opacity-100" />
+                                                    )}
+                                                </a>
                                             </TooltipTrigger>
                                             <TooltipContent>
                                                 <p>{item.title}</p>
