@@ -52,6 +52,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 onChange={(e) => setData('name', e.target.value)}
                                 required
                                 autoComplete="name"
+                                placeholder="Full name"
                             />
 
                             <InputError className="mt-2" message={errors.name} />
@@ -68,6 +69,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 onChange={(e) => setData('email', e.target.value)}
                                 required
                                 autoComplete="username"
+                                placeholder="Email address"
                             />
 
                             <InputError className="mt-2" message={errors.email} />

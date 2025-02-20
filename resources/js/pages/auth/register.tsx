@@ -48,6 +48,7 @@ export default function Register() {
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
                             disabled={processing}
+                            placeholder="Full name"
                         />
                         <InputError message={errors.name} className="mt-2" />
                     </div>
@@ -63,6 +64,7 @@ export default function Register() {
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
                             disabled={processing}
+                            placeholder="email@example.com"
                         />
                         <InputError message={errors.email} />
                     </div>
@@ -78,6 +80,7 @@ export default function Register() {
                             value={data.password}
                             onChange={(e) => setData('password', e.target.value)}
                             disabled={processing}
+                            placeholder="Password"
                         />
                         <InputError message={errors.password} />
                     </div>
@@ -93,6 +96,7 @@ export default function Register() {
                             value={data.password_confirmation}
                             onChange={(e) => setData('password_confirmation', e.target.value)}
                             disabled={processing}
+                            placeholder="Confirm password"
                         />
                         <InputError message={errors.password_confirmation} />
                     </div>

@@ -67,6 +67,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                             className="mt-1 block w-full"
                             autoFocus
                             onChange={(e) => setData('password', e.target.value)}
+                            placeholder="Password"
                         />
                         <InputError message={errors.password} className="mt-2" />
                     </div>
@@ -81,6 +82,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                             value={data.password_confirmation}
                             className="mt-1 block w-full"
                             onChange={(e) => setData('password_confirmation', e.target.value)}
+                            placeholder="Confirm password"
                         />
                         <InputError message={errors.password_confirmation} className="mt-2" />
                     </div>
