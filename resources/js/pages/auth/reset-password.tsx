@@ -36,8 +36,8 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
     };
 
     return (
-        <AuthLayout title="Reset Password" description="Please enter your new password below">
-            <Head title="Reset Password" />
+        <AuthLayout title="Reset password" description="Please enter your new password below">
+            <Head title="Reset password" />
 
             <form onSubmit={submit}>
                 <div className="grid gap-6">
@@ -87,7 +87,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
 
                     <Button type="submit" className="w-full" disabled={processing}>
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        Reset Password
+                        Reset password
                     </Button>
                 </div>
             </form>

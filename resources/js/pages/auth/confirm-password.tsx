@@ -26,7 +26,7 @@ export default function ConfirmPassword() {
             title="Confirm Your Password"
             description="This is a secure area of the application. Please confirm your password before continuing"
         >
-            <Head title="Confirm Password" />
+            <Head title="Confirm password" />
 
             <form onSubmit={submit}>
                 <div className="space-y-6">
@@ -48,7 +48,7 @@ export default function ConfirmPassword() {
                     <div className="flex items-center">
                         <Button className="w-full" disabled={processing}>
                             {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                            Confirm Password
+                            Confirm password
                         </Button>
                     </div>
                 </div>

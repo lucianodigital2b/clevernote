@@ -32,7 +32,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
                 <div className="mt-4 flex items-center justify-between">
                     <Button disabled={processing}>
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        Resend Verification Email
+                    Resend verification email
                     </Button>
 
                     <Link

@@ -99,7 +99,7 @@ export default function Register() {
 
                     <Button type="submit" className="w-full" tabIndex={5} disabled={processing}>
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        Create Account
+                        Create account
                     </Button>
                 </div>
 
