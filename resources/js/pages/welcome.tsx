@@ -14,8 +14,8 @@ export default function Welcome() {
     return (
         <>
             <Head title="Welcome">
-                <link rel="preconnect" href="https://fonts.bunny.net" />
-                <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+                <link rel="preconnect" href="https://rsms.me/" />
+                <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
             </Head>
             <div className="bg-gray-50 text-black/50 antialiased dark:bg-black dark:text-white/50">
                 <img id="background" className="absolute top-0 -left-20 max-w-[877px]" src="https://laravel.com/assets/img/welcome/background.svg" />
@@ -96,8 +96,8 @@ export default function Welcome() {
                                                     stroke="currentColor"
                                                 >
                                                     <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
                                                         d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"
                                                     />
                                                 </svg>
