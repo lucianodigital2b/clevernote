@@ -17,7 +17,7 @@ export default function Welcome() {
                 <link rel="preconnect" href="https://rsms.me/" />
                 <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
             </Head>
-            <div className="bg-gray-50 text-black/50 antialiased dark:bg-black dark:text-white/50">
+            <div className="bg-neutral-50 text-black/50 antialiased dark:bg-black dark:text-white/50">
                 <img id="background" className="absolute top-0 -left-20 max-w-[877px]" src="https://laravel.com/assets/img/welcome/background.svg" />
                 <div className="relative flex min-h-screen flex-col items-center justify-center selection:bg-[#FF2D20] selection:text-white">
                     <div className="relative w-full max-w-2xl px-6 lg:max-w-7xl">
