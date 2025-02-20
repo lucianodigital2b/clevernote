@@ -52,9 +52,10 @@ export default function ForgotPassword({ status }: { status?: string }) {
                         </Button>
                     </div>
                 </form>
-                <div className="space-x-1 text-center text-sm">
-                    <span>Or, return to the</span>
-                    <TextLink href={route('login')}>login page</TextLink>
+
+                <div className="text-muted-foreground space-x-1 text-center text-sm">
+                    <span>Or, return to</span>
+                    <TextLink href={route('login')}>log in</TextLink>
                 </div>
             </div>
         </AuthLayout>
