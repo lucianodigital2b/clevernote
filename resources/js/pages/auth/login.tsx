@@ -81,12 +81,12 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                         <InputError message={errors.password} />
                     </div>
 
-                    <div className="flex items-center space-x-1.5">
+                    <div className="flex items-center space-x-3">
                         <Checkbox id="remember" name="remember" tabIndex={3} />
                         <Label htmlFor="remember">Remember me</Label>
                     </div>
 
-                    <Button type="submit" className="w-full" tabIndex={4} disabled={processing}>
+                    <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                         Log In
                     </Button>
