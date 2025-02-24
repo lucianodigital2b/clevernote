@@ -30,8 +30,8 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
         <div className="px-4 py-6">
             <Heading title="Settings" description="Manage your profile and account settings" />
 
-            <div className="flex flex-col space-y-8 md:flex-row md:space-y-0 md:space-x-12">
-                <aside className="w-full md:w-1/3 lg:w-1/4 xl:w-1/5">
+            <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
+                <aside className="w-full max-w-xl lg:w-48">
                     <nav className="flex flex-col space-y-1 space-x-0">
                         {sidebarNavItems.map((item) => (
                             <Button

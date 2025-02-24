@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Password Settings',
+        title: 'Password settings',
         href: '/settings/password',
     },
 ];
@@ -50,7 +50,7 @@ export default function Password() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Profile Settings" />
+            <Head title="Profile settings" />
 
             <SettingsLayout>
                 <div className="space-y-6">
@@ -68,6 +68,7 @@ export default function Password() {
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="current-password"
+                                placeholder="Current password"
                             />
 
                             <InputError message={errors.current_password} />
@@ -84,6 +85,7 @@ export default function Password() {
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="new-password"
+                                placeholder="New password"
                             />
 
                             <InputError message={errors.password} />
@@ -99,6 +101,7 @@ export default function Password() {
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="new-password"
+                                placeholder="Confirm password"
                             />
 
                             <InputError message={errors.password_confirmation} />
@@ -114,7 +117,7 @@ export default function Password() {
                                 leave="transition ease-in-out"
                                 leaveTo="opacity-0"
                             >
-                                <p className="text-sm text-gray-600">Saved.</p>
+                                <p className="text-sm text-neutral-600">Saved</p>
                             </Transition>
                         </div>
                     </form>

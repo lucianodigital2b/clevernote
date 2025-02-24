@@ -36,8 +36,8 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
     };
 
     return (
-        <AuthLayout title="Reset Password" description="Please enter your new password below">
-            <Head title="Reset Password" />
+        <AuthLayout title="Reset password" description="Please enter your new password below">
+            <Head title="Reset password" />
 
             <form onSubmit={submit}>
                 <div className="grid gap-6">
@@ -67,8 +67,9 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                             className="mt-1 block w-full"
                             autoFocus
                             onChange={(e) => setData('password', e.target.value)}
+                            placeholder="Password"
                         />
-                        <InputError message={errors.password} className="mt-2" />
+                        <InputError message={errors.password} />
                     </div>
 
                     <div className="grid gap-2">
@@ -81,13 +82,14 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                             value={data.password_confirmation}
                             className="mt-1 block w-full"
                             onChange={(e) => setData('password_confirmation', e.target.value)}
+                            placeholder="Confirm password"
                         />
                         <InputError message={errors.password_confirmation} className="mt-2" />
                     </div>
 
-                    <Button type="submit" className="w-full" disabled={processing}>
+                    <Button type="submit" className="mt-4 w-full" disabled={processing}>
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        Reset Password
+                        Reset password
                     </Button>
                 </div>
             </form>
