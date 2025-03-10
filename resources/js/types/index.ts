@@ -14,6 +14,28 @@ export interface NavGroup {
     items: NavItem[];
 }
 
+
+export type Note = {
+    id: number;
+    title: string;
+    date: string;
+    icon: string;
+};
+
+export type Folder = {
+    id: number;
+    name: string;
+    date: string;
+    icon: string;
+};
+
+export type FolderWithNoteCount = {
+    id: number;
+    name: string;
+    notes_count: number;
+    children?: FolderWithNoteCount[];
+};
+
 export interface NavItem {
     title: string;
     url: string;
