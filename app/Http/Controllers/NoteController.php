@@ -27,6 +27,10 @@ class NoteController extends Controller
         $filters = $request->only(['folder_id', 'search', 'tag_id']);
         $notes = $this->noteService->getUserNotes(Auth::id(), $filters);
 
+        if($request->wantsJson()){
+            return $notes;
+        }
+
         return Inertia::render('Notes/Index', [
             'notes' => $notes,
             'filters' => $filters
@@ -75,9 +79,9 @@ class NoteController extends Controller
      */
     public function edit(Note $note)
     {
-        $this->authorize('update', $note);
+        // $this->authorize('update', $note);
 
-        return Inertia::render('Notes/Edit', [
+        return Inertia::render('notes/edit', [
             'note' => $note->load(['tags', 'folder']),
             'folders' => Auth::user()->folders,
             'tags' => Auth::user()->tags

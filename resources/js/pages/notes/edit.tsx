@@ -1,4 +1,15 @@
 import { useState } from 'react';
+import { router } from '@inertiajs/react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
@@ -12,10 +23,14 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Note } from '@/types';
+// Remove ReactMarkdown and remarkGfm imports
 
-export default function Note() {
+export default function Edit({ note }: { note: Note }) {
     const [isChatOpen, setIsChatOpen] = useState(true);
     const [chatMessage, setChatMessage] = useState('');
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [content, setContent] = useState(note.content);
 
     const actions = [
         { icon: '🎯', label: 'Create quiz', action: () => console.log('Create quiz') },
@@ -26,6 +41,15 @@ export default function Note() {
         { icon: '🎥', label: 'Create video', action: () => console.log('Create video') },
         { icon: '🗺️', label: 'Mindmap', action: () => console.log('Mindmap') },
     ];
+
+    const handleDelete = () => {
+        router.delete(`/notes/${note.id}`, {
+            onSuccess: () => {
+                // Redirect to notes list after successful deletion
+                router.visit('/notes');
+            },
+        });
+    };
 
     return (
         <AppLayout>
@@ -60,7 +84,9 @@ export default function Note() {
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuItem>Add to folder</DropdownMenuItem>
-                                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>
+                                            Delete
+                                        </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </div>
@@ -88,17 +114,28 @@ export default function Note() {
                         </div>
 
                         {/* Content */}
-                        <div className="prose dark:prose-invert max-w-none">
-                            <h2>Tópicos Importantes</h2>
-                            <h3>Introdução</h3>
-                            <p>Este texto é um exemplo ou teste para compreender a estrutura e formato esperados.</p>
+                        <div className="bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 p-6">
+                            <Input
+                                value={note.title}
+                                onChange={(e) => {/* Handle title update */}}
+                                className="text-2xl font-semibold border-0 px-0 mb-4 focus-visible:ring-0"
+                                placeholder="Note title"
+                            />
+                            <div className="border-b border-neutral-200 dark:border-neutral-800 -mx-6 mb-6" />
                             
-                            <h3>Objetivo</h3>
-                            <p>Demonstrar como os apontamentos em markdown podem ser organizados.</p>
-                            
-                            <h3>Estrutura</h3>
-                            {/* Add your note content here */}
+                            {/* Markdown Editor */}
+                            <div className="prose dark:prose-invert max-w-none">
+                                <textarea
+                                    value={content}
+                                    onChange={(e) => setContent(e.target.value)}
+                                    className="w-full h-[500px] bg-transparent border-0 focus:ring-0 resize-none font-mono"
+                                    placeholder="Write your markdown here..."
+                                />
+                            </div>
                         </div>
+                        {/* Editor Toolbar */}
+                        
+
                     </div>
                 </div>
 
@@ -157,6 +194,27 @@ export default function Note() {
                     </div>
                 )}
             </div>
+            
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete your note.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDelete}
+                            className="bg-red-500 hover:bg-red-600"
+                        >
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </AppLayout>
     );
 }
