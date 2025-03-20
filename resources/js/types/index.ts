@@ -20,6 +20,10 @@ export type Note = {
     title: string;
     date: string;
     icon: string;
+    content: string;
+    summary: string;
+    transcription: string;
+    
 };
 
 export type Folder = {

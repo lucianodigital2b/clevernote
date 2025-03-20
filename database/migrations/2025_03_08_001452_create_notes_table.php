@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('folder_id')->constrained('folders')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->uuid();
             $table->string('title');
             $table->longText('content')->nullable();
             $table->longText('transcription')->nullable();

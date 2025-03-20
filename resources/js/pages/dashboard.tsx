@@ -223,7 +223,7 @@ export default function Dashboard() {
                             <div className="space-y-3">
                                 {notes.map((note : Note) => (
                                     <div key={note.id} className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 hover:shadow-md transition-shadow">
-                                        <Link href={`/notes/${note.id}`} className="flex items-center justify-between">
+                                        <Link href={`/notes/${note.id}/edit`} className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
                                                 {getIconComponent(note.icon)}
                                                 <div>
