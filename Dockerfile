@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     && docker-php-ext-install pdo_mysql \
-    && docker-php-ext-install bcmath  # ✅ Add this line
+    && docker-php-ext-install bcmath
 
 # Set working directory
 WORKDIR /var/www/clevernote
