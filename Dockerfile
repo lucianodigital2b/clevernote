@@ -1,3 +1,6 @@
+# Start with a base PHP image with FPM (FastCGI Process Manager)
+FROM php:8.3-fpm
+
 # Install Composer dependencies
 RUN apt-get update && apt-get install -y \
     libpng-dev \
