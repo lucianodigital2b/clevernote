@@ -3,12 +3,13 @@ version: '3.8'
 services:
   app:
     build: .
+    ports:
+      - "5173:5173"
     container_name: clevernote_app
     restart: always
     working_dir: /var/www/clevernote
     volumes:
       - .:/var/www/clevernote
-    command: /bin/bash -c "./setup.sh && php-fpm"
     depends_on:
       - db
       - redis
@@ -21,6 +22,7 @@ services:
     restart: always
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - .:/var/www/clevernote
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
@@ -34,10 +36,9 @@ services:
     container_name: clevernote_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: clevernote
-      MYSQL_USER: clevernote
-      MYSQL_PASSWORD: JBqPIC9cyLMg8tq^
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
     networks:
@@ -52,6 +53,8 @@ services:
 
   queue:
     build: .
+    volumes:
+      - .:/var/www/clevernote
     container_name: clevernote_queue
     restart: always
     working_dir: /var/www/clevernote
