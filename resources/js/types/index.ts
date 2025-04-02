@@ -18,7 +18,8 @@ export interface NavGroup {
 export type Note = {
     id: number;
     title: string;
-    date: string;
+    created_at: string;
+    updated_at: string;
     icon: string;
     content: string;
     summary: string;
