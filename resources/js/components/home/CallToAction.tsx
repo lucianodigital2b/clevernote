@@ -30,7 +30,7 @@ const CallToAction = () => {
           <div className="flex justify-center gap-8 flex-wrap">
             <div className="flex items-center text-sm text-gray-600">
               <CheckCircle className="w-4 h-4 text-indigo-500 mr-2" />
-              14-day free trial
+              3-day free trial
             </div>
       
             <div className="flex items-center text-sm text-gray-600">
