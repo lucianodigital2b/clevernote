@@ -1,7 +1,7 @@
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { Folder, Note, type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Search, FileText, Link as LinkIcon, Upload, Mic, File, Folder as FolderIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,7 @@ import { Label } from "@/components/ui/label";
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useDebounce } from '@/hooks/use-debounce';
+import { useQueryClient } from '@tanstack/react-query';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -35,6 +36,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 
 export default function Dashboard() {
+    const queryClient = useQueryClient();
     const [searchQuery, setSearchQuery] = useState('');
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -83,6 +85,10 @@ export default function Dashboard() {
     const [selectedFolder, setSelectedFolder] = useState('');
     const [noteTitle, setNoteTitle] = useState('');
     const [webLink, setWebLink] = useState('');
+    const [audioFile, setAudioFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [audioMode, setAudioMode] = useState<'record' | 'upload'>('upload');
     
 
 
@@ -99,20 +105,63 @@ export default function Dashboard() {
         }
     };
 
-    const handleCreateNote = (type: string) => {
-        // Handle note creation based on type
-        console.log(`Creating ${type} note in folder: ${selectedFolder}`);
-        
-        // Reset form fields
-        setSelectedFolder('');
-        setWebLink('');
-        setNoteTitle('');
-        
-        // Close all modals
-        setIsRecordModalOpen(false);
-        setIsWebLinkModalOpen(false);
-        setIsPdfModalOpen(false);
-        setIsUploadAudioModalOpen(false);
+    const handleCreateNote = async (type: string) => {
+        if (type === 'audio' && !audioFile) {
+            return;
+        }
+
+        setIsUploading(true);
+        setUploadProgress(0);
+
+        try {
+            // Create form data
+            const formData = new FormData();
+            formData.append('title', noteTitle);
+            formData.append('folder_id', selectedFolder);
+            formData.append('type', type);
+
+            console.log(type, audioFile);
+            if (audioFile) {
+                
+                formData.append('audio_file', audioFile);
+            }
+
+            // Use Inertia's router.post instead of axios
+            router.post('/api/notes', formData, {
+                forceFormData: true,
+                onProgress: (progress : any) => {
+                    setUploadProgress(Math.round(progress.percentage));
+                },
+                onSuccess: () => {
+                    // Reset form fields
+                    setSelectedFolder('');
+                    setWebLink('');
+                    setNoteTitle('');
+                    setAudioFile(null);
+                    setUploadProgress(0);
+                    setAudioMode('record');
+                    
+                    // Close all modals
+                    setIsRecordModalOpen(false);
+                    setIsWebLinkModalOpen(false);
+                    setIsPdfModalOpen(false);
+                    setIsUploadAudioModalOpen(false);
+                    
+                    // Refresh notes data
+                    queryClient.invalidateQueries({ queryKey: ['notes'] });
+                },
+                onError: (errors) => {
+                    console.error('Failed to create note:', errors);
+                    // Handle error (show toast notification, etc.)
+                },
+                onFinish: () => {
+                    setIsUploading(false);
+                }
+            });
+        } catch (error) {
+            console.error('Failed to create note:', error);
+            setIsUploading(false);
+        }
     };
 
     return (
@@ -331,15 +380,62 @@ export default function Dashboard() {
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <div className="col-span-4 flex justify-center">
-                                <Button variant="outline" className="rounded-full h-16 w-16 flex items-center justify-center">
-                                    <Mic className="h-6 w-6 text-red-500" />
-                                </Button>
+                        <div className="grid gap-4">
+                            
+                            <div className="flex items-center space-x-2">
+                                <Label htmlFor="audio-mode">Mode</Label>
+                                <Select
+                                    value={audioMode}
+                                    onValueChange={(value: "record" | "upload") => setAudioMode(value)}
+                                >
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Select mode" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="record">Record Audio</SelectItem>
+                                        <SelectItem value="upload">Upload Audio</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
-                            <div className="col-span-4 text-center text-sm text-neutral-500">
-                                Click to start recording
-                            </div>
+
+                            {audioMode === 'record' ? (
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <div className="col-span-4 flex justify-center">
+                                        <Button variant="outline" className="rounded-full h-16 w-16 flex items-center justify-center">
+                                            <Mic className="h-6 w-6 text-red-500" />
+                                        </Button>
+                                    </div>
+                                    <div className="col-span-4 text-center text-sm text-neutral-500">
+                                        Click to start recording
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="audio-file" className="text-right col-span-1">
+                                        Audio file
+                                    </Label>
+                                    <div className="col-span-3">
+                                        <Input
+                                            id="audio-file"
+                                            type="file"
+                                            accept="audio/*"
+                                            onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
+                                            className="cursor-pointer"
+                                        />
+                                        {uploadProgress > 0 && (
+                                            <div className="mt-2">
+                                                <div className="h-2 w-full bg-neutral-200 rounded-full overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-blue-500 transition-all duration-300"
+                                                        style={{ width: `${uploadProgress}%` }}
+                                                    />
+                                                </div>
+                                                <p className="text-sm text-neutral-500 mt-1">{uploadProgress}% uploaded</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                     <DialogFooter>
@@ -468,7 +564,7 @@ export default function Dashboard() {
                     <DialogHeader>
                         <DialogTitle>Upload Audio</DialogTitle>
                         <DialogDescription>
-                            Create a new note from an audio file
+                            Create a new note from an audio file. The audio will be transcribed automatically.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -483,6 +579,7 @@ export default function Dashboard() {
                                 className="col-span-3"
                                 placeholder="Enter note title"
                                 required
+                                disabled={isUploading}
                             />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
@@ -494,7 +591,9 @@ export default function Dashboard() {
                                 type="file"
                                 className="col-span-3"
                                 accept="audio/*"
+                                onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
                                 required
+                                disabled={isUploading}
                             />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
@@ -504,6 +603,7 @@ export default function Dashboard() {
                             <Select
                                 value={selectedFolder}
                                 onValueChange={setSelectedFolder}
+                                disabled={isUploading}
                                 required
                             >
                                 <SelectTrigger className="col-span-3">
@@ -518,9 +618,30 @@ export default function Dashboard() {
                                 </SelectContent>
                             </Select>
                         </div>
+                        {isUploading && (
+                            <div className="col-span-4">
+                                <div className="space-y-2">
+                                    <div className="text-sm text-neutral-500 text-center">
+                                        {uploadProgress < 100 ? 'Uploading audio...' : 'Transcribing audio...'}
+                                    </div>
+                                    <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
+                                        <div 
+                                            className="h-full bg-blue-500 transition-all duration-300 ease-in-out" 
+                                            style={{ width: `${uploadProgress}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <DialogFooter>
-                        <Button type="submit" onClick={() => handleCreateNote('audio')}>Create Note</Button>
+                        <Button 
+                            type="submit" 
+                            onClick={() => handleCreateNote('audio')}
+                            disabled={isUploading || !audioFile || !noteTitle || !selectedFolder}
+                        >
+                            {isUploading ? 'Processing...' : 'Create Note'}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
