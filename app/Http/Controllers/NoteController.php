@@ -125,7 +125,8 @@ class NoteController extends Controller
 
         $note = $this->noteService->updateNote($note, $request->validated());
 
-        return redirect()->route('notes.show', $note)
+        return redirect()
+            ->back()
             ->with('success', 'Note updated successfully.');
     }
 
