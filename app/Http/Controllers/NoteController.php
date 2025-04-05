@@ -10,16 +10,22 @@ use App\Http\Requests\UpdateNoteRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use App\Services\DeepSeekService;
 
 class NoteController extends Controller
 {
     protected $noteService;
     protected $transcriptionService;
+    protected $deepseekService;
 
-    public function __construct(NoteService $noteService, TranscriptionService $transcriptionService)
-    {
+    public function __construct(
+        NoteService $noteService, 
+        TranscriptionService $transcriptionService,
+        DeepSeekService $deepseekService
+    ) {
         $this->noteService = $noteService;
         $this->transcriptionService = $transcriptionService;
+        $this->deepseekService = $deepseekService;
     }
 
     /**
@@ -59,7 +65,6 @@ class NoteController extends Controller
         $validated = $request->validated();
         $validated['user_id'] = Auth::id();
         
-        // Handle audio file upload and transcription
         if ($request->hasFile('audio_file')) {
             $path = $request->file('audio_file')->store('audio', 'public');
             $validated['file_path'] = $path;
@@ -67,13 +72,27 @@ class NoteController extends Controller
             // Process audio file and get transcription
             $transcription = $this->transcriptionService->transcribeAudio($request->file('audio_file'));
             
-            // Add transcribed text to note content
-            $validated['content'] = $transcription['text'] ?? 'Audio transcription in progress...';
-            $validated['metadata'] = [
-                'audio_duration' => $transcription['duration'] ?? null,
-                'language' => $transcription['language'] ?? 'en',
-                'type' => 'audio_transcription'
-            ];
+            // Generate study note using DeepSeek
+            // try {
+                $studyNote = $this->deepseekService->createStudyNote($transcription['text']);
+                $validated['content'] = $studyNote['study_note']['content'];
+                $validated['title']   = $studyNote['study_note']['title'];
+                $validated['summary']   = $studyNote['study_note']['summary'];
+                $validated['metadata'] = [
+                    'audio_duration' => $transcription['duration'] ?? null,
+                    'language' => $transcription['language'] ?? 'en',
+                    'type' => 'audio_transcription',
+                    'original_transcription' => $studyNote['original_transcription']
+                ];
+            // } catch (\Exception $e) {
+            //     // Fallback to original transcription if study note generation fails
+            //     $validated['content'] = $transcription['text'] ?? 'Audio transcription in progress...';
+            //     $validated['metadata'] = [
+            //         'audio_duration' => $transcription['duration'] ?? null,
+            //         'language' => $transcription['language'] ?? 'en',
+            //         'type' => 'audio_transcription'
+            //     ];
+            // }
         }
 
         $note = $this->noteService->createNote($validated);
@@ -122,6 +141,15 @@ class NoteController extends Controller
     public function update(UpdateNoteRequest $request, Note $note)
     {
         // $this->authorize('update', $note);
+
+        // $studyNote = $this->deepseekService->createStudyNote($note->content);
+        // $validated['content'] = $studyNote['study_note'];
+        // $validated['metadata'] = [
+        //     'audio_duration' => $transcription['duration'] ?? null,
+        //     'language' => $transcription['language'] ?? 'en',
+        //     'type' => 'audio_transcription',
+        //     'original_transcription' => $studyNote['original_transcription']
+        // ];
 
         $note = $this->noteService->updateNote($note, $request->validated());
 
