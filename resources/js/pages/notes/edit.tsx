@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { router } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
+import { router, Head, usePage } from '@inertiajs/react';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -11,7 +11,6 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import AppLayout from '@/layouts/app-layout';
-import { Head } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Share, MoreHorizontal, Maximize2, X } from 'lucide-react';
 import {
@@ -24,9 +23,35 @@ import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Note } from '@/types';
-// Remove ReactMarkdown and remarkGfm imports
+import { toastConfig } from '@/lib/toast';
+import dayjs from 'dayjs';
+import { ValidationErrors } from '@/components/validation-errors';
 
 export default function Edit({ note }: { note: Note }) {
+
+    const { errors } = usePage().props;
+    
+    const handleUpdate = () => {
+        router.patch(`/notes/${note.id}`, {
+            title: note.title,
+            content: content,
+            _method: 'PUT'
+        }, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                toastConfig.success("Note updated successfully");
+            },
+            onError: (errors) => {
+                console.log(errors);
+                
+                toastConfig.error("Failed to update note");
+            }
+        });
+    };
+
+    // Add this new state
+    const [isActionsVisible, setIsActionsVisible] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(true);
     const [chatMessage, setChatMessage] = useState('');
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -35,7 +60,6 @@ export default function Edit({ note }: { note: Note }) {
     const actions = [
         { icon: '🎯', label: 'Create quiz', action: () => console.log('Create quiz') },
         { icon: '📝', label: 'Create flashcards', action: () => console.log('Create flashcards') },
-        { icon: '✏️', label: 'Edit note', action: () => console.log('Edit note') },
         { icon: '💬', label: 'Chat with note', action: () => setIsChatOpen(true) },
         { icon: '🌐', label: 'Translate', action: () => console.log('Translate') },
         { icon: '🎥', label: 'Create video', action: () => console.log('Create video') },
@@ -51,9 +75,19 @@ export default function Edit({ note }: { note: Note }) {
         });
     };
 
+    // In the return statement, add this before the closing div of the content section
+    <div className="mt-6 flex justify-end">
+        <Button 
+            onClick={handleUpdate}
+            className="bg-purple-600 hover:bg-purple-700"
+        >
+            Save Changes
+        </Button>
+    </div>
+
     return (
         <AppLayout>
-            <Head title="Note Details" />
+            <Head title={`${note.title} - Note`} />
             
             <div className="flex h-full">
                 {/* Main Content */}
@@ -67,7 +101,10 @@ export default function Edit({ note }: { note: Note }) {
                                 <span>Note details</span>
                             </div>
                             
+
+
                             <div className="flex items-center gap-2">
+
                                 <Button 
                                     variant="outline" 
                                     className="flex items-center gap-2"
@@ -96,21 +133,37 @@ export default function Edit({ note }: { note: Note }) {
                         <h1 className="text-2xl font-semibold mb-4">{note.title}</h1>
                         
                         {/* Date */}
-                        <div className="text-sm text-neutral-500 mb-6">{note.created_at}</div>
+                        <div className="text-sm text-neutral-500 mb-6">
+                            {dayjs(note.created_at).format('DD MMM YYYY, hh:mm A')}
+                        </div>
 
-                        {/* Actions Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
-                            {actions.map((action, index) => (
-                                <Button
-                                    key={index}
-                                    variant="outline"
-                                    className="flex items-center gap-2 justify-start p-4 h-auto"
-                                    onClick={action.action}
-                                >
-                                    <span className="text-lg">{action.icon}</span>
-                                    <span>{action.label}</span>
-                                </Button>
-                            ))}
+
+                        <ValidationErrors errors={errors} />
+
+                        {/* Toggle Button */}
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsActionsVisible(!isActionsVisible)}
+                            className="mb-4"
+                        >
+                            {isActionsVisible ? 'Hide Actions' : 'Show Actions'}
+                        </Button>
+
+                        {/* Actions Grid with animation */}
+                        <div className={`transition-all duration-300 ease-in-out ${isActionsVisible ? 'opacity-100 max-h-[500px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
+                                {actions.map((action, index) => (
+                                    <Button
+                                        key={index}
+                                        variant="outline"
+                                        className="flex items-center gap-2 justify-start p-4 h-auto"
+                                        onClick={action.action}
+                                    >
+                                        <span className="text-lg">{action.icon}</span>
+                                        <span>{action.label}</span>
+                                    </Button>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Content */}
@@ -131,6 +184,16 @@ export default function Edit({ note }: { note: Note }) {
                                     className="w-full h-[500px] bg-transparent border-0 focus:ring-0 resize-none font-mono"
                                     placeholder="Write your markdown here..."
                                 />
+                            </div>
+                            
+                            {/* Save Button */}
+                            <div className="mt-6 flex justify-end">
+                                <Button 
+                                    onClick={handleUpdate}
+                                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                                >
+                                    Save Changes
+                                </Button>
                             </div>
                         </div>
                         {/* Editor Toolbar */}

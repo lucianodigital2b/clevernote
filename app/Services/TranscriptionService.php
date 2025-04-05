@@ -34,7 +34,7 @@ class TranscriptionService
 
             $ch = curl_init();
 
-            curl_setopt($ch, CURLOPT_URL, "https://api.groq.com/openai/v1/audio/transcriptions");
+            curl_setopt($ch, CURLOPT_URL, $this->apiEndpoint);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
 

@@ -11,7 +11,7 @@ class UpdateNoteRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,14 @@ class UpdateNoteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'title' => 'string|max:255',
+            'folder_id' => 'integer|exists:folders,id',
+            'audio_file' =>'file|mimes:mp3,ogg,flac,wav',
+            'title' => 'nullable|string', 
+            'content' => 'nullable|string', 
+            'transcription' => 'nullable|string', 
+            'summary' => 'nullable|string', 
+            'is_pinned' => 'nullable|integer', 
         ];
     }
 }
