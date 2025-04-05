@@ -114,37 +114,27 @@ export default function Dashboard() {
         setUploadProgress(0);
 
         try {
-            // Create form data
             const formData = new FormData();
             formData.append('title', noteTitle);
             formData.append('folder_id', selectedFolder);
             formData.append('type', type);
 
-            console.log(type, audioFile);
-            if (audioFile) {
-                
+            if (type === 'audio' && audioFile) {
                 formData.append('audio_file', audioFile);
             }
 
-            // Use Inertia's router.post instead of axios
+            // Use Inertia's router.post
             router.post('/api/notes', formData, {
                 forceFormData: true,
-                onProgress: (progress : any) => {
+                onProgress: (progress: any) => {
                     setUploadProgress(Math.round(progress.percentage));
                 },
                 onSuccess: () => {
-                    // Reset form fields
+                    // Reset form fields and close modals
                     setSelectedFolder('');
-                    setWebLink('');
                     setNoteTitle('');
                     setAudioFile(null);
                     setUploadProgress(0);
-                    setAudioMode('record');
-                    
-                    // Close all modals
-                    setIsRecordModalOpen(false);
-                    setIsWebLinkModalOpen(false);
-                    setIsPdfModalOpen(false);
                     setIsUploadAudioModalOpen(false);
                     
                     // Refresh notes data
@@ -152,7 +142,6 @@ export default function Dashboard() {
                 },
                 onError: (errors) => {
                     console.error('Failed to create note:', errors);
-                    // Handle error (show toast notification, etc.)
                 },
                 onFinish: () => {
                     setIsUploading(false);
@@ -381,61 +370,16 @@ export default function Dashboard() {
                             </Select>
                         </div>
                         <div className="grid gap-4">
-                            
-                            <div className="flex items-center space-x-2">
-                                <Label htmlFor="audio-mode">Mode</Label>
-                                <Select
-                                    value={audioMode}
-                                    onValueChange={(value: "record" | "upload") => setAudioMode(value)}
-                                >
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder="Select mode" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="record">Record Audio</SelectItem>
-                                        <SelectItem value="upload">Upload Audio</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <div className="col-span-4 flex justify-center">
+                                    <Button variant="outline" className="rounded-full h-16 w-16 flex items-center justify-center">
+                                        <Mic className="h-6 w-6 text-red-500" />
+                                    </Button>
+                                </div>
+                                <div className="col-span-4 text-center text-sm text-neutral-500">
+                                    Click to start recording
+                                </div>
                             </div>
-
-                            {audioMode === 'record' ? (
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <div className="col-span-4 flex justify-center">
-                                        <Button variant="outline" className="rounded-full h-16 w-16 flex items-center justify-center">
-                                            <Mic className="h-6 w-6 text-red-500" />
-                                        </Button>
-                                    </div>
-                                    <div className="col-span-4 text-center text-sm text-neutral-500">
-                                        Click to start recording
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="audio-file" className="text-right col-span-1">
-                                        Audio file
-                                    </Label>
-                                    <div className="col-span-3">
-                                        <Input
-                                            id="audio-file"
-                                            type="file"
-                                            accept="audio/*"
-                                            onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
-                                            className="cursor-pointer"
-                                        />
-                                        {uploadProgress > 0 && (
-                                            <div className="mt-2">
-                                                <div className="h-2 w-full bg-neutral-200 rounded-full overflow-hidden">
-                                                    <div
-                                                        className="h-full bg-blue-500 transition-all duration-300"
-                                                        style={{ width: `${uploadProgress}%` }}
-                                                    />
-                                                </div>
-                                                <p className="text-sm text-neutral-500 mt-1">{uploadProgress}% uploaded</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
                     <DialogFooter>

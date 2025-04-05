@@ -22,7 +22,9 @@ class StoreNoteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'title' => 'string|max:255',
+            'folder_id' => 'required|string',
+            'audio_file' =>'file|mimes:mp3,ogg,flac,wav'
         ];
     }
 }
