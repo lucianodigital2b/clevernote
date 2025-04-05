@@ -512,20 +512,6 @@ export default function Dashboard() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
-                        {/* <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="note-title" className="text-right">
-                                Title
-                            </Label>
-                            <Input
-                                id="note-title"
-                                value={noteTitle}
-                                onChange={(e) => setNoteTitle(e.target.value)}
-                                className="col-span-3"
-                                placeholder="Enter note title"
-                                required
-                                disabled={isUploading}
-                            />
-                        </div> */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="audio-upload" className="text-right">
                                 Audio

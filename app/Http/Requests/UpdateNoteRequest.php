@@ -30,6 +30,8 @@ class UpdateNoteRequest extends FormRequest
             'transcription' => 'nullable|string', 
             'summary' => 'nullable|string', 
             'is_pinned' => 'nullable|integer', 
+            'language' => 'nullable|string',
+
         ];
     }
 }
