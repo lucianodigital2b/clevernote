@@ -89,7 +89,8 @@ export default function Dashboard() {
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [audioMode, setAudioMode] = useState<'record' | 'upload'>('upload');
-    
+    const [selectedLanguage, setSelectedLanguage] = useState('en');
+            
 
 
     const getIconComponent = (iconName: string) => {
@@ -121,6 +122,7 @@ export default function Dashboard() {
 
             if (type === 'audio' && audioFile) {
                 formData.append('audio_file', audioFile);
+                formData.append('language', selectedLanguage);
             }
 
             // Use Inertia's router.post
@@ -527,6 +529,43 @@ export default function Dashboard() {
                             />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="language" className="text-right">
+                                Language
+                            </Label>
+                            <Select
+                                value={selectedLanguage}
+                                onValueChange={setSelectedLanguage}
+                                disabled={isUploading}
+                            >
+                                <SelectTrigger className="col-span-3">
+                                    <SelectValue placeholder="Select audio language" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="en">English</SelectItem>
+                                    <SelectItem value="es">Spanish</SelectItem>
+                                    <SelectItem value="fr">French</SelectItem>
+                                    <SelectItem value="de">German</SelectItem>
+                                    <SelectItem value="it">Italian</SelectItem>
+                                    <SelectItem value="pt">Portuguese</SelectItem>
+                                    <SelectItem value="nl">Dutch</SelectItem>
+                                    <SelectItem value="ru">Russian</SelectItem>
+                                    <SelectItem value="ja">Japanese</SelectItem>
+                                    <SelectItem value="ko">Korean</SelectItem>
+                                    <SelectItem value="zh">Chinese (Mandarin)</SelectItem>
+                                    <SelectItem value="ar">Arabic</SelectItem>
+                                    <SelectItem value="hi">Hindi</SelectItem>
+                                    <SelectItem value="tr">Turkish</SelectItem>
+                                    <SelectItem value="pl">Polish</SelectItem>
+                                    <SelectItem value="vi">Vietnamese</SelectItem>
+                                    <SelectItem value="th">Thai</SelectItem>
+                                    <SelectItem value="id">Indonesian</SelectItem>
+                                    <SelectItem value="ms">Malay</SelectItem>
+                                    <SelectItem value="fa">Persian</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        {/* Add Folder Selector */}
+                        <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="folder" className="text-right">
                                 Folder
                             </Label>
@@ -534,7 +573,6 @@ export default function Dashboard() {
                                 value={selectedFolder}
                                 onValueChange={setSelectedFolder}
                                 disabled={isUploading}
-                                required
                             >
                                 <SelectTrigger className="col-span-3">
                                     <SelectValue placeholder="Select a folder" />
@@ -548,6 +586,7 @@ export default function Dashboard() {
                                 </SelectContent>
                             </Select>
                         </div>
+
                         {isUploading && (
                             <div className="col-span-4">
                                 <div className="space-y-2">
