@@ -56,19 +56,18 @@ class TranscriptionService
             curl_close($ch);
 
 
-            $result = json_decode($response);
+            $result = json_decode($response, true);
 
             if ($httpCode !== 200) {
                 throw new \Exception('Failed to transcribe audio: ' . ($result->error->message ?? 'Unknown error'));
             }
-            
+
             Storage::delete($path);
 
-
             return [
-                'text' => $result['transcription'] ?? '',
+                'text' => $result['text'] ?? '',
                 'duration' => $result['duration'] ?? null,
-                'language' => $result['language'] ?? 'en',
+                'language' => $result['language'] ?? 'English',
             ];
         } catch (\Exception $e) {
             // Clean up on error

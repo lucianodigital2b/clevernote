@@ -25,7 +25,21 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('notes', NoteController::class);
 
 
+     
+    // Route::get('/chat', function () {
+    //     return response()->eventStream(function () {
+    //         $stream = OpenAI::client()->chat()->createStreamed(...);
+    //         foreach ($stream as $response) {
+    //             yield new StreamedEvent(
+    //                 event: 'message',
+    //                 data: json_encode($response->choices[0])
+    //             );
+    //         }
+    //     });
+    // });
+
 });
+
 
 
 

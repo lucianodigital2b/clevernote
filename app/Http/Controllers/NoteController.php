@@ -10,7 +10,6 @@ use App\Http\Requests\UpdateNoteRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Storage;
 
 class NoteController extends Controller
 {
@@ -62,34 +61,22 @@ class NoteController extends Controller
         
         // Handle audio file upload and transcription
         if ($request->hasFile('audio_file')) {
-            // try {
-                // Store the file first
-                $path = $request->file('audio_file')->store('audio', 'public');
-                $validated['file_path'] = $path;
-                
-                // Process audio file and get transcription
-                $transcription = $this->transcriptionService->transcribeAudio($request->file('audio_file'));
-                
-                // Add transcribed text to note content
-                $validated['content'] = $transcription['text'] ?? 'Audio transcription in progress...';
-                $validated['metadata'] = [
-                    'audio_duration' => $transcription['duration'] ?? null,
-                    'language' => $transcription['language'] ?? 'en',
-                    'type' => 'audio_transcription'
-                ];
-            // } catch (\Exception $e) {
-            //     if ($request->wantsJson()) {
-            //         return response()->json([
-            //             'message' => 'Failed to process audio file: ' . $e->getMessage()
-            //         ], 422);
-            //     }
-                
-            //     return redirect()->back()
-            //         ->with('error', 'Failed to process audio file: ' . $e->getMessage());
-            // }
+            $path = $request->file('audio_file')->store('audio', 'public');
+            $validated['file_path'] = $path;
+            
+            // Process audio file and get transcription
+            $transcription = $this->transcriptionService->transcribeAudio($request->file('audio_file'));
+            
+            // Add transcribed text to note content
+            $validated['content'] = $transcription['text'] ?? 'Audio transcription in progress...';
+            $validated['metadata'] = [
+                'audio_duration' => $transcription['duration'] ?? null,
+                'language' => $transcription['language'] ?? 'en',
+                'type' => 'audio_transcription'
+            ];
         }
 
-        $note = $this->noteService->createNote($request->all());
+        $note = $this->noteService->createNote($validated);
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -98,7 +85,8 @@ class NoteController extends Controller
             ]);
         }
 
-        return redirect()->route('notes.show', $note)
+        // Redirect to the edit page of the newly created note
+        return redirect()->route('notes.edit', $note)
             ->with('success', 'Note created successfully.');
     }
 

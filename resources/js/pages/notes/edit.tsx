@@ -93,10 +93,10 @@ export default function Edit({ note }: { note: Note }) {
                         </div>
 
                         {/* Title */}
-                        <h1 className="text-2xl font-semibold mb-4">Organização de Apontamentos em Markdown</h1>
+                        <h1 className="text-2xl font-semibold mb-4">{note.title}</h1>
                         
                         {/* Date */}
-                        <div className="text-sm text-neutral-500 mb-6">Mar 9, 2023</div>
+                        <div className="text-sm text-neutral-500 mb-6">{note.created_at}</div>
 
                         {/* Actions Grid */}
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
