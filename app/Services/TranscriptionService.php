@@ -20,7 +20,7 @@ class TranscriptionService
     /**
      * Handle audio file upload and transcription
      */
-    public function transcribeAudio(UploadedFile $file): array
+    public function transcribeAudio(UploadedFile $file, string $language): array
     {
         // Store the file temporarily
         $path = $file->store('temp/audio', 'local');
@@ -43,7 +43,7 @@ class TranscriptionService
                 "model" => "whisper-large-v3-turbo",
                 "temperature" => "0",
                 "response_format" => "verbose_json",
-                "language" => "en"
+                "language" => $language,
             ];
 
             curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);

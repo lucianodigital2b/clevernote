@@ -70,7 +70,7 @@ class NoteController extends Controller
             $validated['file_path'] = $path;
             
             // Process audio file and get transcription
-            $transcription = $this->transcriptionService->transcribeAudio($request->file('audio_file'));
+            $transcription = $this->transcriptionService->transcribeAudio($request->file('audio_file'), $validated['language']);
             
             // Generate study note using DeepSeek
             // try {
