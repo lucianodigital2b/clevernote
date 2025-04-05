@@ -512,7 +512,7 @@ export default function Dashboard() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
+                        {/* <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="note-title" className="text-right">
                                 Title
                             </Label>
@@ -525,7 +525,7 @@ export default function Dashboard() {
                                 required
                                 disabled={isUploading}
                             />
-                        </div>
+                        </div> */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="audio-upload" className="text-right">
                                 Audio
@@ -582,7 +582,7 @@ export default function Dashboard() {
                         <Button 
                             type="submit" 
                             onClick={() => handleCreateNote('audio')}
-                            disabled={isUploading || !audioFile || !noteTitle || !selectedFolder}
+                            disabled={isUploading || !audioFile}
                         >
                             {isUploading ? 'Processing...' : 'Create Note'}
                         </Button>
