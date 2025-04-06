@@ -26,6 +26,11 @@ import { Note } from '@/types';
 import { toastConfig } from '@/lib/toast';
 import dayjs from 'dayjs';
 import { ValidationErrors } from '@/components/validation-errors';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import TiptapToolbar from '@/components/tiptaptoolbar';
+// import { SectionBlock } from '@/extensions/SectionBlock';
+import DragHandle  from '@/extensions/DragHandle';
 
 export default function Edit({ note }: { note: Note }) {
 
@@ -65,6 +70,40 @@ export default function Edit({ note }: { note: Note }) {
         { icon: '🎥', label: 'Create video', action: () => console.log('Create video') },
         { icon: '🗺️', label: 'Mindmap', action: () => console.log('Mindmap') },
     ];
+
+
+    
+    const editor = useEditor({
+        extensions: [StarterKit, DragHandle],
+        content: note.content,
+        onUpdate: ({ editor }) => {
+            setContent(editor.getHTML());
+        },
+    });
+
+
+    // useEffect(() => {
+    //     if (editor && note.content) {
+    //       // parse your HTML as a paragraph node
+    //       const wrapper = document.createElement('div');
+    //       wrapper.innerHTML = note.content;
+      
+    //       const blocks = Array.from(wrapper.children).map((child) => ({
+    //         type: 'sectionBlock',
+    //         content: [{
+    //           type: 'paragraph',
+    //           content: [{ type: 'text', text: child.textContent || '' }],
+    //         }],
+    //       }));
+      
+    //       editor.commands.setContent({
+    //         type: 'doc',
+    //         content: blocks,
+    //       });
+    //     }
+    //   }, [editor]);
+
+
 
     const handleDelete = () => {
         router.delete(`/notes/${note.id}`, {
@@ -167,24 +206,18 @@ export default function Edit({ note }: { note: Note }) {
                         </div>
 
                         {/* Content */}
-                        <div className="bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 p-6">
-                            <Input
-                                value={note.title}
-                                onChange={(e) => {/* Handle title update */}}
-                                className="text-2xl font-semibold border-0 px-0 mb-4 focus-visible:ring-0"
-                                placeholder="Note title"
-                            />
+                        <div className="">
                             <div className="border-b border-neutral-200 dark:border-neutral-800 -mx-6 mb-6" />
                             
                             {/* Markdown Editor */}
-                            <div className="prose dark:prose-invert max-w-none">
-                                <textarea
-                                    value={content}
-                                    onChange={(e) => setContent(e.target.value)}
-                                    className="w-full h-[500px] bg-transparent border-0 focus:ring-0 resize-none font-mono"
-                                    placeholder="Write your markdown here..."
-                                />
-                            </div>
+                            {editor ? (
+                                <>
+                                    <TiptapToolbar editor={editor} />
+                                    <EditorContent editor={editor} className="prose dark:prose-invert max-w-none min-h-[500px] focus:outline-none" />
+                                </>
+                            ) : (
+                                <p>Loading editor...</p>
+                            )}
                             
                             {/* Save Button */}
                             <div className="mt-6 flex justify-end">
