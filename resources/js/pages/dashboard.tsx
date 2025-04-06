@@ -268,7 +268,10 @@ export default function Dashboard() {
                                                 {getIconComponent(note.icon)}
                                                 <div>
                                                     <h3 className="font-medium">{note.title}</h3>
-                                                    <div className="flex items-center gap-2 text-sm text-neutral-500">
+                                                    <p className="text-sm text-neutral-500 line-clamp-1 mt-0.5">
+                                                        {note.summary || 'No summary available'}
+                                                    </p>
+                                                    <div className="flex items-center gap-2 text-sm text-neutral-500 mt-1">
                                                         <span>Created at {new Date(note.created_at).toLocaleDateString()}</span>
                                                     </div>
                                                 </div>

@@ -28,7 +28,8 @@ class DeepSeekService
 
         try {
             $prompt = <<<EOT
-                You are an AI assistant that converts raw transcription into a well-structured study note using **Markdown formatting**.
+                You are an AI assistant that converts raw transcription into a well-structured study note using **HTML formatting**. 
+                MAKE IT BEAUTIFUL! Dont be shy to use tables, titles, lists etc.
 
                 Instructions:
                 1. Read and analyze the transcription provided.
@@ -37,12 +38,12 @@ class DeepSeekService
 
                 {
                     "title": "A short, clear title summarizing the main topic.",
-                    "content": "Detailed explanation using Markdown: include headings, bullet points, bold text, examples, etc.",
+                    "content": "Detailed explanation using HTML: include headings, bullet points, bold text, examples, etc.",
                     "summary": "2-3 sentence summary of the key takeaways."
                 }
 
                 Requirements:
-                - Use Markdown formatting for structure and clarity.
+                - Use HTML formatting for structure and clarity.
                 - Return **only** the JSON object, no extra text.
                 - Make sure the JSON is valid and can be decoded with PHP’s `json_decode`.
 
@@ -74,7 +75,7 @@ class DeepSeekService
 
             // Get response content and clean it
             $content = $response->json('choices.0.message.content');
-            // Remove 'json' prefix and any markdown code block indicators
+            // Remove 'json' prefix and any HTML code block indicators
             $content = preg_replace('/^(json|\`\`\`json|\`\`\`)\s*/i', '', trim($content));
             $content = preg_replace('/\`\`\`\s*$/i', '', trim($content));
             
