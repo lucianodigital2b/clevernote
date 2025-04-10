@@ -86,6 +86,7 @@ export default function Dashboard() {
     const [noteTitle, setNoteTitle] = useState('');
     const [webLink, setWebLink] = useState('');
     const [audioFile, setAudioFile] = useState<File | null>(null);
+    const [pdfFile, setPdfFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [audioMode, setAudioMode] = useState<'record' | 'upload'>('upload');
@@ -106,40 +107,87 @@ export default function Dashboard() {
         }
     };
 
-    const handleCreateNote = async (type: string) => {
-        if (type === 'audio' && !audioFile) {
+    const [isRecording, setIsRecording] = useState(false);
+    const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+    const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+    
+    const handleRecording = async () => {
+        if (isRecording) {
+            mediaRecorder?.stop();
+            setIsRecording(false);
             return;
         }
+    
+        try {
+            // Check if mediaDevices API is supported
+            if (!navigator.mediaDevices?.getUserMedia) {
+                throw new Error('Media devices API is not supported in your browser');
+            }
 
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const recorder = new MediaRecorder(stream);
+            const chunks: BlobPart[] = [];
+    
+            recorder.ondataavailable = (e) => {
+                chunks.push(e.data);
+            };
+    
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'audio/webm' });
+                setAudioBlob(blob);
+                stream.getTracks().forEach(track => track.stop());
+            };
+    
+            setMediaRecorder(recorder);
+            recorder.start();
+            setIsRecording(true);
+        } catch (error) {
+            console.error('Error accessing microphone:', error);
+            // You might want to show this error to the user
+            alert('Failed to access microphone. Please make sure you have granted microphone permissions.');
+        }
+    };
+    
+    const handleCreateNote = async (type: string) => {
+        if ((type === 'record' && !audioBlob) || 
+            (type === 'audio' && !audioFile) ||
+            (type === 'pdf' && !pdfFile)) {
+            return;
+        }
+    
         setIsUploading(true);
         setUploadProgress(0);
-
+    
         try {
             const formData = new FormData();
             formData.append('title', noteTitle);
             formData.append('folder_id', selectedFolder);
             formData.append('type', type);
-
-            if (type === 'audio' && audioFile) {
+    
+            if (type === 'record' && audioBlob) {
+                formData.append('audio_file', audioBlob, 'recording.webm');
+                formData.append('language', selectedLanguage);
+            } else if (type === 'audio' && audioFile) {
                 formData.append('audio_file', audioFile);
                 formData.append('language', selectedLanguage);
+            } else if (type === 'pdf' && pdfFile) {
+                formData.append('pdf_file', pdfFile);
             }
 
-            // Use Inertia's router.post
-            router.post('/api/notes', formData, {
+            router.post('/notes', formData, {
                 forceFormData: true,
                 onProgress: (progress: any) => {
                     setUploadProgress(Math.round(progress.percentage));
                 },
                 onSuccess: () => {
-                    // Reset form fields and close modals
                     setSelectedFolder('');
                     setNoteTitle('');
                     setAudioFile(null);
+                    setPdfFile(null);
                     setUploadProgress(0);
+                    setIsPdfModalOpen(false);
+                    setIsRecordModalOpen(false);
                     setIsUploadAudioModalOpen(false);
-                    
-                    // Refresh notes data
                     queryClient.invalidateQueries({ queryKey: ['notes'] });
                 },
                 onError: (errors) => {
@@ -165,6 +213,18 @@ export default function Dashboard() {
                     <p className="text-neutral-500 mb-4">Record audio, upload audio, or use a YouTube URL</p>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div 
+                            className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 hover:shadow-md transition-shadow cursor-pointer"
+                            onClick={() => setIsUploadAudioModalOpen(true)}
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="bg-neutral-100 dark:bg-neutral-700 p-2 rounded-full">
+                                    <Upload className="h-5 w-5 text-neutral-500" />
+                                </div>
+                                <span className="font-medium">Upload audio</span>
+                            </div>
+                        </div>
+
                         <div 
                             className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 hover:shadow-md transition-shadow cursor-pointer"
                             onClick={() => setIsRecordModalOpen(true)}
@@ -204,17 +264,7 @@ export default function Dashboard() {
                             </div>
                         </div>
                         
-                        <div 
-                            className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 hover:shadow-md transition-shadow cursor-pointer"
-                            onClick={() => setIsUploadAudioModalOpen(true)}
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className="bg-neutral-100 dark:bg-neutral-700 p-2 rounded-full">
-                                    <Upload className="h-5 w-5 text-neutral-500" />
-                                </div>
-                                <span className="font-medium">Upload audio</span>
-                            </div>
-                        </div>
+                        
                     </div>
                 </section>
                 
@@ -331,7 +381,14 @@ export default function Dashboard() {
             </div>
 
             {/* Record Audio Modal */}
-            <Dialog open={isRecordModalOpen} onOpenChange={setIsRecordModalOpen}>
+            <Dialog open={isRecordModalOpen} onOpenChange={(open) => {
+                if (!open) {
+                    setAudioBlob(null);
+                    setIsRecording(false);
+                    mediaRecorder?.stop();
+                }
+                setIsRecordModalOpen(open);
+            }}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>Record Audio</DialogTitle>
@@ -350,7 +407,6 @@ export default function Dashboard() {
                                 onChange={(e) => setNoteTitle(e.target.value)}
                                 className="col-span-3"
                                 placeholder="Enter note title"
-                                required
                             />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
@@ -374,21 +430,58 @@ export default function Dashboard() {
                                 </SelectContent>
                             </Select>
                         </div>
+                        
                         <div className="grid gap-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <div className="col-span-4 flex justify-center">
-                                    <Button variant="outline" className="rounded-full h-16 w-16 flex items-center justify-center">
-                                        <Mic className="h-6 w-6 text-red-500" />
+                                    <Button 
+                                        variant="outline" 
+                                        className={`rounded-full h-16 w-16 flex items-center justify-center ${isRecording ? 'bg-red-50 border-red-500' : ''}`}
+                                        onClick={handleRecording}
+                                    >
+                                        <Mic className={`h-6 w-6 ${isRecording ? 'text-red-500 animate-pulse' : 'text-neutral-500'}`} />
                                     </Button>
                                 </div>
                                 <div className="col-span-4 text-center text-sm text-neutral-500">
-                                    Click to start recording
+                                    {isRecording ? 'Recording... Click to stop' : audioBlob ? 'Recording complete' : 'Click to start recording'}
                                 </div>
                             </div>
+
+                            {audioBlob && (
+                                <div className="col-span-4 mt-4">
+                                    <div className="bg-neutral-50 dark:bg-neutral-900 rounded-lg p-4">
+                                        <audio
+                                            src={URL.createObjectURL(audioBlob)}
+                                            controls
+                                            className="w-full h-12 [&::-webkit-media-controls-panel]:bg-white dark:[&::-webkit-media-controls-panel]:bg-neutral-800 [&::-webkit-media-controls-current-time-display]:text-neutral-900 dark:[&::-webkit-media-controls-current-time-display]:text-white [&::-webkit-media-controls-time-remaining-display]:text-neutral-900 dark:[&::-webkit-media-controls-time-remaining-display]:text-white"
+                                        />
+                                        <div className="flex items-center justify-between mt-2 text-xs text-neutral-500">
+                                            <span>Preview your recording</span>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setAudioBlob(null);
+                                                    setIsRecording(false);
+                                                }}
+                                                className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+                                            >
+                                                Delete recording
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button type="submit" onClick={() => handleCreateNote('record')}>Create Note</Button>
+                        <Button 
+                            type="submit" 
+                            onClick={() => handleCreateNote('record')}
+                            disabled={!audioBlob}
+                        >   
+                            Create Note
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -464,7 +557,6 @@ export default function Dashboard() {
                                 onChange={(e) => setNoteTitle(e.target.value)}
                                 className="col-span-3"
                                 placeholder="Enter note title"
-                                required
                             />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">

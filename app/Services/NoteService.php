@@ -5,9 +5,32 @@ namespace App\Services;
 use App\Models\Note;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Smalot\PdfParser\Parser;
 
 class NoteService
 {
+    public function extractTextFromPdf($path)
+    {
+        if (empty($path)) {
+            throw new \InvalidArgumentException('PDF file path is required');
+        }
+
+        try {
+            $parser = new Parser();
+            $pdf = $parser->parseFile(storage_path('app/public/' . $path));
+            
+            $text = $pdf->getText();
+            
+            if (empty($text)) {
+                throw new \RuntimeException('Could not extract text from PDF');
+            }
+            
+            return $text;
+        } catch (\Exception $e) {
+            throw new \RuntimeException('Failed to process PDF file: ' . $e->getMessage());
+        }
+    }
+    
     /**
      * Get paginated notes for a user
      */
