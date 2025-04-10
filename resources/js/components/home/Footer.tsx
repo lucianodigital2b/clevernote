@@ -14,7 +14,7 @@ const Footer = () => {
                 <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-sage-400 rounded-full border-2 border-gray-50"></span>
               </div>
               <span className="text-xl font-display font-bold tracking-tight text-gray-900">
-                LearnPad
+                Clevernote
               </span>
             </div>
             <p className="text-gray-600 mb-6 max-w-sm">
@@ -127,7 +127,7 @@ const Footer = () => {
 
         <div className="border-t border-gray-200 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <div className="mb-4 md:mb-0 text-gray-500 text-sm">
-            © {new Date().getFullYear()} LearnPad. All rights reserved.
+            © {new Date().getFullYear()} Clevernote. All rights reserved.
           </div>
           <div className="flex space-x-6">
             <a href="#" className="text-gray-500 hover:text-brand-600 text-sm">
