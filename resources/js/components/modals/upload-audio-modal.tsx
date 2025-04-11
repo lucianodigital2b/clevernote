@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useCreateNote } from "@/hooks/use-create-note";
 import type { Folder } from "@/types";
 import { usePage } from "@inertiajs/react";
+import InputError from "../input-error";
 
 interface UploadAudioModalProps {
     open: boolean;
@@ -20,7 +21,7 @@ export function UploadAudioModal({ open, onOpenChange, folders }: UploadAudioMod
     const [selectedLanguage, setSelectedLanguage] = useState('en');
     const [noteTitle, setNoteTitle] = useState('');
     const { createNote, isUploading, uploadProgress } = useCreateNote();
-    const { errors } = usePage().props
+    // const { errors } = usePage().props
 
     const handleSubmit = async () => {
         
@@ -151,6 +152,9 @@ export function UploadAudioModal({ open, onOpenChange, folders }: UploadAudioMod
                                 ))}
                             </SelectContent>
                         </Select>
+
+                        {/* <InputError message={errors.password} /> */}
+
                     </div>
 
                     {isUploading && (
