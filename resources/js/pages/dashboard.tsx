@@ -26,6 +26,10 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useQueryClient } from '@tanstack/react-query';
+import { UploadAudioModal } from '@/components/modals/upload-audio-modal';
+import { RecordAudioModal } from '@/components/modals/record-audio-modal';
+import { UploadPdfModal } from '@/components/modals/upload-pdf-modal';
+import { WebLinkModal } from '@/components/modals/web-link-modal';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -40,12 +44,14 @@ export default function Dashboard() {
     const [searchQuery, setSearchQuery] = useState('');
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    const debouncedSearch = useDebounce(searchQuery, 300); //
+    const debouncedSearch = useDebounce(searchQuery, 300);
     
     // Query for notes with pagination
     const { 
+
         data: notesData, 
         isLoading: isLoadingNotes, 
+        refetch: refetchNotes,
         error: notesError 
     } = useQuery({
         queryKey: ['notes', page, pageSize, debouncedSearch],
@@ -64,7 +70,7 @@ export default function Dashboard() {
     const notes = notesData?.data || [];
     const totalPages = notesData?.meta?.last_page || 1;
 
-    // Folders query
+    // Add back the folders query
     const { data, isLoading, error } = useQuery({
         queryKey: ['folders'],
         queryFn: async () => {
@@ -75,131 +81,29 @@ export default function Dashboard() {
     
     const folders = data || [];
     
-    // Modal states
+    // Add back modal states
     const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
     const [isWebLinkModalOpen, setIsWebLinkModalOpen] = useState(false);
     const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
     const [isUploadAudioModalOpen, setIsUploadAudioModalOpen] = useState(false);
-    
-    // Form states
-    const [selectedFolder, setSelectedFolder] = useState('');
-    const [noteTitle, setNoteTitle] = useState('');
-    const [webLink, setWebLink] = useState('');
-    const [audioFile, setAudioFile] = useState<File | null>(null);
-    const [pdfFile, setPdfFile] = useState<File | null>(null);
-    const [isUploading, setIsUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
-    const [audioMode, setAudioMode] = useState<'record' | 'upload'>('upload');
-    const [selectedLanguage, setSelectedLanguage] = useState('en');
-            
 
-
+    // Add back the getIconComponent function
     const getIconComponent = (iconName: string) => {
         switch (iconName) {
-            case 'file-text':
-                return <FileText className="h-5 w-5 text-amber-600" />;
-            case 'coffee':
-                return <div className="h-5 w-5 rounded-full bg-neutral-200 flex items-center justify-center">
-                    <span className="text-xs">☕</span>
-                </div>;
+            case 'audio':
+                return <div className="bg-red-100 dark:bg-red-900/30 p-2 rounded-full"><Mic className="h-5 w-5 text-red-500" /></div>;
+            case 'pdf':
+                return <div className="bg-neutral-100 dark:bg-neutral-700 p-2 rounded-full"><FileText className="h-5 w-5 text-neutral-500" /></div>;
+            case 'link':
+                return <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-full"><LinkIcon className="h-5 w-5 text-blue-500" /></div>;
             default:
-                return <File className="h-5 w-5 text-neutral-500" />;
+                return <div className="bg-neutral-100 dark:bg-neutral-700 p-2 rounded-full"><File className="h-5 w-5 text-neutral-500" /></div>;
         }
     };
 
-    const [isRecording, setIsRecording] = useState(false);
-    const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-    const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-    
-    const handleRecording = async () => {
-        if (isRecording) {
-            mediaRecorder?.stop();
-            setIsRecording(false);
-            return;
-        }
-    
-        try {
-            // Check if mediaDevices API is supported
-            if (!navigator.mediaDevices?.getUserMedia) {
-                throw new Error('Media devices API is not supported in your browser');
-            }
-
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const recorder = new MediaRecorder(stream);
-            const chunks: BlobPart[] = [];
-    
-            recorder.ondataavailable = (e) => {
-                chunks.push(e.data);
-            };
-    
-            recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'audio/webm' });
-                setAudioBlob(blob);
-                stream.getTracks().forEach(track => track.stop());
-            };
-    
-            setMediaRecorder(recorder);
-            recorder.start();
-            setIsRecording(true);
-        } catch (error) {
-            console.error('Error accessing microphone:', error);
-            // You might want to show this error to the user
-            alert('Failed to access microphone. Please make sure you have granted microphone permissions.');
-        }
-    };
-    
-    const handleCreateNote = async (type: string) => {
-        if ((type === 'record' && !audioBlob) || 
-            (type === 'audio' && !audioFile) ||
-            (type === 'pdf' && !pdfFile)) {
-            return;
-        }
-    
-        setIsUploading(true);
-        setUploadProgress(0);
-    
-        try {
-            const formData = new FormData();
-            formData.append('title', noteTitle);
-            formData.append('folder_id', selectedFolder);
-            formData.append('type', type);
-    
-            if (type === 'record' && audioBlob) {
-                formData.append('audio_file', audioBlob, 'recording.webm');
-                formData.append('language', selectedLanguage);
-            } else if (type === 'audio' && audioFile) {
-                formData.append('audio_file', audioFile);
-                formData.append('language', selectedLanguage);
-            } else if (type === 'pdf' && pdfFile) {
-                formData.append('pdf_file', pdfFile);
-            }
-
-            router.post('/notes', formData, {
-                forceFormData: true,
-                onProgress: (progress: any) => {
-                    setUploadProgress(Math.round(progress.percentage));
-                },
-                onSuccess: () => {
-                    setSelectedFolder('');
-                    setNoteTitle('');
-                    setAudioFile(null);
-                    setPdfFile(null);
-                    setUploadProgress(0);
-                    setIsPdfModalOpen(false);
-                    setIsRecordModalOpen(false);
-                    setIsUploadAudioModalOpen(false);
-                    queryClient.invalidateQueries({ queryKey: ['notes'] });
-                },
-                onError: (errors) => {
-                    console.error('Failed to create note:', errors);
-                },
-                onFinish: () => {
-                    setIsUploading(false);
-                }
-            });
-        } catch (error) {
-            console.error('Failed to create note:', error);
-            setIsUploading(false);
+    const handleModalClose = (open: boolean) => {
+        if (!open) {
+            refetchNotes();
         }
     };
 
@@ -380,335 +284,41 @@ export default function Dashboard() {
                 </div> */}
             </div>
 
-            {/* Record Audio Modal */}
-            <Dialog open={isRecordModalOpen} onOpenChange={(open) => {
-                if (!open) {
-                    setAudioBlob(null);
-                    setIsRecording(false);
-                    mediaRecorder?.stop();
-                }
-                setIsRecordModalOpen(open);
-            }}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Record Audio</DialogTitle>
-                        <DialogDescription>
-                            Create a new note with recorded audio
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="note-title" className="text-right">
-                                Title
-                            </Label>
-                            <Input
-                                id="note-title"
-                                value={noteTitle}
-                                onChange={(e) => setNoteTitle(e.target.value)}
-                                className="col-span-3"
-                                placeholder="Enter note title"
-                            />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="folder" className="text-right">
-                                Folder
-                            </Label>
-                            <Select
-                                value={selectedFolder}
-                                onValueChange={setSelectedFolder}
-                                required
-                            >
-                                <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder="Select a folder" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {folders.map((folder : Folder) => (
-                                        <SelectItem key={folder.id} value={folder.id.toString()}>
-                                            {folder.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        
-                        <div className="grid gap-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <div className="col-span-4 flex justify-center">
-                                    <Button 
-                                        variant="outline" 
-                                        className={`rounded-full h-16 w-16 flex items-center justify-center ${isRecording ? 'bg-red-50 border-red-500' : ''}`}
-                                        onClick={handleRecording}
-                                    >
-                                        <Mic className={`h-6 w-6 ${isRecording ? 'text-red-500 animate-pulse' : 'text-neutral-500'}`} />
-                                    </Button>
-                                </div>
-                                <div className="col-span-4 text-center text-sm text-neutral-500">
-                                    {isRecording ? 'Recording... Click to stop' : audioBlob ? 'Recording complete' : 'Click to start recording'}
-                                </div>
-                            </div>
-
-                            {audioBlob && (
-                                <div className="col-span-4 mt-4">
-                                    <div className="bg-neutral-50 dark:bg-neutral-900 rounded-lg p-4">
-                                        <audio
-                                            src={URL.createObjectURL(audioBlob)}
-                                            controls
-                                            className="w-full h-12 [&::-webkit-media-controls-panel]:bg-white dark:[&::-webkit-media-controls-panel]:bg-neutral-800 [&::-webkit-media-controls-current-time-display]:text-neutral-900 dark:[&::-webkit-media-controls-current-time-display]:text-white [&::-webkit-media-controls-time-remaining-display]:text-neutral-900 dark:[&::-webkit-media-controls-time-remaining-display]:text-white"
-                                        />
-                                        <div className="flex items-center justify-between mt-2 text-xs text-neutral-500">
-                                            <span>Preview your recording</span>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => {
-                                                    setAudioBlob(null);
-                                                    setIsRecording(false);
-                                                }}
-                                                className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
-                                            >
-                                                Delete recording
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button 
-                            type="submit" 
-                            onClick={() => handleCreateNote('record')}
-                            disabled={!audioBlob}
-                        >   
-                            Create Note
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-
-            {/* Web Link Modal */}
-            <Dialog open={isWebLinkModalOpen} onOpenChange={setIsWebLinkModalOpen}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Add Web Link</DialogTitle>
-                        <DialogDescription>
-                            Create a new note from a web link
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="web-link" className="text-right">
-                                URL
-                            </Label>
-                            <Input
-                                id="web-link"
-                                value={webLink}
-                                onChange={(e) => setWebLink(e.target.value)}
-                                className="col-span-3"
-                                placeholder="https://example.com"
-                                required
-                            />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="folder" className="text-right">
-                                Folder
-                            </Label>
-                            <Select
-                                value={selectedFolder}
-                                onValueChange={setSelectedFolder}
-                                required
-                            >
-                                <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder="Select a folder" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {folders.map((folder : Folder) => (
-                                        <SelectItem key={folder.id} value={folder.id.toString()}>
-                                            {folder.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button type="submit" onClick={() => handleCreateNote('weblink')}>Create Note</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-
-            {/* Upload PDF/Text Modal */}
-            <Dialog open={isPdfModalOpen} onOpenChange={setIsPdfModalOpen}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Upload PDF/Text</DialogTitle>
-                        <DialogDescription>
-                            Create a new note from a PDF or text file
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="note-title" className="text-right">
-                                Title
-                            </Label>
-                            <Input
-                                id="note-title"
-                                value={noteTitle}
-                                onChange={(e) => setNoteTitle(e.target.value)}
-                                className="col-span-3"
-                                placeholder="Enter note title"
-                            />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="file-upload" className="text-right">
-                                File
-                            </Label>
-                            <Input
-                                id="file-upload"
-                                type="file"
-                                className="col-span-3"
-                                accept=".pdf,.txt,.doc,.docx"
-                                required
-                            />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="folder" className="text-right">
-                                Folder
-                            </Label>
-                            <Select
-                                value={selectedFolder}
-                                onValueChange={setSelectedFolder}
-                                required
-                            >
-                                <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder="Select a folder" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {folders.map((folder : Folder) => (
-                                        <SelectItem key={folder.id} value={folder.id.toString()}>
-                                            {folder.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button type="submit" onClick={() => handleCreateNote('pdf')}>Create Note</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-
             {/* Upload Audio Modal */}
-            <Dialog open={isUploadAudioModalOpen} onOpenChange={setIsUploadAudioModalOpen}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Upload Audio</DialogTitle>
-                        <DialogDescription>
-                            Create a new note from an audio file. The audio will be transcribed automatically.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="audio-upload" className="text-right">
-                                Audio
-                            </Label>
-                            <Input
-                                id="audio-upload"
-                                type="file"
-                                className="col-span-3"
-                                accept="audio/*"
-                                onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
-                                required
-                                disabled={isUploading}
-                            />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="language" className="text-right">
-                                Language
-                            </Label>
-                            <Select
-                                value={selectedLanguage}
-                                onValueChange={setSelectedLanguage}
-                                disabled={isUploading}
-                            >
-                                <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder="Select audio language" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="en">English</SelectItem>
-                                    <SelectItem value="es">Spanish</SelectItem>
-                                    <SelectItem value="fr">French</SelectItem>
-                                    <SelectItem value="de">German</SelectItem>
-                                    <SelectItem value="it">Italian</SelectItem>
-                                    <SelectItem value="pt">Portuguese</SelectItem>
-                                    <SelectItem value="nl">Dutch</SelectItem>
-                                    <SelectItem value="ru">Russian</SelectItem>
-                                    <SelectItem value="ja">Japanese</SelectItem>
-                                    <SelectItem value="ko">Korean</SelectItem>
-                                    <SelectItem value="zh">Chinese (Mandarin)</SelectItem>
-                                    <SelectItem value="ar">Arabic</SelectItem>
-                                    <SelectItem value="hi">Hindi</SelectItem>
-                                    <SelectItem value="tr">Turkish</SelectItem>
-                                    <SelectItem value="pl">Polish</SelectItem>
-                                    <SelectItem value="vi">Vietnamese</SelectItem>
-                                    <SelectItem value="th">Thai</SelectItem>
-                                    <SelectItem value="id">Indonesian</SelectItem>
-                                    <SelectItem value="ms">Malay</SelectItem>
-                                    <SelectItem value="fa">Persian</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        {/* Add Folder Selector */}
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="folder" className="text-right">
-                                Folder
-                            </Label>
-                            <Select
-                                value={selectedFolder}
-                                onValueChange={setSelectedFolder}
-                                disabled={isUploading}
-                            >
-                                <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder="Select a folder" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {folders.map((folder : Folder) => (
-                                        <SelectItem key={folder.id} value={folder.id.toString()}>
-                                            {folder.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {isUploading && (
-                            <div className="col-span-4">
-                                <div className="space-y-2">
-                                    <div className="text-sm text-neutral-500 text-center">
-                                        {uploadProgress < 100 ? 'Uploading audio...' : 'Transcribing audio...'}
-                                    </div>
-                                    <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
-                                        <div 
-                                            className="h-full bg-blue-500 transition-all duration-300 ease-in-out" 
-                                            style={{ width: `${uploadProgress}%` }}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                    <DialogFooter>
-                        <Button 
-                            type="submit" 
-                            onClick={() => handleCreateNote('audio')}
-                            disabled={isUploading || !audioFile}
-                        >
-                            {isUploading ? 'Processing...' : 'Create Note'}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <UploadAudioModal 
+                open={isUploadAudioModalOpen}
+                onOpenChange={(open) => {
+                    setIsUploadAudioModalOpen(open);
+                    handleModalClose(open);
+                }}
+                folders={folders}
+            />
+            <RecordAudioModal 
+                open={isRecordModalOpen}
+                onOpenChange={(open) => {
+                    setIsRecordModalOpen(open);
+                    handleModalClose(open);
+                }}
+                folders={folders}
+            />
+            <UploadPdfModal 
+                open={isPdfModalOpen}
+                onOpenChange={(open) => {
+                    setIsPdfModalOpen(open);
+                    handleModalClose(open);
+                }}
+                folders={folders}
+            />
+            <WebLinkModal 
+                open={isWebLinkModalOpen}
+                onOpenChange={(open) => {
+                    setIsWebLinkModalOpen(open);
+                    handleModalClose(open);
+                }}
+                folders={folders}
+            />
+            
+            {/* ... rest of the component ... */}
         </AppLayout>
     );
 }
