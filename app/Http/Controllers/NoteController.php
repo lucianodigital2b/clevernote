@@ -63,7 +63,6 @@ class NoteController extends Controller
     public function store(StoreNoteRequest $request)
     {
 
-        dd($request->all());    
         try {
             $type = $request->input('type');
             $title = $request->input('title');

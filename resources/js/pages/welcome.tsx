@@ -68,8 +68,8 @@ const Welcome = () => {
       <Navbar />
       <Hero />
       <section id="features"><Features /></section>
-      <section id="testimonials"><Testimonials /></section>
-      <section id="pricing"><Pricing /></section>
+      {/* <section id="testimonials"><Testimonials /></section> */}
+      {/* <section id="pricing"><Pricing /></section> */}
       <section id="cta"><CallToAction /></section>
       <Footer />
     </div>

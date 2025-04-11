@@ -9,11 +9,6 @@ export function useCreateNote() {
 
     const props = usePage().props;
 
-    const { flash } = usePage().props;
-
-
-    
-
     const createNote = async (type: string, data: {
         title?: string;
         folder_id: string;
