@@ -28,12 +28,12 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
             pdf_file: pdfFile
         });
 
-        if (success) {
-            setNoteTitle('');
-            setSelectedFolder('');
-            setPdfFile(null);
-            onOpenChange(false);
-        }
+        // if (success) {
+        //     setNoteTitle('');
+        //     setSelectedFolder('');
+        //     setPdfFile(null);
+        //     onOpenChange(false);
+        // }
     };
 
     return (

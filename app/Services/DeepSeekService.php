@@ -20,56 +20,21 @@ class DeepSeekService
         }
     }
 
-    public function createStudyNote(string $transcription): array
+    public function createStudyNote(string $transcription, ?string $language = null): array
     {
         if (empty($transcription)) {
             throw new \InvalidArgumentException('Transcription cannot be empty');
         }
 
+        $language = $language ?? 'of the text provided';
         try {
             $prompt = <<<EOT
                 You are an AI assistant that converts raw transcription into a well-structured study note using **HTML formatting**. 
-                MAKE IT BEAUTIFUL! Dont be shy to use tables, titles, lists etc.
+                 Dont be shy to use tables, titles, lists etc.
 
                 Writing Style Prompt
                     Focus on clarity: Make your message really easy to understand.
-                    Example: "Please send the file by Monday."
-                    Be direct and concise: Get to the point; remove unnecessary words.
-                    Example: "We should meet tomorrow."
-                    Use simple language: Write plainly with short sentences.
-                    Example: "I need help with this issue."
-                    Stay away from fluff: Avoid unnecessary adjectives and adverbs.
-                    Example: "We finished the task."
-                    Avoid marketing language: Don't use hype or promotional words.
-                    Avoid: "This revolutionary product will transform your life."
-                    Use instead: "This product can help you."
-                    Keep it real: Be honest; don't force friendliness.
-                    Example: "I don't think that's the best idea."
-                    Maintain a natural/conversational tone: Write as you normally speak; it's okay to start sentences with "and" or "but."
-                    Example: "And that's why it matters."
-                    Simplify grammar: Don't stress about perfect grammar; it's fine not to capitalize "i" if that's your style.
-                    Example: "i guess we can try that."
-                    Avoid AI-giveaway phrases: Don't use clichés like "dive into," "unleash your potential," etc.
-                    Avoid: "Let's dive into this game-changing solution."
-                    Use instead: "Here's how it works."
-                    Vary sentence structures (short, medium, long) to create rhythm
-                    Address readers directly with "you" and "your"
-                    Example: "This technique works best when you apply it consistently."
-                    Use active voice
-                    Instead of: "The report was submitted by the team."
-                    Use: "The team submitted the report."
-                    Avoid:
-                    Filler phrases
-                    Instead of: "It's important to note that the deadline is approaching."
-                    Use: "The deadline is approaching."
-                    Clichés, jargon, hashtags, semicolons, emojis, and asterisks
-                    Instead of: "Let's touch base to move the needle on this mission-critical deliverable."
-                    Use: "Let's meet to discuss how to improve this important project."
-                    Conditional language (could, might, may) when certainty is possible
-                    Instead of: "This approach might improve results."
-                    Use: "This approach improves results."
-                    Redundancy and repetition (remove fluff!)
-                    Forced keyword placement that disrupts natural reading
+                    It should be a college essay. Make it long and detailed.
 
                 Instructions:
                 1. Read and analyze the transcription provided.
@@ -87,6 +52,7 @@ class DeepSeekService
                 - Return **only** the JSON object, no extra text.
                 - Make sure the JSON is valid and can be decoded with PHP’s `json_decode`.
 
+                The note should be in the following language: {$language}
                 Transcription:
                 {$transcription}
                 EOT;
@@ -94,7 +60,7 @@ class DeepSeekService
 
             // dump($prompt);
 
-            $response = Http::timeout(30)->withHeaders([
+            $response = Http::timeout(200)->withHeaders([
                 'Authorization' => "Bearer {$this->apiKey}",
                 'Content-Type' => 'application/json',
             ])->post($this->apiEndpoint, [

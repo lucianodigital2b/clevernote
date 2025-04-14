@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Services\DeepSeekService;
+use Log;
 
 class NoteController extends Controller
 {
@@ -64,67 +65,37 @@ class NoteController extends Controller
     {
 
         try {
-            $type = $request->input('type');
-            $title = $request->input('title');
-            $folderId = $request->input('folder_id');
+            $validated = $request->validated();
+            $validated['user_id'] = Auth::id();
             
-            if ($type === 'pdf') {
-                if (!$request->hasFile('pdf_file')) {
-                    return response()->json([
-                        'errors' => ['pdf_file' => 'PDF file is required']
-                    ], 422);
-                }
-
-                $file = $request->file('pdf_file');
+            if (isset($validated['pdf_file'])) {
+                $file = $validated['pdf_file'];
                 $path = $file->store('pdfs', 'public');
                 
                 $pdfText = $this->noteService->extractTextFromPdf($path);
-                $studyNote = $this->deepseekService->generateStudyNote($pdfText);
-                
-                $note = $this->noteService->createNote([
-                    'user_id' => Auth::id(),
-                    'title' => $title,
-                    'folder_id' => $folderId,
-                    'content' => $studyNote,
-                    'type' => 'pdf',
-                    'file_path' => $path,
-                    'icon' => 'file-text'
-                ]);
-
-                return response()->json($note);
-            }
-            
-            if ($request->hasFile('audio_file')) {
-                $path = $request->file('audio_file')->store('audio', 'public');
+                $studyNote = $this->deepseekService->createStudyNote($pdfText);
+            }else if (isset($validated['audio_file'])) {
+                $path = $validated['audio_file']->store('audio', 'public');
                 $validated['file_path'] = $path;
                 
                 // Process audio file and get transcription
-                $transcription = $this->transcriptionService->transcribeAudio($request->file('audio_file'), $validated['language']);
-                
-                // Generate study note using DeepSeek
-                // try {
-                    $studyNote = $this->deepseekService->createStudyNote($transcription['text']);
-                    $validated['content'] = $studyNote['study_note']['content'];
-                    $validated['title']   = $studyNote['study_note']['title'];
-                    $validated['summary']   = $studyNote['study_note']['summary'];
-                    $validated['metadata'] = [
-                        'audio_duration' => $transcription['duration'] ?? null,
-                        'language' => $transcription['language'] ?? 'en',
-                        'type' => 'audio_transcription',
-                        'original_transcription' => $studyNote['original_transcription']
-                    ];
-                // } catch (\Exception $e) {
-                //     // Fallback to original transcription if study note generation fails
-                //     $validated['content'] = $transcription['text'] ?? 'Audio transcription in progress...';
-                //     $validated['metadata'] = [
-                //         'audio_duration' => $transcription['duration'] ?? null,
-                //         'language' => $transcription['language'] ?? 'en',
-                //         'type' => 'audio_transcription'
-                //     ];
-                // }
+                $transcription = $this->transcriptionService->transcribeAudio($validated['audio_file'], $validated['language']);
+                $studyNote = $this->deepseekService->createStudyNote($transcription['text'], $validated['language']);
             }
 
+
+            $validated['content'] = $studyNote['study_note']['content'];
+            $validated['title']   = $studyNote['study_note']['title'];
+            $validated['summary']   = $studyNote['study_note']['summary'];
+            // $validated['metadata'] = [
+            //     'audio_duration' => $transcription['duration'] ?? null,
+            //     'language' => $transcription['language'] ?? 'en',
+            //     'type' => 'audio_transcription',
+            //     'original_transcription' => $studyNote['original_transcription']
+            // ];
+            
             $note = $this->noteService->createNote($validated);
+
 
             if ($request->wantsJson()) {
                 return response()->json([
@@ -137,7 +108,17 @@ class NoteController extends Controller
             return redirect()->route('notes.edit', $note)
                 ->with('success', 'Note created successfully.');
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to create note'], 500);
+
+            Log::error($e->getTrace());
+
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'Failed to create note'], 500);
+            }
+
+            return redirect()
+            ->back()
+            ->with('error', $e->getMessage());
+
         }
     }
 

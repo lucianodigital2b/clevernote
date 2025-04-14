@@ -17,7 +17,7 @@ interface UploadAudioModalProps {
 
 export function UploadAudioModal({ open, onOpenChange, folders }: UploadAudioModalProps) {
     const [audioFile, setAudioFile] = useState<File | null>(null);
-    const [selectedFolder, setSelectedFolder] = useState('');
+    const [selectedFolder, setSelectedFolder] = useState(folders.length > 0 ? folders[0].id.toString() : '');
     const [selectedLanguage, setSelectedLanguage] = useState('en');
     const [noteTitle, setNoteTitle] = useState('');
     const { createNote, isUploading, uploadProgress } = useCreateNote();
@@ -104,6 +104,7 @@ export function UploadAudioModal({ open, onOpenChange, folders }: UploadAudioMod
                             value={selectedLanguage}
                             onValueChange={setSelectedLanguage}
                             disabled={isUploading}
+                            required
                         >
                             <SelectTrigger className="col-span-3">
                                 <SelectValue placeholder="Select audio language" />
