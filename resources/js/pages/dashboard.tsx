@@ -277,11 +277,11 @@ export default function Dashboard() {
                 </section>
                 
                 {/* Upgrade Banner */}
-                {/* <div className="fixed bottom-6 right-6">
+                <div className="fixed bottom-6 right-6">
                     <Button className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-full flex items-center gap-2">
                         Unlimited notes <span className="text-xs">⚡</span>
                     </Button>
-                </div> */}
+                </div>
             </div>
 
             {/* Upload Audio Modal */}

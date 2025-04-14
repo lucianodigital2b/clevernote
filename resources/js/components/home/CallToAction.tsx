@@ -22,9 +22,7 @@ const CallToAction = () => {
               Start your free trial
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
-            <Button variant="outline" className="button-secondary px-8 py-4 text-base sm:text-lg">
-              Schedule a demo
-            </Button>
+          
           </div>
 
           <div className="flex justify-center gap-8 flex-wrap">
