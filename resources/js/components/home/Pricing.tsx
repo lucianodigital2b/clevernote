@@ -21,7 +21,7 @@ const pricingPlans = [
   },
   {
     name: "Student",
-    price: "$9.99",
+    price: "$4.99",
     description: "Ideal for individual students",
     features: [
       { included: true, text: "Unlimited rich notes" },
