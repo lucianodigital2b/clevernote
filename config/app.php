@@ -123,4 +123,9 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'ffmpeg_bin' => env('FFMPEG_BIN', null),
+    'ffmpeg_path' => env('FFMPEG_PATH', null),
+    'ffmpeg_probe_path' => env('FFMPEG_PROBE_PATH', null),
+    'ytdlp_path' => env('YT_DLP', null),
+
 ];

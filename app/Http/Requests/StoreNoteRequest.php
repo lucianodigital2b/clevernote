@@ -27,6 +27,7 @@ class StoreNoteRequest extends FormRequest
             'audio_file' =>'file|mimes:mp3,ogg,flac,wav',
             'pdf_file' =>'file|nullable|mimes:pdf,doc,docx',
             'title' => 'nullable|string', 
+            'link' => 'nullable|string', 
             'content' => 'nullable|string', 
             'transcription' => 'nullable|string', 
             'summary' => 'nullable|string', 

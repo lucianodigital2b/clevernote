@@ -14,7 +14,7 @@ interface WebLinkModalProps {
 }
 
 export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps) {
-    const [webLink, setWebLink] = useState('');
+    const [webLink, setWebLink] = useState('https://www.youtube.com/watch?v=Qrd7SawJx3Y');
     const [selectedFolder, setSelectedFolder] = useState('');
     const { createNote, isUploading } = useCreateNote();
 
@@ -23,14 +23,9 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
 
         const success = await createNote('weblink', {
             folder_id: selectedFolder,
-            title: webLink
+            link: webLink
         });
 
-        if (success) {
-            setWebLink('');
-            setSelectedFolder('');
-            onOpenChange(false);
-        }
     };
 
     return (

@@ -136,6 +136,32 @@ class DeepSeekService
         
         return $response;
     }
+    
+    public function processYoutubeVideo(string $url, ?string $language = null): array
+    {
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            throw new \InvalidArgumentException('Invalid YouTube URL');
+        }
+        
+        $prompt = <<<EOT
+        You are an AI assistant that converts YouTube video content into a well-structured study note using HTML formatting.
+        
+        Instructions:
+        1. Analyze the video content
+        2. Extract key concepts, important points, and examples
+        3. Create a structured study note in this format:
+        
+        {
+            "title": "Video title summary",
+            "content": "Detailed note with HTML formatting",
+            "summary": "2-3 sentence summary"
+        }
+        
+        Video URL: {$url}
+        EOT;
+        
+        return $this->createStudyNote($prompt, $language);
+    }
 
     protected function sendPrompt(string $prompt): string
     {
