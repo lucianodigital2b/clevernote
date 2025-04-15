@@ -14,6 +14,7 @@ export function useCreateNote() {
         folder_id: string;
         audio_file?: File | Blob;
         pdf_file?: File;
+        link?: string;
         language?: string;
     }) => {
         setIsUploading(true);
@@ -24,6 +25,9 @@ export function useCreateNote() {
             formData.append('props', props.csrf_token as string);
 
             if (data.title) formData.append('title', data.title);
+
+            if (data.link) formData.append('link', data.link);
+            
             formData.append('folder_id', data.folder_id);
             formData.append('type', type);
 

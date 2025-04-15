@@ -10,23 +10,26 @@ use App\Http\Requests\UpdateNoteRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
-use App\Services\DeepSeekService;
-use Log;
+use App\Services\{DeepSeekService, YouTubeAudioExtractor};
+use Illuminate\Support\Facades\Log;
 
 class NoteController extends Controller
 {
     protected $noteService;
     protected $transcriptionService;
     protected $deepseekService;
+    protected $youtubeAudioExtractor;
 
     public function __construct(
         NoteService $noteService, 
         TranscriptionService $transcriptionService,
-        DeepSeekService $deepseekService
+        DeepSeekService $deepseekService,
+        YouTubeAudioExtractor $youtubeAudioExtractor,
     ) {
         $this->noteService = $noteService;
         $this->transcriptionService = $transcriptionService;
         $this->deepseekService = $deepseekService;
+        $this->youtubeAudioExtractor = $youtubeAudioExtractor;
     }
 
     /**
@@ -74,13 +77,19 @@ class NoteController extends Controller
                 
                 $pdfText = $this->noteService->extractTextFromPdf($path);
                 $studyNote = $this->deepseekService->createStudyNote($pdfText);
-            }else if (isset($validated['audio_file'])) {
+            } else if (isset($validated['audio_file'])) {
                 $path = $validated['audio_file']->store('audio', 'public');
                 $validated['file_path'] = $path;
                 
                 // Process audio file and get transcription
                 $transcription = $this->transcriptionService->transcribeAudio($validated['audio_file'], $validated['language']);
                 $studyNote = $this->deepseekService->createStudyNote($transcription['text'], $validated['language']);
+            } else if (isset($validated['link'])) {
+
+                $audio = $this->youtubeAudioExtractor->extractAudio($validated['link']);
+
+                $transcription = $this->transcriptionService->transcribeAudio($audio, $validated['language'] ?? 'en');
+                $studyNote = $this->deepseekService->createStudyNote($transcription['text'], $validated['language'] ?? 'en');
             }
 
 
