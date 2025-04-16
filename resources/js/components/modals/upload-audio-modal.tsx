@@ -104,7 +104,6 @@ export function UploadAudioModal({ open, onOpenChange, folders }: UploadAudioMod
                             value={selectedLanguage}
                             onValueChange={setSelectedLanguage}
                             disabled={isUploading}
-                            required
                         >
                             <SelectTrigger className="col-span-3">
                                 <SelectValue placeholder="Select audio language" />
