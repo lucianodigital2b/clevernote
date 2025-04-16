@@ -31,9 +31,10 @@ export function useCreateNote() {
             formData.append('folder_id', data.folder_id);
             formData.append('type', type);
 
+            if (data.language) formData.append('language', data.language);
+            
             if ((type === 'record' || type === 'audio') && data.audio_file) {
                 formData.append('audio_file', data.audio_file);
-                if (data.language) formData.append('language', data.language);
             } else if (type === 'pdf' && data.pdf_file) {
                 formData.append('pdf_file', data.pdf_file);
             }

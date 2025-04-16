@@ -16,6 +16,7 @@ interface WebLinkModalProps {
 export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps) {
     const [webLink, setWebLink] = useState('https://www.youtube.com/watch?v=Qrd7SawJx3Y');
     const [selectedFolder, setSelectedFolder] = useState('');
+    const [selectedLanguage, setSelectedLanguage] = useState('en');
     const { createNote, isUploading } = useCreateNote();
 
     const handleSubmit = async () => {
@@ -23,7 +24,8 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
 
         const success = await createNote('weblink', {
             folder_id: selectedFolder,
-            link: webLink
+            link: webLink,
+            language: selectedLanguage
         });
 
     };
@@ -61,6 +63,26 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
                                         {folder.name}
                                     </SelectItem>
                                 ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="language" className="text-right">Language</Label>
+                        <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                            <SelectTrigger className="col-span-3">
+                                <SelectValue placeholder="Select a language" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="en">English</SelectItem>
+                                <SelectItem value="es">Spanish</SelectItem>
+                                <SelectItem value="fr">French</SelectItem>
+                                <SelectItem value="de">German</SelectItem>
+                                <SelectItem value="it">Italian</SelectItem>
+                                <SelectItem value="pt">Portuguese</SelectItem>
+                                <SelectItem value="ru">Russian</SelectItem>
+                                <SelectItem value="zh">Chinese</SelectItem>
+                                <SelectItem value="ja">Japanese</SelectItem>
+                                <SelectItem value="ko">Korean</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
