@@ -24,8 +24,28 @@ export type Note = {
     content: string;
     summary: string;
     transcription: string;
-    
 };
+
+// Add Flashcard type
+export type Flashcard = {
+    id: number;
+    question: string;
+    answer: string;
+    difficulty: 'easy' | 'medium' | 'hard' | null;
+    folder?: Folder | null;
+    created_at: string;
+    updated_at: string;
+};
+
+export type FlashcardSet = {
+    id: number;
+    name: string;
+    description: string | null;
+    flashcards_count: number;
+    created_at: string;
+    updated_at: string;
+};
+
 
 export type Folder = {
     id: number;
@@ -64,4 +84,12 @@ export interface User {
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
+}
+
+export interface PaginatedResponse<T> {
+    data: T[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
 }
