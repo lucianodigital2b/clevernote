@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\FolderController;
 use App\Http\Controllers\NoteController;
+use App\Http\Controllers\FlashcardController;
+use App\Http\Controllers\FlashcardSetController;
+use App\Http\Controllers\FolderFlashcardController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -38,10 +41,18 @@ Route::middleware(['auth'])->group(function () {
     //     });
     // });
 
+    // Flashcard Routes
+    Route::resource('flashcards', FlashcardController::class);
+    Route::resource('folders.flashcards', FolderFlashcardController::class);
+    Route::resource('flashcard-sets', FlashcardSetController::class);
+
+
 });
 
 
 
 
 require __DIR__.'/settings.php';
+
 require __DIR__.'/auth.php';
+

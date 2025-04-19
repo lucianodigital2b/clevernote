@@ -56,7 +56,7 @@ export default function Edit({ note }: { note: Note }) {
     };
 
     // Add this new state
-    const [isActionsVisible, setIsActionsVisible] = useState(false);
+    const [isActionsVisible, setIsActionsVisible] = useState(true);
     const [isChatOpen, setIsChatOpen] = useState(true);
     const [chatMessage, setChatMessage] = useState('');
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -65,10 +65,10 @@ export default function Edit({ note }: { note: Note }) {
     const actions = [
         { icon: '🎯', label: 'Create quiz', action: () => console.log('Create quiz') },
         { icon: '📝', label: 'Create flashcards', action: () => console.log('Create flashcards') },
-        { icon: '💬', label: 'Chat with note', action: () => setIsChatOpen(true) },
-        { icon: '🌐', label: 'Translate', action: () => console.log('Translate') },
-        { icon: '🎥', label: 'Create video', action: () => console.log('Create video') },
-        { icon: '🗺️', label: 'Mindmap', action: () => console.log('Mindmap') },
+        // { icon: '💬', label: 'Chat with note', action: () => setIsChatOpen(true) },
+        // { icon: '🌐', label: 'Translate', action: () => console.log('Translate') },
+        // { icon: '🎥', label: 'Create video', action: () => console.log('Create video') },
+        // { icon: '🗺️', label: 'Mindmap', action: () => console.log('Mindmap') },
     ];
 
 
@@ -144,13 +144,13 @@ export default function Edit({ note }: { note: Note }) {
 
                             <div className="flex items-center gap-2">
 
-                                <Button 
+                                {/* <Button 
                                     variant="outline" 
                                     className="flex items-center gap-2"
                                 >
                                     <Share className="h-4 w-4" />
                                     Share or export
-                                </Button>
+                                </Button> */}
                                 
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -180,13 +180,13 @@ export default function Edit({ note }: { note: Note }) {
                         <ValidationErrors errors={errors} />
 
                         {/* Toggle Button */}
-                        <Button
+                        {/* <Button
                             variant="outline"
                             onClick={() => setIsActionsVisible(!isActionsVisible)}
                             className="mb-4"
                         >
                             {isActionsVisible ? 'Hide Actions' : 'Show Actions'}
-                        </Button>
+                        </Button> */}
 
                         {/* Actions Grid with animation */}
                         <div className={`transition-all duration-300 ease-in-out ${isActionsVisible ? 'opacity-100 max-h-[500px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
@@ -236,9 +236,8 @@ export default function Edit({ note }: { note: Note }) {
                 </div>
 
                 {/* Chat Sidebar */}
-                {isChatOpen && (
+                {false && (
                     <div className="fixed right-0 top-0 bottom-0 w-[400px] bg-white dark:bg-neutral-900 border-l border-neutral-200 dark:border-neutral-800 flex flex-col">
-                        {/* Chat Header */}
                         <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <div className="bg-purple-100 dark:bg-purple-900/30 w-8 h-8 rounded-full flex items-center justify-center">
@@ -258,12 +257,11 @@ export default function Edit({ note }: { note: Note }) {
                             </Button>
                         </div>
 
-                        {/* Chat Messages */}
                         <ScrollArea className="flex-1 p-4">
                             <div className="flex gap-2 mb-4">
                                 <div className="w-8 h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 flex-shrink-0" />
                                 <div className="flex-1">
-                                    <p className="text-sm text-neutral-500">Hi, I'm Coco bot. Ask me anything about this note!</p>
+                                    <p className="text-sm text-neutral-500">Hi, I'm Cleverbot. Ask me anything about this note!</p>
                                 </div>
                             </div>
                             {/* Add more messages here */}
