@@ -32,4 +32,9 @@ class FlashcardSet extends Model
     {
         return $this->hasMany(Flashcard::class);
     }
+
+    public function note()
+    {
+        return $this->belongsTo(Note::class);
+    }
 }

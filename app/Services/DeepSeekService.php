@@ -121,22 +121,7 @@ class DeepSeekService
         }
     }
 
-    public function generateStudyNote($text)
-    {
-        $prompt = "Create a comprehensive study note from the following text. Include:
-        - Key concepts and definitions
-        - Main points and arguments
-        - Important examples
-        - Summary and conclusions
-        
-        Text: " . $text;
 
-        // Call DeepSeek API with the prompt
-        $response = $this->sendPrompt($prompt);
-        
-        return $response;
-    }
-    
     public function processYoutubeVideo(string $url, ?string $language = null): array
     {
         if (!filter_var($url, FILTER_VALIDATE_URL)) {
@@ -209,6 +194,90 @@ class DeepSeekService
             throw new \Exception('Failed to connect to DeepSeek API: ' . $e->getMessage());
         } catch (\Exception $e) {
             Log::error('Prompt processing failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
+        }
+    }
+
+    public function generateFlashcardsFromNote(string $content, ?string $language = null): array
+    {
+        if (empty($content)) {
+            throw new \InvalidArgumentException('Note content cannot be empty');
+        }
+
+        $language = $language ?? 'English';
+        $prompt = <<<EOT
+You are an AI assistant that creates flashcards for studying. 
+Given the following note content, generate a JSON array of 10 to 15 flashcards. 
+Each flashcard should have a "question" and an "answer" field. 
+Questions should cover key concepts, facts, and important details from the note. 
+Answers should be concise and accurate.
+
+Requirements:
+- Return only a valid JSON array, no extra text.
+- Each item in the array must be an object with "question" and "answer" fields.
+- The flashcards should be in {$language}.
+
+Note content:
+{$content}
+EOT;
+
+        try {
+            $response = Http::timeout(200)->withHeaders([
+                'Authorization' => "Bearer {$this->apiKey}",
+                'Content-Type' => 'application/json',
+            ])->post($this->apiEndpoint, [
+                'model' => 'deepseek-chat',
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'You are a study assistant that always responds in valid JSON format.'
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => $prompt
+                    ]
+                ],
+                'temperature' => 0.7,
+                'max_tokens' => 4000
+            ]);
+
+
+            $content = $response->json('choices.0.message.content');
+            // dd($content, $prompt);
+            // Remove code block markers if present
+            $content = preg_replace('/^(json|\`\`\`json|\`\`\`)\s*/i', '', trim($content));
+            $content = preg_replace('/\`\`\`\s*$/i', '', trim($content));
+
+            $cards = json_decode($content, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE || !is_array($cards)) {
+                Log::error('DeepSeek flashcard JSON error', [
+                    'error' => json_last_error_msg(),
+                    'response' => $content
+                ]);
+                throw new \Exception('Invalid JSON response from DeepSeek: ' . json_last_error_msg());
+            }
+
+            // Validate structure
+            foreach ($cards as $card) {
+                if (!isset($card['question']) || !isset($card['answer'])) {
+                    throw new \Exception('Each flashcard must have a question and answer.');
+                }
+            }
+
+            return $cards;
+
+        } catch (RequestException $e) {
+            Log::error('DeepSeek API Request Failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw new \Exception('Failed to connect to DeepSeek API: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            Log::error('Flashcard generation failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
