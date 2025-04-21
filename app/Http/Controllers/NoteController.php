@@ -248,17 +248,4 @@ class NoteController extends Controller
         ]);
     }
     
-    // Helper method (replace with your AI integration)
-    protected function generateFlashcardsFromContent($content)
-    {
-        // Call your AI service here. For now, return dummy data.
-        $cards = [];
-        for ($i = 1; $i <= rand(10, 15); $i++) {
-            $cards[] = [
-                'question' => "Sample Question $i",
-                'answer' => "Sample Answer $i",
-            ];
-        }
-        return $cards;
-    }
 }

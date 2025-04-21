@@ -207,10 +207,10 @@ class DeepSeekService
             throw new \InvalidArgumentException('Note content cannot be empty');
         }
 
-        $language = $language ?? 'English';
+        $language = $language ?? 'language of the note content provided in the prompt';
         $prompt = <<<EOT
 You are an AI assistant that creates flashcards for studying. 
-Given the following note content, generate a JSON array of 10 to 15 flashcards. 
+Given the following note content, generate a JSON array of flashcards. Create as many as possible!
 Each flashcard should have a "question" and an "answer" field. 
 Questions should cover key concepts, facts, and important details from the note. 
 Answers should be concise and accurate.

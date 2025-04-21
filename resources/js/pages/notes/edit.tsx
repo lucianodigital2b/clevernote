@@ -32,6 +32,10 @@ import TiptapToolbar from '@/components/tiptaptoolbar';
 // import { SectionBlock } from '@/extensions/SectionBlock';
 import DragHandle  from '@/extensions/DragHandle';
 import axios from 'axios';
+import {
+    Dialog,
+    DialogContent,
+} from "@/components/ui/dialog";
 
 export default function Edit({ note }: { note: Note }) {
 
@@ -63,16 +67,20 @@ export default function Edit({ note }: { note: Note }) {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [content, setContent] = useState(note.content);
 
-    // Add this handler
+    // Add state for the flashcard modal
+    const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
+
+    // Update handler to show/hide modal
     const handleCreateFlashcards = async () => {
+        setIsFlashcardModalOpen(true);
         try {
             const response = await axios.post(`/notes/${note.id}/generate-flashcards`);
             if (response.data && response.data.flashcardSetId) {
-                // Redirect to the flashcard set page or show a success message
+                setIsFlashcardModalOpen(false);
                 router.visit(`/flashcard-sets/${response.data.flashcardSetId}`);
             }
         } catch (error) {
-            // Handle error (show toast, etc.)
+            setIsFlashcardModalOpen(false);
             toastConfig.error("Failed to generate flashcards");
         }
     };
@@ -323,6 +331,18 @@ export default function Edit({ note }: { note: Note }) {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+            
+            {/* Spinner Modal for Flashcard Generation */}
+            <Dialog open={isFlashcardModalOpen}>
+                <DialogContent className="flex flex-col items-center justify-center">
+                    <div className="flex flex-col items-center gap-4 py-8">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                        <div className="text-lg font-medium text-neutral-700 dark:text-neutral-200">
+                            Generating flashcards...
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }
