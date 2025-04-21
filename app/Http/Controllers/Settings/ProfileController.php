@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use Laravel\Cashier\Subscription;
 
 class ProfileController extends Controller
 {
@@ -18,9 +19,22 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $user = $request->user();
+        $subscriptions = $user->subscriptions()->get()->map(function ($sub) {
+            return [
+                'id' => $sub->id,
+                'name' => $sub->name,
+                'stripe_status' => $sub->stripe_status,
+                'ends_at' => $sub->ends_at,
+                'created_at' => $sub->created_at,
+                'updated_at' => $sub->updated_at,
+            ];
+        });
+
         return Inertia::render('settings/profile', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
+            'subscriptions' => $subscriptions,
         ]);
     }
 

@@ -24,8 +24,10 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::post('/subscriptions/resume/{subscriptionId}', [SubscriptionController::class, 'resume']);
+    Route::get('/subscriptions/list', [SubscriptionController::class, 'list']);
+    Route::post('/subscriptions/cancel/{subscriptionId}', [SubscriptionController::class, 'cancel']);
 
-     
     // Route::get('/chat', function () {
     //     return response()->eventStream(function () {
     //         $stream = OpenAI::client()->chat()->createStreamed(...);

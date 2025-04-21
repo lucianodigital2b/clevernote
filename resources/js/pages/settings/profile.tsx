@@ -11,6 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -19,7 +21,15 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
+export default function Profile({
+    mustVerifyEmail,
+    status,
+    subscriptions: initialSubscriptions = [],
+}: {
+    mustVerifyEmail: boolean;
+    status?: string;
+    subscriptions?: any[];
+}) {
     const { auth } = usePage<SharedData>().props;
 
     const { data, setData, patch, errors, processing, recentlySuccessful } = useForm({
@@ -33,6 +43,57 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
         patch(route('profile.update'), {
             preserveScroll: true,
         });
+    };
+
+    // Use the subscriptions from props instead of fetching via axios
+    const [subscriptions, setSubscriptions] = useState<any[]>(initialSubscriptions);
+
+    const handleCancel = async (id: string) => {
+        try {
+            // Call backend to cancel on Stripe
+            const response = await axios.post(`/subscriptions/cancel/${id}`);
+            if (response.data && response.data.success) {
+                // If the backend returns ends_at, update it in the local state
+                setSubscriptions(subs =>
+                    subs.map(sub =>
+                        sub.id === id
+                            ? {
+                                ...sub,
+                                stripe_status: 'canceled',
+                                ends_at: response.data.ends_at || sub.ends_at,
+                            }
+                            : sub
+                    )
+                );
+            } else {
+                alert('Failed to cancel subscription.');
+            }
+        } catch (error) {
+            alert('Failed to cancel subscription.');
+        }
+    };
+
+    const handleResume = async (id: string) => {
+        try {
+            const response = await axios.post(`/subscriptions/resume/${id}`);
+            if (response.data && response.data.success) {
+                setSubscriptions(subs =>
+                    subs.map(sub =>
+                        sub.id === id
+                            ? {
+                                ...sub,
+                                stripe_status: response.data.stripe_status,
+                                ends_at: response.data.ends_at,
+                            }
+                            : sub
+                    )
+                );
+            } else {
+                alert('Failed to resume subscription.');
+            }
+        } catch (error) {
+            alert('Failed to resume subscription.');
+        }
     };
 
     return (
@@ -116,6 +177,40 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                 </div>
 
                 <DeleteUser />
+                <div className="space-y-6">
+                    {/* Subscription Section */}
+                    <div>
+                        <HeadingSmall title="Your Subscriptions" description="Manage your active subscriptions" />
+                        <div>
+                            {subscriptions.length === 0 && <p>No subscriptions found.</p>}
+                            {subscriptions.map(sub => (
+                                <div key={sub.id} className="border p-4 rounded mb-2">
+                                    <div>
+                                        <strong>{sub.name}</strong> - Status: {sub.stripe_status}
+                                    </div>
+                                    {/* Only show cancel if subscription is active and not scheduled to end */}
+                                    {sub.stripe_status === 'active' && !sub.ends_at && (
+                                        <Button onClick={() => handleCancel(sub.id)}>Cancel</Button>
+                                    )}
+                                    {/* Show banner if ends_at is set */}
+                                    {sub.ends_at && (
+                                        <div className="bg-yellow-100 text-yellow-800 p-2 rounded mt-2 flex items-center gap-4">
+                                            <span>
+                                                Subscription canceled. You have access until {new Date(sub.ends_at).toLocaleDateString()}.
+                                            </span>
+                                            {/* Show Resume button if subscription is canceled and can be resumed */}
+                                            {sub.stripe_status === 'canceled' && (
+                                                <Button variant="outline" onClick={() => handleResume(sub.id)}>
+                                                    Resume
+                                                </Button>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
             </SettingsLayout>
         </AppLayout>
     );

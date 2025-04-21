@@ -28,9 +28,46 @@ class SubscriptionController extends Controller
         return Inertia::render('Billing/Success'); // create this React page
     }
 
-    public function cancel()
+    public function cancel(Request $request, $subscriptionId)
     {
-        return Inertia::render('Billing/Cancel'); // create this React page
+        $user = $request->user();
+        $subscription = $user->subscriptions()->where('id', $subscriptionId)->first();
+
+        if (!$subscription) {
+            return response()->json(['success' => false, 'message' => 'Subscription not found.'], 404);
+        }
+
+        try {
+            $subscription->cancel();
+            
+            return response()->json([
+                'success' => true,
+                'ends_at' => $subscription->ends_at,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+    }
+
+    public function resume(Request $request, $subscriptionId)
+    {
+        $user = $request->user();
+        $subscription = $user->subscriptions()->where('id', $subscriptionId)->first();
+
+        if (!$subscription) {
+            return response()->json(['success' => false, 'message' => 'Subscription not found.'], 404);
+        }
+
+        try {
+            $subscription->resume();
+            return response()->json([
+                'success' => true,
+                'stripe_status' => $subscription->stripe_status,
+                'ends_at' => $subscription->ends_at,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
     }
 
     public function createSetupIntent(Request $request)
