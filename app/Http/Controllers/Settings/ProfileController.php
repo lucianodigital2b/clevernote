@@ -74,4 +74,25 @@ class ProfileController extends Controller
 
         return redirect('/');
     }
+
+    /**
+     * List the user's invoices.
+     */
+    public function invoices(Request $request)
+    {
+        $user = $request->user();
+        $invoices = $user->invoices()->map(function ($invoice) {
+            return [
+                'id' => $invoice->id,
+                'date' => $invoice->date()->toDateString(),
+                'total' => $invoice->total(),
+                'status' => $invoice->status,
+                'download_url' => $invoice->download(),
+            ];
+        });
+
+        return Inertia::render('settings/invoices', [
+            'invoices' => $invoices,
+        ]);
+    }
 }
