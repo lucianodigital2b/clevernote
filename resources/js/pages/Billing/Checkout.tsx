@@ -14,6 +14,7 @@ import { ArrowLeft, CreditCard, ShoppingCartIcon } from 'lucide-react';
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 const CARD_ELEMENT_OPTIONS = {
+    hidePostalCode: true,
     style: {
       base: {
         color: '#1f2937', // text-gray-800
