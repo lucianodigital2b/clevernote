@@ -7,18 +7,12 @@ use App\Http\Controllers\NoteController;
 use App\Http\Controllers\FlashcardController;
 use App\Http\Controllers\FlashcardSetController;
 use App\Http\Controllers\FolderFlashcardController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
-
-
-});
 
 Route::middleware(['auth'])->group(function () {
     // Folder routes
@@ -26,6 +20,8 @@ Route::middleware(['auth'])->group(function () {
     
     // Notes routes
     Route::resource('notes', NoteController::class);
+    
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 
      
@@ -45,6 +41,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('flashcards', FlashcardController::class);
     Route::resource('folders.flashcards', FolderFlashcardController::class);
     Route::resource('flashcard-sets', FlashcardSetController::class);
+    Route::get('flashcard-sets/{flashcardSet}/study', [FlashcardSetController::class, 'study'])
+        ->name('flashcard-sets.study');
+    Route::post('flashcard-sets/{flashcardSet}/progress', [FlashcardSetController::class, 'saveProgress'])
+        ->name('flashcard-sets.progress.store');
 
 
 });

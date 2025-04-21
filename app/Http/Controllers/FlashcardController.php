@@ -19,6 +19,7 @@ class FlashcardController extends Controller
 
         $flashcardSets = FlashcardSet::with('flashcards')
         ->where('user_id', Auth::id())
+        ->withCount('flashcards')
         ->latest()
         ->paginate(12);
 

@@ -15,11 +15,17 @@ class FlashcardSet extends Model
         'user_id',
         'name',
         'description',
+        'folder_id',
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function folder(): BelongsTo 
+    {
+        return $this->belongsTo(Folder::class);
     }
 
     public function flashcards(): HasMany

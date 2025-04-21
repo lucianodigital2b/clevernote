@@ -101,7 +101,7 @@ export function AppSidebar() {
                                     <SidebarMenuItem key={folder.id}>
                                         <SidebarMenuButton asChild>
                                             <Link 
-                                                href={`/folders/${folder.id}`} 
+                                                href={`/dashboard?folderId=${folder.id}`} 
                                                 className="flex justify-between items-center"
                                             >
                                                 <div className="flex items-center">

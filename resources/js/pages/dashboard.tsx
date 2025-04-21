@@ -30,6 +30,7 @@ import { UploadAudioModal } from '@/components/modals/upload-audio-modal';
 import { RecordAudioModal } from '@/components/modals/record-audio-modal';
 import { UploadPdfModal } from '@/components/modals/upload-pdf-modal';
 import { WebLinkModal } from '@/components/modals/web-link-modal';
+import { usePage } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -45,22 +46,24 @@ export default function Dashboard() {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const debouncedSearch = useDebounce(searchQuery, 300);
+    const { folderId } = usePage().props as { folderId?: string | number };
+    
     
     // Query for notes with pagination
     const { 
-
         data: notesData, 
         isLoading: isLoadingNotes, 
         refetch: refetchNotes,
         error: notesError 
     } = useQuery({
-        queryKey: ['notes', page, pageSize, debouncedSearch],
+        queryKey: ['notes', page, pageSize, debouncedSearch, folderId],
         queryFn: async () => {
             const response = await axios.get('/api/notes', {
                 params: {
                     page,
                     per_page: pageSize,
-                    search: debouncedSearch || undefined
+                    search: debouncedSearch || undefined,
+                    folder_id: folderId || undefined,
                 }
             });
             return response.data;

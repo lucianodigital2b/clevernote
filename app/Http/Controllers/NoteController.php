@@ -37,8 +37,9 @@ class NoteController extends Controller
      */
     public function index(Request $request)
     {
-        $filters = $request->only(['folder_id', 'search', 'tag_id']);
-        $notes = $this->noteService->getUserNotes(Auth::id(), $filters);
+
+        // dd($request->all());
+        $notes = $this->noteService->getUserNotes(Auth::id(), $request->all());
 
         if($request->wantsJson()){
             return $notes;
@@ -46,7 +47,7 @@ class NoteController extends Controller
 
         return Inertia::render('Notes/Index', [
             'notes' => $notes,
-            'filters' => $filters
+            'filters' => $request->all()
         ]);
     }
 

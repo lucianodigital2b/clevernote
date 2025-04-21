@@ -30,4 +30,21 @@ class Folder extends Model
     {
         return $this->hasMany(Flashcard::class);
     }
+
+    // Add this for subfolders/children
+    public function children(): HasMany
+    {
+        return $this->hasMany(Folder::class, 'parent_id');
+    }
+
+    // (Optional) Add this for parent folder
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Folder::class, 'parent_id');
+    }
+
+    public function flashcardSets(): HasMany
+    {
+        return $this->hasMany(FlashcardSet::class);
+    }
 }
