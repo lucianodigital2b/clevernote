@@ -11,7 +11,6 @@ class Flashcard extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
         'folder_id',
         'question',
         'answer',

@@ -41,12 +41,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('flashcards', FlashcardController::class);
     Route::resource('folders.flashcards', FolderFlashcardController::class);
     Route::resource('flashcard-sets', FlashcardSetController::class);
-    Route::get('flashcard-sets/{flashcardSet}/study', [FlashcardSetController::class, 'study'])
-        ->name('flashcard-sets.study');
-    Route::post('flashcard-sets/{flashcardSet}/progress', [FlashcardSetController::class, 'saveProgress'])
-        ->name('flashcard-sets.progress.store');
-
-
+    Route::get('flashcard-sets/{flashcardSet}/study', [FlashcardSetController::class, 'study'])->name('flashcard-sets.study');
+    Route::post('flashcard-sets/{flashcardSet}/progress', [FlashcardSetController::class, 'saveProgress'])->name('flashcard-sets.progress.store');
+    Route::post('notes/{note}/generate-flashcards', [NoteController::class, 'generateFlashcards'])->name('notes.generate-flashcards');
+    
 });
 
 

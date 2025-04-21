@@ -31,6 +31,7 @@ import StarterKit from '@tiptap/starter-kit';
 import TiptapToolbar from '@/components/tiptaptoolbar';
 // import { SectionBlock } from '@/extensions/SectionBlock';
 import DragHandle  from '@/extensions/DragHandle';
+import axios from 'axios';
 
 export default function Edit({ note }: { note: Note }) {
 
@@ -62,9 +63,22 @@ export default function Edit({ note }: { note: Note }) {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [content, setContent] = useState(note.content);
 
+    // Add this handler
+    const handleCreateFlashcards = async () => {
+        try {
+            const response = await axios.post(`/notes/${note.id}/generate-flashcards`);
+            if (response.data && response.data.flashcardSetId) {
+                // Redirect to the flashcard set page or show a success message
+                router.visit(`/flashcard-sets/${response.data.flashcardSetId}`);
+            }
+        } catch (error) {
+            // Handle error (show toast, etc.)
+            toastConfig.error("Failed to generate flashcards");
+        }
+    };
+
     const actions = [
-        { icon: '🎯', label: 'Create quiz', action: () => console.log('Create quiz') },
-        { icon: '📝', label: 'Create flashcards', action: () => console.log('Create flashcards') },
+        { icon: '📝', label: 'Create flashcards', action: handleCreateFlashcards },
         // { icon: '💬', label: 'Chat with note', action: () => setIsChatOpen(true) },
         // { icon: '🌐', label: 'Translate', action: () => console.log('Translate') },
         // { icon: '🎥', label: 'Create video', action: () => console.log('Create video') },

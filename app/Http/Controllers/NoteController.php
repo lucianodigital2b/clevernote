@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Services\{DeepSeekService, YouTubeAudioExtractor};
 use Illuminate\Support\Facades\Log;
+use App\Models\FlashcardSet;
+use App\Models\Flashcard;
 
 class NoteController extends Controller
 {
@@ -37,8 +39,6 @@ class NoteController extends Controller
      */
     public function index(Request $request)
     {
-
-        // dd($request->all());
         $notes = $this->noteService->getUserNotes(Auth::id(), $request->all());
 
         if($request->wantsJson()){
@@ -137,7 +137,7 @@ class NoteController extends Controller
      */
     public function show(Note $note)
     {
-        // $this->authorize('view', $note);
+        $this->authorize('view', $note);
 
         return Inertia::render('Notes/Show', [
             'note' => $note->load(['tags', 'folder'])
@@ -149,7 +149,7 @@ class NoteController extends Controller
      */
     public function edit(Note $note)
     {
-        // $this->authorize('update', $note);
+        $this->authorize('update', $note);
 
         return Inertia::render('notes/edit', [
             'note' => $note->load(['tags', 'folder']),
@@ -163,7 +163,7 @@ class NoteController extends Controller
      */
     public function update(UpdateNoteRequest $request, Note $note)
     {
-        // $this->authorize('update', $note);
+        $this->authorize('update', $note);
 
         // $studyNote = $this->deepseekService->createStudyNote($note->content);
         // $validated['content'] = $studyNote['study_note'];
@@ -186,7 +186,7 @@ class NoteController extends Controller
      */
     public function destroy(Note $note)
     {
-        // $this->authorize('delete', $note);
+        $this->authorize('delete', $note);
 
         $this->noteService->deleteNote($note);
 
@@ -206,5 +206,59 @@ class NoteController extends Controller
         return back()->with('success', 
             $note->is_pinned ? 'Note pinned successfully.' : 'Note unpinned successfully.'
         );
+    }
+
+    public function generateFlashcards(Request $request, Note $note)
+    {
+        $this->authorize('update', $note);
+
+        // 1. Create a new FlashcardSet
+        $flashcardSet = FlashcardSet::create([
+            'user_id' => $note->user_id,
+            'name' => $note->title . ' Flashcards',
+            'folder_id' => $note->folder_id ?? null,
+        ]);
+
+        // 2. Generate flashcards using DeepSeek AI
+        try {
+            $flashcards = $this->deepseekService->generateFlashcardsFromNote($note->content);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate flashcards: ' . $e->getMessage(),
+            ], 500);
+        }
+
+        // 3. Save flashcards
+        foreach ($flashcards as $card) {
+            Flashcard::create([
+                'folder_id' => $note->folder_id ?? null,
+                'flashcard_set_id' => $flashcardSet->id,
+                'question' => $card['question'],
+                'answer' => $card['answer'],
+            ]);
+        }
+
+        $flashcardSet->note_id = $note->id;
+        $flashcardSet->save();
+
+        return response()->json([
+            'success' => true,
+            'flashcardSetId' => $flashcardSet->id,
+        ]);
+    }
+    
+    // Helper method (replace with your AI integration)
+    protected function generateFlashcardsFromContent($content)
+    {
+        // Call your AI service here. For now, return dummy data.
+        $cards = [];
+        for ($i = 1; $i <= rand(10, 15); $i++) {
+            $cards[] = [
+                'question' => "Sample Question $i",
+                'answer' => "Sample Answer $i",
+            ];
+        }
+        return $cards;
     }
 }
