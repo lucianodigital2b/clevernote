@@ -1,27 +1,10 @@
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { Folder, Note, type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Search, FileText, Link as LinkIcon, Upload, Mic, File, Folder as FolderIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -31,6 +14,8 @@ import { RecordAudioModal } from '@/components/modals/record-audio-modal';
 import { UploadPdfModal } from '@/components/modals/upload-pdf-modal';
 import { WebLinkModal } from '@/components/modals/web-link-modal';
 import { usePage } from '@inertiajs/react';
+import { UpgradeModal } from '@/components/upgrade-modal';
+import { useRequireSubscription } from '@/hooks/useRequireSubscription';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -110,6 +95,19 @@ export default function Dashboard() {
         }
     };
 
+    const { requireSubscription, upgradeModalOpen, setUpgradeModalOpen } = useRequireSubscription();
+    
+    // Modify the new note section handler to check subscription
+    const handleNewNote = async (action: () => void) => {
+        if (notes.length >= 3) {
+            const canProceed = await requireSubscription();
+            if (!canProceed) {
+                return;
+            }
+        }
+        action();
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
@@ -122,7 +120,7 @@ export default function Dashboard() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div 
                             className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 hover:shadow-md transition-shadow cursor-pointer"
-                            onClick={() => setIsUploadAudioModalOpen(true)}
+                            onClick={() => handleNewNote(() => setIsUploadAudioModalOpen(true))}
                         >
                             <div className="flex items-center gap-3">
                                 <div className="bg-neutral-100 dark:bg-neutral-700 p-2 rounded-full">
@@ -134,7 +132,7 @@ export default function Dashboard() {
 
                         <div 
                             className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 hover:shadow-md transition-shadow cursor-pointer"
-                            onClick={() => setIsRecordModalOpen(true)}
+                            onClick={() => handleNewNote(() => setIsRecordModalOpen(true))}
                         >
                             <div className="flex items-center gap-3">
                                 <div className="bg-red-100 dark:bg-red-900/30 p-2 rounded-full">
@@ -146,7 +144,7 @@ export default function Dashboard() {
                         
                         <div 
                             className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 hover:shadow-md transition-shadow cursor-pointer"
-                            onClick={() => setIsWebLinkModalOpen(true)}
+                            onClick={() => handleNewNote(() => setIsWebLinkModalOpen(true))}
                         >
                             <div className="flex items-center gap-3">
                                 <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-full">
@@ -161,7 +159,7 @@ export default function Dashboard() {
                         
                         <div 
                             className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 hover:shadow-md transition-shadow cursor-pointer"
-                            onClick={() => setIsPdfModalOpen(true)}
+                            onClick={() => handleNewNote(() => setIsPdfModalOpen(true))}
                         >
                             <div className="flex items-center gap-3">
                                 <div className="bg-neutral-100 dark:bg-neutral-700 p-2 rounded-full">
@@ -320,8 +318,14 @@ export default function Dashboard() {
                 }}
                 folders={folders}
             />
-            
-            {/* ... rest of the component ... */}
+
+            {/* Add the UpgradeModal */}
+            <UpgradeModal 
+                open={upgradeModalOpen} 
+                onOpenChange={setUpgradeModalOpen}
+            />
         </AppLayout>
     );
 }
+
+

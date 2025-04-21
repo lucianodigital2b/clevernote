@@ -56,6 +56,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/billing/cancel', [SubscriptionController::class, 'cancel'])->name('billing.cancel');
     Route::get('/checkout', fn () => Inertia::render('Billing/Checkout'))->middleware('auth');
 
+
+
+
 });
 
 

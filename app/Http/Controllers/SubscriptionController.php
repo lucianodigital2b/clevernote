@@ -113,4 +113,30 @@ class SubscriptionController extends Controller
             ], 422);
         }
     }
+
+    /**
+     * Check if the authenticated user has an active subscription.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkSubscription(Request $request)
+    {
+        $user = $request->user();
+        
+        $hasActiveSubscription = $user->subscriptions()
+            ->where(function ($query) {
+                $query->where('stripe_status', 'active')
+                    ->orWhere('stripe_status', 'trialing');
+            })
+            ->where(function ($query) {
+                $query->whereNull('ends_at')
+                    ->orWhere('ends_at', '>', now());
+            })
+            ->exists();
+
+        return response()->json([
+            'hasActiveSubscription' => false
+        ]);
+    }
 }

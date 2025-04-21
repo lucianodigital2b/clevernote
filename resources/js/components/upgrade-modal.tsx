@@ -25,9 +25,9 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
 
     // Plan details
     const plans: Plan[] = [
-        { id: 'weekly', name: 'Weekly', price: '9.99', period: 'week', popular: false },
-        { id: 'monthly', name: 'Monthly', price: '17.99', period: 'month', popular: true },
-        { id: 'yearly', name: 'Yearly', price: '40', period: 'yearly', billed: 'yearly', popular: false, savings: '28%' }
+        // { id: 'weekly', name: 'Weekly', price: '9.99', period: 'week', popular: false },
+        { id: 'monthly', name: 'Monthly', price: '16.99', period: 'month', popular: true },
+        { id: 'yearly', name: 'Yearly', price: '7.57', period: 'month', billed: 'yearly', popular: false, savings: '28%' }
     ];
 
     // Features list
@@ -50,7 +50,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-3xl p-0 overflow-hidden bg-gradient-to-br from-white to-blue-50 dark:from-gray-900 dark:to-gray-800">
+            <DialogContent className="sm:max-w-3xl p-0 overflow-hidden bg-gradient-to-br from-white to-purple-50 dark:from-gray-900 dark:to-gray-800">
                 <DialogHeader className="p-6 pb-0">
                     <DialogTitle className="text-center text-2xl font-bold flex items-center justify-center gap-2">
                         <SparklesIcon className="h-6 w-6 text-yellow-400 animate-pulse" />
@@ -75,13 +75,13 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                                     transition={{ duration: 0.3, delay: plans.indexOf(plan) * 0.1 }}
                                     className={`flex-1 rounded-xl p-5 border-2 cursor-pointer transition-all duration-300 ${
                                         selectedPlan === plan.id 
-                                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-lg scale-[1.02]' 
-                                            : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700'
+                                            ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 shadow-lg scale-[1.02]' 
+                                            : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
                                     }`}
                                     onClick={() => setSelectedPlan(plan.id)}
                                 >
                                     {plan.popular && (
-                                        <div className="bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full inline-block mb-2">
+                                        <div className="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full inline-block mb-2">
                                             MOST POPULAR
                                         </div>
                                     )}
@@ -104,7 +104,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                                         <motion.div 
                                             initial={{ opacity: 0, scale: 0 }}
                                             animate={{ opacity: 1, scale: 1 }}
-                                            className="absolute top-3 right-3 bg-blue-500 rounded-full p-1"
+                                            className="absolute top-3 right-3 bg-indigo-500 rounded-full p-1"
                                         >
                                             <CheckIcon className="h-4 w-4 text-white" />
                                         </motion.div>
@@ -136,7 +136,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                     {/* Action Buttons */}
                     <div className="flex flex-col gap-3">
                         <Button 
-                            className="w-full py-6 text-lg font-bold bg-blue-600 hover:bg-blue-700 transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
+                            className="w-full py-6 text-lg font-bold bg-indigo-600 hover:bg-indigo-700 transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
                             onClick={handleUpgrade}
                         >
                             Upgrade Now
