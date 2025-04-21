@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/button';
+import { router } from '@inertiajs/react';
 
 type Plan = {
     id: string;
@@ -43,9 +44,8 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
     ];
 
     const handleUpgrade = () => {
-        // Handle the upgrade logic here
-        console.log(`Upgrading to ${selectedPlan} plan`);
-        onClose();
+        // Redirect to the checkout page, optionally with the selected plan
+        router.visit(`/checkout?plan=${selectedPlan}`);
     };
 
     return (

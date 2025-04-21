@@ -8,6 +8,7 @@ use App\Http\Controllers\FlashcardController;
 use App\Http\Controllers\FlashcardSetController;
 use App\Http\Controllers\FolderFlashcardController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SubscriptionController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -45,6 +46,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('flashcard-sets/{flashcardSet}/progress', [FlashcardSetController::class, 'saveProgress'])->name('flashcard-sets.progress.store');
     Route::post('notes/{note}/generate-flashcards', [NoteController::class, 'generateFlashcards'])->name('notes.generate-flashcards');
     
+
+
+    Route::post('/subscribe', [SubscriptionController::class, 'subscribe'])->name('billing.subscribe');
+    Route::get('/setup-intent', [SubscriptionController::class, 'createSetupIntent'])->name('billing.setup-intent');
+    Route::get('/billing/success', [SubscriptionController::class, 'success'])->name('billing.success');
+    Route::get('/billing/cancel', [SubscriptionController::class, 'cancel'])->name('billing.cancel');
+    Route::get('/checkout', fn () => Inertia::render('Billing/Checkout'))->middleware('auth');
+
 });
 
 
