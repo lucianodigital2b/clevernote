@@ -13,6 +13,7 @@ class CreateFlashcardSetsTable extends Migration
             $table->string('name');
             $table->string('description')->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('folder_id')->nullable()->constrained()->onDelete('set null');
             $table->timestamps();
         });
     }

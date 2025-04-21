@@ -39,6 +39,18 @@ class FlashcardSetController extends Controller
         $flashcardSet->load('flashcards');
 
         return Inertia::render('FlashcardSets/Show', [
+            'flashcardSet' => $flashcardSet,
+            'flashcards' => $flashcardSet->flashcards
+        ]);
+    }
+
+    public function edit(FlashcardSet $flashcardSet)
+    {
+        $this->authorize('update', $flashcardSet);
+
+        $flashcardSet->load('flashcards');
+
+        return Inertia::render('FlashcardSets/Edit', [
             'flashcardSet' => $flashcardSet
         ]);
     }
@@ -50,9 +62,31 @@ class FlashcardSetController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
+            'flashcards' => 'required|array',
+            'flashcards.*.question' => 'required|string|max:255',
+            'flashcards.*.answer' => 'required|string|max:255',
         ]);
 
-        $flashcardSet->update($validated);
+        // Update the set
+        $flashcardSet->update([
+            'name' => $validated['name'],
+            'description' => $validated['description'],
+        ]);
+
+        // Update flashcards
+        $existingIds = [];
+        foreach ($validated['flashcards'] as $flashcardData) {
+            $flashcard = $flashcardSet->flashcards()->updateOrCreate(
+                ['id' => $flashcardData['id'] ?? null],
+                $flashcardData
+            );
+            $existingIds[] = $flashcard->id;
+        }
+
+        // Delete removed flashcards
+        $flashcardSet->flashcards()
+            ->whereNotIn('id', $existingIds)
+            ->delete();
 
         return redirect()->back()->with('success', 'Flashcard set updated successfully.');
     }
@@ -69,5 +103,39 @@ class FlashcardSetController extends Controller
     
         return redirect()->route('flashcard-sets.index')
             ->with('success', 'Flashcard set and its flashcards deleted successfully.');
+    }
+
+    public function study(FlashcardSet $flashcardSet)
+    {
+        $this->authorize('view', $flashcardSet);
+    
+        $flashcardSet->load('flashcards');
+    
+        return Inertia::render('FlashcardSets/Study', [
+            'flashcardSet' => $flashcardSet
+        ]);
+    }
+
+    public function saveProgress(Request $request, FlashcardSet $flashcardSet)
+    {
+   
+        $validated = $request->validate([
+            'flashcard_id' => 'required|exists:flashcards,id',
+            'interval' => 'required|integer',
+            'repetition' => 'required|integer',
+            'efactor' => 'required|numeric',
+            'next_review' => 'required|date'
+        ]);
+
+
+        $flashcardSet->flashcards()
+            ->find($validated['flashcard_id'])
+            ->userProgress()
+            ->updateOrCreate(
+                ['user_id' => Auth::id()],
+                $validated
+            );
+
+        return response()->json(['success' => true]);
     }
 }

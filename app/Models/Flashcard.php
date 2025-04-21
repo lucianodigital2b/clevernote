@@ -22,6 +22,7 @@ class Flashcard extends Model
 
     protected $casts = [
         'difficulty' => 'string', // Or use an Enum class if preferred
+        'next_review' => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -37,5 +38,10 @@ class Flashcard extends Model
     public function flashcardSet(): BelongsTo
     {
         return $this->belongsTo(FlashcardSet::class);
+    }
+
+    public function userProgress()
+    {
+        return $this->hasMany(FlashcardProgress::class);
     }
 }

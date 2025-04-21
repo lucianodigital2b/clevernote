@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('flashcards', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('folder_id')->nullable()->constrained()->onDelete('cascade');
             $table->text('question');
             $table->text('answer');
