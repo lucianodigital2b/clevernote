@@ -32,6 +32,7 @@ export default function Dashboard() {
     const [pageSize, setPageSize] = useState(10);
     const debouncedSearch = useDebounce(searchQuery, 300);
     const { folderId } = usePage().props as { folderId?: string | number };
+    const [isModalOpen, setIsModalOpen] = useState(false);
     
     
     // Query for notes with pagination
@@ -95,13 +96,15 @@ export default function Dashboard() {
         }
     };
 
-    const { requireSubscription, upgradeModalOpen, setUpgradeModalOpen } = useRequireSubscription();
+    const { requireSubscription } = useRequireSubscription();
     
     // Modify the new note section handler to check subscription
     const handleNewNote = async (action: () => void) => {
         if (notes.length >= 3) {
             const canProceed = await requireSubscription();
+            
             if (!canProceed) {
+                setIsModalOpen(true)
                 return;
             }
         }
@@ -279,7 +282,10 @@ export default function Dashboard() {
                 
                 {/* Upgrade Banner */}
                 <div className="fixed bottom-6 right-6">
-                    <Button className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-full flex items-center gap-2">
+                    <Button 
+                        className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-full flex items-center gap-2"
+                        onClick={() => setIsModalOpen(true)}
+                    >
                         Unlimited notes <span className="text-xs">⚡</span>
                     </Button>
                 </div>
@@ -319,10 +325,9 @@ export default function Dashboard() {
                 folders={folders}
             />
 
-            {/* Add the UpgradeModal */}
             <UpgradeModal 
-                open={upgradeModalOpen} 
-                onOpenChange={setUpgradeModalOpen}
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
             />
         </AppLayout>
     );
