@@ -33,7 +33,8 @@ export default function Dashboard() {
     const debouncedSearch = useDebounce(searchQuery, 300);
     const { folderId } = usePage().props as { folderId?: string | number };
     const [isModalOpen, setIsModalOpen] = useState(false);
-    
+    const { auth } = usePage().props;
+    const user = (auth as any).user;
     
     // Query for notes with pagination
     const { 
@@ -281,14 +282,16 @@ export default function Dashboard() {
                 </section>
                 
                 {/* Upgrade Banner */}
-                <div className="fixed bottom-6 right-6">
-                    <Button 
-                        className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-full flex items-center gap-2"
-                        onClick={() => setIsModalOpen(true)}
-                    >
-                        Unlimited notes <span className="text-xs">⚡</span>
-                    </Button>
-                </div>
+                {user.activeSubscripions?.length == 0 && (
+                    <div className="fixed bottom-6 right-6">
+                        <Button 
+                            className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-full flex items-center gap-2"
+                            onClick={() => setIsModalOpen(true)}
+                        >
+                            Unlimited notes <span className="text-xs">⚡</span>
+                        </Button>
+                    </div>
+                )}
             </div>
 
             {/* Upload Audio Modal */}

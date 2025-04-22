@@ -15,6 +15,8 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, Billable, HasApiTokens;
 
+    protected $with = ['subscriptions', 'activeSubscriptions'];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -53,4 +55,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Flashcard::class);
     }
+
+    public function activeSubscriptions()
+    {
+        return $this->hasMany(\Laravel\Cashier\Subscription::class)
+            ->whereNull('ends_at') // not cancelled
+            ->where('stripe_status', 'active'); // still billed
+    }
+    
 }

@@ -4,7 +4,7 @@ import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarGroupContent } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
-import { Link, router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, ChevronRight, Plus, Layers } from 'lucide-react';
 import AppLogo from './app-logo';
 import { CreateFolderModal } from '@/components/create-folder-modal';
@@ -35,6 +35,10 @@ const footerNavItems: NavItem[] = [
 
 export function AppSidebar() {
     const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
+    
+    const { auth } = usePage().props;
+    const user = (auth as any).user;
+
     
     // Replace useEffect with useQuery
     const { data, isLoading, error } = useQuery({
@@ -122,11 +126,12 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
+                {user.activeSubscripions?.length == 0 && (
                 <NavFooter 
                     items={footerNavItems} 
                     className="mt-auto" 
                     onItemClick={handleNavItemClick}
-                />
+                />)}
                 <NavUser />
             </SidebarFooter>
 
