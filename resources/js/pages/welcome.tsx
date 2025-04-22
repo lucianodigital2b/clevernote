@@ -64,7 +64,7 @@ const Welcome = () => {
   }, []);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white">
       <Navbar />
       <Hero />
       <section id="features"><Features /></section>

@@ -282,7 +282,7 @@ export default function Dashboard() {
                 </section>
                 
                 {/* Upgrade Banner */}
-                {user.activeSubscripions?.length == 0 && (
+                {user.active_subscriptions?.length == 0 && (
                     <div className="fixed bottom-6 right-6">
                         <Button 
                             className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-full flex items-center gap-2"

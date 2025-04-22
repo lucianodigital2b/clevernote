@@ -45,7 +45,7 @@ const Hero = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
-              <Button className="button-secondary" variant="outline" asChild>
+              <Button className="" variant="outline" asChild>
                   <a href="/login">Start for free
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </a>

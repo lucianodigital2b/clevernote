@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { loadStripe } from '@stripe/stripe-js';
 import {
     Elements,
@@ -31,16 +31,38 @@ const CARD_ELEMENT_OPTIONS = {
   };
 
 
+  const plans = {
+      monthly: {
+        id: 'price_1RGgabCUBbBYXpQTdE8BtNm0',
+        price: 16.99
+      },
+      yearly: {
+        id: 'price_1RGgbDCUBbBYXpQTsrR61FU7',
+        price: 90.88
+      }
+  };
+
+
 function CheckoutForm() {
     const stripe = useStripe();
     const elements = useElements();
+    
+    // Use URLSearchParams instead of Ziggy
+    const searchParams = new URLSearchParams(window.location.search);
+    const billing = searchParams.get('plan') || 'yearly';
 
     const [setupIntent, setSetupIntent] = useState<any>(null);
     const [name, setName] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [planId, setPlanId] = useState('price_1RGLdqCUBbBYXpQThM8Ieamf'); // Replace with your Stripe Price ID
+    
+    // Set planId and price based on URL parameters
+    const selectedPlan = plans[billing as 'monthly' | 'yearly'];
+    const [planId, setPlanId] = useState(selectedPlan?.id || plans.yearly.id);
+    const currentPrice = selectedPlan?.price || plans.yearly.price;
 
+    console.log(selectedPlan);
+    
     useEffect(() => {
         fetch('/setup-intent', { credentials: 'include' })
             .then(res => res.json())
@@ -113,7 +135,7 @@ function CheckoutForm() {
             setLoading(false);
         }
     };
-
+    
     return (
        
 
@@ -139,12 +161,12 @@ function CheckoutForm() {
         </div>
         <div className="flex justify-between text-gray-700 mt-4">
           <span>Price</span>
-          <span>$90.88</span>
+          <span>${currentPrice}</span>
         </div>
         <div className="border-t border-purple-200 my-3 opacity-50" />
         <div className="flex justify-between font-bold text-base">
           <span>Total</span>
-          <span className="text-[oklch(0.511_0.262_276.966)]">$90.88</span>
+          <span className="text-[oklch(0.511_0.262_276.966)]">${currentPrice}</span>
         </div>
       </div>
     </div>
