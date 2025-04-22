@@ -45,14 +45,14 @@ export function NavFooter({
                     </div>
                     <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
                         <div 
-                            className="bg-blue-500 h-2 rounded-full" 
+                            className="bg-indigo-500 h-2 rounded-full" 
                             style={{ width: `${100 - progressPercentage}%` }}
                         ></div>
                     </div>
                     <div className="mt-2 text-center">
                         <button 
                             onClick={() => setIsModalOpen(true)}
-                            className="text-xs text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                            className="text-xs text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 cursor-pointer"
                         >
                             Upgrade for unlimited notes
                         </button>
@@ -69,8 +69,8 @@ export function NavFooter({
                             className="flex items-center justify-center w-full p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md transition-colors"
                         >
                             <div className="relative">
-                                <SparklesIcon className="h-5 w-5 text-blue-500" />
-                                <div className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                                <SparklesIcon className="h-5 w-5 text-indigo-500" />
+                                <div className="absolute -top-1 -right-1 bg-indigo-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                                     {freeNotesLeft}
                                 </div>
                             </div>
