@@ -1,35 +1,41 @@
 
 import React, { useState } from "react";
-import { Check, X } from "lucide-react";
+import { Check, CheckCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { router } from "@inertiajs/react";
 
 const pricingPlans = [
-  {
-    name: "Free",
-    price: "$0",
-    description: "Perfect for casual note-takers",
-    features: [
-      { included: true, text: "3 notes with AI" },
-      { included: true, text: "Basic text formatting" },
-      // { included: true, text: "Mobile & desktop access" },
-      { included: false, text: "Spaced repetition" },
-      // { included: false, text: "Advanced collaboration" },
-      // { included: false, text: "Priority support" },
-    ],
-    cta: "Get Started",
-    popular: false,
-  },
+  // {
+  //   name: "Free",
+  //   price: "$0",
+  //   description: "Perfect for casual note-takers",
+  //   features: [
+  //     { included: true, text: "3 notes with AI" },
+  //     { included: true, text: "Basic text formatting" },
+  //     // { included: true, text: "Mobile & desktop access" },
+  //     { included: false, text: "Spaced repetition" },
+  //     // { included: false, text: "Advanced collaboration" },
+  //     // { included: false, text: "Priority support" },
+  //   ],
+  //   cta: "Get Started",
+  //   popular: false,
+  // },
   {
     name: "Student",
-    price: "$4.99",
+    monthlyPrice: "$16.99",
+    annualPrice: "$90.88",
+    billedMonthly: "$16.99",
+    billedAnnually: "$7.57",
     description: "Ideal for individual students",
     features: [
       { included: true, text: "Unlimited rich notes" },
       { included: true, text: "Advanced formatting" },
+      { included: true, text: "Flashcards" },
+      { included: true, text: "Quizzes" },
       { included: true, text: "Unlimited AI summaries" },
       { included: true, text: "Spaced repetition" },
-      { included: false, text: "Advanced collaboration" },
-      { included: false, text: "Priority support" },
+      { included: true, text: "Advanced collaboration" },
+      { included: true, text: "Priority support" },
     ],
     cta: "Start Trial",
     popular: true,
@@ -53,7 +59,7 @@ const pricingPlans = [
 ];
 
 const Pricing = () => {
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("annual");
 
   return (
     <section id="pricing" className="py-20 bg-white">
@@ -96,70 +102,83 @@ const Pricing = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {pricingPlans.map((plan, index) => (
-            <div
-              key={index}
-              className={`rounded-2xl overflow-hidden transition-all duration-300 ${
-                plan.popular
-                  ? "transform md:-translate-y-4 border-2 border-brand-500 shadow-lg"
-                  : "border border-gray-200 shadow-card"
-              }`}
-            >
-              {plan.popular && (
-                <div className="bg-brand-500 text-white text-center py-2 text-sm font-medium">
-                  Most Popular
-                </div>
-              )}
-              <div className="p-6 md:p-8 bg-white">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                <p className="text-gray-600 mb-4">{plan.description}</p>
-                <div className="flex items-baseline mb-6">
-                  <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
-                  <span className="text-gray-500 ml-2">
-                    /{billingCycle === "monthly" ? "month" : "year"}
-                  </span>
-                </div>
+          <div className="col-start-2">
+            {pricingPlans.map((plan, index) => (
+              <div
+                key={index}
+                className={`rounded-2xl overflow-hidden transition-all duration-300 ${
+                  plan.popular
+                    ? "transform md:-translate-y-4 border-2 border-brand-500 shadow-lg"
+                    : "border border-gray-200 shadow-card"
+                }`}
+              >
+                {plan.popular && (
+                  <div className="bg-brand-500 text-white text-center py-2 text-sm font-medium">
+                    Most Popular
+                  </div>
+                )}
+                <div className="p-6 md:p-8 bg-white">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                  <p className="text-gray-600 mb-4">{plan.description}</p>
+                  <div className="flex items-baseline mb-6">
+                    {billingCycle === "annual" ? (
+                      <>
+                        <span className="text-4xl font-bold text-gray-900">{plan.billedAnnually}</span>
+                        <span className="text-gray-500 ml-2">/mo</span>
+                        <span className="text-sm text-gray-500 ml-2">
+                          (billed {plan.annualPrice}/year)
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-4xl font-bold text-gray-900">{plan.monthlyPrice}</span>
+                        <span className="text-gray-500 ml-2">/month</span>
+                      </>
+                    )}
+                  </div>
 
-                <Button
-                  className={`w-full mb-6 ${
-                    plan.popular
-                      ? "bg-brand-500 hover:bg-brand-600 text-white"
-                      : "bg-white border border-gray-200 text-gray-800 hover:bg-gray-50"
-                  }`}
-                >
-                  {plan.cta}
-                </Button>
+                  <Button
+                    className={`w-full mb-6 ${
+                      plan.popular
+                        ? "bg-indigo-600 hover:bg-indigo-700 text-white"
+                        : "bg-white border border-gray-200 text-gray-800 hover:bg-gray-50"
+                    }`}
+                    onClick={() => router.visit('/register')}
+                  >
+                    {plan.cta}
+                  </Button>
 
-                <ul className="space-y-3">
-                  {plan.features.map((feature, featureIndex) => (
-                    <li
-                      key={featureIndex}
-                      className="flex items-start"
-                    >
-                      {feature.included ? (
-                        <Check className="w-5 h-5 text-sage-500 mt-0.5 mr-3 flex-shrink-0" />
-                      ) : (
-                        <X className="w-5 h-5 text-gray-300 mt-0.5 mr-3 flex-shrink-0" />
-                      )}
-                      <span
-                        className={
-                          feature.included ? "text-gray-700" : "text-gray-400"
-                        }
+                  <ul className="space-y-3">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li
+                        key={featureIndex}
+                        className="flex items-center"
                       >
-                        {feature.text}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                        {feature.included ? (
+                          <Check className="w-5 h-5 text-sage-500 mt-0.5 mr-3 flex-shrink-0" />
+                        ) : (
+                          <X className="w-5 h-5 text-gray-300 mt-0.5 mr-3 flex-shrink-0" />
+                        )}
+                          <CheckCircle className="w-4 h-4 text-indigo-500 mr-2" />
+
+                        <span
+                          className={
+                            feature.included ? "text-gray-700" : "text-gray-400"
+                          }
+                        >
+                          {feature.text}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         <div className="text-center mt-10 text-gray-600 max-w-xl mx-auto">
           <p>
-            All plans include a 3-day free trial.
-            <br />
             Need a custom plan for your team or organization?{" "}
             <a href="#" className="text-brand-600 underline hover:text-brand-700">
               Contact us
