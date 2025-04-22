@@ -36,7 +36,7 @@ import {
     Dialog,
     DialogContent,
 } from "@/components/ui/dialog";
-
+import { MathExtension } from "@aarkue/tiptap-math-extension";
 export default function Edit({ note }: { note: Note }) {
 
     const { errors } = usePage().props;
@@ -96,7 +96,7 @@ export default function Edit({ note }: { note: Note }) {
 
     
     const editor = useEditor({
-        extensions: [StarterKit, DragHandle],
+        extensions: [StarterKit, DragHandle, MathExtension.configure({ evaluation: true, katexOptions: { macros: { "\\B": "\\mathbb{B}" } }, delimiters: "dollar" }),],
         content: note.content,
         onUpdate: ({ editor }) => {
             setContent(editor.getHTML());

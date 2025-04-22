@@ -136,7 +136,7 @@ class SubscriptionController extends Controller
             ->exists();
 
         return response()->json([
-            'hasActiveSubscription' => false
+            'hasActiveSubscription' => $hasActiveSubscription
         ]);
     }
 }
