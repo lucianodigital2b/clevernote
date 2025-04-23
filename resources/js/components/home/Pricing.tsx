@@ -22,10 +22,10 @@ const pricingPlans = [
   // },
   {
     name: "Student",
-    monthlyPrice: "$16.99",
-    annualPrice: "$90.88",
-    billedMonthly: "$16.99",
-    billedAnnually: "$7.57",
+    monthlyPrice: "$6.99",
+    annualPrice: "$41.99",
+    billedMonthly: "$6.99",
+    billedAnnually: "$3.50",
     description: "Ideal for individual students",
     features: [
       { included: true, text: "Unlimited rich notes" },

@@ -26,8 +26,8 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
     // Plan details
     const plans: Plan[] = [
         // { id: 'weekly', name: 'Weekly', price: '9.99', period: 'week', popular: false },
-        { id: 'monthly', name: 'Monthly', price: '16.99', period: 'month', popular: true },
-        { id: 'yearly', name: 'Yearly', price: '7.57', period: 'month', billed: 'yearly', popular: false, savings: '28%' }
+        { id: 'monthly', name: 'Monthly', price: '6.99', period: 'month', popular: true },
+        { id: 'yearly', name: 'Yearly', price: '3.50', period: 'month', billed: 'yearly', popular: false, savings: '50%' }
     ];
 
     // Features list
