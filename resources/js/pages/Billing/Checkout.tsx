@@ -34,11 +34,11 @@ const CARD_ELEMENT_OPTIONS = {
   const plans = {
       monthly: {
         id: 'price_1RGgabCUBbBYXpQTdE8BtNm0',
-        price: 16.99
+        price: 6.99
       },
       yearly: {
         id: 'price_1RGgbDCUBbBYXpQTsrR61FU7',
-        price: 90.88
+        price: 41.99
       }
   };
 
