@@ -5,7 +5,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarGroupContent } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, ChevronRight, Plus, Layers, MessageSquare } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, ChevronRight, Plus, Layers, MessageSquare, BrainCircuit, Headphones, GraduationCap } from 'lucide-react';
 import AppLogo from './app-logo';
 import { CreateFolderModal } from '@/components/create-folder-modal';
 import axios from 'axios';
@@ -21,6 +21,24 @@ const mainNavItems: NavItem[] = [
         title: 'Flashcards',
         url: '/flashcards',
         icon: Layers, 
+    },
+    {
+        title: 'Quizzes',
+        url: '#',
+        icon: GraduationCap,
+        tooltip: 'Coming soon',
+    },
+    {
+        title: 'Podcast',
+        url: '#',
+        icon: Headphones,
+        tooltip: 'Coming soon',
+    },
+    {
+        title: 'BrainRot',
+        url: '#',
+        icon: BrainCircuit,
+        tooltip: 'Coming soon',
     },
 ];
 

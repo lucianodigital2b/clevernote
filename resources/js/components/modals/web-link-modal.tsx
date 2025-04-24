@@ -20,7 +20,7 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
     const { createNote, isUploading } = useCreateNote();
 
     const handleSubmit = async () => {
-        if (!webLink || !selectedFolder) return;
+        if (!webLink) return;
 
         const success = await createNote('weblink', {
             folder_id: selectedFolder,
