@@ -101,9 +101,6 @@ export default function Dashboard() {
     
     // Modify the new note section handler to check subscription
     const handleNewNote = async (action: () => void) => {
-        action();
-
-        return;
         if (notes.length >= 3) {
             const canProceed = await requireSubscription();
             
