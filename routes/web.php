@@ -9,6 +9,8 @@ use App\Http\Controllers\FlashcardSetController;
 use App\Http\Controllers\FolderFlashcardController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\QuizController;
+use App\Http\Controllers\QuizSharingController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -47,8 +49,23 @@ Route::middleware(['auth'])->group(function () {
     Route::get('flashcard-sets/{flashcardSet}/study', [FlashcardSetController::class, 'study'])->name('flashcard-sets.study');
     Route::post('flashcard-sets/{flashcardSet}/progress', [FlashcardSetController::class, 'saveProgress'])->name('flashcard-sets.progress.store');
     Route::post('notes/{note}/generate-flashcards', [NoteController::class, 'generateFlashcards'])->name('notes.generate-flashcards');
-    
 
+    // Quiz routes
+    Route::prefix('quizzes')->group(function () {
+        Route::get('/', [QuizController::class, 'index'])->name('quizzes.index');
+        Route::post('/', [QuizController::class, 'store'])->name('quizzes.store');
+        Route::get('/{quiz}', [QuizController::class, 'show'])->name('quizzes.show');
+        Route::put('/{quiz}', [QuizController::class, 'update'])->name('quizzes.update');
+        Route::delete('/{quiz}', [QuizController::class, 'destroy'])->name('quizzes.destroy');
+        Route::post('/{quiz}/attempt', [QuizController::class, 'submitAttempt'])->name('quizzes.submit-attempt');
+        Route::post('/generate-from-note/{note}', [QuizController::class, 'generateFromNote'])->name('quizzes.generate-from-note');
+        
+        // Quiz Sharing and Leaderboard routes
+        Route::get('/shared', [QuizSharingController::class, 'index'])->name('quizzes.shared');
+        Route::get('/shared/{quiz}', [QuizSharingController::class, 'show'])->name('quizzes.shared.show');
+        Route::post('/{quiz}/toggle-sharing', [QuizSharingController::class, 'toggleSharing'])->name('quizzes.toggle-sharing');
+        Route::get('/{quiz}/leaderboard', [QuizSharingController::class, 'leaderboard'])->name('quizzes.leaderboard');
+    });
 
     Route::post('/subscribe', [SubscriptionController::class, 'subscribe'])->name('billing.subscribe');
     Route::get('/setup-intent', [SubscriptionController::class, 'createSetupIntent'])->name('billing.setup-intent');

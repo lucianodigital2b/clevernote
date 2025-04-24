@@ -56,7 +56,7 @@ export function RecordAudioModal({ open, onOpenChange, folders }: RecordAudioMod
     };
 
     const handleSubmit = async () => {
-        if (!audioBlob || !selectedFolder) return;
+        if (!audioBlob ) return;
 
         const success = await createNote('record', {
             title: noteTitle,

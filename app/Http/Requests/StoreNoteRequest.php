@@ -23,7 +23,7 @@ class StoreNoteRequest extends FormRequest
     {
         return [
             'title' => 'string|max:255',
-            'folder_id' => 'nullable|integer|exists:folders,id|required',
+            'folder_id' => 'nullable|integer|exists:folders,id',
             'audio_file' =>'file|mimes:mp3,ogg,flac,wav',
             'pdf_file' =>'file|nullable|mimes:pdf,doc,docx',
             'title' => 'nullable|string', 

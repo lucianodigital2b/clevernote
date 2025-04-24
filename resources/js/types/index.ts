@@ -66,6 +66,8 @@ export interface NavItem {
     url: string;
     icon?: LucideIcon | null;
     isActive?: boolean;
+    tooltip?: string;
+
 }
 
 export interface SharedData {

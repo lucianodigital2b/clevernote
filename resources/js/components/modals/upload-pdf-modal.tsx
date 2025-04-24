@@ -20,7 +20,7 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
     const { createNote, isUploading } = useCreateNote();
 
     const handleSubmit = async () => {
-        if (!pdfFile || !selectedFolder) return;
+        if (!pdfFile) return;
 
         const success = await createNote('pdf', {
             title: noteTitle,
