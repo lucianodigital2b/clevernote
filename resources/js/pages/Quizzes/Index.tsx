@@ -3,7 +3,7 @@ import { Head } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Link } from '@inertiajs/react';
-import AppShell from '@/components/app-shell';
+import {AppShell} from '@/components/app-shell';
 
 interface QuizOption {
   id: number;
