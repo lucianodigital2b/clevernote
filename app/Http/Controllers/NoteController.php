@@ -247,5 +247,19 @@ class NoteController extends Controller
             'flashcardSetId' => $flashcardSet->id,
         ]);
     }
+
+    public function upload(Request $request, Note $note)
+    {
+        $request->validate([
+            'file' => 'required|image|max:5120', // max 5MB
+        ]);
+
+        $media = $note->addMediaFromRequest('file')->toMediaCollection('note-images');
+
+        return response()->json([
+            'url' => $media->getUrl(),
+        ]);
+    }
+
     
 }

@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/dialog";
 import { MathExtension } from "@aarkue/tiptap-math-extension";
 import "katex/dist/katex.min.css";
+import Image from '@tiptap/extension-image'
 
 export default function Edit({ note }: { note: Note }) {
 
@@ -98,13 +99,47 @@ export default function Edit({ note }: { note: Note }) {
 
     
     const editor = useEditor({
-        extensions: [StarterKit, DragHandle, MathExtension.configure({ evaluation: true, katexOptions: { macros: { "\\B": "\\mathbb{B}" } }, delimiters: "dollar" }),],
+        extensions: [
+            StarterKit, 
+            DragHandle, 
+            Image.configure({
+                inline: false,
+                allowBase64: false,
+            }),
+            MathExtension.configure({ evaluation: true, katexOptions: { macros: { "\\B": "\\mathbb{B}" } }, delimiters: "dollar" }),],
         content: note.content,
-
+        editorProps: {
+            handlePaste: (view, event, slice) => {
+              const file = event.clipboardData?.files?.[0]
+              if (file) uploadImage(file)
+              return false
+            },
+            handleDrop: (view, event) => {
+              const file = event.dataTransfer?.files?.[0]
+              if (file) uploadImage(file)
+              return false
+            },
+        },
         onUpdate: ({ editor }) => {
             setContent(editor.getHTML());
         },
     });
+
+    async function uploadImage(file : any) {
+        const formData = new FormData()
+        formData.append('file', file)
+      
+        const noteId = note.id;
+    
+        const res = await axios.post(`/api/notes/${noteId}/media`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        
+        const { url } = await res.data;
+        editor?.chain().focus().setImage({ src: url }).run()
+    }
 
 
     // useEffect(() => {

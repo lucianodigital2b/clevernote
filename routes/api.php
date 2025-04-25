@@ -22,6 +22,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/check-subscription', [SubscriptionController::class, 'checkSubscription']);
     Route::resource('notes', NoteController::class);
+    Route::post('/notes/{id}/media', [NoteController::class, 'upload']);
+
     Route::get('/folders-with-counts', [FolderController::class, 'getFoldersWithCounts']);
 
 });
