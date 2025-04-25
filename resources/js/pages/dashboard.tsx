@@ -101,6 +101,8 @@ export default function Dashboard() {
     
     // Modify the new note section handler to check subscription
     const handleNewNote = async (action: () => void) => {
+        action();
+        return;
         if (notes.length >= 3) {
             const canProceed = await requireSubscription();
             
@@ -155,8 +157,8 @@ export default function Dashboard() {
                                     <LinkIcon className="h-5 w-5 text-blue-500" />
                                 </div>
                                 <div>
-                                    <span className="font-medium">Web link</span>
-                                    <p className="text-xs text-neutral-500">YouTube, websites, Google Drive, etc</p>
+                                    <span className="font-medium">Youtube</span>
+                                    {/* <p className="text-xs text-neutral-500">YouTube, websites, Google Drive, etc</p> */}
                                 </div>
                             </div>
                         </div>
@@ -179,15 +181,15 @@ export default function Dashboard() {
                 
                 {/* My Notes Section */}
                 <section>
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-semibold">My notes</h2>
-                        <div className="flex gap-2">
-                            <div className="relative">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-4 w-full">
+                        <h2 className="text-xl font-semibold w-full sm:w-auto">My notes</h2>
+                        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                            <div className="relative w-full sm:w-64">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
                                 <Input 
                                     type="text" 
                                     placeholder="Search any note" 
-                                    className="pl-9 w-64 bg-neutral-100 dark:bg-neutral-800 border-none"
+                                    className="pl-9 w-full bg-neutral-100 dark:bg-neutral-800 border-none"
                                     value={searchQuery}
                                     onChange={(e) => {
                                         setSearchQuery(e.target.value);
@@ -195,7 +197,7 @@ export default function Dashboard() {
                                     }}
                                 />
                             </div>
-                            <Button variant="outline" className="flex items-center gap-2">
+                            <Button variant="outline" className="flex items-center gap-2 w-full sm:w-auto">
                                 <span>All notes</span>
                             </Button>
                         </div>
@@ -282,7 +284,7 @@ export default function Dashboard() {
                 </section>
                 
                 {/* Upgrade Banner */}
-                {user.active_subscriptions?.length == 0 && (
+                {/* {user.active_subscriptions?.length == 0 && (
                     <div className="fixed bottom-6 right-6">
                         <Button 
                             className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-full flex items-center gap-2"
@@ -291,7 +293,7 @@ export default function Dashboard() {
                             Unlimited notes <span className="text-xs">⚡</span>
                         </Button>
                     </div>
-                )}
+                )} */}
             </div>
 
             {/* Upload Audio Modal */}

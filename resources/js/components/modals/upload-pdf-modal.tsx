@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useCreateNote } from "@/hooks/use-create-note";
 import type { Folder } from "@/types";
+import { Dropzone } from "../ui/dropzone";
 
 interface UploadPdfModalProps {
     open: boolean;
@@ -46,31 +47,36 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="note-title" className="text-right">Title</Label>
+                    <div className="grid gap-2">
+                        <Label htmlFor="note-title">Title</Label>
                         <Input
                             id="note-title"
                             value={noteTitle}
                             onChange={(e) => setNoteTitle(e.target.value)}
-                            className="col-span-3"
                             placeholder="Enter note title"
                         />
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="file-upload" className="text-right">File</Label>
-                        <Input
-                            id="file-upload"
-                            type="file"
-                            className="col-span-3"
-                            accept=".pdf,.txt,.doc,.docx"
-                            onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
-                            required
+                    <div className="grid gap-2">
+                        <Label>File</Label>
+                        <Dropzone
+                            onDrop={(files) => setPdfFile(files[0])}
+                            accept={{
+                                'application/pdf': ['.pdf'],
+                                'text/plain': ['.txt'],
+                                'application/msword': ['.doc'],
+                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
+                            }}
                         />
+                        {pdfFile && (
+                            <p className="text-sm text-neutral-500 mt-2">
+                                Selected: {pdfFile.name}
+                            </p>
+                        )}
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="folder" className="text-right">Folder</Label>
+                    <div className="grid gap-2">
+                        <Label htmlFor="folder">Folder</Label>
                         <Select value={selectedFolder} onValueChange={setSelectedFolder}>
-                            <SelectTrigger className="col-span-3">
+                            <SelectTrigger>
                                 <SelectValue placeholder="Select a folder" />
                             </SelectTrigger>
                             <SelectContent>

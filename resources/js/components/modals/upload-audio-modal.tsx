@@ -8,6 +8,7 @@ import { useCreateNote } from "@/hooks/use-create-note";
 import type { Folder } from "@/types";
 import { usePage } from "@inertiajs/react";
 import InputError from "../input-error";
+import { Dropzone } from "@/components/ui/dropzone";
 
 interface UploadAudioModalProps {
     open: boolean;
@@ -68,36 +69,33 @@ export function UploadAudioModal({ open, onOpenChange, folders }: UploadAudioMod
 
 
                 <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="note-title" className="text-right">
+                    <div className="grid gap-2">
+                        <Label htmlFor="note-title">
                             Title
                         </Label>
                         <Input
                             id="note-title"
                             type="text"
-                            className="col-span-3"
                             placeholder="Enter note title (optional)"
                             value={noteTitle}
                             onChange={(e) => setNoteTitle(e.target.value)}
                             disabled={isUploading}
                         />
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="audio-upload" className="text-right">
+                    <div className="grid gap-2">
+                        <Label htmlFor="audio-upload">
                             Audio
                         </Label>
-                        <Input
-                            id="audio-upload"
-                            type="file"
-                            className="col-span-3"
-                            accept="audio/*"
-                            onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
-                            required
-                            disabled={isUploading}
+                        <Dropzone
+                            onDrop={(files) => setAudioFile(files[0])}
+                            accept={{
+                                'audio/*': []
+                            }}
+                            className="w-full"
                         />
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="language" className="text-right">
+                    <div className="grid gap-2">
+                        <Label htmlFor="language">
                             Language
                         </Label>
                         <Select
@@ -105,7 +103,7 @@ export function UploadAudioModal({ open, onOpenChange, folders }: UploadAudioMod
                             onValueChange={setSelectedLanguage}
                             disabled={isUploading}
                         >
-                            <SelectTrigger className="col-span-3">
+                            <SelectTrigger>
                                 <SelectValue placeholder="Select audio language" />
                             </SelectTrigger>
                             <SelectContent>
@@ -132,8 +130,8 @@ export function UploadAudioModal({ open, onOpenChange, folders }: UploadAudioMod
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="folder" className="text-right">
+                    <div className="grid gap-2">
+                        <Label htmlFor="folder">
                             Folder
                         </Label>
                         <Select
@@ -141,7 +139,7 @@ export function UploadAudioModal({ open, onOpenChange, folders }: UploadAudioMod
                             onValueChange={setSelectedFolder}
                             disabled={isUploading}
                         >
-                            <SelectTrigger className="col-span-3">
+                            <SelectTrigger>
                                 <SelectValue placeholder="Select a folder" />
                             </SelectTrigger>
                             <SelectContent>
@@ -152,13 +150,9 @@ export function UploadAudioModal({ open, onOpenChange, folders }: UploadAudioMod
                                 ))}
                             </SelectContent>
                         </Select>
-
-                        {/* <InputError message={errors.password} /> */}
-
                     </div>
-
                     {isUploading && (
-                        <div className="col-span-4">
+                        <div>
                             <div className="space-y-2">
                                 <div className="text-sm text-neutral-500 text-center">
                                     {uploadProgress < 100 ? 'Uploading audio...' : 'Transcribing audio...'}

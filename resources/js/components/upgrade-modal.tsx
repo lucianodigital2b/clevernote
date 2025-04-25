@@ -50,8 +50,8 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-3xl p-0 overflow-hidden bg-gradient-to-br from-white to-purple-50 dark:from-gray-900 dark:to-gray-800">
-                <DialogHeader className="p-6 pb-0">
+            <DialogContent className="sm:max-w-3xl p-0 overflow-hidden bg-gradient-to-br from-white to-purple-50 dark:from-gray-900 dark:to-gray-800 max-h-[90vh] overflow-y-auto">
+                <DialogHeader className="p-6 pb-0 sticky top-0 bg-gradient-to-br from-white to-purple-50 dark:from-gray-900 dark:to-gray-800 z-10">
                     <DialogTitle className="text-center text-2xl font-bold flex items-center justify-center gap-2">
                         <SparklesIcon className="h-6 w-6 text-yellow-400 animate-pulse" />
                         <span>Upgrade to CleverNote Pro</span>
