@@ -90,20 +90,19 @@ export function RecordAudioModal({ open, onOpenChange, folders }: RecordAudioMod
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="note-title" className="text-right">Title</Label>
+                    <div className="grid gap-2">
+                        <Label htmlFor="note-title">Title</Label>
                         <Input
                             id="note-title"
                             value={noteTitle}
                             onChange={(e) => setNoteTitle(e.target.value)}
-                            className="col-span-3"
                             placeholder="Enter note title"
                         />
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="folder" className="text-right">Folder</Label>
+                    <div className="grid gap-2">
+                        <Label htmlFor="folder">Folder</Label>
                         <Select value={selectedFolder} onValueChange={setSelectedFolder}>
-                            <SelectTrigger className="col-span-3">
+                            <SelectTrigger>
                                 <SelectValue placeholder="Select a folder" />
                             </SelectTrigger>
                             <SelectContent>
@@ -116,22 +115,20 @@ export function RecordAudioModal({ open, onOpenChange, folders }: RecordAudioMod
                         </Select>
                     </div>
                     <div className="grid gap-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <div className="col-span-4 flex justify-center">
-                                <Button 
-                                    variant="outline" 
-                                    className={`rounded-full h-16 w-16 flex items-center justify-center ${isRecording ? 'bg-red-50 border-red-500' : ''}`}
-                                    onClick={handleRecording}
-                                >
-                                    <Mic className={`h-6 w-6 ${isRecording ? 'text-red-500 animate-pulse' : 'text-neutral-500'}`} />
-                                </Button>
-                            </div>
-                            <div className="col-span-4 text-center text-sm text-neutral-500">
-                                {isRecording ? 'Recording... Click to stop' : audioBlob ? 'Recording complete' : 'Click to start recording'}
-                            </div>
+                        <div className="flex justify-center">
+                            <Button 
+                                variant="outline" 
+                                className={`rounded-full h-16 w-16 flex items-center justify-center ${isRecording ? 'bg-red-50 border-red-500' : ''}`}
+                                onClick={handleRecording}
+                            >
+                                <Mic className={`h-6 w-6 ${isRecording ? 'text-red-500 animate-pulse' : 'text-neutral-500'}`} />
+                            </Button>
+                        </div>
+                        <div className="text-center text-sm text-neutral-500">
+                            {isRecording ? 'Recording... Click to stop' : audioBlob ? 'Recording complete' : 'Click to start recording'}
                         </div>
                         {audioBlob && (
-                            <div className="col-span-4 mt-4">
+                            <div className="mt-4">
                                 <div className="bg-neutral-50 dark:bg-neutral-900 rounded-lg p-4">
                                     <audio
                                         src={URL.createObjectURL(audioBlob)}

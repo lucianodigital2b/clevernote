@@ -1,3 +1,4 @@
+import { Dropzone } from "@/components/ui/dropzone";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ interface WebLinkModalProps {
 }
 
 export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps) {
-    const [webLink, setWebLink] = useState('https://www.youtube.com/watch?v=Qrd7SawJx3Y');
+    const [webLink, setWebLink] = useState('');
     const [selectedFolder, setSelectedFolder] = useState('');
     const [selectedLanguage, setSelectedLanguage] = useState('en');
     const { createNote, isUploading } = useCreateNote();
@@ -28,33 +29,38 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
             language: selectedLanguage
         });
 
+        if (success) {
+            setWebLink('');
+            setSelectedFolder('');
+            setSelectedLanguage('en');
+            onOpenChange(false);
+        }
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Add Web Link</DialogTitle>
+                    <DialogTitle>Add from Youtube</DialogTitle>
                     <DialogDescription>
-                        Create a new note from a web link
+                        Create a new note from a youtube video
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="web-link" className="text-right">URL</Label>
+                    <div className="grid gap-2">
+                        <Label htmlFor="web-link">URL</Label>
                         <Input
                             id="web-link"
                             value={webLink}
                             onChange={(e) => setWebLink(e.target.value)}
-                            className="col-span-3"
                             placeholder="https://example.com"
                             required
                         />
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="folder" className="text-right">Folder</Label>
+                    <div className="grid gap-2">
+                        <Label htmlFor="folder">Folder</Label>
                         <Select value={selectedFolder} onValueChange={setSelectedFolder}>
-                            <SelectTrigger className="col-span-3">
+                            <SelectTrigger>
                                 <SelectValue placeholder="Select a folder" />
                             </SelectTrigger>
                             <SelectContent>
@@ -66,10 +72,10 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="language" className="text-right">Language</Label>
+                    <div className="grid gap-2">
+                        <Label htmlFor="language">Language</Label>
                         <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                            <SelectTrigger className="col-span-3">
+                            <SelectTrigger>
                                 <SelectValue placeholder="Select a language" />
                             </SelectTrigger>
                             <SelectContent>
