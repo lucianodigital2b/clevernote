@@ -88,8 +88,28 @@ export default function Edit({ note }: { note: Note }) {
         }
     };
 
+
+    // Add new state for quiz generation
+    const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
+
+    const handleCreateQuizz = async () => {
+        setIsQuizModalOpen(true);
+        try {
+            const response = await axios.post(`/quizzes/generate-from-note/${note.id}`);
+            if (response.data) {
+                setIsQuizModalOpen(false);
+                router.visit(`/quizzes/${response.data.id}`);
+                toastConfig.success("Quiz generated successfully");
+            }
+        } catch (error) {
+            setIsQuizModalOpen(false);
+            toastConfig.error("Failed to generate quiz");
+        }
+    };
+
     const actions = [
         { icon: '📝', label: 'Create flashcards', action: handleCreateFlashcards },
+        { icon: '❓', label: 'Create a quiz', action: handleCreateQuizz },
         // { icon: '💬', label: 'Chat with note', action: () => setIsChatOpen(true) },
         // { icon: '🌐', label: 'Translate', action: () => console.log('Translate') },
         // { icon: '🎥', label: 'Create video', action: () => console.log('Create video') },
@@ -377,6 +397,18 @@ export default function Edit({ note }: { note: Note }) {
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
                         <div className="text-lg font-medium text-neutral-700 dark:text-neutral-200">
                             Generating flashcards...
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+            
+            {/* Add Quiz Generation Modal */}
+            <Dialog open={isQuizModalOpen}>
+                <DialogContent className="flex flex-col items-center justify-center">
+                    <div className="flex flex-col items-center gap-4 py-8">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                        <div className="text-lg font-medium text-neutral-700 dark:text-neutral-200">
+                            Generating quiz...
                         </div>
                     </div>
                 </DialogContent>

@@ -18,7 +18,7 @@ interface WebLinkModalProps {
 export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps) {
     const [webLink, setWebLink] = useState('');
     const [selectedFolder, setSelectedFolder] = useState('');
-    const [selectedLanguage, setSelectedLanguage] = useState('autodetect');
+    const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null); // Add type annotation and initialize with empty string
     const { createNote, isUploading } = useCreateNote();
 
     const handleSubmit = async () => {
@@ -30,12 +30,6 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
             language: selectedLanguage
         });
 
-        if (success) {
-            setWebLink('');
-            setSelectedFolder('');
-            setSelectedLanguage('en');
-            onOpenChange(false);
-        }
     };
 
     return (

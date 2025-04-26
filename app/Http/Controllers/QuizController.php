@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Note;
 use App\Models\Quiz;
 use App\Models\QuizQuestion;
 use App\Models\QuizOption;
 use App\Models\QuizAttempt;
 use App\Models\QuizAnswer;
+use App\Services\QuizGeneratorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +17,13 @@ use Inertia\Inertia;
 
 class QuizController extends Controller
 {
+    protected $quizGeneratorService;
+
+    public function __construct(QuizGeneratorService $quizGeneratorService)
+    {
+        $this->quizGeneratorService = $quizGeneratorService;
+    }
+
     public function index()
     {
         $quizzes = Quiz::with(['questions.options'])
@@ -212,6 +221,24 @@ class QuizController extends Controller
                 'score' => $score,
                 'total' => $totalQuestions,
                 'percentage' => ($score / $totalQuestions) * 100,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Failed to submit quiz attempt'], 500);
+        }
+    }
+
+    public function generateFromNote(Request $request, Note $note)
+    {
+        try {
+            DB::beginTransaction();
+
+            $this->quizGeneratorService->generateQuizFromNote($note);
+
+            DB::commit();
+            return response()->json([
+                'message' => 'Quiz generated successfully',
             ]);
 
         } catch (\Exception $e) {

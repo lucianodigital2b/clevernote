@@ -20,7 +20,8 @@ interface UploadAudioModalProps {
 export function UploadAudioModal({ open, onOpenChange, folders }: UploadAudioModalProps) {
     const [audioFile, setAudioFile] = useState<File | null>(null);
     const [selectedFolder, setSelectedFolder] = useState(folders.length > 0 ? folders[0].id.toString() : '');
-    const [selectedLanguage, setSelectedLanguage] = useState('autodetect');
+    const [selectedLanguage, setSelectedLanguage] = useState<string>(''); // Add type annotation and initialize with empty string
+
     const [noteTitle, setNoteTitle] = useState('');
     const { createNote, isUploading, uploadProgress } = useCreateNote();
     // const { errors } = usePage().props
