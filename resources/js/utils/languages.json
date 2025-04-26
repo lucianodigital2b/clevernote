@@ -1,0 +1,23 @@
+[
+  {"value": "autodetect", "label": "Autodetect"},
+  {"value": "en", "label": "English"},
+  {"value": "es", "label": "Spanish"},
+  {"value": "fr", "label": "French"},
+  {"value": "de", "label": "German"},
+  {"value": "it", "label": "Italian"},
+  {"value": "pt", "label": "Portuguese"},
+  {"value": "nl", "label": "Dutch"},
+  {"value": "ru", "label": "Russian"},
+  {"value": "ja", "label": "Japanese"},
+  {"value": "ko", "label": "Korean"},
+  {"value": "zh", "label": "Chinese (Mandarin)"},
+  {"value": "ar", "label": "Arabic"},
+  {"value": "hi", "label": "Hindi"},
+  {"value": "tr", "label": "Turkish"},
+  {"value": "pl", "label": "Polish"},
+  {"value": "vi", "label": "Vietnamese"},
+  {"value": "th", "label": "Thai"},
+  {"value": "id", "label": "Indonesian"},
+  {"value": "ms", "label": "Malay"},
+  {"value": "fa", "label": "Persian"}
+]

@@ -9,6 +9,7 @@ import type { Folder } from "@/types";
 import { usePage } from "@inertiajs/react";
 import InputError from "../input-error";
 import { Dropzone } from "@/components/ui/dropzone";
+import languages from "@/utils/languages.json";
 
 interface UploadAudioModalProps {
     open: boolean;
@@ -19,7 +20,7 @@ interface UploadAudioModalProps {
 export function UploadAudioModal({ open, onOpenChange, folders }: UploadAudioModalProps) {
     const [audioFile, setAudioFile] = useState<File | null>(null);
     const [selectedFolder, setSelectedFolder] = useState(folders.length > 0 ? folders[0].id.toString() : '');
-    const [selectedLanguage, setSelectedLanguage] = useState('en');
+    const [selectedLanguage, setSelectedLanguage] = useState('autodetect');
     const [noteTitle, setNoteTitle] = useState('');
     const { createNote, isUploading, uploadProgress } = useCreateNote();
     // const { errors } = usePage().props
@@ -35,14 +36,7 @@ export function UploadAudioModal({ open, onOpenChange, folders }: UploadAudioMod
             language: selectedLanguage
         });
 
-        console.log(success);
-        
-        // if (success) {
-        //     setAudioFile(null);
-        //     setSelectedFolder('');
-        //     setNoteTitle('');
-        //     onOpenChange(false);
-        // }
+ 
     };
 
     return (
@@ -70,19 +64,6 @@ export function UploadAudioModal({ open, onOpenChange, folders }: UploadAudioMod
 
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="note-title">
-                            Title
-                        </Label>
-                        <Input
-                            id="note-title"
-                            type="text"
-                            placeholder="Enter note title (optional)"
-                            value={noteTitle}
-                            onChange={(e) => setNoteTitle(e.target.value)}
-                            disabled={isUploading}
-                        />
-                    </div>
-                    <div className="grid gap-2">
                         <Label htmlFor="audio-upload">
                             Audio
                         </Label>
@@ -94,6 +75,20 @@ export function UploadAudioModal({ open, onOpenChange, folders }: UploadAudioMod
                             className="w-full"
                         />
                     </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="note-title">
+                            Title (optional)
+                        </Label>
+                        <Input
+                            id="note-title"
+                            type="text"
+                            placeholder="Enter note title"
+                            value={noteTitle}
+                            onChange={(e) => setNoteTitle(e.target.value)}
+                            disabled={isUploading}
+                        />
+                    </div>
+                    
                     <div className="grid gap-2">
                         <Label htmlFor="language">
                             Language
@@ -107,32 +102,15 @@ export function UploadAudioModal({ open, onOpenChange, folders }: UploadAudioMod
                                 <SelectValue placeholder="Select audio language" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="en">English</SelectItem>
-                                <SelectItem value="es">Spanish</SelectItem>
-                                <SelectItem value="fr">French</SelectItem>
-                                <SelectItem value="de">German</SelectItem>
-                                <SelectItem value="it">Italian</SelectItem>
-                                <SelectItem value="pt">Portuguese</SelectItem>
-                                <SelectItem value="nl">Dutch</SelectItem>
-                                <SelectItem value="ru">Russian</SelectItem>
-                                <SelectItem value="ja">Japanese</SelectItem>
-                                <SelectItem value="ko">Korean</SelectItem>
-                                <SelectItem value="zh">Chinese (Mandarin)</SelectItem>
-                                <SelectItem value="ar">Arabic</SelectItem>
-                                <SelectItem value="hi">Hindi</SelectItem>
-                                <SelectItem value="tr">Turkish</SelectItem>
-                                <SelectItem value="pl">Polish</SelectItem>
-                                <SelectItem value="vi">Vietnamese</SelectItem>
-                                <SelectItem value="th">Thai</SelectItem>
-                                <SelectItem value="id">Indonesian</SelectItem>
-                                <SelectItem value="ms">Malay</SelectItem>
-                                <SelectItem value="fa">Persian</SelectItem>
+                                {languages.map(lang => (
+                                    <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="folder">
-                            Folder
+                            Folder (optional)
                         </Label>
                         <Select
                             value={selectedFolder}
