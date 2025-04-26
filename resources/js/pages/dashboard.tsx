@@ -2,7 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Folder, Note, type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { Search, FileText, Link as LinkIcon, Upload, Mic, File, Folder as FolderIcon } from 'lucide-react';
+import { Search, FileText, Link as LinkIcon, Upload, Mic, File, Folder as FolderIcon, Youtube } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useQuery } from '@tanstack/react-query';
@@ -153,8 +153,8 @@ export default function Dashboard() {
                             onClick={() => handleNewNote(() => setIsWebLinkModalOpen(true))}
                         >
                             <div className="flex items-center gap-3">
-                                <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-full">
-                                    <LinkIcon className="h-5 w-5 text-blue-500" />
+                                <div className="bg-red-100 dark:bg-red-900/30 p-2 rounded-full">
+                                    <Youtube className="h-5 w-5 text-red-500 " />
                                 </div>
                                 <div>
                                     <span className="font-medium">Youtube</span>
