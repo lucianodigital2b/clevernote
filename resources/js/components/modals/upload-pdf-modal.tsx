@@ -48,15 +48,6 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="note-title">Title</Label>
-                        <Input
-                            id="note-title"
-                            value={noteTitle}
-                            onChange={(e) => setNoteTitle(e.target.value)}
-                            placeholder="Enter note title"
-                        />
-                    </div>
-                    <div className="grid gap-2">
                         <Label>File</Label>
                         <Dropzone
                             onDrop={(files) => setPdfFile(files[0])}
@@ -74,7 +65,17 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
                         )}
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="folder">Folder</Label>
+                        <Label htmlFor="note-title">Title (optional)</Label>
+                        <Input
+                            id="note-title"
+                            value={noteTitle}
+                            onChange={(e) => setNoteTitle(e.target.value)}
+                            placeholder="Enter note title"
+                        />
+                    </div>
+                    
+                    <div className="grid gap-2">
+                        <Label htmlFor="folder">Folder (optional)</Label>
                         <Select value={selectedFolder} onValueChange={setSelectedFolder}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select a folder" />

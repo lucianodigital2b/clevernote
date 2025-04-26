@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useCreateNote } from "@/hooks/use-create-note";
 import type { Folder } from "@/types";
+import languages from "@/utils/languages.json";
 
 interface WebLinkModalProps {
     open: boolean;
@@ -17,7 +18,7 @@ interface WebLinkModalProps {
 export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps) {
     const [webLink, setWebLink] = useState('');
     const [selectedFolder, setSelectedFolder] = useState('');
-    const [selectedLanguage, setSelectedLanguage] = useState('en');
+    const [selectedLanguage, setSelectedLanguage] = useState('autodetect');
     const { createNote, isUploading } = useCreateNote();
 
     const handleSubmit = async () => {
@@ -58,7 +59,7 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
                         />
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="folder">Folder</Label>
+                        <Label htmlFor="folder">Folder (optional)</Label>
                         <Select value={selectedFolder} onValueChange={setSelectedFolder}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select a folder" />
@@ -79,16 +80,9 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
                                 <SelectValue placeholder="Select a language" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="en">English</SelectItem>
-                                <SelectItem value="es">Spanish</SelectItem>
-                                <SelectItem value="fr">French</SelectItem>
-                                <SelectItem value="de">German</SelectItem>
-                                <SelectItem value="it">Italian</SelectItem>
-                                <SelectItem value="pt">Portuguese</SelectItem>
-                                <SelectItem value="ru">Russian</SelectItem>
-                                <SelectItem value="zh">Chinese</SelectItem>
-                                <SelectItem value="ja">Japanese</SelectItem>
-                                <SelectItem value="ko">Korean</SelectItem>
+                                {languages.map(lang => (
+                                    <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>

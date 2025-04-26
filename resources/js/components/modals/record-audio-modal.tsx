@@ -91,7 +91,7 @@ export function RecordAudioModal({ open, onOpenChange, folders }: RecordAudioMod
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="note-title">Title</Label>
+                        <Label htmlFor="note-title">Title (optional)</Label>
                         <Input
                             id="note-title"
                             value={noteTitle}
@@ -100,7 +100,7 @@ export function RecordAudioModal({ open, onOpenChange, folders }: RecordAudioMod
                         />
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="folder">Folder</Label>
+                        <Label htmlFor="folder">Folder (optional)</Label>
                         <Select value={selectedFolder} onValueChange={setSelectedFolder}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select a folder" />
