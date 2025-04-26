@@ -71,7 +71,8 @@ class NoteController extends Controller
         try {
             $validated = $request->validated();
             $validated['user_id'] = Auth::id();
-            
+            $language = $validated['language'] ?? null;
+
             if (isset($validated['pdf_file'])) {
                 $file = $validated['pdf_file'];
                 $path = $file->store('pdfs', 'public');
@@ -83,14 +84,14 @@ class NoteController extends Controller
                 $validated['file_path'] = $path;
                 
                 // Process audio file and get transcription
-                $transcription = $this->transcriptionService->transcribeAudio($validated['audio_file'], $validated['language']);
-                $studyNote = $this->deepseekService->createStudyNote($transcription['text'], $validated['language']);
+                $transcription = $this->transcriptionService->transcribeAudio($validated['audio_file'], $language);
+                $studyNote = $this->deepseekService->createStudyNote($transcription['text'], $language);
             } else if (isset($validated['link'])) {
 
                 $audio = $this->youtubeAudioExtractor->extractAudio($validated['link']);
 
-                $transcription = $this->transcriptionService->transcribeAudio($audio, $validated['language'] ?? 'en');
-                $studyNote = $this->deepseekService->createStudyNote($transcription['text'], $validated['language'] ?? 'en');
+                $transcription = $this->transcriptionService->transcribeAudio($audio, $language ?? 'en');
+                $studyNote = $this->deepseekService->createStudyNote($transcription['text'], $language ?? 'en');
             }
 
 
@@ -119,7 +120,7 @@ class NoteController extends Controller
                 ->with('success', 'Note created successfully.');
         } catch (\Exception $e) {
 
-            Log::error($e->getTrace());
+            Log::error($e->getMessage());
 
             if ($request->wantsJson()) {
                 return response()->json(['error' => 'Failed to create note'], 500);

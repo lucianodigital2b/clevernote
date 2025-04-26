@@ -1,5 +1,5 @@
 [
-  {"value": "autodetect", "label": "Autodetect"},
+  {"value": null, "label": "Autodetect"},
   {"value": "en", "label": "English"},
   {"value": "es", "label": "Spanish"},
   {"value": "fr", "label": "French"},

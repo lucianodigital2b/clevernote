@@ -24,18 +24,18 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Quizzes',
-        url: '#',
+        url: '/quizzes',
         icon: GraduationCap,
         tooltip: 'Coming soon',
     },
     {
-        title: 'Podcast',
+        title: 'Podcast (soon)',
         url: '#',
         icon: Headphones,
         tooltip: 'Coming soon',
     },
     {
-        title: 'BrainRot',
+        title: 'BrainRot (soon)',
         url: '#',
         icon: BrainCircuit,
         tooltip: 'Coming soon',

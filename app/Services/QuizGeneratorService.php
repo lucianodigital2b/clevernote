@@ -6,53 +6,40 @@ use App\Models\Quiz;
 use App\Models\Note;
 use OpenAI\Client;
 use Illuminate\Support\Str;
+use App\Services\Prompts\AIPrompts;
 
-class QuizGeneratorService
+class QuizGeneratorService extends AbstractAIService
 {
-    protected $openai;
-
-    public function __construct(Client $openai)
+    protected function initialize()
     {
-        $this->openai = $openai;
+        $this->apiKey = config('services.openai.api_key');
+        $this->apiEndpoint = 'https://api.openai.com/v1/chat/completions';
+        $this->model = 'gpt-4';
+    }
+
+    protected function getSystemPrompt(): string
+    {
+        return 'You are a quiz generator that creates educational multiple-choice questions based on provided content.';
     }
 
     public function generateFromNote(Note $note): Quiz
     {
-        $prompt = $this->buildPrompt($note->content);
-        $response = $this->openai->chat()->create([
-            'model' => 'gpt-4',
-            'messages' => [
-                ['role' => 'system', 'content' => 'You are a quiz generator that creates educational multiple-choice questions based on provided content.'],
-                ['role' => 'user', 'content' => $prompt]
-            ],
-            'temperature' => 0.7
-        ]);
-
-        $questions = $this->parseResponse($response);
+        $prompt = AIPrompts::quizPrompt($note->content);
+        $questions = $this->sendRequest($prompt);
 
         return Quiz::create([
             'title' => "Quiz on " . Str::limit($note->title, 50),
             'description' => "Automatically generated quiz from note: {$note->title}",
-            'questions' => $questions,
+            'questions' => $this->formatQuestions($questions),
             'user_id' => $note->user_id,
-            'category_id' => null, // Can be set based on note's folder or tags
+            'category_id' => null,
             'is_public' => false,
             'next_attempt_available_at' => now()
         ]);
     }
 
-    protected function buildPrompt(string $content): string
+    protected function formatQuestions(array $questions): array
     {
-        return "Create a comprehensive multiple-choice quiz based on the following content. " .
-               "Generate questions that test understanding of key concepts. " .
-               "For each question, provide 4 options with one correct answer and an explanation. " .
-               "Format the response as a JSON array of questions. Content: \n\n" . $content;
-    }
-
-    protected function parseResponse($response): array
-    {
-        $questions = json_decode($response->choices[0]->message->content, true);
-        
         return array_map(function ($q) {
             return [
                 'id' => Str::uuid(),

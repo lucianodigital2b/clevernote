@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import {AppShell} from '@/components/app-shell';
+import AppLayout from '@/layouts/app-layout';
 
 interface QuizOption {
   id: string;
@@ -92,7 +92,7 @@ export default function Edit({ quiz }: Props) {
   };
 
   return (
-    <AppShell>
+    <AppLayout>
       <Head title="Edit Quiz" />
 
       <form onSubmit={handleSubmit} className="p-6 max-w-4xl mx-auto">
@@ -280,6 +280,6 @@ export default function Edit({ quiz }: Props) {
           </Button>
         </div>
       </form>
-    </AppShell>
+    </AppLayout>
   );
 }
