@@ -80,6 +80,7 @@
         "dayjs": "^1.11.13",
         "framer-motion": "^12.4.10",
         "globals": "^15.14.0",
+        "jspdf": "^3.0.1",
         "laravel-vite-plugin": "^1.0",
         "lowlight": "^3.3.0",
         "lucide-react": "^0.475.0",

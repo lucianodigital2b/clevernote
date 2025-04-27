@@ -127,5 +127,7 @@ return [
     'ffmpeg_path' => env('FFMPEG_PATH', null),
     'ffmpeg_probe_path' => env('FFMPEG_PROBE_PATH', null),
     'ytdlp_path' => env('YT_DLP', null),
+    'open_ai' => env('OPEN_AI', null),
+
 
 ];

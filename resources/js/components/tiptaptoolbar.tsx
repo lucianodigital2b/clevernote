@@ -6,19 +6,35 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BubbleMenu } from '@tiptap/react'
+import { useCallback, useState, useEffect } from 'react';
 
 export default function TiptapToolbar({ editor }: { editor: Editor | null }) {
   if (!editor) return null;
 
-  const isActive = (name: string, attrs = {}) =>
-    editor.isActive(name, attrs) ? 'bg-purple-100 dark:bg-purple-900 text-purple-700' : '';
+  const [shouldShow, setShouldShow] = useState(false);
+
+  // Memoize the isActive function to prevent unnecessary re-renders
+  const isActive = useCallback((name: string, attrs = {}) => {
+    if (!editor) return '';
+    return editor.isActive(name, attrs) ? 'bg-purple-100 dark:bg-purple-900 text-purple-700' : '';
+  }, [editor]);
+
+  useEffect(() => {
+    setShouldShow(true);
+    return () => setShouldShow(false);
+  }, []);
+
+  if (!shouldShow) return null;
 
   return (
     <BubbleMenu
-    editor={editor}
-    tippyOptions={{ duration: 100 }}
-    className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow rounded-md p-1 flex gap-1 z-50 w-100"
->
+      editor={editor}
+      tippyOptions={{ duration: 100 }}
+      shouldShow={({ view }) => {
+        return shouldShow && view.state.selection.content().size > 0;
+      }}
+      className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow rounded-md p-1 flex gap-1 z-50 w-100"
+    >
       <Button size="icon" variant="ghost" className={isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()}>
         <Bold className="h-4 w-4" />
       </Button>

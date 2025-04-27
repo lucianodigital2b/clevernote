@@ -41,12 +41,17 @@ abstract class AbstractAIService
                         ]
                     ],
                     'temperature' => 0.7,
-                    'max_tokens' => 4000
+                    'max_tokens' => 4000,
+                    'response_format' => [
+                        'type' => 'json_object'
+                    ]
                 ], $additionalParams));
+
 
             if (!$response->successful()) {
                 throw new RequestException($response);
             }
+
 
             return $this->parseResponse($response);
 
@@ -65,10 +70,10 @@ abstract class AbstractAIService
     protected function parseResponse($response): array
     {
         $content = $response->json('choices.0.message.content');
-        $content = $this->cleanJsonResponse($content);
+
+        $data = json_decode(str_replace(["\\n", "\\", "\n", "\r"], '', trim($content, "\"\"\\")), true);
         
-        $data = json_decode($content, true);
-        
+        // Log::error(print_r($data, true));
         if (json_last_error() !== JSON_ERROR_NONE) {
             Log::error('JSON Parsing Error', [
                 'service' => static::class,
@@ -78,12 +83,8 @@ abstract class AbstractAIService
             throw new \Exception('Invalid JSON response: ' . json_last_error_msg());
         }
 
-        return $data;
+        return $data['quiz'];
     }
 
-    protected function cleanJsonResponse(string $content): string
-    {
-        $content = preg_replace('/^(json|\`\`\`json|\`\`\`)\s*/i', '', trim($content));
-        return preg_replace('/\`\`\`\s*$/i', '', trim($content));
-    }
+
 }

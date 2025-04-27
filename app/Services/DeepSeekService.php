@@ -4,6 +4,9 @@ namespace App\Services;
 
 use App\Services\Prompts\AIPrompts;
 
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Client\RequestException;
 
 class DeepSeekService extends AbstractAIService
 {
