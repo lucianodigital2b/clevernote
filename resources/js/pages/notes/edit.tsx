@@ -98,7 +98,7 @@ export default function Edit({ note }: { note: Note }) {
             const response = await axios.post(`/quizzes/generate-from-note/${note.id}`);
             if (response.data) {
                 setIsQuizModalOpen(false);
-                router.visit(`/quizzes/${response.data.id}`);
+                router.visit(`/quizzes/${response.data.quiz.id}`);
                 toastConfig.success("Quiz generated successfully");
             }
         } catch (error) {

@@ -196,6 +196,7 @@ class QuizController extends Controller
                 'user_id' => Auth::id(),
                 'total_questions' => $totalQuestions,
                 'completed_at' => now(),
+                'score' => 0,
             ]);
 
             foreach ($validated['answers'] as $answer) {
@@ -224,6 +225,7 @@ class QuizController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            dd($e->getMessage());
             DB::rollBack();
             return response()->json(['message' => 'Failed to submit quiz attempt'], 500);
         }
@@ -234,16 +236,18 @@ class QuizController extends Controller
         try {
             DB::beginTransaction();
 
-            $this->quizGeneratorService->generateQuizFromNote($note);
+            $quiz = $this->quizGeneratorService->generateFromNote($note);
 
             DB::commit();
             return response()->json([
                 'message' => 'Quiz generated successfully',
+                'quiz' => $quiz
             ]);
 
         } catch (\Exception $e) {
+            dd($e->getMessage());
             DB::rollBack();
-            return response()->json(['message' => 'Failed to submit quiz attempt'], 500);
+            return response()->json(['message' => 'Failed to submit quiz attempt: ' . $e->getMessage()], 500);
         }
     }
 }

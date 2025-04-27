@@ -57,9 +57,6 @@ class AIPrompts
 
     public static function quizPrompt(string $content): string
     {
-        return "Create a comprehensive multiple-choice quiz based on the following content. " .
-               "Generate questions that test understanding of key concepts. " .
-               "For each question, provide 4 options with one correct answer and an explanation. " .
-               "Format the response as a JSON array of questions. Content: \n\n" . $content;
+        return "Create a multiple-choice quiz based on the following content. Content:\n\n" . $content;
     }
 }
