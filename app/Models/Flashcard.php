@@ -18,7 +18,6 @@ class Flashcard extends Model implements HasMedia
         'answer',
         'difficulty',
         'language',
-        'flashcard_set_id',
     ];
 
     protected $casts = [
@@ -36,9 +35,9 @@ class Flashcard extends Model implements HasMedia
         return $this->belongsTo(Folder::class);
     }
 
-    public function flashcardSet(): BelongsTo
+    public function flashcardSets()
     {
-        return $this->belongsTo(FlashcardSet::class);
+        return $this->belongsToMany(FlashcardSet::class);
     }
 
     public function userProgress()

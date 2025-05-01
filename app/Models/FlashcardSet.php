@@ -28,9 +28,9 @@ class FlashcardSet extends Model
         return $this->belongsTo(Folder::class);
     }
 
-    public function flashcards(): HasMany
+    public function flashcards()
     {
-        return $this->hasMany(Flashcard::class);
+        return $this->belongsToMany(Flashcard::class);
     }
 
     public function note()
