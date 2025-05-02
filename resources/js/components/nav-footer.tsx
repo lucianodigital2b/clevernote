@@ -9,18 +9,22 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 type NavFooterProps = ComponentPropsWithoutRef<typeof SidebarGroup> & {
     items: NavItem[];
     onItemClick?: (item: NavItem) => boolean;
+    user?: any;
 };
 
 export function NavFooter({
     items,
     className,
     onItemClick,
+    user,
     ...props
 }: NavFooterProps) {
     // Free notes limit and current usage
     const freeNotesLimit = 3;
-    const freeNotesUsed = 0; // This should be fetched from your state/API
-    const freeNotesLeft = freeNotesLimit - freeNotesUsed;
+    
+    const freeNotesUsed = user?.notes_count || 0;
+
+    const freeNotesLeft = Math.max(0, freeNotesLimit - freeNotesUsed);
     const progressPercentage = (freeNotesUsed / freeNotesLimit) * 100;
     
     // Get sidebar state
@@ -40,7 +44,7 @@ export function NavFooter({
                             Free Notes Left
                         </span>
                         <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-200">
-                            {freeNotesLeft}/{freeNotesLimit}
+                            {freeNotesUsed}/{freeNotesLimit}
                         </span>
                     </div>
                     <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">

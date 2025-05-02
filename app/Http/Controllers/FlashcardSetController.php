@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FlashcardSet;
+use App\Models\Flashcard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -13,7 +14,20 @@ class FlashcardSetController extends Controller
 
     public function index(Request $request)
     {
-        
+        $flashcards = FlashcardSet::where('user_id', Auth::id())
+            ->withCount('flashcards')
+            ->latest()
+            ->paginate(10);
+
+
+        return Inertia::render('flashcardSets/index', [
+            'flashcardSets' => $flashcards,
+        ]);
+    }
+    
+    public function create()
+    {
+        return Inertia::render('flashcardSets/create');
     }
     
     public function store(Request $request)
@@ -21,7 +35,10 @@ class FlashcardSetController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
+            'flashcard_ids' => 'nullable|array',
         ]);
+
+
 
         $flashcardSet = FlashcardSet::create([
             'user_id' => Auth::id(),
@@ -29,7 +46,11 @@ class FlashcardSetController extends Controller
             'description' => $validated['description'],
         ]);
 
-        return redirect()->back()->with('success', 'Flashcard set created successfully.');
+        if (!empty($validated['flashcard_ids'])) {
+            $flashcardSet->flashcards()->attach($validated['flashcard_ids']);
+        }
+
+        return redirect()->route('flashcard-sets.index')->with('success', 'Flashcard set created successfully.');
     }
 
     public function show(FlashcardSet $flashcardSet)
@@ -38,7 +59,7 @@ class FlashcardSetController extends Controller
 
         $flashcardSet->load('flashcards');
 
-        return Inertia::render('FlashcardSets/Show', [
+        return Inertia::render('flashcardSets/show', [
             'flashcardSet' => $flashcardSet,
             'flashcards' => $flashcardSet->flashcards
         ]);
@@ -50,7 +71,7 @@ class FlashcardSetController extends Controller
 
         $flashcardSet->load('flashcards');
 
-        return Inertia::render('FlashcardSets/Edit', [
+        return Inertia::render('flashcardSets/edit', [
             'flashcardSet' => $flashcardSet
         ]);
     }
@@ -73,20 +94,24 @@ class FlashcardSetController extends Controller
             'description' => $validated['description'],
         ]);
 
-        // Update flashcards
-        $existingIds = [];
+        // Get current flashcard IDs in the set
+        $currentIds = $flashcardSet->flashcards()->pluck('flashcards.id')->toArray();
+        
+        // Update or create flashcards
+        $updatedIds = [];
         foreach ($validated['flashcards'] as $flashcardData) {
             $flashcard = $flashcardSet->flashcards()->updateOrCreate(
-                ['id' => $flashcardData['id'] ?? null],
+                ['flashcards.id' => $flashcardData['id'] ?? null],
                 $flashcardData
             );
-            $existingIds[] = $flashcard->id;
+            $updatedIds[] = $flashcard->id;
         }
 
-        // Delete removed flashcards
-        $flashcardSet->flashcards()
-            ->whereNotIn('id', $existingIds)
-            ->delete();
+        // Detach only flashcards that were removed from the set
+        $removedIds = array_diff($currentIds, $updatedIds);
+        if (!empty($removedIds)) {
+            $flashcardSet->flashcards()->detach($removedIds);
+        }
 
         return redirect()->back()->with('success', 'Flashcard set updated successfully.');
     }
@@ -111,7 +136,7 @@ class FlashcardSetController extends Controller
     
         $flashcardSet->load('flashcards');
     
-        return Inertia::render('FlashcardSets/Study', [
+        return Inertia::render('flashcardSets/study', [
             'flashcardSet' => $flashcardSet
         ]);
     }
@@ -137,5 +162,14 @@ class FlashcardSetController extends Controller
             );
 
         return response()->json(['success' => true]);
+    }
+    
+    public function getFlashcards(Request $request)
+    {
+        $flashcards = Flashcard::where('user_id', Auth::id())
+            ->latest()
+            ->paginate(10);
+
+        return response()->json($flashcards);
     }
 }

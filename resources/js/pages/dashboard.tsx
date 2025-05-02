@@ -54,7 +54,9 @@ export default function Dashboard() {
                 }
             });
             return response.data;
-        }
+        },
+        staleTime: 30000, // Data remains fresh for 30 seconds
+        refetchOnWindowFocus: false // Prevent refetch on window focus
     });
     
     const notes = notesData?.data || [];
@@ -66,7 +68,9 @@ export default function Dashboard() {
         queryFn: async () => {
             const response = await axios.get('/api/folders-with-counts');
             return response.data.folders;
-        }
+        },
+        staleTime: 30000, // Data remains fresh for 30 seconds
+        refetchOnWindowFocus: false // Prevent refetch on window focus
     });
     
     const folders = data || [];
@@ -91,9 +95,9 @@ export default function Dashboard() {
         }
     };
 
-    const handleModalClose = (open: boolean) => {
-        if (!open) {
-            refetchNotes();
+    const handleModalClose = (open: boolean, success: boolean = false) => {
+        if (!open && success) {
+            queryClient.invalidateQueries({ queryKey: ['notes'] });
         }
     };
 
@@ -299,33 +303,33 @@ export default function Dashboard() {
             {/* Upload Audio Modal */}
             <UploadAudioModal 
                 open={isUploadAudioModalOpen}
-                onOpenChange={(open) => {
+                onOpenChange={(open, success = false) => {
                     setIsUploadAudioModalOpen(open);
-                    handleModalClose(open);
+                    handleModalClose(open, success);
                 }}
                 folders={folders}
             />
             <RecordAudioModal 
                 open={isRecordModalOpen}
-                onOpenChange={(open) => {
+                onOpenChange={(open, success = false) => {
                     setIsRecordModalOpen(open);
-                    handleModalClose(open);
+                    handleModalClose(open, success);
                 }}
                 folders={folders}
             />
             <UploadPdfModal 
                 open={isPdfModalOpen}
-                onOpenChange={(open) => {
+                onOpenChange={(open, success = false) => {
                     setIsPdfModalOpen(open);
-                    handleModalClose(open);
+                    handleModalClose(open, success);
                 }}
                 folders={folders}
             />
             <WebLinkModal 
                 open={isWebLinkModalOpen}
-                onOpenChange={(open) => {
+                onOpenChange={(open, success = false) => {
                     setIsWebLinkModalOpen(open);
-                    handleModalClose(open);
+                    handleModalClose(open, success);
                 }}
                 folders={folders}
             />

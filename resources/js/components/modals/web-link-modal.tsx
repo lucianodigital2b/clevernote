@@ -34,7 +34,7 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="">
                 <DialogHeader>
                     <DialogTitle>Add from Youtube</DialogTitle>
                     <DialogDescription>

@@ -82,7 +82,7 @@ export function RecordAudioModal({ open, onOpenChange, folders }: RecordAudioMod
             }
             onOpenChange(open);
         }}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="">
                 <DialogHeader>
                     <DialogTitle>Record Audio</DialogTitle>
                     <DialogDescription>

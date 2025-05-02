@@ -37,7 +37,7 @@ class Flashcard extends Model implements HasMedia
 
     public function flashcardSets()
     {
-        return $this->belongsToMany(FlashcardSet::class);
+        return $this->belongsToMany(FlashcardSet::class, 'flashcard_flashcard_set');
     }
 
     public function userProgress()

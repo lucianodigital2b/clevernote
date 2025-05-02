@@ -49,7 +49,7 @@ export function UploadAudioModal({ open, onOpenChange, folders }: UploadAudioMod
             }
             onOpenChange(open);
         }}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="">
                 <DialogHeader>
                     <DialogTitle>Upload Audio</DialogTitle>
                     <DialogDescription>

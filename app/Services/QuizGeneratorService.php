@@ -48,7 +48,6 @@ class QuizGeneratorService extends AbstractAIService
         $prompt = AIPrompts::quizPrompt($note->content);
         $questions = $this->sendRequest($prompt);
 
-
         $quiz = Quiz::create([
             'title' => Str::limit($note->title, 255),
             'description' => "Automatically generated quiz from note: {$note->title}",
@@ -57,7 +56,7 @@ class QuizGeneratorService extends AbstractAIService
         ]);
 
 
-        foreach ($questions as $index => $questionData) {
+        foreach ($questions['quiz'] as $index => $questionData) {
             $question = $quiz->questions()->create([
                 'question' => $questionData['question'],
                 'type' => $questionData['type'],

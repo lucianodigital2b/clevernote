@@ -30,7 +30,7 @@ class FlashcardSet extends Model
 
     public function flashcards()
     {
-        return $this->belongsToMany(Flashcard::class);
+        return $this->belongsToMany(Flashcard::class, 'flashcard_flashcard_set');
     }
 
     public function note()
