@@ -8,6 +8,7 @@ use App\Http\Controllers\FlashcardController;
 use App\Http\Controllers\FlashcardSetController;
 use App\Http\Controllers\FolderFlashcardController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\QuizSharingController;
@@ -74,7 +75,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/checkout', fn () => Inertia::render('Billing/Checkout'))->middleware('auth');
 
 
-
+    Route::get('/onboarding', [OnboardingController::class, 'show'])
+        ->name('onboarding.show');
+    Route::post('/onboarding', [OnboardingController::class, 'store'])
+        ->name('onboarding.store');
 
 });
 
@@ -90,4 +94,6 @@ Route::get('auth/google/callback', [\App\Http\Controllers\Auth\GoogleController:
 require __DIR__.'/settings.php';
 
 require __DIR__.'/auth.php';
+
+
 

@@ -16,6 +16,8 @@ import { WebLinkModal } from '@/components/modals/web-link-modal';
 import { usePage } from '@inertiajs/react';
 import { UpgradeModal } from '@/components/upgrade-modal';
 import { useRequireSubscription } from '@/hooks/useRequireSubscription';
+import OnboardingForm from '@/components/onboardingForm';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -33,8 +35,16 @@ export default function Dashboard() {
     const debouncedSearch = useDebounce(searchQuery, 300);
     const { folderId } = usePage().props as { folderId?: string | number };
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
     const { auth } = usePage().props;
     const user = (auth as any).user;
+
+    useEffect(() => {
+        // Show onboarding modal if user hasn't completed it
+        if (!user.onboarding_completed) {
+            setIsOnboardingOpen(true);
+        }
+    }, [user.onboarding_completed]);
     
     // Query for notes with pagination
     const { 
@@ -105,8 +115,6 @@ export default function Dashboard() {
     
     // Modify the new note section handler to check subscription
     const handleNewNote = async (action: () => void) => {
-        action();
-        return;
         if (notes.length >= 3) {
             const canProceed = await requireSubscription();
             
@@ -125,7 +133,7 @@ export default function Dashboard() {
                 {/* New Note Section */}
                 <section>
                     <h2 className="text-xl font-semibold mb-2">New note</h2>
-                    <p className="text-neutral-500 mb-4">Record audio, upload audio, or use a YouTube URL</p>
+                    <p className="text-neutral-500 mb-4">Record/upload audio, send a document or use a YouTube URL</p>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div 
@@ -338,6 +346,15 @@ export default function Dashboard() {
                 isOpen={isModalOpen} 
                 onClose={() => setIsModalOpen(false)} 
             />
+
+            <Dialog open={isOnboardingOpen} onOpenChange={setIsOnboardingOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Welcome to Clevernote! 👋</DialogTitle>
+                    </DialogHeader>
+                    <OnboardingForm />
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }
