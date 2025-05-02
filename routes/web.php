@@ -81,6 +81,12 @@ Route::middleware(['auth'])->group(function () {
 
 
 
+// Google OAuth Routes
+Route::get('auth/google', [\App\Http\Controllers\Auth\GoogleController::class, 'redirectToGoogle'])
+    ->name('auth.google');
+Route::get('auth/google/callback', [\App\Http\Controllers\Auth\GoogleController::class, 'handleGoogleCallback'])
+    ->name('auth.google.callback');
+
 require __DIR__.'/settings.php';
 
 require __DIR__.'/auth.php';
