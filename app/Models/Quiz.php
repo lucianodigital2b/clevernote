@@ -13,6 +13,7 @@ class Quiz extends Model
         'description',
         'user_id',
         'is_published',
+        'note_id'
     ];
 
     protected $casts = [

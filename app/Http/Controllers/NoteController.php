@@ -199,11 +199,12 @@ class NoteController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Note $note)
+    public function destroy(Request $request, Note $note)
     {
         $this->authorize('delete', $note);
 
-        $this->noteService->deleteNote($note);
+        $delete_related_items = $request->input('delete_related_items', false);
+        $this->noteService->deleteNote($note, $delete_related_items);
 
         return redirect()->route('notes.index')
             ->with('success', 'Note deleted successfully.');

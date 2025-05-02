@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Note;
+use App\Models\FlashcardSet;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Smalot\PdfParser\Parser;
@@ -90,10 +91,30 @@ class NoteService
     }
 
     /**
-     * Delete a note
+     * Delete a note and its related resources
      */
-    public function deleteNote(Note $note): bool
+    public function deleteNote(Note $note, bool $delete_related_items = false): bool
     {
+        // Delete associated flashcard sets and quizzes if requested
+        if ($delete_related_items) {
+            // Delete flashcard sets and their relationships
+            $note->flashcardSets->each(function ($set) {
+                $set->flashcards()->detach();
+                $set->delete();
+            });
+            
+            // Delete associated quizzes
+            $note->quizzes()->delete();
+        }
+
+        // Delete all media collections
+        $note->clearMediaCollection('note-images');
+        $note->clearMediaCollection('note-audio');
+        $note->clearMediaCollection('note-videos');
+        $note->clearMediaCollection('note-docs');
+        $note->clearMediaCollection('note-texts');
+
+        // Delete the note itself
         return $note->delete();
     }
 

@@ -238,11 +238,20 @@ export default function Edit({ note }: { note: Note }) {
 
 
 
+
+    const [deleteRelatedItems, setDeleteRelatedItems] = useState(false);
+
     const handleDelete = () => {
         router.delete(`/notes/${note.id}`, {
+            data: {
+                delete_related_items: deleteRelatedItems
+            },
             onSuccess: () => {
-                // Redirect to notes list after successful deletion
+                toastConfig.success('Note deleted successfully');
                 router.visit('/notes');
+            },
+            onError: () => {
+                toastConfig.error('Failed to delete note');
             },
         });
     };
@@ -453,8 +462,20 @@ export default function Edit({ note }: { note: Note }) {
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete your note.
+                        <AlertDialogDescription className="space-y-4">
+                            <p>This action cannot be undone. This will permanently delete your note.</p>
+                            <div className="flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    id="deleteRelated"
+                                    checked={deleteRelatedItems}
+                                    onChange={(e) => setDeleteRelatedItems(e.target.checked)}
+                                    className="h-4 w-4 rounded border-gray-300"
+                                />
+                                <label htmlFor="deleteRelated" className="text-sm text-gray-600 dark:text-gray-400">
+                                    Also delete related items (flashcards, quizzes)
+                                </label>
+                            </div>
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
