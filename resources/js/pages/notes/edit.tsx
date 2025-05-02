@@ -48,6 +48,7 @@ export default function Edit({ note }: { note: Note }) {
         router.patch(`/notes/${note.id}`, {
             title: note.title,
             content: content,
+            folder_id: selectedFolder,
             _method: 'PUT'
         }, {
             preserveScroll: true,
@@ -62,6 +63,41 @@ export default function Edit({ note }: { note: Note }) {
             }
         });
     };
+    
+    const handleSaveFolder = () => {
+        setIsFolderModalOpen(false);
+        handleUpdate();
+    };
+
+    const renderFolderModal = () => (
+        <Dialog open={isFolderModalOpen} onOpenChange={setIsFolderModalOpen}>
+            <DialogContent>
+                <h3 className="text-lg font-medium mb-4">Select Folder</h3>
+                <div className="space-y-4">
+                    <select 
+                        className="w-full p-2 border rounded"
+                        value={selectedFolder || ''}
+                        onChange={(e) => setSelectedFolder(e.target.value ? parseInt(e.target.value) : null)}
+                    >
+                        <option value="">No folder</option>
+                        {folders.map(folder => (
+                            <option key={folder.id} value={folder.id}>
+                                {folder.name}
+                            </option>
+                        ))}
+                    </select>
+                    <div className="flex justify-end gap-2">
+                        <Button variant="outline" onClick={() => setIsFolderModalOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleSaveFolder}>
+                            Save
+                        </Button>
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
 
     // Add this new state
     const [isActionsVisible, setIsActionsVisible] = useState(true);
@@ -91,6 +127,23 @@ export default function Edit({ note }: { note: Note }) {
 
     // Add new state for quiz generation
     const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
+    const [selectedFolder, setSelectedFolder] = useState(note.folder_id || null);
+    const [folders, setFolders] = useState<Array<{id: number; name: string}>>([]);
+    const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
+    
+    useEffect(() => {
+        if (isFolderModalOpen) {
+            
+            axios.get('/folders').then(response => {
+                console.log(response.data);
+                setFolders(response.data);
+            }).catch(error => {
+                console.error('Error fetching folders:', error);
+            });
+        }
+    }, [isFolderModalOpen]);
+
+
 
     const handleCreateQuizz = async () => {
         setIsQuizModalOpen(true);
@@ -208,6 +261,32 @@ export default function Edit({ note }: { note: Note }) {
         <AppLayout>
             <Head title={`${note.title} - Note`} />
             
+            <Dialog open={isFolderModalOpen} onOpenChange={setIsFolderModalOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-medium">Select Folder</h3>
+                        <select 
+                            className="w-full p-2 border rounded"
+                            value={selectedFolder || ''}
+                            onChange={(e) => setSelectedFolder(e.target.value ? parseInt(e.target.value) : null)}
+                        >
+                            <option value="">No folder</option>
+                            {folders?.map(folder => (
+                                <option key={folder.id} value={folder.id}>{folder.name}</option>
+                            ))}
+                        </select>
+                        <div className="flex justify-end gap-2">
+                            <Button variant="outline" onClick={() => setIsFolderModalOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button onClick={handleSaveFolder}>
+                                Save
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+            
             <div className="flex h-full">
                 {/* Main Content */}
                 <div className={`flex-1 p-6 ${isChatOpen ? 'mr-[400px]' : ''}`}>
@@ -239,7 +318,7 @@ export default function Edit({ note }: { note: Note }) {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                        <DropdownMenuItem>Add to folder</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setIsFolderModalOpen(true)}>Add to folder</DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>
                                             Delete
                                         </DropdownMenuItem>
