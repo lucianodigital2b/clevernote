@@ -34,4 +34,13 @@ class Note extends Model implements HasMedia
         return $this->belongsTo(Folder::class); 
     }
 
+    public function flashcardSets()
+    {
+        return $this->hasMany(FlashcardSet::class);
+    }
+
+    public function quizzes()
+    {
+        return $this->hasMany(Quiz::class);
+    }
 }
