@@ -19,7 +19,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Flashcards',
-        url: '/flashcards',
+        url: '/flashcard-sets',
         icon: Layers, 
     },
     {
@@ -153,6 +153,7 @@ export function AppSidebar() {
                     items={footerNavItems} 
                     className="mt-auto" 
                     onItemClick={handleNavItemClick}
+                    user={user}
                 />
                 )}
                 <NavUser />

@@ -14,17 +14,21 @@ class FlashcardController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
 
-        $flashcardSets = FlashcardSet::with('flashcards')
-        ->where('user_id', Auth::id())
-        ->withCount('flashcards')
+        $flashcards = Flashcard::whereHas('flashcardSets', function($query) {
+            $query->where('user_id', Auth::id());
+        })
         ->latest()
         ->paginate(12);
 
+        if($request->wantsJson()) {
+            return response()->json($flashcards);
+        }
+
         return Inertia::render('flashcards/index', [
-            'flashcardSets' => $flashcardSets,
+            'flashcards' => $flashcards,
         ]);
     }
 

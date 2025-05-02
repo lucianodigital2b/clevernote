@@ -16,6 +16,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable, Billable, HasApiTokens;
 
     protected $with = ['subscriptions', 'activeSubscriptions'];
+    protected $withCount = ['notes'];
 
     /**
      * The attributes that are mass assignable.
@@ -62,5 +63,10 @@ class User extends Authenticatable
             ->whereNull('ends_at') // not cancelled
             ->where('stripe_status', 'active'); // still billed
     }
-    
+
+    public function notes(): HasMany
+    {
+        return $this->hasMany(Note::class);
+    }
+
 }

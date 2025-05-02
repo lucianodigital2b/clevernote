@@ -73,7 +73,7 @@ abstract class AbstractAIService
 
         $data = json_decode(str_replace(["\\n", "\\", "\n", "\r"], '', trim($content, "\"\"\\")), true);
         
-        // Log::error(print_r($data, true));
+        Log::error(print_r($data, true));
         if (json_last_error() !== JSON_ERROR_NONE) {
             Log::error('JSON Parsing Error', [
                 'service' => static::class,
@@ -82,8 +82,9 @@ abstract class AbstractAIService
             ]);
             throw new \Exception('Invalid JSON response: ' . json_last_error_msg());
         }
+        
 
-        return $data['quiz'];
+        return $data;
     }
 
 

@@ -65,7 +65,7 @@ export default function Show({ quiz }: Props) {
                     animate={{ opacity: 1, y: 0 }}
                     className="bg-white dark:bg-neutral-800 rounded-xl p-8 shadow-sm border border-neutral-200 dark:border-neutral-700"
                 >
-                    <div className="max-w-3xl mx-auto">
+                    <div className="max-w-3xl mx-auto text-center">
                         <h1 className="text-3xl font-bold mb-4">{quiz.title}</h1>
                         
                         {quiz.description && (

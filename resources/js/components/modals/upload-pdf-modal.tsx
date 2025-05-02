@@ -39,7 +39,7 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="">
                 <DialogHeader>
                     <DialogTitle>Upload PDF/Text</DialogTitle>
                     <DialogDescription>

@@ -3,7 +3,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { PaginatedResponse, FlashcardSet } from '@/types';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import FlashcardCreationModal from '@/components/flashcardset-creation-modal';
+
 import { Layers, MoreVertical, ArrowRight } from 'lucide-react';
 import {
     DropdownMenu,
@@ -20,11 +20,8 @@ interface Props {
 }
 
 export default function Index({ flashcardSets }: Props) {
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [selectedSetId, setSelectedSetId] = useState<number | null>(null);
-    
-    const openModal = () => setIsModalOpen(true);
 
     const handleDelete = (id: number) => {
         setSelectedSetId(id);
@@ -51,16 +48,13 @@ export default function Index({ flashcardSets }: Props) {
         <AppLayout>
             <Head title="Flashcards" />
 
-            <FlashcardCreationModal 
-                open={isModalOpen} 
-                onOpenChange={setIsModalOpen}
-            />
+
 
             <div className="container mx-auto py-6 px-4">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-semibold">Flashcard Sets</h1>
-                    <Button onClick={openModal}>
-                        Create Flashcard Set
+                    <Button asChild>
+                        <Link href="/flashcard-sets/create">Create Flashcard Set</Link>
                     </Button>
                 </div>
 
@@ -90,11 +84,6 @@ export default function Index({ flashcardSets }: Props) {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                        <DropdownMenuItem asChild>
-                                            <Link href={`/flashcard-sets/${set.id}`}>
-                                                View Set
-                                            </Link>
-                                        </DropdownMenuItem>
                                         <DropdownMenuItem asChild>
                                             <Link href={`/flashcard-sets/${set.id}/edit`}>
                                                 Edit Set

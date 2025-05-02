@@ -75,10 +75,24 @@ class NoteController extends Controller
 
             if (isset($validated['pdf_file'])) {
                 $file = $validated['pdf_file'];
-                $path = $file->store('pdfs', 'public');
+                $extension = $file->getClientOriginalExtension();
+                $storageDir = $extension === 'pdf' ? 'pdfs' : 'docs';
+                $path = $file->store($storageDir, 'public');
                 
-                $pdfText = $this->noteService->extractTextFromPdf($path);
-                $studyNote = $this->deepseekService->createStudyNote($pdfText);
+                if ($extension === 'pdf') {
+                    $text = $this->noteService->extractTextFromPdf($path);
+                } else {
+                    $phpWord = \PhpOffice\PhpWord\IOFactory::load(storage_path('app/public/' . $path));
+                    $text = '';
+                    foreach ($phpWord->getSections() as $section) {
+                        foreach ($section->getElements() as $element) {
+                            if (method_exists($element, 'getText')) {
+                                $text .= $element->getText() . "\n";
+                            }
+                        }
+                    }
+                }
+                $studyNote = $this->deepseekService->createStudyNote($text);
             } else if (isset($validated['audio_file'])) {
                 $path = $validated['audio_file']->store('audio', 'public');
                 $validated['file_path'] = $path;
