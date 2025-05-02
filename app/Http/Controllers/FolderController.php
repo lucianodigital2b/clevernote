@@ -25,11 +25,15 @@ class FolderController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
 
         $folders = $this->folderService->getRootFoldersForUser(Auth::id());
             
+        if($request->wantsJson()) {
+            return response()->json($folders);
+        }
+        
         return Inertia::render('Folders/Index', [
             'folders' => $folders
         ]);

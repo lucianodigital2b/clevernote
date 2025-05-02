@@ -24,6 +24,7 @@ export type Note = {
     content: string;
     summary: string;
     transcription: string;
+    folder_id?: number | null;
 };
 
 // Add Flashcard type
@@ -44,6 +45,8 @@ export type FlashcardSet = {
     flashcards_count: number;
     created_at: string;
     updated_at: string;
+    flashcards?: Flashcard[];
+
 };
 
 
