@@ -1,10 +1,38 @@
 import React, { useState, useEffect } from "react";
-import { Menu, X, BookText } from "lucide-react";
+import { Menu, X, BookText, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useTranslation } from 'react-i18next';
+
+const languages = [
+  { code: 'en', name: 'English' },
+  { code: 'es', name: 'Español' },
+  { code: 'pt-BR', name: 'Português' }
+];
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { i18n } = useTranslation();
+  const [currentLang, setCurrentLang] = useState(i18n.language);
+
+  useEffect(() => {
+    setCurrentLang(i18n.language);
+  }, [i18n.language]);
+
+  const handleLanguageChange = (value: string) => {
+    if (value) {
+      i18n.changeLanguage(value);
+      setCurrentLang(value);
+      localStorage.setItem('i18nextLng', value);
+    }
+  };
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,6 +93,27 @@ const Navbar = () => {
             >
               Pricing
             </a>
+            <div className="ml-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Globe className="h-4 w-4" />
+                    {languages.find(lang => lang.code === currentLang)?.name}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {languages.map((lang) => (
+                    <DropdownMenuItem
+                      key={lang.code}
+                      onClick={() => handleLanguageChange(lang.code)}
+                    >
+                      {lang.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
             <div className="ml-4">
               <Button variant="outline" size="sm" className="mr-2" asChild>
                 <a href="/login">Log In</a>
@@ -114,6 +163,33 @@ const Navbar = () => {
             >
               Pricing
             </a>
+            <div className="flex space-x-2 pt-2">
+              <Button variant="outline" size="sm" className="flex-1" asChild>
+                <a href="/login">Log In</a>
+              </Button>
+              <Button size="sm" className="flex-1 bg-indigo-500 hover:bg-indigo-600" asChild>
+                <a href="/register">Sign Up</a>
+              </Button>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="gap-2 w-full justify-start">
+                  <Globe className="h-4 w-4" />
+                  {languages.find(lang => lang.code === currentLang)?.name}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {languages.map((lang) => (
+                  <DropdownMenuItem
+                    key={lang.code}
+                    onClick={() => setCurrentLang(lang.code)}
+                  >
+                    {lang.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <div className="flex space-x-2 pt-2">
               <Button variant="outline" size="sm" className="flex-1" asChild>
                 <a href="/login">Log In</a>

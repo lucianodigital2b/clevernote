@@ -18,6 +18,7 @@ import { UpgradeModal } from '@/components/upgrade-modal';
 import { useRequireSubscription } from '@/hooks/useRequireSubscription';
 import OnboardingForm from '@/components/onboardingForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useTranslation } from 'react-i18next';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -37,6 +38,9 @@ export default function Dashboard() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
     const { auth } = usePage().props;
+
+    const { t } = useTranslation();
+
     const user = (auth as any).user;
 
     useEffect(() => {
@@ -128,12 +132,12 @@ export default function Dashboard() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Dashboard" />
+            <Head title={t('Dashboard')} />
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 {/* New Note Section */}
                 <section>
-                    <h2 className="text-xl font-semibold mb-2">New note</h2>
-                    <p className="text-neutral-500 mb-4">Record/upload audio, send a document or use a YouTube URL</p>
+                    <h2 className="text-xl font-semibold mb-2">{t('New note')}</h2>
+                    <p className="text-neutral-500 mb-4">{t('Record/upload audio, send a document or use a YouTube URL')}</p>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div 
@@ -144,7 +148,7 @@ export default function Dashboard() {
                                 <div className="bg-neutral-100 dark:bg-neutral-700 p-2 rounded-full">
                                     <Upload className="h-5 w-5 text-neutral-500" />
                                 </div>
-                                <span className="font-medium">Upload audio</span>
+                                <span className="font-medium">{t('Upload audio')}</span>
                             </div>
                         </div>
 
@@ -156,7 +160,7 @@ export default function Dashboard() {
                                 <div className="bg-red-100 dark:bg-red-900/30 p-2 rounded-full">
                                     <Mic className="h-5 w-5 text-red-500" />
                                 </div>
-                                <span className="font-medium">Record audio</span>
+                                <span className="font-medium">{t('Record audio')}</span>
                             </div>
                         </div>
                         
@@ -169,8 +173,7 @@ export default function Dashboard() {
                                     <Youtube className="h-5 w-5 text-red-500 " />
                                 </div>
                                 <div>
-                                    <span className="font-medium">Youtube</span>
-                                    {/* <p className="text-xs text-neutral-500">YouTube, websites, Google Drive, etc</p> */}
+                                    <span className="font-medium">{t('Youtube')}</span>
                                 </div>
                             </div>
                         </div>
@@ -183,34 +186,32 @@ export default function Dashboard() {
                                 <div className="bg-neutral-100 dark:bg-neutral-700 p-2 rounded-full">
                                     <FileText className="h-5 w-5 text-neutral-500" />
                                 </div>
-                                <span className="font-medium">Upload PDF/text</span>
+                                <span className="font-medium">{t('Upload PDF/text')}</span>
                             </div>
                         </div>
-                        
-                        
                     </div>
                 </section>
                 
                 {/* My Notes Section */}
                 <section>
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-4 w-full">
-                        <h2 className="text-xl font-semibold w-full sm:w-auto">My notes</h2>
+                        <h2 className="text-xl font-semibold w-full sm:w-auto">{t('My notes')}</h2>
                         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                             <div className="relative w-full sm:w-64">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
                                 <Input 
                                     type="text" 
-                                    placeholder="Search any note" 
+                                    placeholder={t('Search any note')}
                                     className="pl-9 w-full bg-neutral-100 dark:bg-neutral-800 border-none"
                                     value={searchQuery}
                                     onChange={(e) => {
                                         setSearchQuery(e.target.value);
-                                        setPage(1); // Reset to first page on new search
+                                        setPage(1);
                                     }}
                                 />
                             </div>
                             <Button variant="outline" className="flex items-center gap-2 w-full sm:w-auto">
-                                <span>All notes</span>
+                                <span>{t('All notes')}</span>
                             </Button>
                         </div>
                     </div>
@@ -226,9 +227,9 @@ export default function Dashboard() {
                     ) : notes.length === 0 ? (
                         <div className="bg-white dark:bg-neutral-800 p-8 rounded-lg text-center flex flex-col items-center">
                             <div className="mb-4 text-5xl">📝</div>
-                            <h3 className="text-lg font-medium mb-2">No notes yet</h3>
+                            <h3 className="text-lg font-medium mb-2">{t('No notes yet')}</h3>
                             <p className="text-neutral-500 max-w-md">
-                                Create your first note by recording audio, uploading a file, or adding a web link from the options above.
+                                {t('Create your first note')}
                             </p>
                         </div>
                     ) : (
