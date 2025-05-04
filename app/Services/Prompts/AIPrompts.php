@@ -59,4 +59,31 @@ class AIPrompts
     {
         return "Create a multiple-choice quiz based on the following content. Content:\n\n" . $content;
     }
+
+
+    public static function mindmapPrompt(string $content): string
+    {
+        return "Generate a comprehensive mindmap structure based on the following note content.
+
+                The output must be in React Flow-compatible JSON format, including both nodes and edges.
+
+                Nodes should reflect the hierarchy and relationships within the content, with clear parent-child connections.
+
+                Include a root node that summarizes the overall topic, followed by key concepts, subtopics, and supporting ideas.
+
+                Each node should have:
+
+                A unique id
+
+                A type of 'default'
+
+                A data field with a label (short, descriptive title)
+
+                A position object (you can generate default x/y values like { x: 0, y: 0 })
+
+                Edges should connect child nodes to their respective parent using source and target IDs.
+
+                Nodes should be in the language of the note content.
+                Return only the JSON object with nodes and edges in a format ready to be used in React Flow.\n\nContent:\n" . $content;
+    }
 }

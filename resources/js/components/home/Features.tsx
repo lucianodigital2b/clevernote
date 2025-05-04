@@ -10,71 +10,66 @@ import {
   FileSearch,
   FileText
 } from "lucide-react";
-
-const featureItems = [
-  {
-    icon: <Mic className="w-5 h-5 text-indigo-600" />,
-    title: "Voice to Text Conversion",
-    description:
-      "Transform your spoken content into written notes with our AI-powered transcription technology. Perfect for lectures and meetings.",
-  },
-  {
-    icon: <Languages className="w-5 h-5 text-indigo-600" />,
-    title: "Multilingual Support",
-    description:
-      "Access transcription and note-taking in over 100 languages, making learning accessible regardless of your native tongue.",
-  },
-  {
-    icon: <FileSearch className="w-5 h-5 text-indigo-600" />,
-    title: "Smart Content Analysis",
-    description:
-      "Our AI analyzes your notes to create concise summaries and identify key insights, saving you hours of review time.",
-  },
-  {
-    icon: <FileText className="w-5 h-5 text-indigo-600" />,
-    title: "Learning Materials Generator",
-    description:
-      "Automatically create customized study materials like quizzes and flashcards from your notes to reinforce learning.",
-  },
-  {
-    icon: <Search className="w-5 h-5 text-indigo-600" />,
-    title: "Instant Search",
-    description:
-      "Find any note instantly with powerful search across all your content and attachments.",
-  },
-  {
-    icon: <Sparkles className="w-5 h-5 text-indigo-600" />,
-    title: "AI Summaries",
-    description:
-      "Get instant AI-powered summaries of lengthy content to focus on what matters most.",
-  },
-  {
-    icon: <BookOpen className="w-5 h-5 text-indigo-600" />,
-    title: "Study Modes",
-    description:
-      "Switch between focused study mode, flashcard mode, and mind mapping with a click.",
-  },
-  {
-    icon: <Lightbulb className="w-5 h-5 text-indigo-600" />,
-    title: "Knowledge Connections",
-    description:
-      "Discover connections between notes and ideas with automated linking suggestions.",
-  },
-];
+import { useTranslation } from "react-i18next";
 
 const Features = () => {
+  const { t } = useTranslation();
+
+  const featureItems = [
+    {
+      icon: <Mic className="w-5 h-5 text-indigo-600" />,
+      title: t('voice_to_text_title'),
+      description: t('voice_to_text_description'),
+    },
+    {
+      icon: <Languages className="w-5 h-5 text-indigo-600" />,
+      title: t('multilingual_support_title'),
+      description: t('multilingual_support_description'),
+    },
+    {
+      icon: <FileSearch className="w-5 h-5 text-indigo-600" />,
+      title: t('smart_analysis_title'),
+      description: t('smart_analysis_description'),
+    },
+    {
+      icon: <FileText className="w-5 h-5 text-indigo-600" />,
+      title: t('materials_generator_title'),
+      description: t('materials_generator_description'),
+    },
+    {
+      icon: <Search className="w-5 h-5 text-indigo-600" />,
+      title: t('instant_search_title'),
+      description: t('instant_search_description'),
+    },
+    {
+      icon: <Sparkles className="w-5 h-5 text-indigo-600" />,
+      title: t('ai_summaries_title'),
+      description: t('ai_summaries_description'),
+    },
+    {
+      icon: <BookOpen className="w-5 h-5 text-indigo-600" />,
+      title: t('study_modes_title'),
+      description: t('study_modes_description'),
+    },
+    {
+      icon: <Lightbulb className="w-5 h-5 text-indigo-600" />,
+      title: t('knowledge_connections_title'),
+      description: t('knowledge_connections_description'),
+    },
+  ];
+
   return (
     <section id="features" className="py-20 bg-white">
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <div className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-700 mb-4">
-            Powerful Features
+            {t('powerful_features')}
           </div>
           <h2 className="text-3xl md:text-4xl font-display font-bold text-gray-900 tracking-tight mb-4">
-            Everything you need to excel in learning
+            {t('features_heading')}
           </h2>
           <p className="text-xl text-gray-600">
-            Designed for students and lifelong learners, Clevernote helps you capture, organize, and retain information more effectively.
+            {t('features_description')}
           </p>
         </div>
 

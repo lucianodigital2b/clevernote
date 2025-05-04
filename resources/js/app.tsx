@@ -7,6 +7,7 @@ import { route as routeFn } from 'ziggy-js';
 import { initializeTheme } from './hooks/use-appearance';
 import axios from 'axios';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import './i18n';
 
 declare global {
     const route: typeof routeFn;

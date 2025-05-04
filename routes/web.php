@@ -8,6 +8,7 @@ use App\Http\Controllers\FlashcardController;
 use App\Http\Controllers\FlashcardSetController;
 use App\Http\Controllers\FolderFlashcardController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MindmapController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\QuizController;
@@ -80,6 +81,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/onboarding', [OnboardingController::class, 'store'])
         ->name('onboarding.store');
 
+    Route::post('/notes/{note}/generate-mindmap', [MindmapController::class, 'generate']);
+    Route::get('/mindmaps/{mindmap}', [MindmapController::class, 'show'])->name('mindmaps.show');
+    Route::patch('/mindmaps/{mindmap}', [MindmapController::class, 'update'])->name('mindmaps.update');
 });
 
 

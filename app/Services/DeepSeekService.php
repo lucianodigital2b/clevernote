@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Mindmap;
+use App\Models\Note;
 use App\Services\Prompts\AIPrompts;
 
 use Illuminate\Support\Facades\Http;
@@ -45,5 +47,24 @@ class DeepSeekService extends AbstractAIService
         $prompt = AIPrompts::flashcardPrompt($content, $language);
         
         return $this->sendRequest($prompt);
+    }
+
+
+    public function createMindMap(Note $note): Mindmap
+    {
+        $language = $language ?? $this->defaultLanguage;
+        
+        $prompt = AIPrompts::mindmapPrompt($note->content);
+        $mindmapData = $this->sendRequest($prompt);
+
+        $mindmap = Mindmap::create([
+            'note_id' => $note->id,
+            'title' => $note->title . ' Mindmap',
+            'nodes' => $mindmapData['nodes'],
+            'edges' => $mindmapData['edges'],
+        ]);
+
+        return $mindmap;
+
     }
 }

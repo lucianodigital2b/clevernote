@@ -3,76 +3,47 @@ import React, { useState } from "react";
 import { Check, CheckCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { router } from "@inertiajs/react";
+import { useTranslation } from "react-i18next";
 
 const pricingPlans = [
-  // {
-  //   name: "Free",
-  //   price: "$0",
-  //   description: "Perfect for casual note-takers",
-  //   features: [
-  //     { included: true, text: "3 notes with AI" },
-  //     { included: true, text: "Basic text formatting" },
-  //     // { included: true, text: "Mobile & desktop access" },
-  //     { included: false, text: "Spaced repetition" },
-  //     // { included: false, text: "Advanced collaboration" },
-  //     // { included: false, text: "Priority support" },
-  //   ],
-  //   cta: "Get Started",
-  //   popular: false,
-  // },
   {
     name: "Student",
     monthlyPrice: "$6.99",
     annualPrice: "$41.99",
     billedMonthly: "$6.99",
     billedAnnually: "$3.50",
-    description: "Ideal for individual students",
+    description: "pricing_student_description",
     features: [
-      { included: true, text: "Unlimited rich notes" },
-      { included: true, text: "Advanced formatting" },
-      { included: true, text: "Flashcards" },
-      { included: true, text: "Quizzes" },
-      { included: true, text: "Unlimited AI summaries" },
-      { included: true, text: "Spaced repetition" },
-      { included: true, text: "Advanced collaboration" },
-      { included: true, text: "Priority support" },
+      { included: true, text: "pricing_feature_unlimited_notes" },
+      { included: true, text: "pricing_feature_advanced_formatting" },
+      { included: true, text: "pricing_feature_flashcards" },
+      { included: true, text: "pricing_feature_quizzes" },
+      { included: true, text: "pricing_feature_ai_summaries" },
+      { included: true, text: "pricing_feature_spaced_repetition" },
+      { included: true, text: "pricing_feature_collaboration" },
+      { included: true, text: "pricing_feature_priority_support" },
     ],
-    cta: "Start Trial",
+    cta: "pricing_start_trial",
     popular: true,
   },
-  // {
-  //   name: "Premium",
-  //   price: "$12",
-  //   description: "For power users and professionals",
-  //   features: [
-  //     { included: true, text: "Unlimited rich notes" },
-  //     { included: true, text: "Advanced formatting" },
-  //     { included: true, text: "20GB file storage" },
-  //     { included: true, text: "Unlimited AI summaries" },
-  //     { included: true, text: "Advanced spaced repetition" },
-  //     { included: true, text: "Collaborative workspaces" },
-  //     { included: true, text: "Priority support" },
-  //   ],
-  //   cta: "Start Trial",
-  //   popular: false,
-  // },
 ];
 
 const Pricing = () => {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("annual");
+  const { t } = useTranslation();
 
   return (
     <section id="pricing" className="py-20 bg-white">
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <div className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-brand-100 text-brand-700 mb-4">
-            Simple Pricing
+            {t('pricing_simple')}
           </div>
           <h2 className="text-3xl md:text-4xl font-display font-bold text-gray-900 tracking-tight mb-4">
-            Choose the perfect plan for your needs
+            {t('pricing_heading')}
           </h2>
           <p className="text-xl text-gray-600 mb-8">
-            Whether you're a casual note-taker or a serious student, we have a plan that fits your needs.
+            {t('pricing_subheading')}
           </p>
 
           <div className="flex items-center justify-center mb-8">
@@ -85,7 +56,7 @@ const Pricing = () => {
                 }`}
                 onClick={() => setBillingCycle("monthly")}
               >
-                Monthly
+                {t('pricing_monthly')}
               </button>
               <button
                 className={`px-4 py-2 text-sm font-medium rounded-full transition-all ${
@@ -95,7 +66,7 @@ const Pricing = () => {
                 }`}
                 onClick={() => setBillingCycle("annual")}
               >
-                Annual <span className="text-brand-600 font-semibold">Save 20%</span>
+                {t('pricing_annual')} <span className="text-brand-600 font-semibold">{t('pricing_save_20')}</span>
               </button>
             </div>
           </div>
@@ -114,25 +85,25 @@ const Pricing = () => {
               >
                 {plan.popular && (
                   <div className="bg-brand-500 text-white text-center py-2 text-sm font-medium">
-                    Most Popular
+                    {t('pricing_most_popular')}
                   </div>
                 )}
                 <div className="p-6 md:p-8 bg-white">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                  <p className="text-gray-600 mb-4">{plan.description}</p>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{t(plan.name)}</h3>
+                  <p className="text-gray-600 mb-4">{t(plan.description)}</p>
                   <div className="flex items-baseline mb-6">
                     {billingCycle === "annual" ? (
                       <>
                         <span className="text-4xl font-bold text-gray-900">{plan.billedAnnually}</span>
-                        <span className="text-gray-500 ml-2">/mo</span>
+                        <span className="text-gray-500 ml-2">{t('pricing_per_month')}</span>
                         <span className="text-sm text-gray-500 ml-2">
-                          (billed {plan.annualPrice}/year)
+                          {t('pricing_billed_annually', { price: plan.annualPrice })}
                         </span>
                       </>
                     ) : (
                       <>
                         <span className="text-4xl font-bold text-gray-900">{plan.monthlyPrice}</span>
-                        <span className="text-gray-500 ml-2">/month</span>
+                        <span className="text-gray-500 ml-2">{t('pricing_per_month')}</span>
                       </>
                     )}
                   </div>
@@ -145,7 +116,7 @@ const Pricing = () => {
                     }`}
                     onClick={() => router.visit('/register')}
                   >
-                    {plan.cta}
+                    {t(plan.cta)}
                   </Button>
 
                   <ul className="space-y-3">
@@ -159,14 +130,12 @@ const Pricing = () => {
                         ) : (
                           <X className="w-5 h-5 text-gray-300 mt-0.5 mr-3 flex-shrink-0" />
                         )}
-                          <CheckCircle className="w-4 h-4 text-indigo-500 mr-2" />
-
                         <span
                           className={
                             feature.included ? "text-gray-700" : "text-gray-400"
                           }
                         >
-                          {feature.text}
+                          {t(feature.text)}
                         </span>
                       </li>
                     ))}
@@ -179,10 +148,10 @@ const Pricing = () => {
 
         <div className="text-center mt-10 text-gray-600 max-w-xl mx-auto">
           <p>
-            Need a custom plan for your team or organization?{" "}
+            {t('pricing_custom_plan')}{" "}
             <a href="#" className="text-brand-600 underline hover:text-brand-700">
-              Contact us
-            </a>.
+              {t('pricing_contact_us')}
+            </a>
           </p>
         </div>
       </div>

@@ -160,13 +160,31 @@ export default function Edit({ note }: { note: Note }) {
         }
     };
 
+    // Add new state for mindmap loading modal
+    const [isMindmapLoading, setIsMindmapLoading] = useState(false);
+
+    const handleCreateMindmap = async () => {
+        setIsMindmapLoading(true);
+        try {
+            const response = await axios.post(`/notes/${note.id}/generate-mindmap`);
+            if (response.data && response.data.mindmap) {
+                router.visit(`/mindmaps/${response.data.mindmap.id}`);
+                toastConfig.success("Mindmap generated successfully");
+            }
+        } catch (error) {
+            toastConfig.error("Failed to generate mindmap");
+        } finally {
+            setIsMindmapLoading(false);
+        }
+    };
+
     const actions = [
         { icon: '📝', label: 'Create flashcards', action: handleCreateFlashcards },
         { icon: '❓', label: 'Create a quiz', action: handleCreateQuizz },
+        { icon: '🗺️', label: 'Mindmap', action: handleCreateMindmap },
         // { icon: '💬', label: 'Chat with note', action: () => setIsChatOpen(true) },
         // { icon: '🌐', label: 'Translate', action: () => console.log('Translate') },
         // { icon: '🎥', label: 'Create video', action: () => console.log('Create video') },
-        // { icon: '🗺️', label: 'Mindmap', action: () => console.log('Mindmap') },
     ];
 
 
@@ -510,6 +528,19 @@ export default function Edit({ note }: { note: Note }) {
                         <div className="text-lg font-medium text-neutral-700 dark:text-neutral-200">
                             Generating quiz...
                         </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+            
+            {/* Add this before the closing AppLayout tag */}
+            <Dialog open={isMindmapLoading} onOpenChange={setIsMindmapLoading}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <div className="flex flex-col items-center justify-center p-4">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
+                        <h3 className="text-lg font-medium text-center">Generating Mindmap</h3>
+                        <p className="text-sm text-neutral-500 text-center mt-2">
+                            Please wait while we generate your mindmap...
+                        </p>
                     </div>
                 </DialogContent>
             </Dialog>
