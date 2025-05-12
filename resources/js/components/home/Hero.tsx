@@ -54,10 +54,7 @@ const Hero = () => {
               </Button>
             </div>
             
-            <div className="flex items-center text-sm text-gray-500">
-              <CheckCircle className="w-4 h-4 text-teal-500 mr-2" />
-              {t('free_trial')}
-            </div>
+          
           </div>
           
           <div className="w-full lg:w-1/2 relative" ref={notesRef}>

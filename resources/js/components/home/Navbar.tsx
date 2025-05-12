@@ -96,7 +96,7 @@ const Navbar = () => {
             <div className="ml-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button variant="outline" size="sm" className="gap-2 border-2 bg-white text-black">
                     <Globe className="h-4 w-4" />
                     {languages.find(lang => lang.code === currentLang)?.name}
                   </Button>
@@ -115,10 +115,10 @@ const Navbar = () => {
             </div>
 
             <div className="ml-4">
-              <Button variant="outline" size="sm" className="mr-2" asChild>
+              <Button variant="outline" size="sm" className="mr-2 border-2" asChild>
                 <a href="/login">Log In</a>
               </Button>
-              <Button size="sm" className="bg-indigo-500 hover:bg-indigo-600" asChild>
+              <Button size="sm" className="bg-indigo-500 hover:bg-indigo-600 text-white" asChild>
                 <a href="/register">Sign Up</a>
               </Button>
             </div>
@@ -164,7 +164,7 @@ const Navbar = () => {
               Pricing
             </a>
             <div className="flex space-x-2 pt-2">
-              <Button variant="outline" size="sm" className="flex-1" asChild>
+              <Button variant="outline" size="sm" className="flex-1 border-2" asChild>
                 <a href="/login">Log In</a>
               </Button>
               <Button size="sm" className="flex-1 bg-indigo-500 hover:bg-indigo-600" asChild>
@@ -173,7 +173,7 @@ const Navbar = () => {
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-2 w-full justify-start">
+                <Button variant="ghost" size="sm" className="gap-2 w-full justify-start bg-white">
                   <Globe className="h-4 w-4" />
                   {languages.find(lang => lang.code === currentLang)?.name}
                 </Button>

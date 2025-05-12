@@ -70,5 +70,21 @@
   "pricing_feature_collaboration": "Advanced collaboration",
   "pricing_feature_priority_support": "Priority support",
   "pricing_custom_plan": "Need a custom plan for your team or organization?",
-  "pricing_contact_us": "Contact us"
+  "pricing_contact_us": "Contact us",
+  "Question": "Question",
+  "of": "of",
+  "Shuffle": "Shuffle",
+  "Export PDF": "Export PDF",
+  "Reset Quiz": "Reset Quiz",
+  "Score": "Score",
+  "Explanation": "Explanation",
+  "Submit Answer": "Submit Answer",
+  "Next Question": "Next Question",
+  "Finish Quiz": "Finish Quiz",
+  "Quiz completed! Score: {{score}}/{{total}}": "Quiz completed! Score: {{score}}/{{total}}",
+  "Failed to save quiz attempt": "Failed to save quiz attempt",
+  "This quiz is based on your note": "This quiz is based on your note",
+  "{{count}} questions": "{{count}} questions",
+  "Test your knowledge and track your progress": "Test your knowledge and track your progress",
+  "Start Quiz": "Start Quiz"
 }

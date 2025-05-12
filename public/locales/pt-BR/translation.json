@@ -70,5 +70,21 @@
   "pricing_feature_collaboration": "Colaboração avançada",
   "pricing_feature_priority_support": "Suporte prioritário",
   "pricing_custom_plan": "Precisa de um plano personalizado para sua equipe ou organização?",
-  "pricing_contact_us": "Contate-nos"
+  "pricing_contact_us": "Contate-nos",
+  "Question": "Questão",
+  "of": "de",
+  "Shuffle": "Embaralhar",
+  "Export PDF": "Exportar PDF",
+  "Reset Quiz": "Reiniciar Quiz",
+  "Score": "Pontuação",
+  "Explanation": "Explicação",
+  "Submit Answer": "Enviar Resposta",
+  "Next Question": "Próxima Questão",
+  "Finish Quiz": "Finalizar Quiz",
+  "Quiz completed! Score: {{score}}/{{total}}": "Quiz concluído! Pontuação: {{score}}/{{total}}",
+  "Failed to save quiz attempt": "Falha ao salvar a tentativa do quiz",
+  "This quiz is based on your note": "Este quiz é baseado na sua anotação",
+  "{{count}} questions": "{{count}} questões",
+  "Test your knowledge and track your progress": "Teste seu conhecimento e acompanhe seu progresso",
+  "Start Quiz": "Iniciar Quiz"
 }
