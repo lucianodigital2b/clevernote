@@ -40,8 +40,6 @@ interface Props {
 export default function Show({ quiz }: Props) {
     const [isQuizStarted, setIsQuizStarted] = useState(false);
 
-    const [answers, setAnswers] = useState<Array<{ question_id: string; option_id: string }>>([]);
-
     const handleQuizComplete = async (score: number, selectedAnswers: Array<{ question_id: string; option_id: string }>) => {
         try {
             const response = await axios.post(`/quizzes/${quiz.id}/attempt`, {

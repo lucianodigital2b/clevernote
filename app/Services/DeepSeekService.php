@@ -62,6 +62,7 @@ class DeepSeekService extends AbstractAIService
             'title' => $note->title . ' Mindmap',
             'nodes' => $mindmapData['nodes'],
             'edges' => $mindmapData['edges'],
+            'user_id' => $note->user_id,
         ]);
 
         return $mindmap;

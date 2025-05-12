@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Mindmap extends Model
 {
-    protected $fillable = ['note_id', 'title', 'nodes', 'edges'];
+    protected $fillable = ['note_id', 'user_id', 'title', 'nodes', 'edges'];
 
     protected $casts = [
         'nodes' => 'array',
@@ -17,5 +17,10 @@ class Mindmap extends Model
     public function note(): BelongsTo
     {
         return $this->belongsTo(Note::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }
