@@ -20,7 +20,7 @@ class FlashcardSetController extends Controller
             ->paginate(10);
 
 
-        return Inertia::render('flashcardSets/index', [
+        return Inertia::render('FlashcardSets/index', [
             'flashcardSets' => $flashcards,
         ]);
     }
