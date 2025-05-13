@@ -351,7 +351,7 @@ export default function Dashboard() {
             <Dialog open={isOnboardingOpen} onOpenChange={setIsOnboardingOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Welcome to Clevernote! 👋</DialogTitle>
+                        <DialogTitle>{t('welcome_title')}</DialogTitle>
                     </DialogHeader>
                     <OnboardingForm />
                 </DialogContent>
