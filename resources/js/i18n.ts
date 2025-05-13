@@ -18,12 +18,16 @@ i18n
     
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.json',
+      queryStringParams: { v: new Date().getTime() }
     },
 
     detection: {
       order: ['localStorage', 'cookie', 'navigator'],
       caches: ['localStorage', 'cookie'],
-    }
+    },
+
+    load: 'languageOnly',
+    cleanCode: true
   });
 
 export default i18n;
