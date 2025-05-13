@@ -14,7 +14,7 @@ class OnboardingController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'preferred_language' => 'required|string|max:2',
+            'preferred_language' => 'required|string',
             'discovery_source' => 'nullable|string|max:255',
             'primary_subject_interest' => 'nullable|string|max:255',
             'learning_goals' => 'nullable|string'

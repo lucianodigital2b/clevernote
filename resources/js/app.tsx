@@ -20,7 +20,7 @@ const queryClient = new QueryClient();
 
 // Then wrap your app with QueryClientProvider
 createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
+    title: (title) => `${title ? title + ' - ' : ''} ${appName}`,
     resolve: (name) => resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx')),
     setup({ el, App, props }) {
         const root = createRoot(el);
