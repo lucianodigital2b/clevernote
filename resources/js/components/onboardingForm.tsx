@@ -31,6 +31,10 @@ export default function OnboardingForm({ onClose }: { onClose?: () => void }) {
             onSuccess: () => {
                 toast.success('Onboarding completed successfully!');
                 window.location.reload()
+            },
+            onError: (errors) => {
+                toast.error('An error occurred while saving your onboarding data.');
+                console.error(errors);
             }
         });
     };
