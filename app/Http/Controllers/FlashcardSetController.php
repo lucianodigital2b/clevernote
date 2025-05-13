@@ -27,7 +27,7 @@ class FlashcardSetController extends Controller
     
     public function create()
     {
-        return Inertia::render('flashcardSets/create');
+        return Inertia::render('FlashcardSets/create');
     }
     
     public function store(Request $request)
@@ -59,7 +59,7 @@ class FlashcardSetController extends Controller
 
         $flashcardSet->load('flashcards');
 
-        return Inertia::render('flashcardSets/show', [
+        return Inertia::render('FlashcardSets/show', [
             'flashcardSet' => $flashcardSet,
             'flashcards' => $flashcardSet->flashcards
         ]);
@@ -71,7 +71,7 @@ class FlashcardSetController extends Controller
 
         $flashcardSet->load('flashcards');
 
-        return Inertia::render('flashcardSets/edit', [
+        return Inertia::render('FlashcardSets/edit', [
             'flashcardSet' => $flashcardSet
         ]);
     }
@@ -136,7 +136,7 @@ class FlashcardSetController extends Controller
     
         $flashcardSet->load('flashcards');
     
-        return Inertia::render('flashcardSets/study', [
+        return Inertia::render('FlashcardSets/study', [
             'flashcardSet' => $flashcardSet
         ]);
     }
