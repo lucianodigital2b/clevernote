@@ -133,7 +133,7 @@ export default function Dashboard() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={t('Dashboard')} />
-            <div className="flex h-full flex-1 flex-col gap-6 p-6">
+            <div className="flex h-full flex-1 flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
                 {/* New Note Section */}
                 <section>
                     <h2 className="text-xl font-semibold mb-2">{t('New note')}</h2>
@@ -194,9 +194,9 @@ export default function Dashboard() {
                 
                 {/* My Notes Section */}
                 <section>
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-4 w-full">
-                        <h2 className="text-xl font-semibold w-full sm:w-auto">{t('My notes')}</h2>
-                        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 mb-4 w-full">
+                        <h2 className="text-xl font-semibold">{t('My notes')}</h2>
+                        <div className="flex flex-col sm:flex-row items-center gap-2">
                             <div className="relative w-full sm:w-64">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
                                 <Input 
@@ -210,7 +210,7 @@ export default function Dashboard() {
                                     }}
                                 />
                             </div>
-                            <Button variant="outline" className="flex items-center gap-2 w-full sm:w-auto">
+                            <Button variant="outline" className="flex items-center gap-2">
                                 <span>{t('All notes')}</span>
                             </Button>
                         </div>

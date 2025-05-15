@@ -28,7 +28,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                 </SelectTrigger>
                 <SelectContent>
                     {languages
-                        .filter(lang => lang.value && ['en', 'es', 'pt-BR'].includes(lang.value))
+                        .filter(lang => lang.value && ['en', 'es', 'pt'].includes(lang.value))
                         .map((lang) => (
                             <SelectItem key={lang.value} value={lang.value || ''}>
                                 {lang.label}

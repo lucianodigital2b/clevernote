@@ -1,4 +1,8 @@
 import { LucideIcon } from 'lucide-react';
+import { Mindmap } from './mindmap';
+
+export * from './mindmap';
+
 
 export interface Auth {
     user: User;
@@ -25,7 +29,37 @@ export type Note = {
     summary: string;
     transcription: string;
     folder_id?: number | null;
+    flashcard_sets: FlashcardSet[];
+    quizzes: Quiz[];
+    mindmaps: Mindmap[];
 };
+
+
+export type Quiz = {
+    id: number;
+    title: string;
+    description?: string;
+    questions: QuizQuestion[];
+    created_at: string;
+    note?: {
+        id: number;
+        title: string;
+    };
+}
+
+export type QuizOption = {
+    id: string;
+    text: string;
+}
+
+export type QuizQuestion = {
+    id: string;
+    question: string;
+    type: string;
+    explanation?: string;
+    options: QuizOption[];
+    correctOptionId: string;
+}
 
 // Add Flashcard type
 export type Flashcard = {

@@ -12,13 +12,13 @@ import { useTranslation } from 'react-i18next';
 const languages = [
   { code: 'en', name: 'English' },
   { code: 'es', name: 'Español' },
-  { code: 'pt-BR', name: 'Português' }
+  { code: 'pt', name: 'Português' }
 ];
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [currentLang, setCurrentLang] = useState(i18n.language);
 
   useEffect(() => {
@@ -79,19 +79,19 @@ const Navbar = () => {
               href="#features"
               className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
             >
-              Features
+              {t('nav_features')}
             </a>
             <a
               href="#testimonials"
               className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
             >
-              Testimonials
+              {t('nav_testimonials')}
             </a>
             <a
               href="#pricing"
               className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
             >
-              Pricing
+              {t('nav_pricing')}
             </a>
             <div className="ml-2">
               <DropdownMenu>
@@ -116,10 +116,10 @@ const Navbar = () => {
 
             <div className="ml-4">
               <Button variant="outline" size="sm" className="mr-2 bg-white text-black border-zinc-200 hover:bg-zinc-100 hover:text-black" asChild>
-                <a href="/login">Log In</a>
+                <a href="/login">{t('nav_login')}</a>
               </Button>
               <Button size="sm" className="bg-indigo-500 hover:bg-indigo-600 text-white" asChild>
-                <a href="/register">Sign Up</a>
+                <a href="/register">{t('nav_signup')}</a>
               </Button>
             </div>
           </div>
@@ -147,28 +147,28 @@ const Navbar = () => {
               className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Features
+              {t('nav_features')}
             </a>
             <a
               href="#testimonials"
               className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Testimonials
+              {t('nav_testimonials')}
             </a>
             <a
               href="#pricing"
               className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Pricing
+              {t('nav_pricing')}
             </a>
             <div className="flex space-x-2 pt-2">
               <Button variant="outline" size="sm" className="flex-1 bg-white text-black border-zinc-200 hover:bg-white hover:text-black" asChild>
-                <a href="/login">Log In</a>
+                <a href="/login">{t('nav_login')}</a>
               </Button>
               <Button size="sm" className="flex-1 bg-indigo-500 hover:bg-indigo-600" asChild>
-                <a href="/register">Sign Up</a>
+                <a href="/register">{t('nav_signup')}</a>
               </Button>
             </div>
             <DropdownMenu>
@@ -182,22 +182,13 @@ const Navbar = () => {
                 {languages.map((lang) => (
                   <DropdownMenuItem
                     key={lang.code}
-                    onClick={() => setCurrentLang(lang.code)}
+                    onClick={() => handleLanguageChange(lang.code)}
                   >
                     {lang.name}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-
-            <div className="flex space-x-2 pt-2">
-              <Button variant="outline" size="sm" className="flex-1 bg-white" asChild>
-                <a href="/login">Log In</a>
-              </Button>
-              <Button size="sm" className="flex-1 bg-indigo-500 hover:bg-indigo-600" asChild>
-                <a href="/register">Sign Up</a>
-              </Button>
-            </div>
           </div>
         </div>
       )}

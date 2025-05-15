@@ -113,6 +113,14 @@ export default function Edit({ note }: { note: Note }) {
     const handleCreateFlashcards = async () => {
         setIsFlashcardModalOpen(true);
         try {
+            // Check if flashcard set already exists in preloaded data
+            if (note.flashcard_sets && note.flashcard_sets.length > 0) {
+                setIsFlashcardModalOpen(false);
+                router.visit(`/flashcard-sets/${note.flashcard_sets[0].id}`);
+                return;
+            }
+
+            // If no existing flashcard set, create a new one
             const response = await axios.post(`/notes/${note.id}/generate-flashcards`);
             if (response.data && response.data.flashcardSetId) {
                 setIsFlashcardModalOpen(false);
@@ -148,6 +156,14 @@ export default function Edit({ note }: { note: Note }) {
     const handleCreateQuizz = async () => {
         setIsQuizModalOpen(true);
         try {
+            // Check if quiz already exists in preloaded data
+            if (note.quizzes && note.quizzes.length > 0) {
+                setIsQuizModalOpen(false);
+                router.visit(`/quizzes/${note.quizzes[0].id}`);
+                return;
+            }
+
+            // If no existing quiz, create a new one
             const response = await axios.post(`/quizzes/generate-from-note/${note.id}`);
             if (response.data) {
                 setIsQuizModalOpen(false);
@@ -166,6 +182,13 @@ export default function Edit({ note }: { note: Note }) {
     const handleCreateMindmap = async () => {
         setIsMindmapLoading(true);
         try {
+            // Check if mindmap already exists in preloaded data
+            if (note.mindmaps && note.mindmaps.length > 0) {
+                router.visit(`/mindmaps/${note.mindmaps[0].id}`);
+                return;
+            }
+
+            // If no existing mindmap, create a new one
             const response = await axios.post(`/notes/${note.id}/generate-mindmap`);
             if (response.data && response.data.mindmap) {
                 router.visit(`/mindmaps/${response.data.mindmap.id}`);
