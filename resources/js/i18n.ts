@@ -10,8 +10,7 @@ i18n
   .init({
     fallbackLng: 'en',
     debug: process.env.NODE_ENV === 'development',
-    supportedLngs: ['en', 'es', 'pt-BR'],
-    
+    supportedLngs: ['en', 'es', 'pt'],
     interpolation: {
       escapeValue: false,
     },
@@ -24,10 +23,7 @@ i18n
     detection: {
       order: ['localStorage', 'cookie', 'navigator'],
       caches: ['localStorage', 'cookie'],
-    },
-
-    load: 'languageOnly',
-    cleanCode: true
+    }
   });
 
 export default i18n;

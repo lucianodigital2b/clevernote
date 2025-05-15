@@ -68,7 +68,10 @@ export function AppSidebar() {
         queryFn: async () => {
             const response = await axios.get('/api/folders-with-counts');
             return response.data.folders;
-        }
+        },
+        staleTime: 30000, // Data remains fresh for 30 seconds
+        refetchOnWindowFocus: false, // Prevent refetch on window focus
+        refetchOnMount: false // Prevent refetch on component mount
     });
     
     const folders = data || [];

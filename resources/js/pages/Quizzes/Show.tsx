@@ -6,32 +6,11 @@ import { QuizContent } from '@/components/quiz/quiz-content';
 import AppLayout from '@/layouts/app-layout';
 import { toast } from 'sonner';
 import axios from 'axios';
+import { Quiz } from '@/types';
 
-interface QuizOption {
-    id: string;
-    text: string;
-}
 
-interface QuizQuestion {
-    id: string;
-    question: string;
-    type: string;
-    explanation?: string;
-    options: QuizOption[];
-    correctOptionId: string;
-}
 
-interface Quiz {
-    id: number;
-    title: string;
-    description?: string;
-    questions: QuizQuestion[];
-    created_at: string;
-    note?: {
-        id: number;
-        title: string;
-    };
-}
+
 
 interface Props {
     quiz: Quiz;
