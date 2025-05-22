@@ -39,11 +39,17 @@ import {
 import { MathExtension } from "@aarkue/tiptap-math-extension";
 import "katex/dist/katex.min.css";
 import Image from '@tiptap/extension-image'
+import { useDebounce } from '@/hooks/use-debounce';
 
 export default function Edit({ note }: { note: Note }) {
 
     const { errors } = usePage().props;
     
+    // Add state for processing status and polling
+    const [isProcessing, setIsProcessing] = useState(note.status === 'processing');
+    const [currentNote, setCurrentNote] = useState(note);
+    const [pollingIntervalId, setPollingIntervalId] = useState<NodeJS.Timeout | null>(null);
+
     const handleUpdate = () => {
         router.patch(`/notes/${note.id}`, {
             title: note.title,
@@ -105,6 +111,8 @@ export default function Edit({ note }: { note: Note }) {
     const [chatMessage, setChatMessage] = useState('');
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [content, setContent] = useState(note.content);
+
+    const debouncedContent = useDebounce(content, 1000); // Debounce content by 1 second
 
     // Add state for the flashcard modal
     const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
@@ -220,7 +228,8 @@ export default function Edit({ note }: { note: Note }) {
                 inline: false,
                 allowBase64: false,
             }),
-            MathExtension.configure({ evaluation: true, katexOptions: { macros: { "\\B": "\\mathbb{B}" } }, delimiters: "dollar" }),],
+            MathExtension.configure({ evaluation: true, katexOptions: { macros: { "\\B": "\\mathbb{B}" } }, delimiters: "dollar" }),
+        ],
         content: note.content,
         editorProps: {
             handlePaste: (view, event, slice) => {
@@ -278,6 +287,53 @@ export default function Edit({ note }: { note: Note }) {
     //   }, [editor]);
 
 
+    // Add useEffect for polling mechanism
+    useEffect(() => {
+        let intervalId: NodeJS.Timeout;
+
+        if (isProcessing) {
+            intervalId = setInterval(async () => {
+                try {
+                    const response = await axios.get(`/api/notes/${note.id}`);
+                    const updatedNote = response.data;
+                    
+                    if (updatedNote.status !== 'processing') {
+                        setIsProcessing(false);
+                        setCurrentNote(updatedNote);
+                        if (editor) {
+                            editor.commands.setContent(updatedNote.content);
+                        }
+                        setContent(updatedNote.content);
+                        clearInterval(intervalId);
+                    }
+                } catch (error) {
+                    console.error('Error checking note status:', error);
+                    clearInterval(intervalId);
+                    setIsProcessing(false);
+                    toastConfig.error('Failed to check note status');
+                }
+            }, 3000); // Poll every 3 seconds
+
+            setPollingIntervalId(intervalId);
+        }
+
+        return () => {
+            if (intervalId) {
+                clearInterval(intervalId);
+            } else if (pollingIntervalId) { // Clear interval on component unmount
+                clearInterval(pollingIntervalId);
+            }
+        };
+    }, [isProcessing, note.id, editor, pollingIntervalId]);
+
+    // Add useEffect for autosave
+    useEffect(() => {
+        // Only save if the editor is ready, content has changed (debounced), and not currently processing
+        if (editor && debouncedContent !== note.content && !isProcessing) {
+            handleUpdate();
+        }
+    }, [debouncedContent, editor, isProcessing, note.content]);
+
 
 
     const [deleteRelatedItems, setDeleteRelatedItems] = useState(false);
@@ -298,18 +354,18 @@ export default function Edit({ note }: { note: Note }) {
     };
 
     // In the return statement, add this before the closing div of the content section
-    <div className="mt-6 flex justify-end">
-        <Button 
-            onClick={handleUpdate}
-            className="bg-purple-600 hover:bg-purple-700"
-        >
-            Save Changes
-        </Button>
-    </div>
+    // <div className="mt-6 flex justify-end">
+    //     <Button
+    //         onClick={handleUpdate}
+    //         className="bg-purple-600 hover:bg-purple-700"
+    //     >
+    //         Save Changes
+    //     </Button>
+    // </div>
 
     return (
         <AppLayout>
-            <Head title={`${note.title} - Note`} />
+            <Head title={`${currentNote.title} - Note`} />
             
             <Dialog open={isFolderModalOpen} onOpenChange={setIsFolderModalOpen}>
                 <DialogContent className="sm:max-w-[425px]">
@@ -377,69 +433,81 @@ export default function Edit({ note }: { note: Note }) {
                             </div>
                         </div>
 
-                        {/* Title */}
-                        <h1 className="text-2xl font-semibold mb-4">{note.title}</h1>
-                        
-                        {/* Date */}
-                        <div className="text-sm text-neutral-500 mb-6">
-                            {dayjs(note.created_at).format('DD MMM YYYY, hh:mm A')}
-                        </div>
-
-
-                        <ValidationErrors errors={errors} />
-
-                        {/* Toggle Button */}
-                        {/* <Button
-                            variant="outline"
-                            onClick={() => setIsActionsVisible(!isActionsVisible)}
-                            className="mb-4"
-                        >
-                            {isActionsVisible ? 'Hide Actions' : 'Show Actions'}
-                        </Button> */}
-
-                        {/* Actions Grid with animation */}
-                        <div className={`transition-all duration-300 ease-in-out ${isActionsVisible ? 'opacity-100 max-h-[500px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
-                                {actions.map((action, index) => (
-                                    <Button
-                                        key={index}
-                                        variant="outline"
-                                        className="flex items-center gap-2 justify-start p-4 h-auto"
-                                        onClick={action.action}
-                                    >
-                                        <span className="text-lg">{action.icon}</span>
-                                        <span>{action.label}</span>
-                                    </Button>
-                                ))}
+                        {isProcessing ? (
+                            <div className="flex flex-col items-center justify-center min-h-[500px]">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+                                <p className="mt-4 text-lg text-neutral-600 dark:text-neutral-400">Processing note content...</p>
+                                <p className="text-sm text-neutral-500">This may take a few moments.</p>
                             </div>
-                        </div>
+                        ) : (
+                            <>
+                                {/* Title */}
+                                <h1 className="text-2xl font-semibold mb-4">{currentNote.title}</h1>
+                                
+                                {/* Date */}
+                                <div className="text-sm text-neutral-500 mb-6">
+                                    {dayjs(currentNote.created_at).format('DD MMM YYYY, hh:mm A')}
+                                </div>
 
-                        {/* Content */}
-                        <div className="">
-                            <div className="border-b border-neutral-200 dark:border-neutral-800 -mx-6 mb-6" />
-                            
-                            {/* Markdown Editor */}
-                            {editor ? (
-                                <>
-                                    <TiptapToolbar editor={editor} />
-                                    <EditorContent editor={editor} className="prose dark:prose-invert max-w-none min-h-[500px] focus:outline-none" />
-                                </>
-                            ) : (
-                                <p>Loading editor...</p>
-                            )}
-                            
-                            {/* Save Button */}
-                            <div className="mt-6 flex justify-end">
-                                <Button 
-                                    onClick={handleUpdate}
-                                    className="bg-purple-600 hover:bg-purple-700 text-white"
+
+                                <ValidationErrors errors={errors} />
+
+                                {/* Toggle Button */}
+                                {/* <Button
+                                    variant="outline"
+                                    onClick={() => setIsActionsVisible(!isActionsVisible)}
+                                    className="mb-4"
                                 >
-                                    Save Changes
-                                </Button>
-                            </div>
-                        </div>
-                        {/* Editor Toolbar */}
-                        
+                                    {isActionsVisible ? 'Hide Actions' : 'Show Actions'}
+                                </Button> */}
+
+                                {/* Actions Grid with animation */}
+                                <div className={`transition-all duration-300 ease-in-out ${isActionsVisible ? 'opacity-100 max-h-[500px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
+                                        {actions.map((action, index) => (
+                                            <Button
+                                                key={index}
+                                                variant="outline"
+                                                className="flex items-center gap-2 justify-start p-4 h-auto"
+                                                onClick={action.action}
+                                                disabled={isProcessing} // Disable actions while processing
+                                            >
+                                                <span className="text-lg">{action.icon}</span>
+                                                <span>{action.label}</span>
+                                            </Button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Content */}
+                                <div className="">
+                                    <div className="border-b border-neutral-200 dark:border-neutral-800 -mx-6 mb-6" />
+                                    
+                                    {/* Markdown Editor */}
+                                    {editor ? (
+                                        <>
+                                            <TiptapToolbar editor={editor} />
+                                            <EditorContent editor={editor} className="prose dark:prose-invert max-w-none min-h-[500px] focus:outline-none" />
+                                        </>
+                                    ) : (
+                                        <p>Loading editor...</p>
+                                    )}
+                                    
+                                    {/* Save Button */}
+                                    {/* <div className="mt-6 flex justify-end">
+                                        <Button
+                                            onClick={handleUpdate}
+                                            className="bg-purple-600 hover:bg-purple-700 text-white"
+                                            disabled={isProcessing} // Disable save button while processing
+                                        >
+                                            Save Changes
+                                        </Button>
+                                    </div> */}
+                                </div>
+                                {/* Editor Toolbar */}
+                                
+                            </>
+                        )}
 
                     </div>
                 </div>

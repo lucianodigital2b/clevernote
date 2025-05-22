@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Head } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export default function Show({ quiz }: Props) {
+    const { t } = useTranslation();
     const [isQuizStarted, setIsQuizStarted] = useState(false);
 
     const handleQuizComplete = async (score: number, selectedAnswers: Array<{ question_id: string; option_id: string }>) => {
@@ -25,10 +27,10 @@ export default function Show({ quiz }: Props) {
                 answers: selectedAnswers
             });
 
-            toast.success(`Quiz completed! Score: ${score}/${quiz.questions.length}`);
+            toast.success(t('quiz_completed', { score, total: quiz.questions.length }));
         } catch (error) {
             console.error('Error saving quiz attempt:', error);
-            toast.error('Failed to save quiz attempt');
+            toast.error(t('quiz_save_error'));
         }
     };
 
@@ -54,7 +56,7 @@ export default function Show({ quiz }: Props) {
                         {quiz.note && (
                             <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                                 <p className="text-sm text-blue-600 dark:text-blue-400">
-                                    This quiz is based on your note:{' '}
+                                    {t('quiz_based_on_note')}{' '}
                                     <a
                                         href={`/notes/${quiz.note.id}`}
                                         className="font-medium hover:underline"
@@ -69,10 +71,10 @@ export default function Show({ quiz }: Props) {
                             <div className="flex flex-col items-center justify-center space-y-4 mt-8">
                                 <div className="text-center mb-4">
                                     <p className="text-lg mb-2">
-                                        {quiz.questions.length} questions
+                                        {t('quiz_questions_count', { count: quiz.questions.length })}
                                     </p>
                                     <p className="text-neutral-600 dark:text-neutral-400">
-                                        Test your knowledge and track your progress
+                                        {t('quiz_test_knowledge')}
                                     </p>
                                 </div>
 
@@ -81,7 +83,7 @@ export default function Show({ quiz }: Props) {
                                     onClick={() => setIsQuizStarted(true)}
                                     className="w-full max-w-sm"
                                 >
-                                    Start Quiz
+                                    {t('quiz_start')}
                                 </Button>
                             </div>
                         ) : (

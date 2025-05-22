@@ -8,16 +8,18 @@ import { FlashcardSet } from '@/types';
 import { Search, Grid, List } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Download } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     flashcardSet: FlashcardSet;
 }
 
 const Show = ({ flashcardSet }: Props) => {
+    const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
     const [isGridView, setIsGridView] = useState(true);
 
-    const filteredFlashcards = flashcardSet.flashcards.filter(flashcard => 
+    const filteredFlashcards = flashcardSet.flashcards?.filter(flashcard => 
         flashcard.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
         flashcard.answer.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -53,26 +55,26 @@ const Show = ({ flashcardSet }: Props) => {
                         <Button variant="outline" asChild>
                             <Link href={`/flashcard-sets/${flashcardSet.id}/edit`} className="flex items-center gap-2">
                                 <Pencil className="h-4 w-4" />
-                                Edit Set
+                                {t('edit_set')}
                             </Link>
                         </Button>
                         <Button asChild>
                             <Link href={`/flashcard-sets/${flashcardSet.id}/study`} className="flex items-center gap-2">
                                 <Brain className="h-4 w-4" />
-                                Study Now
+                                {t('study_now')}
                             </Link>
                         </Button>
                     </div>
                 </div>
 
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-medium">Flashcards ({filteredFlashcards.length})</h2>
+                    <h2 className="text-xl font-medium">{t('flashcards')} ({filteredFlashcards.length})</h2>
                     <div className="flex gap-3">
                         <div className="relative w-64">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
                             <Input
                                 type="search"
-                                placeholder="Search flashcards..."
+                                placeholder={t('search_flashcards')}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="pl-10"
@@ -99,7 +101,7 @@ const Show = ({ flashcardSet }: Props) => {
                         <Button variant="outline" asChild>
                             <Link href={`/flashcard-sets/${flashcardSet.id}/flashcards/create`} className="flex items-center gap-2">
                                 <Plus className="h-4 w-4" />
-                                Add Flashcard
+                                {t('add_flashcard')}
                             </Link>
                         </Button>
                     </div>
@@ -112,14 +114,14 @@ const Show = ({ flashcardSet }: Props) => {
                                 <div className="space-y-4">
                                     <div>
                                         <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2">
-                                            Question
-                                        </h3>
-                                        <p className="text-lg">{flashcard.question}</p>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2">
-                                            Answer
-                                        </h3>
+                                    {t('flashcard_question')}
+                                </h3>
+                                <p className="text-lg">{flashcard.question}</p>
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2">
+                                    {t('flashcard_answer')}
+                                </h3>
                                         <p className="text-lg">{flashcard.answer}</p>
                                     </div>
                                 </div>
@@ -131,10 +133,10 @@ const Show = ({ flashcardSet }: Props) => {
                 {flashcardSet.flashcards.length === 0 && (
                     <div className="text-center py-12">
                         <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">
-                            No flashcards yet
+                            {t('no_flashcards_yet')}
                         </h3>
                         <p className="text-neutral-500 mt-2">
-                            Start by adding your first flashcard to this set
+                            {t('start_first_flashcard')}
                         </p>
                     </div>
                 )}

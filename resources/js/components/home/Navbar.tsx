@@ -82,10 +82,10 @@ const Navbar = () => {
               {t('nav_features')}
             </a>
             <a
-              href="#testimonials"
+              href="#faq"
               className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
             >
-              {t('nav_testimonials')}
+              FAQ
             </a>
             <a
               href="#pricing"

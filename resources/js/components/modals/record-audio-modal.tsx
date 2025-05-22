@@ -17,7 +17,7 @@ interface RecordAudioModalProps {
 export function RecordAudioModal({ open, onOpenChange, folders }: RecordAudioModalProps) {
     const [noteTitle, setNoteTitle] = useState('');
     const [selectedFolder, setSelectedFolder] = useState('');
-    const [selectedLanguage, setSelectedLanguage] = useState('en');
+    const [selectedLanguage, setSelectedLanguage] = useState('autodetect');
     const [isRecording, setIsRecording] = useState(false);
     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
@@ -65,11 +65,14 @@ export function RecordAudioModal({ open, onOpenChange, folders }: RecordAudioMod
             language: selectedLanguage
         });
 
-        if (success) {
+        if (success && success.id) {
             setNoteTitle('');
             setSelectedFolder('');
             setAudioBlob(null);
-            onOpenChange(false);
+            onOpenChange(false, true, success.id);
+        } else if (success === null) {
+            // Handle error case if createNote returns null
+            onOpenChange(false, false);
         }
     };
 

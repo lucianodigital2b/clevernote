@@ -1,11 +1,10 @@
 [
-  {"value": null, "label": "Autodetect"},
+  {"value": "autodetect", "label": "Auto detect"},
   {"value": "en", "label": "English"},
   {"value": "es", "label": "Spanish"},
   {"value": "fr", "label": "French"},
   {"value": "de", "label": "German"},
   {"value": "it", "label": "Italian"},
-  {"value": "pt-BR", "label": "Portuguese"},
   {"value": "pt", "label": "Portuguese"},
   {"value": "nl", "label": "Dutch"},
   {"value": "ru", "label": "Russian"},

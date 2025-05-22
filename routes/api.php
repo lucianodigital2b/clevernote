@@ -26,5 +26,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/folders-with-counts', [FolderController::class, 'getFoldersWithCounts']);
 
+
 });
 

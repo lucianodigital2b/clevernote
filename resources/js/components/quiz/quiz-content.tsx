@@ -139,18 +139,18 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
             
             // Calculate percentage
             const percentage = Math.round((score / questions.length) * 100);
-            let message = `Congratulations! 🎉\n`;
-            message += `You've completed the quiz with a score of ${score}/${questions.length} (${percentage}%)`;
+            let message = t('quiz_congratulations') + '\n';
+            message += t('quiz_score_message', { score, total: questions.length, percentage });
             
             // Add encouraging message based on performance
             if (percentage >= 90) {
-                message += "\nExcellent work! You've mastered this topic! 🌟";
+                message += '\n' + t('quiz_excellent_message');
             } else if (percentage >= 70) {
-                message += '\nGreat job! Keep up the good work! 👏';
+                message += '\n' + t('quiz_great_message');
             } else if (percentage >= 50) {
-                message += "\nGood effort! With some review, you'll do even better! 💪";
+                message += '\n' + t('quiz_good_message');
             } else {
-                message += "\nKeep practicing! Every attempt helps you learn! 📚";
+                message += '\n' + t('quiz_keep_practicing_message');
             }
             
             toastConfig.success(message, {
@@ -187,7 +187,7 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
         <div className="max-w-3xl mx-auto space-y-6">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">
-                    <span>{t('Question')} {currentQuestionIndex + 1} {t('of')} {questions.length}</span>
+                    <span>{t('quiz_question_of', { current: currentQuestionIndex + 1, total: questions.length })}</span>
                     <Button
                         variant="outline"
                         size="sm"
@@ -196,7 +196,7 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
                         className="flex items-center gap-2"
                     >
                         <ArrowPathIcon className="w-4 h-4" />
-                        {t('Shuffle')}
+                        {t('quiz_shuffle')}
                     </Button>
                     <Button
                         variant="outline"
@@ -205,7 +205,7 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
                         className="flex items-center gap-2"
                     >
                         <DocumentArrowDownIcon className="w-4 h-4" />
-                        {t('Export PDF')}
+                        {t('quiz_export_pdf')}
                     </Button>
                     <Button
                         variant="outline"
@@ -214,10 +214,10 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
                         className="flex items-center gap-2 text-yellow-600 hover:text-yellow-700"
                     >
                         <ArrowPathIcon className="w-4 h-4" />
-                        {t('Reset Quiz')}
+                        {t('quiz_reset')}
                     </Button>
                 </div>
-                <span className="text-indigo-600 dark:text-indigo-400">{t('Score')}: {score}/{currentQuestionIndex + 1}</span>
+                <span className="text-indigo-600 dark:text-indigo-400">{t('quiz_score_of', { current: score, total: currentQuestionIndex + 1 })}</span>
             </div>
 
             <div className="mb-6">
@@ -266,7 +266,7 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
                         animate={{ opacity: 1, y: 0 }}
                         className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800"
                     >
-                        <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">{t('Explanation')}:</h3>
+                        <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">{t('quiz_explanation')}:</h3>
                         <p className="text-blue-700 dark:text-blue-200">{currentQuestion.explanation}</p>
                     </motion.div>
                 )}
@@ -278,14 +278,14 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
                             disabled={!selectedOptionId}
                             className="bg-indigo-600 hover:bg-indigo-700"
                         >
-                            {t('Submit Answer')}
+                            {t('quiz_submit_answer')}
                         </Button>
                     ) : (
                         <Button
                             onClick={handleNextQuestion}
                             className="bg-indigo-600 hover:bg-indigo-700"
                         >
-                            {currentQuestionIndex === questions.length - 1 ? t('Finish Quiz') : t('Next Question')}
+                            {currentQuestionIndex === questions.length - 1 ? t('quiz_finish') : t('quiz_next_question')}
                         </Button>
                     )}
                 </div>

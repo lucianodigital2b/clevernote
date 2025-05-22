@@ -84,6 +84,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/notes/{note}/generate-mindmap', [MindmapController::class, 'generate']);
     Route::get('/mindmaps/{mindmap}', [MindmapController::class, 'show'])->name('mindmaps.show');
     Route::patch('/mindmaps/{mindmap}', [MindmapController::class, 'update'])->name('mindmaps.update');
+
+
 });
 
 

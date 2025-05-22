@@ -7,13 +7,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Jijunair\LaravelReferral\Traits\Referrable;
 use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, Billable, HasApiTokens;
+    use HasFactory, Notifiable, Billable, HasApiTokens, Referrable;
 
     protected $with = ['subscriptions', 'activeSubscriptions'];
     protected $withCount = ['notes'];

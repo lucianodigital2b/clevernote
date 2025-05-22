@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import Navbar from "../components/home/Navbar";
 import Hero from "../components/home/Hero";
 import Features from "../components/home/Features";
+import FAQ from "../components/home/FAQ";
 import Testimonials from "../components/home/Testimonials";
 import Pricing from "../components/home/Pricing";
 import CallToAction from "../components/home/CallToAction";
@@ -70,6 +71,7 @@ const Welcome = () => {
       <section id="features"><Features /></section>
       {/* <section id="testimonials"><Testimonials /></section> */}
       <section id="pricing"><Pricing /></section>
+      <section id="faq"><FAQ /></section>
       <section id="cta"><CallToAction /></section>
       <Footer />
     </div>

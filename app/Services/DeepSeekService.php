@@ -31,6 +31,7 @@ class DeepSeekService extends AbstractAIService
     public function createStudyNote(string $transcription, ?string $language = null): array
     {
         $language = $language ?? $this->defaultLanguage;
+        // dump($transcription);
         $prompt = AIPrompts::studyNotePrompt($transcription, $language);
         
         $studyNote = $this->sendRequest($prompt);

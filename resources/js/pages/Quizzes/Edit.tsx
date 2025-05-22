@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/app-layout';
+import { useTranslation } from 'react-i18next';
 
 interface QuizOption {
   id: string;
@@ -35,6 +36,7 @@ interface Props {
 }
 
 export default function Edit({ quiz }: Props) {
+  const { t } = useTranslation();
   const { data, setData, put, processing, errors } = useForm({
     title: quiz.title,
     description: quiz.description || '',
@@ -93,15 +95,15 @@ export default function Edit({ quiz }: Props) {
 
   return (
     <AppLayout>
-      <Head title="Edit Quiz" />
+      <Head title={t('edit_quiz')} />
 
       <form onSubmit={handleSubmit} className="p-6 max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Edit Quiz</h1>
+        <h1 className="text-3xl font-bold mb-6">{t('edit_quiz')}</h1>
 
         <div className="bg-white rounded-lg shadow p-6 mb-6 space-y-4">
           <div className="space-y-4">
             <div>
-              <Label htmlFor="title">Quiz Title</Label>
+              <Label htmlFor="title">{t('quiz_title')}</Label>
               <Input
                 id="title"
                 value={data.title}
@@ -112,7 +114,7 @@ export default function Edit({ quiz }: Props) {
             </div>
 
             <div>
-              <Label htmlFor="description">Description (Optional)</Label>
+              <Label htmlFor="description">{t('quiz_description_optional')}</Label>
               <Textarea
                 id="description"
                 value={data.description}
@@ -127,7 +129,7 @@ export default function Edit({ quiz }: Props) {
                 checked={data.is_published}
                 onCheckedChange={(checked) => setData('is_published', checked)}
               />
-              <Label htmlFor="published">Published</Label>
+              <Label htmlFor="published">{t('quiz_published')}</Label>
             </div>
           </div>
         </div>
@@ -143,7 +145,7 @@ export default function Edit({ quiz }: Props) {
             >
               <div className="bg-white rounded-lg shadow p-6 mb-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">Question {questionIndex + 1}</h2>
+                  <h2 className="text-xl font-semibold">{t('question_number', { number: questionIndex + 1 })}</h2>
                   <button
                     type="button"
                     onClick={() => removeQuestion(question.id)}
@@ -155,7 +157,7 @@ export default function Edit({ quiz }: Props) {
 
                 <div className="space-y-4">
                   <div>
-                    <Label>Question Text</Label>
+                    <Label>{t('question_text')}</Label>
                     <Input
                       value={question.question}
                       onChange={(e) => {
@@ -167,7 +169,7 @@ export default function Edit({ quiz }: Props) {
                   </div>
 
                   <div>
-                    <Label>Question Type</Label>
+                    <Label>{t('question_type')}</Label>
                     <Select
                       value={question.type}
                       onValueChange={(value) => {
@@ -177,25 +179,25 @@ export default function Edit({ quiz }: Props) {
                       }}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select question type" />
+                        <SelectValue placeholder={t('select_question_type')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
-                        <SelectItem value="true-false">True/False</SelectItem>
-                        <SelectItem value="fill-in-blank">Fill in the Blank</SelectItem>
+                        <SelectItem value="multiple-choice">{t('multiple_choice')}</SelectItem>
+                        <SelectItem value="true-false">{t('true_false')}</SelectItem>
+                        <SelectItem value="fill-in-blank">{t('fill_in_blank')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div>
-                    <Label className="mb-2">Options</Label>
+                    <Label className="mb-2">{t('options')}</Label>
                     {question.options.map((option, optionIndex) => (
                       <div
                         key={option.id}
                         className="flex gap-2 mb-2"
                       >
                         <Input
-                          placeholder={`Option ${optionIndex + 1}`}
+                          placeholder={t('option_number', { number: optionIndex + 1 })}
                           value={option.text}
                           onChange={(e) => {
                             const newQuestions = [...data.questions];
@@ -241,12 +243,12 @@ export default function Edit({ quiz }: Props) {
                       className="mt-2"
                     >
                       <PlusIcon className="w-5 h-5 mr-2" />
-                      Add Option
+                      {t('add_option')}
                     </Button>
                   </div>
 
                   <div>
-                    <Label>Explanation (Optional)</Label>
+                    <Label>{t('explanation_optional')}</Label>
                     <Textarea
                       value={question.explanation}
                       onChange={(e) => {
@@ -270,13 +272,13 @@ export default function Edit({ quiz }: Props) {
             onClick={addQuestion}
           >
             <PlusIcon className="w-5 h-5 mr-2" />
-            Add Question
+            {t('add_question')}
           </Button>
           <Button
             type="submit"
             disabled={processing}
           >
-            Save Changes
+            {t('save_changes')}
           </Button>
         </div>
       </form>

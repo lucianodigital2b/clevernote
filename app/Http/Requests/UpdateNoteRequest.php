@@ -23,7 +23,7 @@ class UpdateNoteRequest extends FormRequest
     {
         return [
             'title' => 'string|max:255',
-            'folder_id' => 'integer|exists:folders,id',
+            'folder_id' => 'integer|exists:folders,id|nullable',
             'audio_file' =>'file|mimes:mp3,ogg,flac,wav',
             'title' => 'nullable|string', 
             'content' => 'nullable|string', 
