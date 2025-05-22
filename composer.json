@@ -12,6 +12,7 @@
         "php": "^8.2",
         "dompdf/dompdf": "^3.1",
         "inertiajs/inertia-laravel": "^2.0",
+        "jijunair/laravel-referral": "^1.0",
         "laravel/cashier": "^15.6",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",

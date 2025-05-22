@@ -11,7 +11,7 @@ abstract class AbstractAIService
     protected $apiKey;
     protected $apiEndpoint;
     protected $model;
-    protected $defaultLanguage = 'en';
+    protected $defaultLanguage = 'detect';
 
     public function __construct()
     {
@@ -71,17 +71,22 @@ abstract class AbstractAIService
     {
         $content = $response->json('choices.0.message.content');
 
-        $data = json_decode(str_replace(["\\n", "\\", "\n", "\r"], '', trim($content, "\"\"\\")), true);
+
+        // $data = json_decode(str_replace(["\\n", "\\", "\n", "\r"], '', trim($content, "\"\"\\")), true);
+        $data = json_decode($content, true);
         
+
         Log::error(print_r($data, true));
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            Log::error('JSON Parsing Error', [
-                'service' => static::class,
-                'error' => json_last_error_msg(),
-                'response' => $content
-            ]);
-            throw new \Exception('Invalid JSON response: ' . json_last_error_msg());
-        }
+        // Log::error('chegou');
+
+        // if (json_last_error() !== JSON_ERROR_NONE) {
+        //     Log::error('JSON Parsing Error', [
+        //         'service' => static::class,
+        //         'error' => json_last_error_msg(),
+        //         'response' => $content
+        //     ]);
+        //     throw new \Exception('Invalid JSON response: ' . json_last_error_msg());
+        // }
         
 
         return $data;

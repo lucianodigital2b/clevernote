@@ -12,7 +12,7 @@ class Note extends Model implements HasMedia
     /** @use HasFactory<\Database\Factories\NoteFactory> */
     use HasFactory, InteractsWithMedia;
 
-    protected $fillable = ['folder_id', 'user_id', 'title', 'content', 'transcription', 'summary', 'is_pinned'];
+    protected $fillable = ['folder_id', 'user_id', 'title', 'content', 'transcription', 'summary', 'is_pinned', 'status'];
 
     public function registerMediaCollections(): void
     {
@@ -42,5 +42,10 @@ class Note extends Model implements HasMedia
     public function quizzes()
     {
         return $this->hasMany(Quiz::class);
+    }
+
+    public function mindmaps()
+    {
+        return $this->hasMany(Mindmap::class);
     }
 }

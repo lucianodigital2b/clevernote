@@ -7,30 +7,42 @@ class AIPrompts
     public static function studyNotePrompt(string $content, string $language): string
     {
         return <<<EOT
+            Language Instructions:
+            1. First, determine the target language:
+               - If {$language} is specified, use that language for ALL output.
+               - If {$language} is 'autodetect':
+                 a. Analyze the input content's language patterns and characteristics
+                 b. Identify the primary language used
+                 c. Use the detected language for ALL output
+                 d. Only default to English if language detection confidence is below 50%
+
             You are an AI assistant that converts raw transcription into a well-structured study note using **HTML formatting**. 
             Don't be shy to use tables, titles, lists etc.
 
-            Writing Style Prompt
-                Focus on clarity: Make your message really easy to understand.
-                It should be a college essay. Make it long and detailed.
+            Writing Style Prompt:
+            - Focus on clarity: Make your message really easy to understand
+            - Write at a college essay level - detailed and comprehensive
+            - Maintain academic/professional tone appropriate for study materials
+            - Use the determined target language consistently throughout
 
             Instructions:
-            1. Read and analyze the transcription provided.
-            2. Extract key concepts, important points, and examples.
+            1. Read and analyze the transcription in the context of the target language
+            2. Extract key concepts, important points, and examples
             3. Write a study note in the following **valid JSON** format (parseable by PHP's `json_decode`):
 
             {
-                "title": "A short, clear title summarizing the main topic.",
-                "content": "Detailed explanation using HTML: include headings, bullet points, bold text, examples, etc.",
-                "summary": "2-3 sentence summary of the key takeaways."
+                "title": "A clear title summarizing the main topic (in target language)",
+                "content": "Detailed explanation using HTML: include headings, bullet points, bold text, examples, etc. (in target language)",
+                "summary": "2-3 sentence summary of key takeaways (in target language)"
             }
 
             Requirements:
-            - Use HTML formatting for structure and clarity.
-            - Return **only** the JSON object, no extra text.
-            - Make sure the JSON is valid and can be decoded with PHP's `json_decode`.
+            - Use HTML formatting for structure and clarity
+            - Return **only** the JSON object, no extra text
+            - Ensure JSON is valid and can be decoded with PHP's `json_decode`
+            - Generate ALL text content (title, content, summary) in the target language
+            - Preserve technical terms, proper nouns, and code snippets in their original form
 
-            The note should be in the following language: {$language}
             Transcription:
             {$content}
         EOT;
@@ -48,7 +60,11 @@ class AIPrompts
             Requirements:
             - Return only a valid JSON array, no extra text.
             - Each item in the array must be an object with "question" and "answer" fields.
-            - The flashcards should be in {$language}.
+            Language Instructions:
+            - If {$language} is 'autodetect', first analyze the input content to determine its primary language.
+            - Generate all flashcards (questions and answers) in the detected language.
+            - If unable to confidently detect the language, default to English.
+            - If {$language} is specified, use that language for all flashcards.
 
             Note content:
             {$content}

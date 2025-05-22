@@ -38,6 +38,8 @@ return [
             'bucket' => env('R2_BUCKET'),
             'endpoint' => env('R2_ENDPOINT'), // important!
             'use_path_style_endpoint' => true, // required for R2
+            'url' => env('R2_CUSTOM_DOMAIN'),
+            'visibility' => 'public',
         ],
 
         'local' => [

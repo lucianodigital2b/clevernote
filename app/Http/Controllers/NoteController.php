@@ -7,6 +7,9 @@ use App\Services\NoteService;
 use App\Services\TranscriptionService;
 use App\Http\Requests\StoreNoteRequest;
 use App\Http\Requests\UpdateNoteRequest;
+use App\Jobs\ProcessAudioNote;
+use App\Jobs\ProcessLinkNote;
+use App\Jobs\ProcessPdfNote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -67,71 +70,58 @@ class NoteController extends Controller
      */
     public function store(StoreNoteRequest $request)
     {
-
         try {
             $validated = $request->validated();
             $validated['user_id'] = Auth::id();
-            $language = $validated['language'] ?? null;
+            
+            // Create a placeholder note immediately
+            $note = Note::create([
+                'user_id' => $validated['user_id'],
+                'title' => $validated['title'] ?? 'Processing Note',
+                'content' => '', // Placeholder content
+                'status' => 'processing', // Add a status column to the notes table
+                'folder_id' => $validated['folder_id'] ?? null,
+                'icon' => $validated['icon'] ?? 'file',
+            ]);
+
 
             if (isset($validated['pdf_file'])) {
                 $file = $validated['pdf_file'];
                 $extension = $file->getClientOriginalExtension();
                 $storageDir = $extension === 'pdf' ? 'pdfs' : 'docs';
                 $path = $file->store($storageDir, 'public');
-                
-                if ($extension === 'pdf') {
-                    $text = $this->noteService->extractTextFromPdf($path);
-                } else {
-                    $phpWord = \PhpOffice\PhpWord\IOFactory::load(storage_path('app/public/' . $path));
-                    $text = '';
-                    foreach ($phpWord->getSections() as $section) {
-                        foreach ($section->getElements() as $element) {
-                            if (method_exists($element, 'getText')) {
-                                $text .= $element->getText() . "\n";
-                            }
-                        }
-                    }
-                }
-                $studyNote = $this->deepseekService->createStudyNote($text);
+
+                // Remove file instance from validated data
+                unset($validated['pdf_file']);
+
+                // Dispatch job for PDF/Doc processing
+                ProcessPdfNote::dispatch($note->id, $validated, $path, $extension);
+
             } else if (isset($validated['audio_file'])) {
-                $path = $validated['audio_file']->store('audio', 'public');
-                $validated['file_path'] = $path;
-                
-                // Process audio file and get transcription
-                $transcription = $this->transcriptionService->transcribeAudio($validated['audio_file'], $language);
-                $studyNote = $this->deepseekService->createStudyNote($transcription['text'], $language);
+                $audioFile = $validated['audio_file'];
+                $path = $audioFile->store('audio', 'public');
+
+                // Remove file instance from validated data
+                unset($validated['audio_file']);
+
+                // Dispatch job for audio processing
+                ProcessAudioNote::dispatch($note->id, $validated, $path);
+
             } else if (isset($validated['link'])) {
-
-                $audio = $this->youtubeAudioExtractor->extractAudio($validated['link']);
-
-                $transcription = $this->transcriptionService->transcribeAudio($audio, $language ?? 'en');
-                $studyNote = $this->deepseekService->createStudyNote($transcription['text'], $language ?? 'en');
+                // Dispatch job for link processing
+                ProcessLinkNote::dispatch($note->id, $validated);
             }
 
 
-            $validated['content'] = $studyNote['study_note']['content'];
-            $validated['title']   = $studyNote['study_note']['title'];
-            $validated['summary']   = $studyNote['study_note']['summary'];
-            // $validated['metadata'] = [
-            //     'audio_duration' => $transcription['duration'] ?? null,
-            //     'language' => $transcription['language'] ?? 'en',
-            //     'type' => 'audio_transcription',
-            //     'original_transcription' => $studyNote['original_transcription']
-            // ];
             
-            $note = $this->noteService->createNote($validated);
-
-
+            // Return the created note object immediately
             if ($request->wantsJson()) {
-                return response()->json([
-                    'message' => 'Note created successfully',
-                    'note' => $note
-                ]);
+                return response()->json($note);
             }
 
             // Redirect to the edit page of the newly created note
-            return redirect()->route('notes.edit', $note)
-                ->with('success', 'Note created successfully.');
+            return redirect()->route('notes.edit', $note->id)
+                ->with('success', 'Note processing started. You will be redirected to the note once it\'s ready.');
         } catch (\Exception $e) {
 
             Log::error($e->getMessage());
@@ -142,7 +132,7 @@ class NoteController extends Controller
 
             return redirect()
             ->back()
-            ->with('error', $e->getMessage());
+            ->withErrors('create', $e->getMessage());
 
         }
     }
@@ -150,9 +140,13 @@ class NoteController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Note $note)
+    public function show(Note $note, Request $request)
     {
         $this->authorize('view', $note);
+
+        if($request->wantsJson()){
+            return $note->load(['tags', 'folder']);
+        }
 
         return Inertia::render('Notes/Show', [
             'note' => $note->load(['tags', 'folder'])
@@ -245,15 +239,18 @@ class NoteController extends Controller
             ], 500);
         }
 
-        // 3. Save flashcards
-        foreach ($flashcards as $card) {
-            Flashcard::create([
+
+        // 3. Save flashcards and attach them to the flashcard set
+        $createdFlashcards = collect($flashcards['flashcards'])->map(function ($card) use ($note) {
+            return Flashcard::create([
                 'folder_id' => $note->folder_id ?? null,
-                'flashcard_set_id' => $flashcardSet->id,
                 'question' => $card['question'],
                 'answer' => $card['answer'],
             ]);
-        }
+        });
+
+        // Attach all flashcards to the flashcard set using the pivot table
+        $flashcardSet->flashcards()->attach($createdFlashcards->pluck('id'));
 
         $flashcardSet->note_id = $note->id;
         $flashcardSet->save();
@@ -277,5 +274,4 @@ class NoteController extends Controller
         ]);
     }
 
-    
 }

@@ -20,11 +20,12 @@ class TranscriptionService
     /**
      * Handle audio file upload and transcription
      */
-    public function transcribeAudio(UploadedFile $file, ?string $language = null): array
+    public function transcribeAudio($fullPath, ?string $language = null): array
     {
         // Store the file temporarily
-        $path = $file->store('temp/audio', 'local');
-        $fullPath = Storage::path($path);
+        // $path = $file->store('temp/audio', 'local');
+
+        dump($fullPath, $language);
 
         try {
 
@@ -45,7 +46,7 @@ class TranscriptionService
                 "response_format" => "verbose_json",
             ];
 
-            if($language)
+            if($language != 'autodetect')
                 $postFields['language'] = $language;
 
             curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
@@ -64,7 +65,6 @@ class TranscriptionService
                 throw new \Exception('Failed to transcribe audio: ' . ($result->error->message ?? 'Unknown error'));
             }
 
-            Storage::delete($path);
 
             return [
                 'text' => $result['text'] ?? '',
@@ -73,7 +73,6 @@ class TranscriptionService
             ];
         } catch (\Exception $e) {
             // Clean up on error
-            Storage::delete($path);
             throw $e;
         }
     }

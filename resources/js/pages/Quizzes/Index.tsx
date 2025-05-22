@@ -12,6 +12,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import AppLayout from '@/layouts/app-layout';
+import { t } from 'i18next';
 
 interface QuizOption {
   id: number;
@@ -75,7 +76,7 @@ export default function Index({ quizzes }: Props) {
       
       <div className="container mx-auto py-6 px-4">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-semibold">My Quizzes</h1>
+          <h1 className="text-2xl font-semibold">{t('My Quizzes')}</h1>
           {/* <Button asChild>
             <Link href="/quizzes/create">
               Create Quiz
@@ -120,16 +121,16 @@ export default function Index({ quizzes }: Props) {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
                           <Link href={`/quizzes/${quiz.id}`}>
-                            View Quiz
+                            {t('View Quiz')}
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link href={`/quizzes/${quiz.id}/edit`}>
-                            Edit Quiz
+                            {t('Edit Quiz')}
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem className="text-red-500" onClick={() => handleDelete(quiz.id)}>
-                          Delete Quiz
+                          {t('Delete Quiz')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -142,11 +143,11 @@ export default function Index({ quizzes }: Props) {
                   )}
 
                   <div className="flex justify-between items-center text-sm text-neutral-500">
-                    <span>Created {new Date(quiz.created_at).toLocaleDateString()}</span>
+                    <span>{t('Created')} {new Date(quiz.created_at).toLocaleDateString()}</span>
                     
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/quizzes/${quiz.id}`} className="flex items-center gap-2">
-                        Take Quiz
+                        {t('Take Quiz')}
                         <PencilIcon className="h-4 w-4" />
                       </Link>
                     </Button>
@@ -160,10 +161,10 @@ export default function Index({ quizzes }: Props) {
         {quizzes.data.length === 0 && (
           <div className="text-center py-12">
             <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">
-              No quizzes yet
+              {t('No quizzes yet')}
             </h3>
             <p className="text-neutral-500 mt-2">
-              Generate your first quiz to start testing your knowledge
+              {t('Generate your first quiz')}
             </p>
           </div>
         )}
@@ -173,8 +174,8 @@ export default function Index({ quizzes }: Props) {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         onConfirm={confirmDelete}
-        title="Delete Quiz"
-        description="Are you sure you want to delete this quiz? This action cannot be undone."
+        title={t('delete_quiz_title')}
+        description={t('delete_quiz_confirmation')}
       />
     </AppLayout>
   );

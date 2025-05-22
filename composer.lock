@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cd9f4658470d063853fad1029873bc57",
+    "content-hash": "9b0c18f2c7cec5a550cae57c79ec7e46",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1631,6 +1631,69 @@
                 "source": "https://github.com/Jean85/pretty-package-versions/tree/2.1.1"
             },
             "time": "2025-03-19T14:43:43+00:00"
+        },
+        {
+            "name": "jijunair/laravel-referral",
+            "version": "v1.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jijunair/laravel-referral.git",
+                "reference": "3fab42b5fe5b9824d82f562c7ca29e9aea3da139"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jijunair/laravel-referral/zipball/3fab42b5fe5b9824d82f562c7ca29e9aea3da139",
+                "reference": "3fab42b5fe5b9824d82f562c7ca29e9aea3da139",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/auth": "^8.0|^9.0|^10.0|^11.0|^12.0",
+                "illuminate/database": "^8.0|^9.0|^10.0|^11.0|^12.0",
+                "php": "^7.2|^7.3|^7.4|^8.0|^8.1|^8.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.4|^10.0|^11.0|^12.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Jijunair\\LaravelReferral\\Providers\\ReferralServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Jijunair\\LaravelReferral\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jiju Nair",
+                    "email": "hello@jijunair.com"
+                }
+            ],
+            "description": "Laravel package for a referral system",
+            "homepage": "https://github.com/jijunair/laravel-referral",
+            "keywords": [
+                "affiliate",
+                "jijunair",
+                "laravel",
+                "laravel-referral",
+                "package",
+                "referral",
+                "referral-system",
+                "user-referral"
+            ],
+            "support": {
+                "issues": "https://github.com/jijunair/laravel-referral/issues",
+                "source": "https://github.com/jijunair/laravel-referral/tree/v1.0.4"
+            },
+            "time": "2025-05-02T03:13:23+00:00"
         },
         {
             "name": "laravel/cashier",

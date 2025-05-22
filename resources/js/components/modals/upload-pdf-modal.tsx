@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useCreateNote } from "@/hooks/use-create-note";
 import type { Folder } from "@/types";
 import { Dropzone } from "../ui/dropzone";
+import languages from "@/utils/languages.json";
 
 interface UploadPdfModalProps {
     open: boolean;
@@ -18,6 +19,7 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
     const [noteTitle, setNoteTitle] = useState('');
     const [selectedFolder, setSelectedFolder] = useState('');
     const [pdfFile, setPdfFile] = useState<File | null>(null);
+    const [selectedLanguage, setSelectedLanguage] = useState<string>('autodetect');
     const { createNote, isUploading } = useCreateNote();
 
     const handleSubmit = async () => {
@@ -26,7 +28,8 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
         const success = await createNote('pdf', {
             title: noteTitle,
             folder_id: selectedFolder,
-            pdf_file: pdfFile
+            pdf_file: pdfFile,
+            language: selectedLanguage
         });
 
         // if (success) {
@@ -34,7 +37,15 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
         //     setSelectedFolder('');
         //     setPdfFile(null);
         //     onOpenChange(false);
-        // }
+        if (success && success.id) {
+            setNoteTitle('');
+            setSelectedFolder('');
+            setPdfFile(null);
+            onOpenChange(false, true, success.id);
+        } else if (success === null) {
+            // Handle error case if createNote returns null
+            onOpenChange(false, false);
+        }
     };
 
     return (
@@ -85,6 +96,23 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
                                     <SelectItem key={folder.id} value={folder.id.toString()}>
                                         {folder.name}
                                     </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="language">Language</Label>
+                        <Select
+                            value={selectedLanguage}
+                            onValueChange={setSelectedLanguage}
+                            disabled={isUploading}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select language" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {languages.map(lang => (
+                                    <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>

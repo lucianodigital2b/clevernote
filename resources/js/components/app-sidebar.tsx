@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -10,6 +11,7 @@ import AppLogo from './app-logo';
 import { CreateFolderModal } from '@/components/create-folder-modal';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
+import { t } from 'i18next';
 
 const mainNavItems: NavItem[] = [
     {
@@ -23,33 +25,33 @@ const mainNavItems: NavItem[] = [
         icon: Layers, 
     },
     {
-        title: 'Quizzes',
+        title: t('Quizzes'),
         url: '/quizzes',
         icon: GraduationCap,
-        tooltip: 'Coming soon',
+        tooltip: t('Coming soon'),
     },
     {
-        title: 'Podcast (soon)',
+        title: t('Podcast') + ' (' + t('Coming soon') + ')',
         url: '#',
         icon: Headphones,
-        tooltip: 'Coming soon',
+        tooltip: t('Coming soon'),
     },
     {
-        title: 'BrainRot (soon)',
+        title: t('BrainRot') + ' (' + t('Coming soon') + ')',
         url: '#',
         icon: BrainCircuit,
-        tooltip: 'Coming soon',
+        tooltip: t('Coming soon'),
     },
 ];
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Create folder',
+        title: t('Create folder'),
         url: '#', // Changed to # to prevent navigation
         icon: Folder,
     },
     {
-        title: 'Feedback',
+        title: t('Feedback'),
         url: 'https://clevernote.featurebase.app/',
         icon: MessageSquare,
     }
@@ -57,6 +59,7 @@ const footerNavItems: NavItem[] = [
 
 
 export function AppSidebar() {
+    const { t } = useTranslation();
     const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
     
     const { auth } = usePage().props;
@@ -105,7 +108,7 @@ export function AppSidebar() {
                 <SidebarGroup>
                     <div className="flex items-center justify-between px-3 py-2">
                         <h2 className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
-                            Folders
+                            {t('Folders')}
                         </h2>
                         {/* <button 
                             onClick={() => setIsFolderModalOpen(true)}
@@ -119,11 +122,11 @@ export function AppSidebar() {
                         <SidebarMenu>
                             {isLoading ? (
                                 <div className="px-3 py-2 text-sm text-neutral-500">
-                                    Loading folders...
+                                    {t('Loading folders...')}
                                 </div>
                             ) : folders.length === 0 ? (
                                 <div className="px-3 py-2 text-sm text-neutral-500">
-                                    No folders yet
+                                    {t('No folders yet')}
                                 </div>
                             ) : (
                                 folders.map((folder : any) => (

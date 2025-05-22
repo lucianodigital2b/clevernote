@@ -1,5 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import { PaginatedResponse, FlashcardSet } from '@/types';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -14,6 +15,7 @@ import {
 import { router } from '@inertiajs/react'
 import { toast } from 'sonner';
 import {DeleteConfirmationDialog} from '@/components/delete-confirmation-dialog';
+import { t } from 'i18next';
 
 interface Props {
     flashcardSets: PaginatedResponse<FlashcardSet>;
@@ -33,11 +35,11 @@ export default function Index({ flashcardSets }: Props) {
 
         router.delete(`/flashcard-sets/${selectedSetId}`, {
             onSuccess: () => {
-                toast.success('Flashcard set and its flashcards deleted successfully.');
+                toast.success(t('delete_success'));
                 setDeleteDialogOpen(false);
             },
             onError: (error) => {
-                toast.error('There was an error deleting the flashcard set!');
+                toast.error(t('delete_error'));
                 console.error('There was an error deleting the flashcard set!', error);
                 setDeleteDialogOpen(false);
             }
@@ -52,9 +54,9 @@ export default function Index({ flashcardSets }: Props) {
 
             <div className="container mx-auto py-6 px-4">
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-semibold">Flashcard Sets</h1>
+                    <h1 className="text-2xl font-semibold">{t('flashcard_sets_title')}</h1>
                     <Button asChild>
-                        <Link href="/flashcard-sets/create">Create Flashcard Set</Link>
+                        <Link href="/flashcard-sets/create">{t('create_flashcard_set')}</Link>
                     </Button>
                 </div>
 
@@ -73,7 +75,7 @@ export default function Index({ flashcardSets }: Props) {
                                     <div>
                                         <h3 className="font-medium text-lg">{set.name}</h3>
                                         <p className="text-sm text-neutral-500">
-                                            {set.flashcards_count} cards
+                                            {t('flashcard_count', { count: set.flashcards_count })}
                                         </p>
                                     </div>
                                 </div>
@@ -86,11 +88,11 @@ export default function Index({ flashcardSets }: Props) {
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuItem asChild>
                                             <Link href={`/flashcard-sets/${set.id}/edit`}>
-                                                Edit Set
+                                                {t('edit_set')}
                                             </Link>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem className="text-red-500" onClick={() => handleDelete(set.id)}>
-                                            Delete Set
+                                            {t('delete_set')}
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
@@ -101,11 +103,11 @@ export default function Index({ flashcardSets }: Props) {
                             </p>
 
                             <div className="flex justify-between items-center text-sm text-neutral-500">
-                                <span>Created {new Date(set.created_at).toLocaleDateString()}</span>
+                                <span>{t('created_date', { date: new Date(set.created_at).toLocaleDateString() })}</span>
                                 
                                 <Button variant="outline" size="sm" asChild>
                                     <Link href={`/flashcard-sets/${set.id}/study`} className="flex items-center gap-2">
-                                        Study Now
+                                        {t('study_now')}
                                         <ArrowRight className="h-4 w-4" />
                                     </Link>
                                 </Button>
@@ -117,10 +119,10 @@ export default function Index({ flashcardSets }: Props) {
                 {flashcardSets.data.length === 0 && (
                     <div className="text-center py-12">
                         <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">
-                            No flashcard sets yet
+                            {t('no_flashcard_sets')}
                         </h3>
                         <p className="text-neutral-500 mt-2">
-                            Create your first flashcard set to start studying
+                            {t('create_first_set')}
                         </p>
                     </div>
                 )}
@@ -130,8 +132,8 @@ export default function Index({ flashcardSets }: Props) {
                 open={deleteDialogOpen}
                 onOpenChange={setDeleteDialogOpen}
                 onConfirm={confirmDelete}
-                title="Delete Flashcard Set"
-                description="Are you sure you want to delete this flashcard set and all its flashcards? This action cannot be undone."
+                title={t('delete_set_title')}
+                description={t('delete_set_confirmation')}
             />
         </AppLayout>
     );
