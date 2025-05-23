@@ -199,6 +199,7 @@
   "has_mobile_app_answer": "No, not yet but stay tuned",
   
   "is_it_legal_in_school": "Is this legal at my school?",
-  "is_it_legal_in_school_answer": "Definitely. Clevernote is designed to support your learning, not replace it. Just make sure you're following your school’s academic integrity policies."
+  "is_it_legal_in_school_answer": "Definitely. Clevernote is designed to support your learning, not replace it. Just make sure you're following your school's academic integrity policies.",
+  "back_to_notes": "Back to Notes"
 
 }

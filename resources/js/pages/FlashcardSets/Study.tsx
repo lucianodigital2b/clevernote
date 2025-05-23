@@ -176,23 +176,7 @@ const Study = ({ flashcardSet }: Props) => {
                                 Review All
                             </Button>
                         </div>
-                        <div className="relative w-full">
-                            <input
-                                type="text"
-                                placeholder="Leave us a feedback!"
-                                className="w-full border rounded px-3 py-2 text-sm pr-10"
-                                value={feedback}
-                                onChange={e => setFeedback(e.target.value)}
-                            />
-                            <button
-                                type="button"
-                                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary"
-                                tabIndex={-1}
-                                // onClick={() => { /* handle feedback send */ }}
-                            >
-                                <SendHorizonal className="w-5 h-5" />
-                            </button>
-                        </div>
+                      
                     </div>
                 </div>
             </AppLayout>

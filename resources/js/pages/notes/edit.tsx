@@ -132,7 +132,7 @@ export default function Edit({ note }: { note: Note }) {
             const response = await axios.post(`/notes/${note.id}/generate-flashcards`);
             if (response.data && response.data.flashcardSetId) {
                 setIsFlashcardModalOpen(false);
-                router.visit(`/flashcard-sets/${response.data.flashcardSetId}`);
+                router.visit(`/flashcard-sets/${response.data.flashcardSetId}/study`);
             }
         } catch (error) {
             setIsFlashcardModalOpen(false);
