@@ -23,6 +23,20 @@ class ProcessAudioNote implements ShouldQueue
     protected $filePath;
 
     /**
+     * The number of seconds the job can run before timing out.
+     *
+     * @var int
+     */
+    public $timeout = 300; // 5 minutes
+
+    /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public $tries = 3;
+
+    /**
      * Create a new job instance.
      */
     public function __construct(int $noteId, array $validatedData, string $filePath)
@@ -63,17 +77,41 @@ class ProcessAudioNote implements ShouldQueue
                  ->toMediaCollection('note-audio', 'r2');
 
             // Clean up the temporary file after processing
-            Storage::disk('public')->delete($fullPath);
+            Storage::disk('public')->delete($this->filePath);
 
         } catch (\Exception $e) {
             Log::error("Failed to process audio note: " . $e->getMessage());
 
             // Clean up the temporary file in case of an error
-            Storage::disk('public')->delete($fullPath);
+            if (Storage::disk('public')->exists($this->filePath)) {
+                Storage::disk('public')->delete($this->filePath);
+            }
 
             $note->update([
                 'status' => 'failed',
             ]);
+        }
+    }
+
+    /**
+     * Handle a job failure.
+     */
+    public function failed(\Throwable $exception): void
+    {
+        Log::error("Audio note processing job failed: " . $exception->getMessage());
+        
+        try {
+            $note = Note::find($this->noteId);
+            if ($note) {
+                $note->update(['status' => 'failed']);
+            }
+            
+            // Clean up the temporary file
+            if (Storage::disk('public')->exists($this->filePath)) {
+                Storage::disk('public')->delete($this->filePath);
+            }
+        } catch (\Exception $e) {
+            Log::error("Failed to update note status on job failure: " . $e->getMessage());
         }
     }
 }

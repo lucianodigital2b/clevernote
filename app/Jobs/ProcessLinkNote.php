@@ -22,6 +22,20 @@ class ProcessLinkNote implements ShouldQueue
     protected $validatedData;
 
     /**
+     * The number of seconds the job can run before timing out.
+     *
+     * @var int
+     */
+    public $timeout = 600; // 10 minutes (YouTube processing can take longer)
+
+    /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public $tries = 3;
+
+    /**
      * Create a new job instance.
      */
     public function __construct(int $noteId, array $validatedData)
@@ -60,6 +74,23 @@ class ProcessLinkNote implements ShouldQueue
             $note->update([
                 'status' => 'failed',
             ]);
+        }
+    }
+
+    /**
+     * Handle a job failure.
+     */
+    public function failed(\Throwable $exception): void
+    {
+        Log::error("Link note processing job failed: " . $exception->getMessage());
+        
+        try {
+            $note = Note::find($this->noteId);
+            if ($note) {
+                $note->update(['status' => 'failed']);
+            }
+        } catch (\Exception $e) {
+            Log::error("Failed to update note status on job failure: " . $e->getMessage());
         }
     }
 }
