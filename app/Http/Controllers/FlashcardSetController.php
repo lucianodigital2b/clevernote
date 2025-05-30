@@ -55,7 +55,14 @@ class FlashcardSetController extends Controller
     {
         $this->authorize('view', $flashcardSet);
 
-        $flashcardSet->load('flashcards');
+        // Eager load flashcards with their progress for the current user
+        $flashcardSet->load([
+            'flashcards' => function ($query) {
+                $query->with(['userProgress' => function ($progressQuery) {
+                    $progressQuery->where('user_id', Auth::id());
+                }]);
+            }
+        ]);
 
         return Inertia::render('FlashcardSets/show', [
             'flashcardSet' => $flashcardSet,

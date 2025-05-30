@@ -112,7 +112,5 @@ class FlashcardController extends Controller
         $flashcard->delete();
 
         return redirect()->back()->with('success', 'Flashcard deleted successfully.');
-
-   
     }
 }
