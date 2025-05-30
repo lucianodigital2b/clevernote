@@ -79,7 +79,7 @@ export type FlashcardSet = {
     flashcards_count: number;
     created_at: string;
     updated_at: string;
-    flashcards?: Flashcard[];
+    flashcards: Flashcard[] | [];
 
 };
 

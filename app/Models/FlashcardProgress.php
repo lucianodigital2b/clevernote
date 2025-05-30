@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class FlashcardProgress extends Model
 {
     protected $fillable = [
-        'user_id',
-        'flashcard_id',
-        'interval',
-        'repetition',
-        'efactor',
-        'next_review'
+        'user_id',        // Which user this progress belongs to
+        'flashcard_id',   // Which flashcard this tracks
+        'interval',       // Time until next review (in minutes)
+        'repetition',     // Number of times reviewed
+        'efactor',        // Ease factor (difficulty multiplier)
+        'next_review'     // When the card should be reviewed next
     ];
 
     protected $casts = [

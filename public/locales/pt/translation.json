@@ -194,5 +194,7 @@
   "quiz_excellent_message": "Excelente trabalho! Você dominou este tema! 🌟",
   "quiz_great_message": "Bom trabalho! Continue assim! 👏",
   "quiz_good_message": "Bom esforço! Com um pouco mais de revisão, você vai se sair ainda melhor! 💪",
-  "quiz_keep_practicing_message": "Continue praticando! Cada tentativa te ajuda a aprender! 📚"
+  "quiz_keep_practicing_message": "Continue praticando! Cada tentativa te ajuda a aprender! 📚",
+  "quiz_restart": "Reiniciar Questionário",
+  "back_to_quizzes": "Voltar aos Questionários"
 }

@@ -133,30 +133,12 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
         }]);
     };
 
+    const [isFinished, setIsFinished] = useState(false);
+
     const handleNextQuestion = () => {
         if (currentQuestionIndex === questions.length - 1) {
             onComplete?.(score, answers);
-            
-            // Calculate percentage
-            const percentage = Math.round((score / questions.length) * 100);
-            let message = t('quiz_congratulations') + '\n';
-            message += t('quiz_score_message', { score, total: questions.length, percentage });
-            
-            // Add encouraging message based on performance
-            if (percentage >= 90) {
-                message += '\n' + t('quiz_excellent_message');
-            } else if (percentage >= 70) {
-                message += '\n' + t('quiz_great_message');
-            } else if (percentage >= 50) {
-                message += '\n' + t('quiz_good_message');
-            } else {
-                message += '\n' + t('quiz_keep_practicing_message');
-            }
-            
-            toastConfig.success(message, {
-                duration: 5000,
-                className: "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800"
-            });
+            setIsFinished(true);
             return;
         }
 
@@ -182,6 +164,48 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
 
         return 'border-2 border-gray-200 dark:border-neutral-700 opacity-50';
     };
+
+    if (isFinished) {
+        const percentage = Math.round((score / questions.length) * 100);
+        let message = t('quiz_congratulations');
+        let encouragingMessage = '';
+        
+        if (percentage >= 90) {
+            encouragingMessage = t('quiz_excellent_message');
+        } else if (percentage >= 70) {
+            encouragingMessage = t('quiz_great_message');
+        } else if (percentage >= 50) {
+            encouragingMessage = t('quiz_good_message');
+        } else {
+            encouragingMessage = t('quiz_keep_practicing_message');
+        }
+
+        return (
+            <div className="max-w-3xl mx-auto text-center space-y-8 py-12">
+                <h2 className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{message}</h2>
+                <div className="text-xl">
+                    {t('quiz_score_message', { score, total: questions.length, percentage })}
+                </div>
+                <p className="text-lg text-gray-600 dark:text-gray-400">{encouragingMessage}</p>
+                <div className="flex justify-center gap-4 mt-8">
+                    <Button
+                        onClick={handleReset}
+                        variant="outline"
+                        className="flex items-center gap-2"
+                    >
+                        <ArrowPathIcon className="w-5 h-5" />
+                        {t('quiz_restart')}
+                    </Button>
+                    <Button
+                        onClick={() => window.history.back()}
+                        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700"
+                    >
+                        {t('back_to_quizzes')}
+                    </Button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-3xl mx-auto space-y-6">

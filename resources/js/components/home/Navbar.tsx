@@ -58,14 +58,6 @@ const Navbar = () => {
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between">
           <a href="#" className="flex items-center space-x-2">
-            <div className="relative">
-              <BookText
-                className={`w-8 h-8 ${
-                  isScrolled ? "text-indigo-600" : "text-indigo-700"
-                }`}
-              />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-teal-400 rounded-full border-2 border-white"></span>
-            </div>
             <span className={`text-xl font-display font-bold tracking-tight ${
               isScrolled ? "text-gray-900" : "text-indigo-900"
             }`}>

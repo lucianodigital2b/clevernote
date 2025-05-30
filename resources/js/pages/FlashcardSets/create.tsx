@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,11 @@ export default function Create() {
             console.error('Error fetching flashcards:', error);
         }
     };
+    
+    // Add useEffect to fetch flashcards on component mount
+    useEffect(() => {
+        fetchFlashcards();
+    }, []);
     
     const nameInput = useRef<HTMLInputElement>(null);
     const { data, setData, post, processing, reset, errors } = useForm({

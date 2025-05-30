@@ -46,11 +46,24 @@ class FlashcardController extends Controller
      */
     public function store(StoreFlashcardRequest $request) // Use the form request for validation
     {
-        // Create the flashcard using validated data
-        // $flashcard = Auth::user()->flashcards()->create($request->validated());
-
-        // Redirect to the flashcards index page with a success message
-        return redirect()->route('flashcards.index')->with('success', 'Flashcard created successfully.');
+        $flashcard = FlashcardSet::find($request->flashcard_set_id)->flashcards()->create($request->validated());
+        
+        if ($request->wantsJson()) {
+            return response()->json([
+                'flashcard' => $flashcard,
+                'message' => 'Flashcard created successfully.'
+            ]);
+        }
+        
+        // For Inertia requests, return the current page with the new flashcard
+        $flashcardSet = FlashcardSet::with('flashcards')->find($request->flashcard_set_id);
+        
+        return Inertia::render('FlashcardSets/show', [
+            'flashcardSet' => $flashcardSet,
+            'flashcards' => $flashcardSet->flashcards,
+            'flashcard' => $flashcard, // The newly created flashcard
+            'success' => 'Flashcard created successfully.'
+        ]);
     }
 
     /**
@@ -92,12 +105,14 @@ class FlashcardController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Flashcard $flashcard)
+    public function destroy(Request $request, Flashcard $flashcard)
     {
-        $this->authorize('delete', $flashcard);
+        // $this->authorize('delete', $flashcard);
 
         $flashcard->delete();
 
-        return redirect()->route('flashcards.index')->with('success', 'Flashcard deleted successfully.');
+        return redirect()->back()->with('success', 'Flashcard deleted successfully.');
+
+   
     }
 }

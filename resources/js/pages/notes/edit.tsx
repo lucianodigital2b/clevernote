@@ -222,8 +222,11 @@ export default function Edit({ note }: { note: Note }) {
     
     const editor = useEditor({
         extensions: [
-            StarterKit, 
-            DragHandle, 
+            StarterKit,
+            DragHandle.configure({
+                dragHandlePosition: "follow",
+                dragHandleSpeed: 1
+            }),
             Image.configure({
                 inline: false,
                 allowBase64: false,
@@ -289,7 +292,7 @@ export default function Edit({ note }: { note: Note }) {
 
     // Add useEffect for polling mechanism
     useEffect(() => {
-        let intervalId: NodeJS.Timeout;
+        let intervalId: NodeJS.Timeout | null = null;
 
         if (isProcessing) {
             intervalId = setInterval(async () => {
@@ -298,13 +301,13 @@ export default function Edit({ note }: { note: Note }) {
                     const updatedNote = response.data;
                     
                     if (updatedNote.status !== 'processing') {
+                        clearInterval(intervalId);
                         setIsProcessing(false);
                         setCurrentNote(updatedNote);
                         if (editor) {
                             editor.commands.setContent(updatedNote.content);
                         }
                         setContent(updatedNote.content);
-                        clearInterval(intervalId);
                     }
                 } catch (error) {
                     console.error('Error checking note status:', error);
@@ -313,18 +316,14 @@ export default function Edit({ note }: { note: Note }) {
                     toastConfig.error('Failed to check note status');
                 }
             }, 3000); // Poll every 3 seconds
-
-            setPollingIntervalId(intervalId);
         }
 
         return () => {
             if (intervalId) {
                 clearInterval(intervalId);
-            } else if (pollingIntervalId) { // Clear interval on component unmount
-                clearInterval(pollingIntervalId);
             }
         };
-    }, [isProcessing, note.id, editor, pollingIntervalId]);
+    }, [isProcessing, note.id, editor]);
 
     // Add useEffect for autosave
     useEffect(() => {
