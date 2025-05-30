@@ -42,8 +42,8 @@ export default function OnboardingForm({ onClose }: { onClose?: () => void }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="mb-8 flex justify-center">
+        <form onSubmit={handleSubmit} className="space-y-6" translate="yes">
+            <div className="mb-8 flex justify-center" translate="no">
                 <div className="flex items-center space-x-2">
                     {[1, 2, 3].map((i) => (
                         <div key={i} className="flex items-center">
@@ -61,22 +61,23 @@ export default function OnboardingForm({ onClose }: { onClose?: () => void }) {
                     animate={{ x: 0, opacity: 1 }}
                     exit={{ x: -10, opacity: 0 }}
                     transition={{ duration: 0.2 }}
+                    translate="yes"
                 >
                     {step === 1 && (
                         <div className="space-y-4">
-                            <h2 className="text-lg font-semibold">{t('onboarding_language_title')}</h2>
+                            <h2 className="text-lg font-semibold" translate="yes">{t('onboarding_language_title')}</h2>
                             <div className="space-y-2">
-                                <Label htmlFor="preferred_language">{t('onboarding_language_select')}</Label>
+                                <Label htmlFor="preferred_language" translate="yes">{t('onboarding_language_select')}</Label>
                                 <Select 
                                     value={data.preferred_language}
                                     onValueChange={(value) => setData('preferred_language', value)}
                                 >
-                                    <SelectTrigger>
+                                    <SelectTrigger translate="no">
                                         <SelectValue placeholder={t('onboarding_language_placeholder')} />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent translate="no">
                                         {languages.map((lang) => (
-                                            <SelectItem key={lang.value ?? 'auto'} value={lang.value ?? 'auto'}>
+                                            <SelectItem key={lang.value ?? 'auto'} value={lang.value ?? 'auto'} translate="no">
                                                 {lang.label}
                                             </SelectItem>
                                         ))}
@@ -88,18 +89,19 @@ export default function OnboardingForm({ onClose }: { onClose?: () => void }) {
 
                     {step === 2 && (
                         <div className="space-y-4">
-                            <h2 className="text-lg font-semibold">{t('onboarding_about_title')}</h2>
+                            <h2 className="text-lg font-semibold" translate="yes">{t('onboarding_about_title')}</h2>
                             <div className="space-y-3">
-                                <Label className='mb-5'>{t('onboarding_discovery_question')}</Label>
+                                <Label className='mb-5' translate="yes">{t('onboarding_discovery_question')}</Label>
                                 <RadioGroup
                                     value={data.discovery_source}
                                     onValueChange={(value) => setData('discovery_source', value)}
                                     className="space-y-2"
+                                    translate="no"
                                 >
                                     {['TikTok', 'YouTube', 'Instagram', 'Google', 'Other'].map((source) => (
                                         <div key={source} className="flex items-center space-x-2">
-                                            <RadioGroupItem value={source.toLowerCase()} id={`source-${source.toLowerCase()}`} />
-                                            <Label htmlFor={`source-${source.toLowerCase()}`}>{t(`onboarding_source_${source.toLowerCase()}`)}</Label>
+                                            <RadioGroupItem value={source.toLowerCase()} id={`source-${source.toLowerCase()}`} translate="no" />
+                                            <Label htmlFor={`source-${source.toLowerCase()}`} translate="yes">{t(`onboarding_source_${source.toLowerCase()}`)}</Label>
                                         </div>
                                     ))}
                                 </RadioGroup>
@@ -109,16 +111,18 @@ export default function OnboardingForm({ onClose }: { onClose?: () => void }) {
                                         placeholder={t('onboarding_source_other_placeholder')}
                                         value={data.discovery_source === 'other' ? data.discovery_source : ''}
                                         onChange={(e) => setData('discovery_source', e.target.value)}
+                                        translate="yes"
                                     />
                                 )}
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="primary_subject_interest">{t('onboarding_subject_interest')}</Label>
+                                <Label htmlFor="primary_subject_interest" translate="yes">{t('onboarding_subject_interest')}</Label>
                                 <Input
                                     id="primary_subject_interest"
                                     value={data.primary_subject_interest}
                                     onChange={(e) => setData('primary_subject_interest', e.target.value)}
                                     placeholder={t('onboarding_subject_placeholder')}
+                                    translate="yes"
                                 />
                             </div>
                         </div>
@@ -126,14 +130,15 @@ export default function OnboardingForm({ onClose }: { onClose?: () => void }) {
 
                     {step === 3 && (
                         <div className="space-y-4">
-                            <h2 className="text-lg font-semibold">{t('onboarding_goals_title')}</h2>
+                            <h2 className="text-lg font-semibold" translate="yes">{t('onboarding_goals_title')}</h2>
                             <div className="space-y-2">
-                                <Label htmlFor="learning_goals">{t('onboarding_goals_question')}</Label>
+                                <Label htmlFor="learning_goals" translate="yes">{t('onboarding_goals_question')}</Label>
                                 <Input
                                     id="learning_goals"
                                     value={data.learning_goals}
                                     onChange={(e) => setData('learning_goals', e.target.value)}
                                     placeholder={t('onboarding_goals_placeholder')}
+                                    translate="yes"
                                 />
                             </div>
                         </div>
@@ -143,7 +148,7 @@ export default function OnboardingForm({ onClose }: { onClose?: () => void }) {
 
             <div className="flex justify-between space-x-4 pt-4">
                 {step > 1 && (
-                    <Button type="button" variant="outline" onClick={prevStep}>
+                    <Button type="button" variant="outline" onClick={prevStep} translate="yes">
                         {t('onboarding_previous')}
                     </Button>
                 )}
@@ -151,6 +156,7 @@ export default function OnboardingForm({ onClose }: { onClose?: () => void }) {
                     type="submit" 
                     className="ml-auto" 
                     disabled={processing}
+                    translate="yes"
                 >
                     {step < 3 ? t('onboarding_next') : (processing ? t('onboarding_saving') : t('onboarding_complete'))}
                 </Button>
