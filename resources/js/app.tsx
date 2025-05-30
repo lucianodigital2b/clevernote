@@ -18,10 +18,20 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 // Create a client
 const queryClient = new QueryClient();
 
+// Fix for import.meta.glob issue
+const pages = import.meta.glob('./pages/**/*.tsx', { eager: false });
+
 // Then wrap your app with QueryClientProvider
 createInertiaApp({
     title: (title) => `${title ? title + ' - ' : ''} ${appName}`,
-    resolve: (name) => resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx')),
+    resolve: (name) => {
+        const pagePath = `./pages/${name}.tsx`;
+        if (pages[pagePath]) {
+            return pages[pagePath]();
+        }
+        // Fallback for dynamic imports
+        return import(`./pages/${name}.tsx`);
+    },
     setup({ el, App, props }) {
         const root = createRoot(el);
 
@@ -48,3 +58,10 @@ axios.defaults.withCredentials = true;
 axios.defaults.headers.common['Accept'] = 'application/json';
 
 axios.defaults.withXSRFToken = true;
+
+// Initialize i18n after DOM is ready and stable
+setTimeout(() => {
+    import('./i18n').catch(error => {
+        console.warn('Failed to load i18n:', error);
+    });
+}, 100);
