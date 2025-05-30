@@ -87,7 +87,7 @@ export default function Index({ flashcardSets }: Props) {
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuItem asChild>
-                                            <Link href={`/flashcard-sets/${set.id}/edit`}>
+                                            <Link href={`/flashcard-sets/${set.id}`}>
                                                 {t('edit_set')}
                                             </Link>
                                         </DropdownMenuItem>

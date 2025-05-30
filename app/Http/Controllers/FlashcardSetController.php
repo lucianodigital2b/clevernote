@@ -38,8 +38,6 @@ class FlashcardSetController extends Controller
             'flashcard_ids' => 'nullable|array',
         ]);
 
-
-
         $flashcardSet = FlashcardSet::create([
             'user_id' => Auth::id(),
             'name' => $validated['name'],
@@ -153,8 +151,7 @@ class FlashcardSetController extends Controller
         ]);
 
 
-        $flashcardSet->flashcards()
-            ->find($validated['flashcard_id'])
+        Flashcard::find($validated['flashcard_id'])
             ->userProgress()
             ->updateOrCreate(
                 ['user_id' => Auth::id()],

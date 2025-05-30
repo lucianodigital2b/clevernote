@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, ArrowRight, RotateCw, SendHorizonal } from 'lucide-react';
+import { ArrowLeft, RotateCw } from 'lucide-react';
 import { FlashcardSet } from '@/types';
 import { Progress } from "@/components/ui/progress";
 import axios from 'axios';
@@ -36,7 +36,7 @@ const Study = ({ flashcardSet }: Props) => {
     // Initialize progress and dueIndexes
     useEffect(() => {
         const initialProgress = flashcardSet.flashcards.map(flashcard => ({
-            id: flashcard.id,
+            id: flashcard.id.toString(),
             interval: 1,
             repetition: 0,
             efactor: 2.5,
@@ -78,7 +78,7 @@ const Study = ({ flashcardSet }: Props) => {
         } else if (currentIndex === null || !due.includes(currentIndex)) {
             setCurrentIndex(due[0]);
         }
-    }, [progress]);
+    }, [progress, currentIndex]);
 
     const currentFlashcard = currentIndex !== null ? flashcardSet.flashcards[currentIndex] : null;
     const currentProgress = currentIndex !== null ? progress[currentIndex] : null;
@@ -108,10 +108,10 @@ const Study = ({ flashcardSet }: Props) => {
     };
 
     const recallOptions: RecallOption[] = [
-        { label: 'Again', interval: 1, quality: 0 }, // 1 minute
-        { label: 'Hard', interval: 6, quality: 2 }, // 6 minutes
-        { label: 'Good', interval: 10, quality: 3 }, // 10 minutes
-        { label: 'Easy', interval: 5760, quality: 5 }, // 4 days (in minutes)
+        { label: 'Again', interval: 1, quality: 0 },      // 1 minute - forgot completely
+        { label: 'Hard', interval: 6, quality: 2 },       // 6 minutes - difficult recall
+        { label: 'Good', interval: 10, quality: 3 },      // 10 minutes - normal recall
+        { label: 'Easy', interval: 5760, quality: 5 },    // 4 days - easy recall
     ];
 
     const handleRecall = async (option: RecallOption) => {
@@ -129,13 +129,18 @@ const Study = ({ flashcardSet }: Props) => {
             nextReview: new Date(nextReviewTime)
         };
 
-        await axios.post(`/flashcard-sets/${flashcardSet.id}/progress`, {
-            flashcard_id: currentFlashcard!.id,
-            interval: option.interval,
-            repetition: newProgress[currentIndex].repetition,
-            efactor: currentProgress.efactor,
-            next_review: new Date(nextReviewTime).toISOString()
-        });
+        try {
+            await axios.post(`/flashcard-sets/${flashcardSet.id}/progress`, {
+                flashcard_id: currentFlashcard!.id,
+                interval: option.interval,
+                repetition: newProgress[currentIndex].repetition,
+                efactor: currentProgress.efactor,
+                next_review: new Date(nextReviewTime).toISOString()
+            });
+        } catch (error) {
+            console.error('Failed to update flashcard progress:', error);
+            return;
+        }
 
         setProgress(newProgress);
         // After updating progress, useEffect will update dueIndexes and currentIndex
@@ -144,9 +149,6 @@ const Study = ({ flashcardSet }: Props) => {
     const studyProgress = dueIndexes.length === 0
         ? 100
         : ((flashcardSet.flashcards.length - dueIndexes.length) / flashcardSet.flashcards.length) * 100;
-
-    // Feedback input state (optional, for send icon)
-    const [feedback, setFeedback] = useState('');
 
     if (isComplete) {
         return (
@@ -176,7 +178,6 @@ const Study = ({ flashcardSet }: Props) => {
                                 Review All
                             </Button>
                         </div>
-                      
                     </div>
                 </div>
             </AppLayout>
@@ -185,7 +186,16 @@ const Study = ({ flashcardSet }: Props) => {
 
     if (currentIndex === null || !currentFlashcard) {
         // No cards due
-        return null;
+        return (
+            <AppLayout>
+                <div className="flex flex-col items-center justify-center min-h-[60vh]">
+                    <div className="text-center">
+                        <h2 className="text-xl font-semibold mb-2">No cards due for review</h2>
+                        <p className="text-gray-500">Come back later when cards are ready for review.</p>
+                    </div>
+                </div>
+            </AppLayout>
+        );
     }
 
     return (
@@ -206,7 +216,7 @@ const Study = ({ flashcardSet }: Props) => {
                 <div className="max-w-2xl mx-auto">
                     <Progress value={studyProgress} className="mb-6" />
                     <div 
-                        className="relative min-h-[400px] perspective-1000"
+                        className="relative min-h-[400px] perspective-1000 cursor-pointer"
                         onClick={handleFlip}
                     >
                         <div className={`absolute w-full h-full transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>

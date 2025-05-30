@@ -37,6 +37,7 @@ export default function Dashboard() {
     const { folderId } = usePage().props as { folderId?: string | number };
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+    const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
     const { auth } = usePage().props;
 
     const { t } = useTranslation();
@@ -119,27 +120,27 @@ export default function Dashboard() {
     
     // Modify the new note section handler to check subscription
     const handleNewNote = async (action: () => void) => {
-        // if (notes.length >= 3) {
-        //     const canProceed = await requireSubscription();
+        if (notes.length >= 3) {
+            const canProceed = await requireSubscription();
             
-        //     if (!canProceed) {
-        //         setIsModalOpen(true)
-        //         return;
-        //     }
-        // }
+            if (!canProceed) {
+                setIsModalOpen(true)
+                return;
+            }
+        }
         action();
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={t('Dashboard')} />
-            <div className="flex h-full flex-1 flex-col gap-6 p-6 max-w-7xl mx-auto w-full">
-                {/* New Note Section */}
-                <section>
+            <div className="flex sm:flex-start h-full flex-1 flex-col gap-6 p-6 max-w-7xl mx-auto w-full relative">
+                {/* New Note Section - Desktop */}
+                <section className="hidden md:block">
                     <h2 className="text-xl font-semibold mb-2">{t('New note')}</h2>
                     <p className="text-neutral-500 mb-4">{t('Record/upload audio, send a document or use a YouTube URL')}</p>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         <div 
                             className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 hover:shadow-md transition-shadow cursor-pointer"
                             onClick={() => handleNewNote(() => setIsUploadAudioModalOpen(true))}
@@ -191,13 +192,88 @@ export default function Dashboard() {
                         </div>
                     </div>
                 </section>
+
+                {/* Mobile Floating Action Button and Bottom Sheet */}
+                <div className="md:hidden">
+                    <button 
+                        onClick={() => setIsBottomSheetOpen(true)}
+                        className="fixed bottom-6 right-6 w-12 h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full flex items-center justify-center shadow-lg z-50"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
+                    </button>
+
+                    {(
+                        <>
+                            <div 
+                                className={`fixed inset-0 bg-black/50 z-40 transition-all duration-300 ease-in-out ${isBottomSheetOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                                onClick={() => setIsBottomSheetOpen(false)}
+                            />
+                            <div 
+                                className={`fixed bottom-0 left-0 right-0 bg-white dark:bg-neutral-800 rounded-t-xl p-6 z-50 transition-all duration-300 ease-in-out transform ${isBottomSheetOpen ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}
+                            >
+                                <div className="w-12 h-1 bg-neutral-300 dark:bg-neutral-600 rounded-full mx-auto mb-6" />
+                                <h2 className="text-xl font-semibold mb-4">{t('New note')}</h2>
+                                <div className="space-y-4">
+                                    <div 
+                                        className="flex items-center gap-3 p-4 bg-neutral-100 dark:bg-neutral-700 rounded-xl cursor-pointer"
+                                        onClick={() => {
+                                            setIsBottomSheetOpen(false);
+                                            handleNewNote(() => setIsUploadAudioModalOpen(true));
+                                        }}
+                                    >
+                                        <div className="bg-neutral-200 dark:bg-neutral-600 p-2 rounded-full">
+                                            <Upload className="h-5 w-5 text-neutral-500" />
+                                        </div>
+                                        <span className="font-medium">{t('Upload audio')}</span>
+                                    </div>
+                                    <div 
+                                        className="flex items-center gap-3 p-4 bg-neutral-100 dark:bg-neutral-700 rounded-xl cursor-pointer"
+                                        onClick={() => {
+                                            setIsBottomSheetOpen(false);
+                                            handleNewNote(() => setIsRecordModalOpen(true));
+                                        }}
+                                    >
+                                        <div className="bg-red-100 dark:bg-red-900/30 p-2 rounded-full">
+                                            <Mic className="h-5 w-5 text-red-500" />
+                                        </div>
+                                        <span className="font-medium">{t('Record audio')}</span>
+                                    </div>
+                                    <div 
+                                        className="flex items-center gap-3 p-4 bg-neutral-100 dark:bg-neutral-700 rounded-xl cursor-pointer"
+                                        onClick={() => {
+                                            setIsBottomSheetOpen(false);
+                                            handleNewNote(() => setIsWebLinkModalOpen(true));
+                                        }}
+                                    >
+                                        <div className="bg-red-100 dark:bg-red-900/30 p-2 rounded-full">
+                                            <Youtube className="h-5 w-5 text-red-500" />
+                                        </div>
+                                        <span className="font-medium">{t('Youtube')}</span>
+                                    </div>
+                                    <div 
+                                        className="flex items-center gap-3 p-4 bg-neutral-100 dark:bg-neutral-700 rounded-xl cursor-pointer"
+                                        onClick={() => {
+                                            setIsBottomSheetOpen(false);
+                                            handleNewNote(() => setIsPdfModalOpen(true));
+                                        }}
+                                    >
+                                        <div className="bg-neutral-200 dark:bg-neutral-600 p-2 rounded-full">
+                                            <FileText className="h-5 w-5 text-neutral-500" />
+                                        </div>
+                                        <span className="font-medium">{t('Upload PDF/text')}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
                 
                 {/* My Notes Section */}
                 <section>
-                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 mb-4 w-full">
+                    <div className="flex flex-col sm:flex-row justify-start sm:justify-between items-stretch sm:items-center gap-4 sm:gap-0 mb-4 w-full">
                         <h2 className="text-xl font-semibold">{t('My notes')}</h2>
                         <div className="flex flex-col sm:flex-row items-center gap-2">
-                            <div className="relative w-full sm:w-64">
+                            <div className="relative w-full sm:w-64 md:w-full">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
                                 <Input 
                                     type="text" 
@@ -210,7 +286,7 @@ export default function Dashboard() {
                                     }}
                                 />
                             </div>
-                            <Button variant="outline" className="flex items-center gap-2">
+                            <Button variant="outline" className="flex items-center gap-2 w-full">
                                 <span>{t('All notes')}</span>
                             </Button>
                         </div>

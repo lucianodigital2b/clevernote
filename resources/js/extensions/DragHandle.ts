@@ -26,7 +26,7 @@ function createDragHandle(editor: Editor) {
   const handle = new ReactRenderer(DragHandleComponent, {
     editor,
     className:
-      "fixed top-0 left-0 will-change-transform transition-opacity ease-in-out cursor-grab text-muted-foreground p-1 rounded opacity-0 hover:bg-accent",
+      "fixed top-0 left-0 will-change-transform cursor-grab text-muted-foreground p-1 rounded opacity-0 hover:bg-accent z-50",
     attrs: {
       tabindex: "-1",
       draggable: "",
@@ -66,12 +66,13 @@ function getElementAndNodePos(
     return null;
   }
 
-  if (!node.parentElement?.matches(".ProseMirror")) {
+  const blockElement = node.closest('.ProseMirror p, .ProseMirror h1, .ProseMirror h2, .ProseMirror h3, .ProseMirror h4, .ProseMirror h5, .ProseMirror h6, .ProseMirror ul, .ProseMirror ol');
+  if (!blockElement) {
     return null;
   }
 
   return {
-    element: node,
+    element: blockElement,
     pos: nodePos,
   };
 }
@@ -92,7 +93,7 @@ function DragHandlePlugin(options: DragHandleOptions) {
       const nextTop =
         prevTop + distanceTop / (Math.max(options.dragHandleSpeed, 1) * delta);
 
-      handle.style.transform = `translate3d(calc(-100% - 0.5rem + ${targetLeft}px), ${nextTop}px, 0)`;
+      handle.style.transform = `translate3d(${targetLeft - 40}px, ${nextTop}px, 0)`;
       prevTop = nextTop;
     }
 
