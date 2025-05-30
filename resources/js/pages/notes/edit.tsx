@@ -52,7 +52,6 @@ export default function Edit({ note }: { note: Note }) {
 
     const handleUpdate = () => {
         router.patch(`/notes/${note.id}`, {
-            title: note.title,
             content: content,
             folder_id: selectedFolder,
             _method: 'PUT'
@@ -325,6 +324,8 @@ export default function Edit({ note }: { note: Note }) {
         };
     }, [isProcessing, note.id, editor]);
 
+    console.log(isProcessing);
+    
     // Add useEffect for autosave
     useEffect(() => {
         // Only save if the editor is ready, content has changed (debounced), and not currently processing
