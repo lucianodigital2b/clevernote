@@ -44,7 +44,7 @@ import { MathExtension } from "@aarkue/tiptap-math-extension";
 import "katex/dist/katex.min.css";
 import Image from '@tiptap/extension-image'
 import { useDebounce } from '@/hooks/use-debounce';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 export default function Edit({ note }: { note: Note }) {
 
@@ -54,10 +54,26 @@ export default function Edit({ note }: { note: Note }) {
     const [isProcessing, setIsProcessing] = useState(note.status === 'processing');
     const [currentNote, setCurrentNote] = useState(note);
     const [pollingIntervalId, setPollingIntervalId] = useState<NodeJS.Timeout | null>(null);
+    
+    // Word count utility function
+    const getWordCount = (htmlContent: string): number => {
+        if (!htmlContent) return 0;
+        
+        // Create a temporary div to strip HTML tags
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+        const textContent = tempDiv.textContent || tempDiv.innerText || '';
+        
+        // Split by whitespace and filter out empty strings
+        const words = textContent.trim().split(/\s+/).filter(word => word.length > 0);
+        return words.length;
+    };
+    
+
 
     const handleUpdate = () => {
         router.patch(`/notes/${note.id}`, {
-            content: content,
+            content,
             folder_id: selectedFolder,
             _method: 'PUT'
         }, {
@@ -116,8 +132,15 @@ export default function Edit({ note }: { note: Note }) {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [content, setContent] = useState(note.content);
 
+    // Calculate word count from current content using useMemo for real-time updates
+    const wordCount = useMemo(() => {
+        return getWordCount(content || note.content);
+    }, [content, note.content]);
+
     const debouncedContent = useDebounce(content, 1000); // Debounce content by 1 second
 
+    // console.log(wordCount);
+    
     // Add state for the flashcard modal
     const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
 
@@ -424,7 +447,7 @@ export default function Edit({ note }: { note: Note }) {
                                 <Button 
                                     variant="ghost" 
                                     size="sm"
-                                    onClick={() => router.visit('/notes')}
+                                    onClick={() => router.visit('/dashboard')}
                                     className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900"
                                 >
                                     <ArrowLeft className="h-4 w-4" />
@@ -453,6 +476,11 @@ export default function Edit({ note }: { note: Note }) {
                                             <span>Auto-saved</span>
                                         </div>
                                     )}
+                                    <div className="flex items-center gap-1">
+                                        <Badge variant="secondary" className="text-xs py-1 px-2">
+                                            {wordCount} {wordCount === 1 ? 'word' : 'words'}
+                                        </Badge>
+                                    </div>
                                 </div>
                                 
                                 <Button 
@@ -542,7 +570,7 @@ export default function Edit({ note }: { note: Note }) {
                                             const IconComponent = action.icon;
                                             return (
                                                 <Card key={index} className={`transition-all duration-200 cursor-pointer hover:shadow-md ${action.color}`}>
-                                                    <CardContent className="p-3">
+                                                    <CardContent className="px-3">
                                                         <Button
                                                             variant="ghost"
                                                             className="w-full h-auto p-2 flex flex-col items-start gap-2 text-left hover:bg-transparent"
@@ -570,12 +598,6 @@ export default function Edit({ note }: { note: Note }) {
 
                                 {/* Content Section */}
                                 <div className="">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-                                            Note Content
-                                        </h2>
-                                        
-                                    </div>
                                     
                                     {/* Editor Container */}
                                     <div className="border border-neutral-200 dark:border-neutral-800 rounded-lg overflow-hidden bg-white dark:bg-neutral-900">
