@@ -25,6 +25,7 @@ export type Note = {
     created_at: string;
     updated_at: string;
     icon: string;
+    status: string;
     content: string;
     summary: string;
     transcription: string;

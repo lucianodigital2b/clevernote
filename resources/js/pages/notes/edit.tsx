@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { router, Head, usePage } from '@inertiajs/react';
 import {
     AlertDialog,
@@ -12,7 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
-import { Share, MoreHorizontal, Maximize2, X } from 'lucide-react';
+import { Share, MoreHorizontal, Maximize2, X, ArrowLeft, Save, Clock, CheckCircle2, Folder, Trash2, Sparkles, Brain, Map, FileText, Loader2 } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -22,9 +21,14 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Note } from '@/types';
 import { toastConfig } from '@/lib/toast';
 import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(relativeTime);
 import { ValidationErrors } from '@/components/validation-errors';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -40,6 +44,7 @@ import { MathExtension } from "@aarkue/tiptap-math-extension";
 import "katex/dist/katex.min.css";
 import Image from '@tiptap/extension-image'
 import { useDebounce } from '@/hooks/use-debounce';
+import { useState, useEffect } from 'react';
 
 export default function Edit({ note }: { note: Note }) {
 
@@ -209,12 +214,30 @@ export default function Edit({ note }: { note: Note }) {
     };
 
     const actions = [
-        { icon: '📝', label: 'Create flashcards', action: handleCreateFlashcards },
-        { icon: '❓', label: 'Create a quiz', action: handleCreateQuizz },
-        { icon: '🗺️', label: 'Mindmap', action: handleCreateMindmap },
-        // { icon: '💬', label: 'Chat with note', action: () => setIsChatOpen(true) },
-        // { icon: '🌐', label: 'Translate', action: () => console.log('Translate') },
-        // { icon: '🎥', label: 'Create video', action: () => console.log('Create video') },
+        { 
+            icon: FileText, 
+            label: 'Create flashcards', 
+            description: 'Generate study cards from your notes',
+            action: handleCreateFlashcards,
+            color: 'bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700',
+            loading: isFlashcardModalOpen
+        },
+        { 
+            icon: Brain, 
+            label: 'Create a quiz', 
+            description: 'Test your knowledge with AI-generated questions',
+            action: handleCreateQuizz,
+            color: 'bg-green-50 hover:bg-green-100 border-green-200 text-green-700',
+            loading: isQuizModalOpen
+        },
+        { 
+            icon: Map, 
+            label: 'Generate mindmap', 
+            description: 'Visualize concepts and connections',
+            action: handleCreateMindmap,
+            color: 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700',
+            loading: isMindmapLoading
+        },
     ];
 
 
@@ -323,8 +346,6 @@ export default function Edit({ note }: { note: Note }) {
             }
         };
     }, [isProcessing, note.id, editor]);
-
-    console.log(isProcessing);
     
     // Add useEffect for autosave
     useEffect(() => {
@@ -393,40 +414,67 @@ export default function Edit({ note }: { note: Note }) {
                 </DialogContent>
             </Dialog>
             
-            <div className="flex h-full">
+            <div className="flex h-full bg-neutral-50/50 dark:bg-neutral-900/50">
                 {/* Main Content */}
-                <div className={`flex-1 p-6 ${isChatOpen ? 'mr-[400px]' : ''}`}>
-                    <div className="max-w-4xl mx-auto">
+                <div className={`flex-1 p-4 sm:p-6 lg:p-8 ${isChatOpen ? 'mr-[400px]' : ''}`}>
+                    <div className="max-w-5xl mx-auto">
                         {/* Header */}
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="flex items-center gap-2 text-sm text-neutral-500">
-                                <span>Notes</span>
-                                <span>/</span>
-                                <span>Note details</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                            <div className="flex items-center gap-4">
+                                <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    onClick={() => router.visit('/notes')}
+                                    className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900"
+                                >
+                                    <ArrowLeft className="h-4 w-4" />
+                                    Back to Notes
+                                </Button>
+                                <div className="hidden sm:block h-4 w-px bg-neutral-300" />
+                                <div className="flex items-center gap-2">
+                                    {currentNote.folder_id && (
+                                        <Badge variant="secondary" className="flex items-center gap-1">
+                                            <Folder className="h-3 w-3" />
+                                            Folder
+                                        </Badge>
+                                    )}
+                                    <Badge variant="outline" className="flex items-center gap-1">
+                                        <Clock className="h-3 w-3" />
+                                        {dayjs(currentNote.updated_at).fromNow()}
+                                    </Badge>
+                                </div>
                             </div>
                             
-
-
                             <div className="flex items-center gap-2">
-
-                                {/* <Button 
+                                <div className="flex items-center gap-2 text-sm text-neutral-500">
+                                    {!isProcessing && (
+                                        <div className="flex items-center gap-1">
+                                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                            <span>Auto-saved</span>
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                <Button 
                                     variant="outline" 
+                                    size="sm"
+                                    onClick={() => setIsFolderModalOpen(true)}
                                     className="flex items-center gap-2"
                                 >
-                                    <Share className="h-4 w-4" />
-                                    Share or export
-                                </Button> */}
+                                    <Folder className="h-4 w-4" />
+                                    <span className="hidden sm:inline">Folder</span>
+                                </Button>
                                 
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" size="icon">
+                                        <Button variant="outline" size="sm">
                                             <MoreHorizontal className="h-4 w-4" />
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={() => setIsFolderModalOpen(true)}>Add to folder</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>
-                                            Delete
+                                        <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="text-red-600">
+                                            <Trash2 className="h-4 w-4 mr-2" />
+                                            Delete Note
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
@@ -434,19 +482,39 @@ export default function Edit({ note }: { note: Note }) {
                         </div>
 
                         {isProcessing ? (
-                            <div className="flex flex-col items-center justify-center min-h-[500px]">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-                                <p className="mt-4 text-lg text-neutral-600 dark:text-neutral-400">Processing note content...</p>
-                                <p className="text-sm text-neutral-500">This may take a few moments.</p>
-                            </div>
+                            <Card className="border-2 border-dashed border-purple-200 bg-purple-50/50 dark:bg-purple-900/10">
+                                <CardContent className="flex flex-col items-center justify-center min-h-[500px] p-12">
+                                    <div className="relative">
+                                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600"></div>
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <Brain className="h-6 w-6 text-purple-600" />
+                                        </div>
+                                    </div>
+                                    <div className="text-center mt-6">
+                                        <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
+                                            Processing your note
+                                        </h3>
+                                        <p className="text-neutral-600 dark:text-neutral-400 mb-1">
+                                            Our AI is analyzing and enhancing your content
+                                        </p>
+                                        <p className="text-sm text-neutral-500">
+                                            This usually takes 30-60 seconds
+                                        </p>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         ) : (
                             <>
-                                {/* Title */}
-                                <h1 className="text-2xl font-semibold mb-4">{currentNote.title}</h1>
-                                
-                                {/* Date */}
-                                <div className="text-sm text-neutral-500 mb-6">
-                                    {dayjs(currentNote.created_at).format('DD MMM YYYY, hh:mm A')}
+                                {/* Title Section */}
+                                <div className="mb-8">
+                                    <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 dark:text-neutral-100 mb-3 leading-tight">
+                                        {currentNote.title}
+                                    </h1>
+                                    <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-500">
+                                        <span>Created {dayjs(currentNote.created_at).format('MMM DD, YYYY')}</span>
+                                        <span>•</span>
+                                        <span>Last updated {dayjs(currentNote.updated_at).fromNow()}</span>
+                                    </div>
                                 </div>
 
 
@@ -461,48 +529,77 @@ export default function Edit({ note }: { note: Note }) {
                                     {isActionsVisible ? 'Hide Actions' : 'Show Actions'}
                                 </Button> */}
 
-                                {/* Actions Grid with animation */}
-                                <div className={`transition-all duration-300 ease-in-out ${isActionsVisible ? 'opacity-100 max-h-[500px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
-                                        {actions.map((action, index) => (
-                                            <Button
-                                                key={index}
-                                                variant="outline"
-                                                className="flex items-center gap-2 justify-start p-4 h-auto"
-                                                onClick={action.action}
-                                                disabled={isProcessing} // Disable actions while processing
-                                            >
-                                                <span className="text-lg">{action.icon}</span>
-                                                <span>{action.label}</span>
-                                            </Button>
-                                        ))}
+                                {/* AI Actions Section */}
+                                <div className="mb-8">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <Sparkles className="h-5 w-5 text-purple-600" />
+                                        <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                                            AI-Powered Study Tools
+                                        </h2>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {actions.map((action, index) => {
+                                            const IconComponent = action.icon;
+                                            return (
+                                                <Card key={index} className={`transition-all duration-200 cursor-pointer hover:shadow-md ${action.color}`}>
+                                                    <CardContent className="p-3">
+                                                        <Button
+                                                            variant="ghost"
+                                                            className="w-full h-auto p-2 flex flex-col items-start gap-2 text-left hover:bg-transparent"
+                                                            onClick={action.action}
+                                                            disabled={isProcessing || action.loading}
+                                                        >
+                                                            <div className="flex items-center gap-3 w-full">
+                                                                {action.loading ? (
+                                                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                                                ) : (
+                                                                    <IconComponent className="h-5 w-5" />
+                                                                )}
+                                                                <span className="font-medium">{action.label}</span>
+                                                            </div>
+                                                            <p className="text-xs opacity-75 leading-relaxed">
+                                                                {action.description}
+                                                            </p>
+                                                        </Button>
+                                                    </CardContent>
+                                                </Card>
+                                            );
+                                        })}
                                     </div>
                                 </div>
 
-                                {/* Content */}
+                                {/* Content Section */}
                                 <div className="">
-                                    <div className="border-b border-neutral-200 dark:border-neutral-800 -mx-6 mb-6" />
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                                            Note Content
+                                        </h2>
+                                        
+                                    </div>
                                     
-                                    {/* Markdown Editor */}
-                                    {editor ? (
-                                        <>
-                                            <TiptapToolbar editor={editor} />
-                                            <EditorContent editor={editor} className="prose dark:prose-invert max-w-none min-h-[500px] focus:outline-none" />
-                                        </>
-                                    ) : (
-                                        <p>Loading editor...</p>
-                                    )}
-                                    
-                                    {/* Save Button */}
-                                    {/* <div className="mt-6 flex justify-end">
-                                        <Button
-                                            onClick={handleUpdate}
-                                            className="bg-purple-600 hover:bg-purple-700 text-white"
-                                            disabled={isProcessing} // Disable save button while processing
-                                        >
-                                            Save Changes
-                                        </Button>
-                                    </div> */}
+                                    {/* Editor Container */}
+                                    <div className="border border-neutral-200 dark:border-neutral-800 rounded-lg overflow-hidden bg-white dark:bg-neutral-900">
+                                        {editor ? (
+                                            <>
+                                                <div className="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/50">
+                                                    <TiptapToolbar editor={editor} />
+                                                </div>
+                                                <div className="p-6">
+                                                    <EditorContent 
+                                                        editor={editor} 
+                                                        className="prose dark:prose-invert max-w-none min-h-[500px] focus:outline-none prose-headings:text-neutral-900 dark:prose-headings:text-neutral-100 prose-p:text-neutral-700 dark:prose-p:text-neutral-300" 
+                                                    />
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="flex items-center justify-center p-12">
+                                                <div className="flex items-center gap-3">
+                                                    <Loader2 className="h-5 w-5 animate-spin text-purple-600" />
+                                                    <span className="text-neutral-600 dark:text-neutral-400">Loading editor...</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                                 {/* Editor Toolbar */}
                                 
@@ -599,39 +696,66 @@ export default function Edit({ note }: { note: Note }) {
                 </AlertDialogContent>
             </AlertDialog>
             
-            {/* Spinner Modal for Flashcard Generation */}
+            {/* Enhanced Loading Modals */}
             <Dialog open={isFlashcardModalOpen}>
-                <DialogContent className="flex flex-col items-center justify-center">
-                    <div className="flex flex-col items-center gap-4 py-8">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-                        <div className="text-lg font-medium text-neutral-700 dark:text-neutral-200">
-                            Generating flashcards...
+                <DialogContent className="sm:max-w-md">
+                    <div className="flex flex-col items-center gap-6 py-8">
+                        <div className="relative">
+                            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600"></div>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <FileText className="h-6 w-6 text-blue-600" />
+                            </div>
+                        </div>
+                        <div className="text-center">
+                            <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
+                                Creating Flashcards
+                            </h3>
+                            <p className="text-neutral-600 dark:text-neutral-400">
+                                AI is analyzing your note to create study cards
+                            </p>
                         </div>
                     </div>
                 </DialogContent>
             </Dialog>
             
-            {/* Add Quiz Generation Modal */}
             <Dialog open={isQuizModalOpen}>
-                <DialogContent className="flex flex-col items-center justify-center">
-                    <div className="flex flex-col items-center gap-4 py-8">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-                        <div className="text-lg font-medium text-neutral-700 dark:text-neutral-200">
-                            Generating quiz...
+                <DialogContent className="sm:max-w-md">
+                    <div className="flex flex-col items-center gap-6 py-8">
+                        <div className="relative">
+                            <div className="animate-spin rounded-full h-16 w-16 border-4 border-green-200 border-t-green-600"></div>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <Brain className="h-6 w-6 text-green-600" />
+                            </div>
+                        </div>
+                        <div className="text-center">
+                            <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
+                                Generating Quiz
+                            </h3>
+                            <p className="text-neutral-600 dark:text-neutral-400">
+                                Creating intelligent questions from your content
+                            </p>
                         </div>
                     </div>
                 </DialogContent>
             </Dialog>
             
-            {/* Add this before the closing AppLayout tag */}
             <Dialog open={isMindmapLoading} onOpenChange={setIsMindmapLoading}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <div className="flex flex-col items-center justify-center p-4">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
-                        <h3 className="text-lg font-medium text-center">Generating Mindmap</h3>
-                        <p className="text-sm text-neutral-500 text-center mt-2">
-                            Please wait while we generate your mindmap...
-                        </p>
+                <DialogContent className="sm:max-w-md">
+                    <div className="flex flex-col items-center gap-6 py-8">
+                        <div className="relative">
+                            <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600"></div>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <Map className="h-6 w-6 text-purple-600" />
+                            </div>
+                        </div>
+                        <div className="text-center">
+                            <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
+                                Building Mindmap
+                            </h3>
+                            <p className="text-neutral-600 dark:text-neutral-400">
+                                Mapping concepts and connections visually
+                            </p>
+                        </div>
                     </div>
                 </DialogContent>
             </Dialog>

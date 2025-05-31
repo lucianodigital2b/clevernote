@@ -84,6 +84,9 @@ class NoteController extends Controller
                 'icon' => $validated['icon'] ?? 'file',
             ]);
 
+            // Increment user's notes count
+            Auth::user()->increment('notes_count');
+
 
             if (isset($validated['pdf_file'])) {
                 $file = $validated['pdf_file'];
@@ -200,7 +203,11 @@ class NoteController extends Controller
         $delete_related_items = $request->input('delete_related_items', false);
         $this->noteService->deleteNote($note, $delete_related_items);
 
-        return redirect()->route('notes.index')
+        // Decrement user's notes count
+        $note->user->decrement('notes_count');
+
+        return redirect()
+            ->route('dashboard')
             ->with('success', 'Note deleted successfully.');
     }
 
