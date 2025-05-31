@@ -565,25 +565,29 @@ export default function Edit({ note }: { note: Note }) {
                                         {actions.map((action, index) => {
                                             const IconComponent = action.icon;
                                             return (
-                                                <Card key={index} className={`transition-all duration-200 cursor-pointer hover:shadow-md overflow-hidden ${action.color}`}>
-                                                    <CardContent className="p-2 sm:p-3 md:p-4">
+                                                <Card key={index} className={` py-2 transition-all duration-200 cursor-pointer hover:shadow-md word-break ${action.color}`}>
+                                                    <CardContent className="p-2 sm:p-3 md:p-1">
                                                         <Button
                                                             variant="ghost"
-                                                            className="w-full h-auto p-1 sm:p-2 flex flex-col items-start gap-1 sm:gap-2 text-left hover:bg-transparent overflow-hidden"
+                                                            className="w-full h-auto p-1 sm:p-2 flex items-start gap-2 sm:gap-3 md:gap-4 text-left hover:bg-transparent word-break overflow-visible whitespace-normal"
                                                             onClick={action.action}
                                                             disabled={isProcessing || action.loading}
                                                         >
-                                                            <div className="flex items-center gap-1 sm:gap-2 md:gap-3 w-full min-w-0 overflow-hidden">
+                                                            <div className="flex-shrink-0 mt-1">
                                                                 {action.loading ? (
-                                                                    <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 animate-spin flex-shrink-0" />
+                                                                    <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 animate-spin" />
                                                                 ) : (
-                                                                    <IconComponent className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 flex-shrink-0" />
+                                                                    <IconComponent className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
                                                                 )}
-                                                                <span className="font-medium text-xs sm:text-sm md:text-base truncate overflow-hidden">{action.label}</span>
                                                             </div>
-                                                            <p className="text-xs opacity-75 leading-tight sm:leading-relaxed break-words word-break overflow-wrap-anywhere w-full overflow-hidden">
-                                                                {action.description}
-                                                            </p>
+                                                            <div className="flex-1 min-w-0 word-break">
+                                                                <div className="font-medium text-xs sm:text-sm md:text-base truncate overflow-hidden mb-1">
+                                                                    {action.label}
+                                                                </div>
+                                                                <p className="text-xs opacity-75 leading-tight w-full ">
+                                                                    {action.description}
+                                                                </p>
+                                                            </div>
                                                         </Button>
                                                     </CardContent>
                                                 </Card>
