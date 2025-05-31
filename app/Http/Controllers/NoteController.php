@@ -164,7 +164,7 @@ class NoteController extends Controller
         $this->authorize('update', $note);
 
         return Inertia::render('notes/edit', [
-            'note' => $note->load(['tags', 'folder', 'flashcardSets', 'quizzes', 'mindmaps']),
+            'note' => $note->load(['tags', 'folder', 'flashcardSets', 'quizzes', 'mindmaps', 'media']),
             'folders' => Auth::user()->folders,
             'tags' => Auth::user()->tags
         ]);

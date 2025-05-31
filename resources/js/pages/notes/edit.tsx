@@ -46,6 +46,8 @@ import Image from '@tiptap/extension-image'
 import { useDebounce } from '@/hooks/use-debounce';
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import AudioPlayer from 'react-h5-audio-player';
+import 'react-h5-audio-player/lib/styles.css';
 
 export default function Edit({ note }: { note: Note }) {
     const { t } = useTranslation();
@@ -543,6 +545,43 @@ export default function Edit({ note }: { note: Note }) {
 
 
                                 <ValidationErrors errors={errors} />
+
+                                {/* Audio Player Section */}
+                                {currentNote.media && currentNote.media.filter(media => media.collection_name === 'note-audio').length > 0 && (
+                                    <div className="mb-8">
+                                        {currentNote.media
+                                            .filter(media => media.collection_name === 'note-audio')
+                                            .map((audioFile, index) => (
+                                                <div key={audioFile.id} className="space-y-2">
+                                                    {index > 0 && <Separator className="my-4" />}
+                                                    <AudioPlayer
+                                                        src={audioFile.original_url}
+                                                        onPlay={e => console.log("onPlay")}
+                                                        className="rounded-lg"
+                                                        customAdditionalControls={[]}
+                                                        showJumpControls={false}
+                                                        showPlaybackRateControls={true}
+                                                        playbackRates={[0.5, 1, 1.25, 1.5, 2]}
+                                                        layout="horizontal-reverse"
+                                                        style={{
+                                                            backgroundColor: 'transparent',
+                                                            boxShadow: 'none',
+                                                            border: '1px solid rgb(229 231 235)',
+                                                            borderRadius: '0.5rem',
+                                                            '--rhap_theme-color': '#7c3aed',
+                                                            '--rhap_bar-color': '#e5e7eb',
+                                                            '--rhap_time-color': '#6b7280',
+                                                            '--rhap_font-family': 'inherit',
+                                                            '--rhap_main-controls-button-size': '32px',
+                                                            '--rhap_button-height': '32px',
+                                                            '--rhap_button-width': '32px',
+                                                        } as React.CSSProperties}
+                                                    />
+                                                </div>
+                                            ))
+                                        }
+                                    </div>
+                                )}
 
                                 {/* Toggle Button */}
                                 {/* <Button
