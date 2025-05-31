@@ -183,6 +183,12 @@
   "flashcards": "Flashcards",
   "search_flashcards": "Search flashcards...",
   "add_flashcard": "Add Flashcard",
+  "create_flashcards": "Create flashcards",
+  "generate_study_cards": "Generate study cards from your notes",
+  "create_quiz": "Create a quiz",
+  "test_knowledge_ai": "Test your knowledge with AI-generated questions",
+  "generate_mindmap": "Generate mindmap",
+  "visualize_concepts": "Visualize concepts and connections",
 
   "frequently_asked_questions": "Frequently Asked Questions",
   "what_is_clevernote": "What is Clevernote?",

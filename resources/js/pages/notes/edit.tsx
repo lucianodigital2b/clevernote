@@ -45,9 +45,10 @@ import "katex/dist/katex.min.css";
 import Image from '@tiptap/extension-image'
 import { useDebounce } from '@/hooks/use-debounce';
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function Edit({ note }: { note: Note }) {
-
+    const { t } = useTranslation();
     const { errors } = usePage().props;
     
     // Add state for processing status and polling
@@ -127,7 +128,7 @@ export default function Edit({ note }: { note: Note }) {
 
     // Add this new state
     const [isActionsVisible, setIsActionsVisible] = useState(true);
-    const [isChatOpen, setIsChatOpen] = useState(true);
+    const [isChatOpen, setIsChatOpen] = useState(false);
     const [chatMessage, setChatMessage] = useState('');
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [content, setContent] = useState(note.content);
@@ -239,24 +240,24 @@ export default function Edit({ note }: { note: Note }) {
     const actions = [
         { 
             icon: FileText, 
-            label: 'Create flashcards', 
-            description: 'Generate study cards from your notes',
+            label: t('create_flashcards'), 
+            description: t('generate_study_cards'),
             action: handleCreateFlashcards,
             color: 'bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700',
             loading: isFlashcardModalOpen
         },
         { 
             icon: Brain, 
-            label: 'Create a quiz', 
-            description: 'Test your knowledge with AI-generated questions',
+            label: t('create_quiz'), 
+            description: t('test_knowledge_ai'),
             action: handleCreateQuizz,
             color: 'bg-green-50 hover:bg-green-100 border-green-200 text-green-700',
             loading: isQuizModalOpen
         },
         { 
             icon: Map, 
-            label: 'Generate mindmap', 
-            description: 'Visualize concepts and connections',
+            label: t('generate_mindmap'), 
+            description: t('visualize_concepts'),
             action: handleCreateMindmap,
             color: 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700',
             loading: isMindmapLoading
@@ -455,12 +456,7 @@ export default function Edit({ note }: { note: Note }) {
                                 </Button>
                                 <div className="hidden sm:block h-4 w-px bg-neutral-300" />
                                 <div className="flex items-center gap-2">
-                                    {currentNote.folder_id && (
-                                        <Badge variant="secondary" className="flex items-center gap-1">
-                                            <Folder className="h-3 w-3" />
-                                            Folder
-                                        </Badge>
-                                    )}
+                                   
                                     <Badge variant="outline" className="flex items-center gap-1">
                                         <Clock className="h-3 w-3" />
                                         {dayjs(currentNote.updated_at).fromNow()}
@@ -565,27 +561,27 @@ export default function Edit({ note }: { note: Note }) {
                                             AI-Powered Study Tools
                                         </h2>
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
                                         {actions.map((action, index) => {
                                             const IconComponent = action.icon;
                                             return (
-                                                <Card key={index} className={`transition-all duration-200 cursor-pointer hover:shadow-md ${action.color}`}>
-                                                    <CardContent className="px-3">
+                                                <Card key={index} className={`transition-all duration-200 cursor-pointer hover:shadow-md overflow-hidden ${action.color}`}>
+                                                    <CardContent className="p-2 sm:p-3 md:p-4">
                                                         <Button
                                                             variant="ghost"
-                                                            className="w-full h-auto p-2 flex flex-col items-start gap-2 text-left hover:bg-transparent"
+                                                            className="w-full h-auto p-1 sm:p-2 flex flex-col items-start gap-1 sm:gap-2 text-left hover:bg-transparent overflow-hidden"
                                                             onClick={action.action}
                                                             disabled={isProcessing || action.loading}
                                                         >
-                                                            <div className="flex items-center gap-3 w-full">
+                                                            <div className="flex items-center gap-1 sm:gap-2 md:gap-3 w-full min-w-0 overflow-hidden">
                                                                 {action.loading ? (
-                                                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                                                    <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 animate-spin flex-shrink-0" />
                                                                 ) : (
-                                                                    <IconComponent className="h-5 w-5" />
+                                                                    <IconComponent className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 flex-shrink-0" />
                                                                 )}
-                                                                <span className="font-medium">{action.label}</span>
+                                                                <span className="font-medium text-xs sm:text-sm md:text-base truncate overflow-hidden">{action.label}</span>
                                                             </div>
-                                                            <p className="text-xs opacity-75 leading-relaxed">
+                                                            <p className="text-xs opacity-75 leading-tight sm:leading-relaxed break-words word-break overflow-wrap-anywhere w-full overflow-hidden">
                                                                 {action.description}
                                                             </p>
                                                         </Button>
