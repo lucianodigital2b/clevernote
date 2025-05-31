@@ -374,3 +374,7 @@
 .animate-scroll {
   animation: scroll 20s linear infinite;
 }
+
+.rhap_additional-controls {
+  display: none !important;
+}
