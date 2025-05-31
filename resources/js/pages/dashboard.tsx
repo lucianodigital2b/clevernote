@@ -429,7 +429,12 @@ export default function Dashboard() {
                     <DialogHeader>
                         <DialogTitle>{t('welcome_title')}</DialogTitle>
                     </DialogHeader>
-                    <OnboardingForm />
+                    <OnboardingForm 
+                        onComplete={() => {
+                            setIsOnboardingOpen(false);
+                            setIsModalOpen(true);
+                        }}
+                    />
                 </DialogContent>
             </Dialog>
         </AppLayout>

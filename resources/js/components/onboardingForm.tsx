@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
-export default function OnboardingForm({ onClose }: { onClose?: () => void }) {
+export default function OnboardingForm({ onClose, onComplete }: { onClose?: () => void; onComplete?: () => void }) {
     const [step, setStep] = useState(1);
     const { t } = useTranslation();
     const { data, setData, post, processing, errors } = useForm({
@@ -32,7 +32,11 @@ export default function OnboardingForm({ onClose }: { onClose?: () => void }) {
         post(route('onboarding.store'), {
             onSuccess: () => {
                 toast.success(t('onboarding_success'));
-                window.location.reload()
+                if (onComplete) {
+                    onComplete();
+                } else {
+                    window.location.reload();
+                }
             },
             onError: (errors) => {
                 toast.error(t('onboarding_error'));
@@ -42,17 +46,18 @@ export default function OnboardingForm({ onClose }: { onClose?: () => void }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6" translate="yes">
-            <div className="mb-8 flex justify-center" translate="no">
-                <div className="flex items-center space-x-2">
-                    {[1, 2, 3].map((i) => (
-                        <div key={i} className="flex items-center">
-                            <div className={`h-2 w-2 rounded-full ${step >= i ? 'bg-primary' : 'bg-gray-300'}`} />
-                            {i < 3 && <div className={`h-0.5 w-8 ${step > i ? 'bg-primary' : 'bg-gray-300'}`} />}
-                        </div>
-                    ))}
+        <div className="max-h-[90vh] overflow-y-auto px-4 py-2">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6" translate="yes">
+                <div className="mb-6 sm:mb-8 flex justify-center" translate="no">
+                    <div className="flex items-center space-x-2">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="flex items-center">
+                                <div className={`h-2 w-2 rounded-full ${step >= i ? 'bg-primary' : 'bg-gray-300'}`} />
+                                {i < 3 && <div className={`h-0.5 w-6 sm:w-8 ${step > i ? 'bg-primary' : 'bg-gray-300'}`} />}
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
 
             <AnimatePresence mode="wait">
                 <motion.div
@@ -64,10 +69,10 @@ export default function OnboardingForm({ onClose }: { onClose?: () => void }) {
                     translate="yes"
                 >
                     {step === 1 && (
-                        <div className="space-y-4">
-                            <h2 className="text-lg font-semibold" translate="yes">{t('onboarding_language_title')}</h2>
+                        <div className="space-y-3 sm:space-y-4">
+                            <h2 className="text-base sm:text-lg font-semibold" translate="yes">{t('onboarding_language_title')}</h2>
                             <div className="space-y-2">
-                                <Label htmlFor="preferred_language" translate="yes">{t('onboarding_language_select')}</Label>
+                                <Label htmlFor="preferred_language" translate="yes" className="text-sm sm:text-base">{t('onboarding_language_select')}</Label>
                                 <Select 
                                     value={data.preferred_language}
                                     onValueChange={(value) => setData('preferred_language', value)}
@@ -88,10 +93,10 @@ export default function OnboardingForm({ onClose }: { onClose?: () => void }) {
                     )}
 
                     {step === 2 && (
-                        <div className="space-y-4">
-                            <h2 className="text-lg font-semibold" translate="yes">{t('onboarding_about_title')}</h2>
+                        <div className="space-y-3 sm:space-y-4">
+                            <h2 className="text-base sm:text-lg font-semibold" translate="yes">{t('onboarding_about_title')}</h2>
                             <div className="space-y-3">
-                                <Label className='mb-5' translate="yes">{t('onboarding_discovery_question')}</Label>
+                                <Label className='mb-3 sm:mb-5 text-sm sm:text-base' translate="yes">{t('onboarding_discovery_question')}</Label>
                                 <RadioGroup
                                     value={data.discovery_source}
                                     onValueChange={(value) => setData('discovery_source', value)}
@@ -116,7 +121,7 @@ export default function OnboardingForm({ onClose }: { onClose?: () => void }) {
                                 )}
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="primary_subject_interest" translate="yes">{t('onboarding_subject_interest')}</Label>
+                                <Label htmlFor="primary_subject_interest" translate="yes" className="text-sm sm:text-base">{t('onboarding_subject_interest')}</Label>
                                 <Input
                                     id="primary_subject_interest"
                                     value={data.primary_subject_interest}
@@ -129,10 +134,10 @@ export default function OnboardingForm({ onClose }: { onClose?: () => void }) {
                     )}
 
                     {step === 3 && (
-                        <div className="space-y-4">
-                            <h2 className="text-lg font-semibold" translate="yes">{t('onboarding_goals_title')}</h2>
+                        <div className="space-y-3 sm:space-y-4">
+                            <h2 className="text-base sm:text-lg font-semibold" translate="yes">{t('onboarding_goals_title')}</h2>
                             <div className="space-y-2">
-                                <Label htmlFor="learning_goals" translate="yes">{t('onboarding_goals_question')}</Label>
+                                <Label htmlFor="learning_goals" translate="yes" className="text-sm sm:text-base">{t('onboarding_goals_question')}</Label>
                                 <Input
                                     id="learning_goals"
                                     value={data.learning_goals}
@@ -146,21 +151,22 @@ export default function OnboardingForm({ onClose }: { onClose?: () => void }) {
                 </motion.div>
             </AnimatePresence>
 
-            <div className="flex justify-between space-x-4 pt-4">
-                {step > 1 && (
-                    <Button type="button" variant="outline" onClick={prevStep} translate="yes">
-                        {t('onboarding_previous')}
+                <div className="flex justify-between space-x-2 sm:space-x-4 pt-4 sticky bottom-0 bg-white pb-4 sm:pb-6 mt-4">
+                    {step > 1 && (
+                        <Button type="button" variant="outline" onClick={prevStep} translate="yes" className="text-sm sm:text-base px-3 sm:px-4">
+                            {t('onboarding_previous')}
+                        </Button>
+                    )}
+                    <Button 
+                        type="submit" 
+                        className="ml-auto text-sm sm:text-base px-3 sm:px-4" 
+                        disabled={processing}
+                        translate="yes"
+                    >
+                        {step < 3 ? t('onboarding_next') : (processing ? t('onboarding_saving') : t('onboarding_complete'))}
                     </Button>
-                )}
-                <Button 
-                    type="submit" 
-                    className="ml-auto" 
-                    disabled={processing}
-                    translate="yes"
-                >
-                    {step < 3 ? t('onboarding_next') : (processing ? t('onboarding_saving') : t('onboarding_complete'))}
-                </Button>
-            </div>
-        </form>
+                </div>
+            </form>
+        </div>
     );
 }
