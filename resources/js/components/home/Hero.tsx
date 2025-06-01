@@ -72,7 +72,7 @@ const Hero = () => {
                   </a>
                 </Button>
               </div>
-              <Button className="py-4 bg-indigo-100 hover:bg-indigo-200 text-indigo-600 border-2 px-8 rounded-full font-medium transition-all duration-200 shadow-lg shadow-indigo-200/50 hover:shadow-xl hover:shadow-indigo-300/60 h-full border-indigo-600" asChild>
+              <Button className="py-4 bg-indigo-100 hover:bg-indigo-200 text-indigo-600 border-2 px-8 rounded-full font-medium transition-all duration-200 shadow-lg shadow-indigo-200/50 hover:shadow-xl hover:shadow-indigo-300/60 h-full border-indigo-600 dark:text-indigo-600 " asChild>
                 <a href="/login" className="flex items-center justify-center">
                   {t('premium_cta_email')}
                   <ArrowRight className="w-4 h-4 ml-2" />

@@ -25,12 +25,16 @@ class YouTubeAudioExtractor
             $ytdlp,
             '--extract-audio',
             '--audio-format', 'mp3',
+            '--audio-quality', '128K', // Lower quality for faster processing
+            '--no-playlist', // Ensure only single video is processed
             '--ffmpeg-location', $ffmpeg,
             '-o', $outputPath,
             $youtubeUrl,
         ];
 
         $process = new Process($command);
+        $process->setTimeout(config('app.ytdlp_timeout', 600));
+        $process->setIdleTimeout(config('app.ytdlp_idle_timeout', 120));
 
         try {
             $process->mustRun();

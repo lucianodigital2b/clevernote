@@ -281,4 +281,54 @@ class NoteController extends Controller
         ]);
     }
 
+    public function retryProcessing(Note $note)
+    {
+        // Check if the note is in failed status
+        if ($note->status !== 'failed') {
+            return response()->json(['error' => 'Note is not in failed status'], 400);
+        }
+
+        // Reset the note status to processing
+        $note->update([
+            'status' => 'processing',
+            'failure_reason' => null
+        ]);
+
+        // Determine which job to dispatch based on note type/content
+        // You'll need to store the original job type or determine it from the note
+        $this->dispatchAppropriateJob($note);
+
+        return response()->json(['message' => 'Job retry initiated successfully']);
+    }
+
+    private function dispatchAppropriateJob(Note $note)
+    {
+        // You'll need to determine which job to run based on the note's original data
+        // This could be stored in a new field like 'job_type' or determined from existing data
+        
+        // Example logic (you'll need to adapt this based on your note structure):
+        if ($note->link) {
+            // This was a link note
+            ProcessLinkNote::dispatch($note->id, [
+                'language' => $note->language ?? 'en',
+                'link' => $note->link,
+                // Add other necessary data
+            ]);
+        } elseif ($note->file_path) {
+            // This was a file upload (audio or PDF)
+            $extension = pathinfo($note->file_path, PATHINFO_EXTENSION);
+            if (in_array($extension, ['mp3', 'wav', 'ogg'])) {
+                ProcessAudioNote::dispatch($note->id, [
+                    'language' => $note->language ?? 'en',
+                    // Add other necessary data
+                ], $note->file_path);
+            } else {
+                ProcessPdfNote::dispatch($note->id, [
+                    'language' => $note->language ?? 'en',
+                    // Add other necessary data
+                ], $note->file_path, $extension);
+            }
+        }
+    }
+
 }

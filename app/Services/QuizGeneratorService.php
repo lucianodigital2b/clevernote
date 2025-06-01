@@ -50,7 +50,7 @@ class QuizGeneratorService extends AbstractAIService
 
         $quiz = Quiz::create([
             'title' => Str::limit($note->title, 255),
-            'description' => "Automatically generated quiz from note: {$note->title}",
+            'description' => $note->summary,
             'user_id' => $note->user_id,
             'is_published' => false
         ]);

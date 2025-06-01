@@ -3,7 +3,7 @@ import { SVGAttributes } from 'react';
 export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
     return (
 <svg {...props} version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"  x="0px" y="0px"
-	 width="100%" viewBox="0 0 1024 1024" enable-background="new 0 0 1024 1024">
+	 width="100%" viewBox="0 0 1024 1024" enableBackground="new 0 0 1024 1024">
 <path fill="#5127EF" opacity="1.000000" stroke="none" 
 	d="
 M646.000000,1025.000000 

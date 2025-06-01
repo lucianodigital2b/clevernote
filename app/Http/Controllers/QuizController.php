@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\UpdateUserStatistics;
 use App\Models\Note;
 use App\Models\Quiz;
 use App\Models\QuizQuestion;
@@ -10,6 +11,7 @@ use App\Models\QuizOption;
 use App\Models\QuizAttempt;
 use App\Models\QuizAnswer;
 use App\Services\QuizGeneratorService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -161,20 +163,19 @@ class QuizController extends Controller
         }
     }
 
-    public function destroy(Quiz $quiz)
+    public function destroy(Request $request, Quiz $quiz)
     {
         $this->authorize('delete', $quiz);
 
-        try {
-            DB::beginTransaction();
-            $quiz->delete();
-            DB::commit();
-
-            return response()->json(null, 204);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['message' => 'Failed to delete quiz'], 500);
+        $quiz->delete();
+        if($request->wantsJson()) {
+            return response()->json([
+                'message' => __('quiz_deleted_successfully')
+            ]);
         }
+
+        return redirect()->back()->with('success', __('quiz_deleted_successfully'));
+
     }
 
     public function submitAttempt(Request $request, Quiz $quiz)
@@ -217,6 +218,9 @@ class QuizController extends Controller
 
             $attempt->update(['score' => $score]);
 
+            UpdateUserStatistics::dispatch(auth()->id(), Carbon::today());
+    
+            
             DB::commit();
             return response()->json([
                 'score' => $score,

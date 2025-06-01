@@ -1,9 +1,8 @@
-import { useState } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import React, { useState } from 'react';
+import { Head, Link } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PlusIcon, PencilIcon, TrashIcon, MoreVertical, ClipboardList } from 'lucide-react';
+import { PencilIcon, MoreVertical, ClipboardList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog';
 import {
     DropdownMenu,
@@ -12,7 +11,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import AppLayout from '@/layouts/app-layout';
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 interface QuizOption {
   id: number;
@@ -45,6 +44,7 @@ interface Props {
 }
 
 export default function Index({ quizzes }: Props) {
+  const { t } = useTranslation(['translation']);
   const [hoveredQuiz, setHoveredQuiz] = useState<number | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedQuizId, setSelectedQuizId] = useState<number | null>(null);
@@ -54,25 +54,9 @@ export default function Index({ quizzes }: Props) {
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    if (!selectedQuizId) return;
-
-    router.delete(`/quizzes/${selectedQuizId}`, {
-      onSuccess: () => {
-        toast.success('Quiz deleted successfully.');
-        setDeleteDialogOpen(false);
-      },
-      onError: (error) => {
-        toast.error('There was an error deleting the quiz!');
-        console.error('There was an error deleting the quiz!', error);
-        setDeleteDialogOpen(false);
-      }
-    });
-  };
-
   return (
     <AppLayout>
-      <Head title="Quizzes" />
+      <Head title={t('Quizzes')} />
       
       <div className="container mx-auto py-6 px-4">
         <div className="flex justify-between items-center mb-6">
@@ -119,18 +103,8 @@ export default function Index({ quizzes }: Props) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <Link href={`/quizzes/${quiz.id}`}>
-                            {t('View Quiz')}
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/quizzes/${quiz.id}/edit`}>
-                            {t('Edit Quiz')}
-                          </Link>
-                        </DropdownMenuItem>
                         <DropdownMenuItem className="text-red-500" onClick={() => handleDelete(quiz.id)}>
-                          {t('Delete Quiz')}
+                          {t('delete')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -170,13 +144,17 @@ export default function Index({ quizzes }: Props) {
         )}
       </div>
 
-      <DeleteConfirmationDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        onConfirm={confirmDelete}
-        title={t('delete_quiz_title')}
-        description={t('delete_quiz_confirmation')}
-      />
+      {selectedQuizId && (
+        <DeleteConfirmationDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          endpoint={`/quizzes/${selectedQuizId}`}
+          title={t('are_you_sure')}
+          description={t('this_action_cannot_be_undone')}
+          successMessage={t('deleted_successfully')}
+          errorMessage={t('delete_error')}
+        />
+      )}
     </AppLayout>
   );
 }

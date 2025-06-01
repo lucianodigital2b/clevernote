@@ -16,6 +16,13 @@ class Folder extends Model
         'user_id',
     ];
 
+    public static function booted() {
+        static::creating(function ($model) {
+            $model->uuid = \Str::uuid();
+        });
+    }
+    
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

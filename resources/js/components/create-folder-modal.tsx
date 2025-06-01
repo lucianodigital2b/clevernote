@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { FolderIcon } from 'lucide-react';
+import { FolderIcon, LoaderCircle } from 'lucide-react';
 import { router } from '@inertiajs/react';
 import { toast } from 'sonner';
+import { t } from 'i18next';
 
 type CreateFolderModalProps = {
     isOpen: boolean;
@@ -112,14 +113,16 @@ export function CreateFolderModal({ isOpen, onClose }: CreateFolderModalProps) {
                             onClick={onClose}
                             disabled={isSubmitting}
                         >
-                            Cancel
+                            {t('cancel')}
                         </Button>
                         <Button 
                             onClick={handleSave} 
                             disabled={!folderName.trim() || isSubmitting}
-                            className="bg-neutral-800 hover:bg-neutral-700 dark:bg-neutral-700 dark:hover:bg-neutral-600"
+                            className=" "
+                            
                         >
-                            {isSubmitting ? 'Creating...' : 'Create Folder'}
+                            {isSubmitting && <LoaderCircle className="h-4 w-4 animate-spin mr-2" />}
+                            {t('create_folder')}
                         </Button>
                     </div>
                 </div>

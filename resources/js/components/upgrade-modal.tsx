@@ -54,7 +54,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                 <DialogHeader className="p-6 pb-0 sticky top-0 bg-gradient-to-br from-white to-purple-50 dark:from-gray-900 dark:to-gray-800 z-10">
                     <DialogTitle className="text-center text-2xl font-bold flex items-center justify-center gap-2">
                         <SparklesIcon className="h-6 w-6 text-yellow-400 animate-pulse" />
-                        <span>Upgrade to CleverNote Pro</span>
+                        <span>Upgrade to Clevernote Pro</span>
                         <SparklesIcon className="h-6 w-6 text-yellow-400 animate-pulse" />
                     </DialogTitle>
                     <p className="text-center text-gray-600 dark:text-gray-300 mt-2">
@@ -136,7 +136,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                     {/* Action Buttons */}
                     <div className="flex flex-col gap-3">
                         <Button 
-                            className="w-full py-6 text-lg font-bold bg-indigo-600 hover:bg-indigo-700 transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
+                            className="dark:text-white w-full py-6 text-lg font-bold bg-indigo-600 hover:bg-indigo-700 transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
                             onClick={handleUpgrade}
                         >
                             Upgrade Now

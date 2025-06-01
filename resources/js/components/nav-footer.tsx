@@ -5,6 +5,7 @@ import { type ComponentPropsWithoutRef, useState } from 'react';
 import { UpgradeModal } from '@/components/upgrade-modal';
 import { SparklesIcon } from '@heroicons/react/24/outline';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useTranslation } from 'react-i18next';
 
 type NavFooterProps = ComponentPropsWithoutRef<typeof SidebarGroup> & {
     items: NavItem[];
@@ -19,6 +20,8 @@ export function NavFooter({
     user,
     ...props
 }: NavFooterProps) {
+    const { t } = useTranslation();
+    
     // Free notes limit and current usage
     const freeNotesLimit = 3;
     
@@ -41,7 +44,7 @@ export function NavFooter({
                 <div className="bg-neutral-100 dark:bg-neutral-800 rounded-md p-3">
                     <div className="flex justify-between items-center mb-2">
                         <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300">
-                            Free Notes Left
+                            {t('free_notes_left')}
                         </span>
                         <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-200">
                             {freeNotesUsed}/{freeNotesLimit}
@@ -58,7 +61,7 @@ export function NavFooter({
                             onClick={() => setIsModalOpen(true)}
                             className="text-xs text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 cursor-pointer"
                         >
-                            Upgrade for unlimited notes
+                            {t('upgrade_for_unlimited_notes')}
                         </button>
                     </div>
                 </div>
@@ -81,7 +84,7 @@ export function NavFooter({
                         </button>
                     </TooltipTrigger>
                     <TooltipContent side="right">
-                        {freeNotesLeft} free notes left - Upgrade for unlimited
+                        {t('upgrade_for_unlimited_notes')}
                     </TooltipContent>
                 </Tooltip>
             </div>
