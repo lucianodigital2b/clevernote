@@ -248,6 +248,23 @@
   "study_title_prefix": "Study",
   "study_flashcard_of": "Flashcard {{current}} of {{total}}",
   "study_previous": "Previous",
-  "study_flip_card": "Flip Card"
+  "study_flip_card": "Flip Card",
+  "study_next": "Next",
+  "performance_over_weeks": "Performance over the weeks",
+  "you": "You",
+  "goal": "Goal",
+  "one_month": "1 month",
+  "your_accuracy": "Your accuracy",
+  "questions_answered": "Questions answered",
+  "study_activity": "Study Activity",
+  "studied_cards_today": "Studied {{count}} cards in {{minutes}} minutes today ({{seconds}}s/card)",
+  "daily_average": "Daily average",
+  "days_learned": "Days learned",
+  "longest_streak": "Longest streak",
+  "current_streak": "Current streak",
+  "track_learning_progress": "Track your learning progress and performance",
+  "cards": "cards",
+  "days": "days",
+  "activities": "activities"
 
 }

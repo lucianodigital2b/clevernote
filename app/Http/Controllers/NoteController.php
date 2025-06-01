@@ -203,8 +203,6 @@ class NoteController extends Controller
         $delete_related_items = $request->input('delete_related_items', false);
         $this->noteService->deleteNote($note, $delete_related_items);
 
-        // Decrement user's notes count
-        $note->user->decrement('notes_count');
 
         return redirect()
             ->route('dashboard')
