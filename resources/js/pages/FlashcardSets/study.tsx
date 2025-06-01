@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, RotateCw } from 'lucide-react';
+import { ArrowLeft, PlusCircle, RotateCw } from 'lucide-react';
 import { FlashcardSet } from '@/types';
 import { Progress } from "@/components/ui/progress";
+import { useTranslation } from 'react-i18next';
+import DOMPurify from 'dompurify';
 import axios from 'axios';
 
 interface Props {
@@ -27,6 +29,7 @@ interface RecallOption {
 }
 
 const Study = ({ flashcardSet }: Props) => {
+    const { t } = useTranslation();
     const [progress, setProgress] = useState<FlashcardProgress[]>([]);
     const [dueIndexes, setDueIndexes] = useState<number[]>([]);
     const [currentIndex, setCurrentIndex] = useState<number | null>(null);
@@ -52,16 +55,6 @@ const Study = ({ flashcardSet }: Props) => {
         setIsFlipped(false);
     }, [flashcardSet]);
 
-    // Helper to get the next due card index
-    const getNextDueIndex = (excludeIndex?: number) => {
-        const now = new Date();
-        const filtered = dueIndexes.filter(idx => {
-            if (excludeIndex !== undefined && idx === excludeIndex) return false;
-            const prog = progress[idx];
-            return prog && prog.nextReview <= now;
-        });
-        return filtered.length > 0 ? filtered[0] : null;
-    };
 
     // Only show cards that are due (nextReview <= now)
     useEffect(() => {
@@ -83,16 +76,6 @@ const Study = ({ flashcardSet }: Props) => {
     const currentFlashcard = currentIndex !== null ? flashcardSet.flashcards[currentIndex] : null;
     const currentProgress = currentIndex !== null ? progress[currentIndex] : null;
 
-    const handleNext = () => {
-        const nextIdx = getNextDueIndex(currentIndex ?? undefined);
-        if (nextIdx === null) {
-            setCurrentIndex(null);
-            setIsComplete(true);
-        } else {
-            setCurrentIndex(nextIdx);
-            setIsFlipped(false);
-        }
-    };
 
     const handlePrevious = () => {
         if (dueIndexes.length === 0 || currentIndex === null) return;
@@ -108,11 +91,30 @@ const Study = ({ flashcardSet }: Props) => {
     };
 
     const recallOptions: RecallOption[] = [
-        { label: 'Again', interval: 1, quality: 0 },      // 1 minute - forgot completely
-        { label: 'Hard', interval: 6, quality: 2 },       // 6 minutes - difficult recall
-        { label: 'Good', interval: 10, quality: 3 },      // 10 minutes - normal recall
-        { label: 'Easy', interval: 5760, quality: 5 },    // 4 days - easy recall
+        { label: t('flashcard_recall_again'), interval: 1, quality: 0 },      // 1 minute - forgot completely
+        { label: t('flashcard_recall_hard'), interval: 6, quality: 2 },       // 6 minutes - difficult recall
+        { label: t('flashcard_recall_good'), interval: 10, quality: 3 },      // 10 minutes - normal recall
+        { label: t('flashcard_recall_easy'), interval: 5760, quality: 5 },    // 4 days - easy recall
     ];
+
+    // Calculate progress percentages for visual feedback
+    const getProgressPercentage = (quality: number) => {
+        return (quality / 5) * 100; // Convert quality (0-5) to percentage
+    };
+
+    const getButtonVariant = (label: string) => {
+        if (label === t('flashcard_recall_again')) return 'destructive';
+        if (label === t('flashcard_recall_easy')) return 'default';
+        return 'outline';
+    };
+
+    const getButtonColor = (label: string) => {
+        if (label === t('flashcard_recall_again')) return 'bg-red-100 hover:bg-red-600 text-red-800 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-800/30 border-red-200 dark:border-red-800';
+        if (label === t('flashcard_recall_hard')) return 'bg-orange-100 hover:bg-orange-600 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400 dark:hover:bg-orange-800/30 border-orange-200 dark:border-orange-800';
+        if (label === t('flashcard_recall_good')) return 'bg-blue-100 hover:bg-blue-600 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-800/30 border-blue-200 dark:border-blue-800';
+        if (label === t('flashcard_recall_easy')) return 'bg-green-100 hover:bg-green-600 text-green-800 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-800/30 border-green-200 dark:border-green-800';
+        return '';
+    };
 
     const handleRecall = async (option: RecallOption) => {
         if (currentIndex === null || !currentProgress) return;
@@ -153,15 +155,15 @@ const Study = ({ flashcardSet }: Props) => {
     if (isComplete) {
         return (
             <AppLayout>
-                <div className="flex flex-col items-center justify-center min-h-[60vh]">
-                    <div className="bg-white rounded-xl border shadow-lg p-8 flex flex-col items-center max-w-md w-full">
-                        <div className="text-2xl font-semibold mb-2 flex items-center gap-2">
-                            Well done! <span role="img" aria-label="bee">🐝</span>
+                <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+                    <div className="rounded-xl border shadow-lg p-6 sm:p-8 flex flex-col items-center max-w-md w-full">
+                        <div className="text-xl sm:text-2xl font-semibold mb-2 flex items-center gap-2 text-center">
+                            {t('study_well_done')} <span role="img" aria-label="bee">🐝</span>
                         </div>
-                        <div className="mb-6 text-gray-500 text-center">
-                            Your learning experience does not stop here <span role="img" aria-label="point">👈</span>
+                        <div className="mb-6 text-white text-center">
+                            {t('study_learning_continues')} <span role="img" aria-label="point">👈</span>
                         </div>
-                        <div className="flex gap-2 w-full mb-4">
+                        <div className="flex flex-col sm:flex-row gap-2 w-full mb-4">
                             <Button
                                 variant="outline"
                                 className="flex-1"
@@ -175,7 +177,17 @@ const Study = ({ flashcardSet }: Props) => {
                                 }}
                             >
                                 <RotateCw className="h-4 w-4 mr-2" />
-                                Review All
+                                {t('study_review_all')}
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="flex-1"
+                                asChild
+                            >
+                                <Link href="/dashboard" className="flex items-center gap-2">
+                                    <PlusCircle className="h-4 w-4 mr-2" />
+                                    {t('study_create_new_note')}
+                                </Link>
                             </Button>
                         </div>
                     </div>
@@ -190,8 +202,8 @@ const Study = ({ flashcardSet }: Props) => {
             <AppLayout>
                 <div className="flex flex-col items-center justify-center min-h-[60vh]">
                     <div className="text-center">
-                        <h2 className="text-xl font-semibold mb-2">No cards due for review</h2>
-                        <p className="text-gray-500">Come back later when cards are ready for review.</p>
+                        <h2 className="text-xl font-semibold mb-2">{t('study_no_cards_due')}</h2>
+                        <p className="text-gray-500">{t('study_come_back_later')}</p>
                     </div>
                 </div>
             </AppLayout>
@@ -200,23 +212,23 @@ const Study = ({ flashcardSet }: Props) => {
 
     return (
         <AppLayout>
-            <Head title={`Study ${flashcardSet.name}`} />
+            <Head title={`${t('study_title_prefix')} ${flashcardSet.name}`} />
 
-            <div className="container mx-auto py-6 px-4">
-                <div className="flex items-center mb-6">
-                    <Button variant="ghost" asChild>
+            <div className="container mx-auto py-4 sm:py-6 px-4">
+                <div className="flex items-center mb-4 sm:mb-6">
+                    <Button variant="ghost" asChild className="shrink-0">
                         <Link href={`/flashcard-sets/${flashcardSet.id}`} className="flex items-center gap-2">
                             <ArrowLeft className="h-4 w-4" />
                         </Link>
                     </Button>
-                    <h1 className="text-2xl font-semibold flex-1 text-center">{flashcardSet.name}</h1>
-                    <div className="w-9"></div>
+                    <h1 className="text-lg sm:text-2xl font-semibold flex-1 text-center px-2 truncate">{flashcardSet.name}</h1>
+                    <div className="w-9 shrink-0"></div>
                 </div>
 
-                <div className="max-w-2xl mx-auto">
-                    <Progress value={studyProgress} className="mb-6" />
+                <div className="max-w-2xl mx-auto w-full">
+                    <Progress value={studyProgress} className="mb-4 sm:mb-6" />
                     <div 
-                        className="relative min-h-[400px] perspective-1000 cursor-pointer"
+                        className="relative min-h-[300px] sm:min-h-[400px] perspective-1000 cursor-pointer"
                         onClick={handleFlip}
                     >
                         <div className={`absolute w-full h-full transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
@@ -224,13 +236,16 @@ const Study = ({ flashcardSet }: Props) => {
                             <Card className={`absolute w-full h-full backface-hidden ${isFlipped ? 'opacity-0' : 'opacity-100'}`}>
                                 <CardHeader className="flex-none">
                                     <CardTitle className="text-center">
-                                        Flashcard {currentIndex + 1} of {flashcardSet.flashcards.length}
+                                        {t('study_flashcard_of', { current: currentIndex + 1, total: flashcardSet.flashcards.length })}
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent className="flex-1 flex flex-col items-center justify-center p-6">
-                                    <div className="text-center text-xl">
-                                        {currentFlashcard.question}
-                                    </div>
+                                <CardContent className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6">
+                                    <div 
+                                        className="text-center text-base sm:text-xl leading-relaxed"
+                                        dangerouslySetInnerHTML={{
+                                            __html: DOMPurify.sanitize(currentFlashcard.question)
+                                        }}
+                                    />
                                 </CardContent>
                             </Card>
                             
@@ -238,19 +253,22 @@ const Study = ({ flashcardSet }: Props) => {
                             <Card className={`absolute w-full h-full backface-hidden rotate-y-180 ${isFlipped ? 'opacity-100' : 'opacity-0'}`}>
                                 <CardHeader className="flex-none">
                                     <CardTitle className="text-center">
-                                        Flashcard {currentIndex + 1} of {flashcardSet.flashcards.length}
+                                        {t('study_flashcard_of', { current: currentIndex + 1, total: flashcardSet.flashcards.length })}
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent className="flex-1 flex flex-col items-center justify-center p-6">
-                                    <div className="text-center text-xl">
-                                        {currentFlashcard.answer}
-                                    </div>
+                                <CardContent className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6">
+                                    <div 
+                                        className="text-center text-base sm:text-xl leading-relaxed"
+                                        dangerouslySetInnerHTML={{
+                                            __html: DOMPurify.sanitize(currentFlashcard.answer)
+                                        }}
+                                    />
                                 </CardContent>
                             </Card>
                         </div>
                     </div>
 
-                    <div className="flex justify-center gap-4 mt-6">
+                    <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 mt-4 sm:mt-6">
                         <Button 
                             variant="outline" 
                             onClick={handlePrevious}
@@ -259,47 +277,46 @@ const Study = ({ flashcardSet }: Props) => {
                                 currentIndex === null ||
                                 dueIndexes.indexOf(currentIndex) === 0
                             }
+                            className="w-full sm:w-auto"
                         >
                             <ArrowLeft className="h-4 w-4 mr-2" />
-                            Previous
+                            {t('study_previous')}
                         </Button>
                         <Button 
                             variant="outline" 
                             onClick={handleFlip}
+                            className="w-full sm:w-auto"
                         >
                             <RotateCw className="h-4 w-4 mr-2" />
-                            Flip Card
+                            {t('study_flip_card')}
                         </Button>
                     </div>
                     {/* Recall options are now always visible */}
-                    <div className="flex justify-center gap-4 mt-6">
+                    <div className="grid grid-cols-2 sm:flex sm:justify-center gap-2 sm:gap-3 mt-6 sm:mt-8">
                         {recallOptions.map((option) => (
-                            <Button
-                                key={option.label}
-                                variant={
-                                    option.label === 'Again' ? 'destructive' : 
-                                    option.label === 'Easy' ? 'default' : 
-                                    'outline'
-                                }
-                                onClick={() => handleRecall(option)}
-                                className={
-                                    `min-w-[80px] py-4 px-6` +
-                                    (option.label === 'Easy'
-                                        ? ' bg-green-500 text-white hover:bg-green-600'
-                                        : '')
-                                }
-                            >
-                                <div className="flex flex-col items-center">
-                                    <span>{option.label}</span>
-                                    <span className="text-xs opacity-70">
-                                        {option.interval >= 1440 
-                                            ? `${Math.floor(option.interval / 1440)}d` 
-                                            : option.interval >= 60 
-                                                ? `${Math.floor(option.interval / 60)}h` 
-                                                : `${option.interval}m`}
-                                    </span>
-                                </div>
-                            </Button>
+                            <div key={option.label} className="flex flex-col items-center">
+                                <Button
+                                    variant={'outline'}
+                                    onClick={() => handleRecall(option)}
+                                    className={`
+                                        w-full sm:w-auto min-h-[60px] sm:min-h-[auto]
+                                        ${getButtonColor(option.label)}
+                                    `}
+                                >
+                                    <div className="flex flex-col items-center justify-center h-full relative z-10">
+                                        <span className="font-semibold text-xs sm:text-sm text-center leading-tight">{option.label}</span>
+                                        <span className="text-xs opacity-90 font-medium mt-1">
+                                            {option.interval >= 1440 
+                                                ? `${Math.floor(option.interval / 1440)}d` 
+                                                : option.interval >= 60 
+                                                    ? `${Math.floor(option.interval / 60)}h` 
+                                                    : `${option.interval}m`}
+                                        </span>
+                                    </div>
+                                   
+                                </Button>
+                               
+                            </div>
                         ))}
                     </div>
                 </div>

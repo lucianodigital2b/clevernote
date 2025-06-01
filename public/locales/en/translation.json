@@ -87,7 +87,7 @@
   "pricing_subheading": "Whether you're a casual note-taker or a serious student, we have a plan that fits your needs.",
   "pricing_monthly": "Monthly",
   "pricing_annual": "Annual",
-  "pricing_save_20": "Save 20%",
+  "pricing_save_20": "Save 50%",
   "pricing_most_popular": "Most Popular",
   "Student": "Student",
   "pricing_student_description": "Ideal for individual students",
@@ -234,6 +234,20 @@
   "cancel": "Cancel",
   "free_notes_left": "Free Notes Left",
   "upgrade_for_unlimited_notes": "Upgrade for unlimited notes",
-  "free_notes_left_upgrade_unlimited": "{{count}} free notes left - Upgrade for unlimited"
+  "free_notes_left_upgrade_unlimited": "{{count}} free notes left - Upgrade for unlimited",
+  "flashcard_recall_again": "Again",
+  "flashcard_recall_hard": "Hard",
+  "flashcard_recall_good": "Good",
+  "flashcard_recall_easy": "Easy",
+  "study_well_done": "Well done!",
+  "study_learning_continues": "Your learning experience does not stop here",
+  "study_review_all": "Review All",
+  "study_create_new_note": "Create a new note",
+  "study_no_cards_due": "No cards due for review",
+  "study_come_back_later": "Come back later when cards are ready for review.",
+  "study_title_prefix": "Study",
+  "study_flashcard_of": "Flashcard {{current}} of {{total}}",
+  "study_previous": "Previous",
+  "study_flip_card": "Flip Card"
 
 }

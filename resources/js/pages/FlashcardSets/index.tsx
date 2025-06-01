@@ -90,7 +90,7 @@ export default function Index({ flashcardSets }: Props) {
                             <div className="flex justify-between items-center text-sm text-neutral-500">
                                 <span>{t('created_date', { date: new Date(set.created_at).toLocaleDateString() })}</span>
                                 
-                                <Button variant="outline" size="sm" asChild>
+                                <Button variant="outline" size="sm" asChild className='dark:text-white'>
                                     <Link href={`/flashcard-sets/${set.id}/study`} className="flex items-center gap-2">
                                         {t('study_now')}
                                         <ArrowRight className="h-4 w-4" />
