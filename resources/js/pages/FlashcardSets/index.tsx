@@ -5,15 +5,13 @@ import { PaginatedResponse, FlashcardSet } from '@/types';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
-import { Layers, MoreVertical, ArrowRight } from 'lucide-react';
+import { Layers, MoreVertical, ArrowRight, PlusIcon } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { router } from '@inertiajs/react'
-import { toast } from 'sonner';
 import {DeleteConfirmationDialog} from '@/components/delete-confirmation-dialog';
 import { t } from 'i18next';
 
@@ -30,22 +28,6 @@ export default function Index({ flashcardSets }: Props) {
         setDeleteDialogOpen(true);
     };
 
-    const confirmDelete = () => {
-        if (!selectedSetId) return;
-
-        router.delete(`/flashcard-sets/${selectedSetId}`, {
-            onSuccess: () => {
-                toast.success(t('delete_success'));
-                setDeleteDialogOpen(false);
-            },
-            onError: (error) => {
-                toast.error(t('delete_error'));
-                console.error('There was an error deleting the flashcard set!', error);
-                setDeleteDialogOpen(false);
-            }
-        });
-    };
-
     return (
         <AppLayout>
             <Head title="Flashcards" />
@@ -56,7 +38,10 @@ export default function Index({ flashcardSets }: Props) {
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-semibold">{t('flashcard_sets_title')}</h1>
                     <Button asChild>
-                        <Link href="/flashcard-sets/create">{t('create_flashcard_set')}</Link>
+                        <Link href="/flashcard-sets/create" className="flex items-center gap-2">
+                            <PlusIcon className="h-4 w-4" />
+                            {t('create_flashcard_set')}
+                        </Link>
                     </Button>
                 </div>
 
@@ -88,11 +73,11 @@ export default function Index({ flashcardSets }: Props) {
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuItem asChild>
                                             <Link href={`/flashcard-sets/${set.id}`}>
-                                                {t('edit_set')}
+                                                {t('edit')}
                                             </Link>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem className="text-red-500" onClick={() => handleDelete(set.id)}>
-                                            {t('delete_set')}
+                                            {t('delete')}
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
@@ -128,13 +113,17 @@ export default function Index({ flashcardSets }: Props) {
                 )}
             </div>
             
-            <DeleteConfirmationDialog
-                open={deleteDialogOpen}
-                onOpenChange={setDeleteDialogOpen}
-                onConfirm={confirmDelete}
-                title={t('delete_set_title')}
-                description={t('delete_set_confirmation')}
-            />
+            {selectedSetId && (
+                <DeleteConfirmationDialog
+                    open={deleteDialogOpen}
+                    onOpenChange={setDeleteDialogOpen}
+                    endpoint={`/flashcard-sets/${selectedSetId}`}
+                    title={t('are_you_sure')}
+                    description={t('this_action_cannot_be_undone')}
+                    successMessage={t('deleted_successfully')}
+                    errorMessage={t('delete_error')}
+                />
+            )}
         </AppLayout>
     );
 }

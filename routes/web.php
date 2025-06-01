@@ -13,6 +13,7 @@ use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\QuizSharingController;
+use App\Http\Controllers\StatisticsController;
 use Laravel\Horizon\Horizon;
 
 Route::get('/', function () {
@@ -26,7 +27,9 @@ Route::middleware(['auth'])->group(function () {
     
     // Notes routes
     Route::resource('notes', NoteController::class);
+    Route::post('/notes/{note}/retry', [NoteController::class, 'retryProcessing'])->name('notes.retry');
     
+
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::post('/subscriptions/resume/{subscriptionId}', [SubscriptionController::class, 'resume']);
@@ -86,8 +89,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/mindmaps/{mindmap}', [MindmapController::class, 'show'])->name('mindmaps.show');
     Route::patch('/mindmaps/{mindmap}', [MindmapController::class, 'update'])->name('mindmaps.update');
 
+    
+    Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
+
 
 });
+
 
 
 

@@ -13,16 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { toastConfig } from '@/lib/toast';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog';
 import {
     Dialog,
     DialogContent,
@@ -231,18 +222,8 @@ const Show = ({ flashcardSet }: Props) => {
     };
 
     const handleDeleteFlashcard = () => {
-        if (!deleteFlashcardId) return;
-        
-        deleteFlashcard(`/flashcards/${deleteFlashcardId}`, {
-            onSuccess: () => {
-                setFlashcards(prev => prev.filter(fc => fc.id !== deleteFlashcardId));
-                setDeleteFlashcardId(null);
-                toastConfig.success('Flashcard deleted successfully');
-            },
-            onError: () => {
-                toastConfig.error('Failed to delete flashcard');
-            }
-        });
+        setFlashcards(prev => prev.filter(fc => fc.id !== deleteFlashcardId));
+        setDeleteFlashcardId(null);
     };
 
     const handleAddFlashcard = () => {
@@ -261,6 +242,7 @@ const Show = ({ flashcardSet }: Props) => {
         e.preventDefault();
         
         postNewFlashcard(`/flashcards`, {
+
             onSuccess: (response) => {
                 // Add the new flashcard to local state
                 console.log(response.props);
@@ -376,7 +358,7 @@ const Show = ({ flashcardSet }: Props) => {
                                 variant={studyFilter === 'new' ? 'default' : 'outline'}
                                 size="sm"
                                 onClick={() => setStudyFilter('new')}
-                                className="bg-purple-100 text-purple-700 hover:bg-purple-200 border-purple-300 text-xs sm:text-sm"
+                                className="hover:text-purple-900 bg-purple-100 text-purple-700 hover:bg-purple-200 border-purple-300 text-xs sm:text-sm"
                             >
                                 <span className="hidden sm:inline">🆕 New</span>
                                 <span className="sm:hidden">🆕</span>
@@ -386,7 +368,7 @@ const Show = ({ flashcardSet }: Props) => {
                                 variant={studyFilter === 'review' ? 'default' : 'outline'}
                                 size="sm"
                                 onClick={() => setStudyFilter('review')}
-                                className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-orange-300 text-xs sm:text-sm"
+                                className="hover:text-orange-900 bg-orange-100 text-orange-700 hover:bg-orange-200 border-orange-300 text-xs sm:text-sm"
                             >
                                 <span className="hidden sm:inline">📝 To Review</span>
                                 <span className="sm:hidden">📝</span>
@@ -396,7 +378,7 @@ const Show = ({ flashcardSet }: Props) => {
                                 variant={studyFilter === 'memorised' ? 'default' : 'outline'}
                                 size="sm"
                                 onClick={() => setStudyFilter('memorised')}
-                                className="bg-green-100 text-green-700 hover:bg-green-200 border-green-300 text-xs sm:text-sm"
+                                className="hover:text-green-900 bg-green-100 text-green-700 hover:bg-green-200 border-green-300 text-xs sm:text-sm"
                             >
                                 <span className="hidden sm:inline">✅ Memorised</span>
                                 <span className="sm:hidden">✅</span>
@@ -656,25 +638,16 @@ const Show = ({ flashcardSet }: Props) => {
             </Dialog>
 
             {/* Delete Confirmation Dialog */}
-            <AlertDialog open={!!deleteFlashcardId} onOpenChange={() => setDeleteFlashcardId(null)}>
-                <AlertDialogContent className="w-[95vw] max-w-[400px]">
-                    <AlertDialogHeader>
-                        <AlertDialogTitle className="text-lg sm:text-xl">Delete Flashcard</AlertDialogTitle>
-                        <AlertDialogDescription className="text-sm sm:text-base">
-                            Are you sure you want to delete this flashcard? This action cannot be undone.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter className="flex-col gap-2 sm:flex-row sm:gap-0">
-                        <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
-                        <AlertDialogAction 
-                            onClick={handleDeleteFlashcard}
-                            className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
-                        >
-                            Delete
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <DeleteConfirmationDialog
+                open={!!deleteFlashcardId}
+                onOpenChange={() => setDeleteFlashcardId(null)}
+                endpoint={`/flashcards/${deleteFlashcardId}`}
+                title="Delete Flashcard"
+                description="Are you sure you want to delete this flashcard? This action cannot be undone."
+                successMessage="Flashcard deleted successfully"
+                errorMessage="Failed to delete flashcard"
+                onSuccess={handleDeleteFlashcard}
+            />
         </AppLayout>
     );
 };

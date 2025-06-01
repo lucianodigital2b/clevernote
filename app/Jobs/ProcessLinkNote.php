@@ -26,7 +26,12 @@ class ProcessLinkNote implements ShouldQueue
      *
      * @var int
      */
-    public $timeout = 600; // 10 minutes (YouTube processing can take longer)
+    /**
+     * The number of seconds the job can run before timing out.
+     *
+     * @var int
+     */
+    public $timeout = 900; // Increase to 15 minutes to accommodate longer videos
 
     /**
      * The number of times the job may be attempted.
@@ -55,8 +60,9 @@ class ProcessLinkNote implements ShouldQueue
             $link = $this->validatedData['link'];
 
             $audio = $youtubeAudioExtractor->extractAudio($link);
+            $audioPath = $audio->getPathname();
 
-            $transcription = $transcriptionService->transcribeAudio($audio, $language);
+            $transcription = $transcriptionService->transcribeAudio($audioPath, $language);
             $studyNote = $deepseekService->createStudyNote($transcription['text'], $language);
 
             $noteData = array_merge($this->validatedData, [
@@ -72,7 +78,8 @@ class ProcessLinkNote implements ShouldQueue
         } catch (\Exception $e) {
             Log::error("Failed to process link note: " . $e->getMessage());
             $note->update([
-                'status' => 'failed',
+                'status' => 'failed', 
+                'failure_reason' => $e->getMessage()
             ]);
         }
     }
@@ -87,7 +94,10 @@ class ProcessLinkNote implements ShouldQueue
         try {
             $note = Note::find($this->noteId);
             if ($note) {
-                $note->update(['status' => 'failed']);
+                $note->update([
+                    'status' => 'failed', 
+                    'failure_reason' => $exception->getMessage()
+                ]);
             }
         } catch (\Exception $e) {
             Log::error("Failed to update note status on job failure: " . $e->getMessage());

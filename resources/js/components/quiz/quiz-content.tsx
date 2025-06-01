@@ -47,11 +47,13 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
 
         // Add title
         doc.setFontSize(20);
+        doc.setTextColor(0, 0, 0); // Black color for title
         doc.text('Quiz Summary', 20, yOffset);
         yOffset += 20;
 
         // Add quiz details
         doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0); // Black color for details
         doc.text(`Total Questions: ${questions.length}`, 20, yOffset);
         yOffset += 20;
 
@@ -59,20 +61,31 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
         questions.forEach((question, index) => {
             // Add question
             doc.setFontSize(14);
+            doc.setTextColor(0, 0, 0); // Black color for questions
             doc.text(`Question ${index + 1}: ${question.question}`, 20, yOffset);
             yOffset += 10;
 
             // Add options
             doc.setFontSize(12);
             question.options.forEach((option) => {
-                const optionText = `${option.is_correct ? '✓' : '  '} ${option.text}`;
-                doc.text(optionText, 30, yOffset);
+                if (option.is_correct) {
+                    // Set red color for correct answers
+                    doc.setTextColor(255, 0, 0); // Red color (RGB: 255, 0, 0)
+                    const optionText = `${option.text} (CORRECT)`;
+                    doc.text(optionText, 30, yOffset);
+                } else {
+                    // Set black color for incorrect answers
+                    doc.setTextColor(0, 0, 0); // Black color
+                    const optionText = `  ${option.text}`;
+                    doc.text(optionText, 30, yOffset);
+                }
                 yOffset += 8;
             });
 
             // Add explanation if available
             if (question.explanation) {
                 doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0); // Black color for explanations
                 doc.text(`Explanation: ${question.explanation}`, 30, yOffset);
                 yOffset += 15;
             }

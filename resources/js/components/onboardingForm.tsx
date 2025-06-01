@@ -151,7 +151,7 @@ export default function OnboardingForm({ onClose, onComplete }: { onClose?: () =
                 </motion.div>
             </AnimatePresence>
 
-                <div className="flex justify-between space-x-2 sm:space-x-4 pt-4 sticky bottom-0 bg-white pb-4 sm:pb-6 mt-4">
+                <div className="flex justify-between space-x-2 sm:space-x-4 pt-4 sticky bottom-0 pb-4 sm:pb-6 mt-4">
                     {step > 1 && (
                         <Button type="button" variant="outline" onClick={prevStep} translate="yes" className="text-sm sm:text-base px-3 sm:px-4">
                             {t('onboarding_previous')}

@@ -70,4 +70,19 @@ class User extends Authenticatable
         return $this->hasMany(Note::class);
     }
 
+    // Add these new relationships
+    public function quizAttempts(): HasMany
+    {
+        return $this->hasMany(QuizAttempt::class);
+    }
+
+    public function statistics(): HasMany
+    {
+        return $this->hasMany(UserStatistics::class);
+    }
+
+    public function flashcardProgress(): HasMany
+    {
+        return $this->hasMany(FlashcardProgress::class);
+    }
 }

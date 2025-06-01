@@ -55,15 +55,10 @@ class FlashcardController extends Controller
             ]);
         }
         
-        // For Inertia requests, return the current page with the new flashcard
-        $flashcardSet = FlashcardSet::with('flashcards')->find($request->flashcard_set_id);
-        
-        return Inertia::render('FlashcardSets/show', [
-            'flashcardSet' => $flashcardSet,
-            'flashcards' => $flashcardSet->flashcards,
-            'flashcard' => $flashcard, // The newly created flashcard
-            'success' => 'Flashcard created successfully.'
-        ]);
+        // For Inertia requests, redirect back to the flashcard set with the new flashcard data
+        return redirect()->route('flashcard-sets.show', $flashcard->flashcardSets->first()->id)
+                        ->with('success', 'Flashcard created successfully.')
+                        ->with('flashcard', $flashcard);
     }
 
     /**
@@ -110,6 +105,12 @@ class FlashcardController extends Controller
         // $this->authorize('delete', $flashcard);
 
         $flashcard->delete();
+
+        if($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Flashcard deleted successfully.'
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Flashcard deleted successfully.');
     }

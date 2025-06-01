@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\UpdateUserStatistics;
 use App\Models\FlashcardSet;
 use App\Models\Flashcard;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -66,7 +68,9 @@ class FlashcardSetController extends Controller
 
         return Inertia::render('FlashcardSets/show', [
             'flashcardSet' => $flashcardSet,
-            'flashcards' => $flashcardSet->flashcards
+            'flashcards' => $flashcardSet->flashcards,
+            'flashcard' => session('flashcard'), // Pass the newly created flashcard from flash data
+            'success' => session('success') // Pass success message
         ]);
     }
 
@@ -164,6 +168,8 @@ class FlashcardSetController extends Controller
                 ['user_id' => Auth::id()],
                 $validated
             );
+
+        UpdateUserStatistics::dispatch(Auth::id(), Carbon::today());
 
         return response()->json(['success' => true]);
     }

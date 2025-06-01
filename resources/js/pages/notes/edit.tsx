@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
-import { Share, MoreHorizontal, Maximize2, X, ArrowLeft, Save, Clock, CheckCircle2, Folder, Trash2, Sparkles, Brain, Map, FileText, Loader2 } from 'lucide-react';
+import { Share, MoreHorizontal, Maximize2, X, ArrowLeft, Save, Clock, CheckCircle2, Folder, Trash2, Sparkles, Brain, Map, FileText, Loader2, ChevronRight } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -55,6 +55,7 @@ export default function Edit({ note }: { note: Note }) {
     
     // Add state for processing status and polling
     const [isProcessing, setIsProcessing] = useState(note.status === 'processing');
+    const [isFailed, setIsFailed] = useState(note.status === 'failed');
     const [currentNote, setCurrentNote] = useState(note);
     const [pollingIntervalId, setPollingIntervalId] = useState<NodeJS.Timeout | null>(null);
     
@@ -98,35 +99,24 @@ export default function Edit({ note }: { note: Note }) {
         handleUpdate();
     };
 
-    const renderFolderModal = () => (
-        <Dialog open={isFolderModalOpen} onOpenChange={setIsFolderModalOpen}>
-            <DialogContent>
-                <h3 className="text-lg font-medium mb-4">Select Folder</h3>
-                <div className="space-y-4">
-                    <select 
-                        className="w-full p-2 border rounded"
-                        value={selectedFolder || ''}
-                        onChange={(e) => setSelectedFolder(e.target.value ? parseInt(e.target.value) : null)}
-                    >
-                        <option value="">No folder</option>
-                        {folders.map(folder => (
-                            <option key={folder.id} value={folder.id}>
-                                {folder.name}
-                            </option>
-                        ))}
-                    </select>
-                    <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={() => setIsFolderModalOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button onClick={handleSaveFolder}>
-                            Save
-                        </Button>
-                    </div>
-                </div>
-            </DialogContent>
-        </Dialog>
-    );
+    // Add this function near your other handlers
+    const handleRetryProcessing = async () => {
+        try {
+            setIsFailed(false);
+            setIsProcessing(true);
+            
+            const response = await axios.post(`/notes/${note.id}/retry`);
+            
+            if (response.data.message) {
+                toastConfig.success('Processing retry initiated');
+            }
+        } catch (error) {
+            console.error('Error retrying processing:', error);
+            setIsFailed(true);
+            setIsProcessing(false);
+            toastConfig.error('Failed to retry processing');
+        }
+    };
 
     // Add this new state
     const [isActionsVisible, setIsActionsVisible] = useState(true);
@@ -245,7 +235,7 @@ export default function Edit({ note }: { note: Note }) {
             label: t('create_flashcards'), 
             description: t('generate_study_cards'),
             action: handleCreateFlashcards,
-            color: 'bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700',
+            color: 'bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 hover:text-blue-900',
             loading: isFlashcardModalOpen
         },
         { 
@@ -351,16 +341,23 @@ export default function Edit({ note }: { note: Note }) {
                     if (updatedNote.status !== 'processing') {
                         clearInterval(intervalId);
                         setIsProcessing(false);
-                        setCurrentNote(updatedNote);
-                        if (editor) {
-                            editor.commands.setContent(updatedNote.content);
+                        
+                        if (updatedNote.status === 'failed') {
+                            setIsFailed(true);
+                        } else {
+                            setIsFailed(false);
+                            setCurrentNote(updatedNote);
+                            if (editor) {
+                                editor.commands.setContent(updatedNote.content);
+                            }
+                            setContent(updatedNote.content);
                         }
-                        setContent(updatedNote.content);
                     }
                 } catch (error) {
                     console.error('Error checking note status:', error);
                     clearInterval(intervalId);
                     setIsProcessing(false);
+                    setIsFailed(true);
                     toastConfig.error('Failed to check note status');
                 }
             }, 3000); // Poll every 3 seconds
@@ -451,14 +448,13 @@ export default function Edit({ note }: { note: Note }) {
                                     variant="ghost" 
                                     size="sm"
                                     onClick={() => router.visit('/dashboard')}
-                                    className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900"
+                                    className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900 dark:text-white"
                                 >
                                     <ArrowLeft className="h-4 w-4" />
-                                    Back to Notes
+                                    {t('back')}
                                 </Button>
                                 <div className="hidden sm:block h-4 w-px bg-neutral-300" />
                                 <div className="flex items-center gap-2">
-                                   
                                     <Badge variant="outline" className="flex items-center gap-1">
                                         <Clock className="h-3 w-3" />
                                         {dayjs(currentNote.updated_at).fromNow()}
@@ -467,7 +463,7 @@ export default function Edit({ note }: { note: Note }) {
                             </div>
                             
                             <div className="flex items-center gap-2">
-                                <div className="flex items-center gap-2 text-sm text-neutral-500">
+                                <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-white">
                                     {!isProcessing && (
                                         <div className="flex items-center gap-1">
                                             <CheckCircle2 className="h-4 w-4 text-green-500" />
@@ -475,8 +471,8 @@ export default function Edit({ note }: { note: Note }) {
                                         </div>
                                     )}
                                     <div className="flex items-center gap-1">
-                                        <Badge variant="secondary" className="text-xs py-1 px-2">
-                                            {wordCount} {wordCount === 1 ? 'word' : 'words'}
+                                        <Badge variant="secondary" className="text-xs ">
+                                            {wordCount} {wordCount === 1 ? t('word') : t('words')}
                                         </Badge>
                                     </div>
                                 </div>
@@ -508,28 +504,59 @@ export default function Edit({ note }: { note: Note }) {
                         </div>
 
                         {isProcessing ? (
-                            <Card className="border-2 border-dashed border-purple-200 bg-purple-50/50 dark:bg-purple-900/10">
-                                <CardContent className="flex flex-col items-center justify-center min-h-[500px] p-12">
-                                    <div className="relative">
-                                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600"></div>
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <Brain className="h-6 w-6 text-purple-600" />
-                                        </div>
-                                    </div>
-                                    <div className="text-center mt-6">
-                                        <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-                                            Processing your note
-                                        </h3>
-                                        <p className="text-neutral-600 dark:text-neutral-400 mb-1">
-                                            Our AI is analyzing and enhancing your content
-                                        </p>
-                                        <p className="text-sm text-neutral-500">
-                                            This usually takes 30-60 seconds
-                                        </p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ) : (
+            <Card className="border-2 border-dashed border-purple-200 bg-purple-50/50 dark:bg-purple-900/10">
+                <CardContent className="flex flex-col items-center justify-center min-h-[500px] p-12">
+                    <div className="relative">
+                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600"></div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <Brain className="h-6 w-6 text-purple-600" />
+                        </div>
+                    </div>
+                    <div className="text-center mt-6">
+                        <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
+                            Processing your note
+                        </h3>
+                        <p className="text-neutral-600 dark:text-neutral-400 mb-1">
+                            Our AI is analyzing and enhancing your content
+                        </p>
+                        <p className="text-sm text-neutral-500">
+                            This usually takes 30-60 seconds
+                        </p>
+                    </div>
+                </CardContent>
+            </Card>
+        ) : isFailed ? (
+            <Card className="border-2 border-dashed border-red-200 bg-red-50/50 dark:bg-red-900/10">
+                <CardContent className="flex flex-col items-center justify-center min-h-[500px] p-12">
+                    <div className="relative">
+                        <div className="rounded-full h-16 w-16 bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                            <X className="h-8 w-8 text-red-600 dark:text-red-400" />
+                        </div>
+                    </div>
+                    <div className="text-center mt-6">
+                        <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
+                            Processing failed
+                        </h3>
+                        <p className="text-neutral-600 dark:text-neutral-400 mb-4">
+                            We encountered an error while processing your note. This could be due to content complexity or a temporary service issue.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                            <Button 
+                                onClick={handleRetryProcessing}
+                                className="bg-red-600 hover:bg-red-700 text-white"
+                            >
+                                <Brain className="h-4 w-4 mr-2" />
+                                Try Again
+                            </Button>
+                            
+                        </div>
+                        <p className="text-xs text-neutral-500 mt-4">
+                            If this problem persists, please contact support
+                        </p>
+                    </div>
+                </CardContent>
+            </Card>
+        ) : (
                             <>
                                 {/* Title Section */}
                                 <div className="mb-8">
@@ -583,14 +610,6 @@ export default function Edit({ note }: { note: Note }) {
                                     </div>
                                 )}
 
-                                {/* Toggle Button */}
-                                {/* <Button
-                                    variant="outline"
-                                    onClick={() => setIsActionsVisible(!isActionsVisible)}
-                                    className="mb-4"
-                                >
-                                    {isActionsVisible ? 'Hide Actions' : 'Show Actions'}
-                                </Button> */}
 
                                 {/* AI Actions Section */}
                                 <div className="mb-8">
@@ -626,6 +645,9 @@ export default function Edit({ note }: { note: Note }) {
                                                                 <p className="text-xs opacity-75 leading-tight w-full ">
                                                                     {action.description}
                                                                 </p>
+                                                            </div>
+                                                            <div className="flex-shrink-0 mt-1">
+                                                                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 opacity-50" />
                                                             </div>
                                                         </Button>
                                                     </CardContent>

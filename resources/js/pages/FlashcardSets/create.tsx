@@ -123,8 +123,8 @@ export default function Create() {
                                             className="h-4 w-4"
                                         />
                                         <div className="flex flex-col ml-2">
-                                            <div className="font-medium">{flashcard.question}</div>
-                                            <div className="text-sm text-neutral-500 dark:text-neutral-400">{flashcard.answer}</div>
+                                            <div className="font-medium" dangerouslySetInnerHTML={{ __html: flashcard.question }} />
+                                            <div className="text-sm text-neutral-500 dark:text-neutral-400" dangerouslySetInnerHTML={{ __html: flashcard.answer }} />
                                         </div>
                                     </label>
                                 ))}
@@ -133,8 +133,6 @@ export default function Create() {
                         
                     </div>
 
-
-                    
                     <div className="flex justify-end">
                         <Button type="submit" disabled={processing}>
                             {processing ? 'Creating...' : 'Create Set'}

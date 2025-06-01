@@ -6,7 +6,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarGroupContent } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, ChevronRight, Plus, Layers, MessageSquare, BrainCircuit, Headphones, GraduationCap } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, ChevronRight, Plus, Layers, MessageSquare, BrainCircuit, Headphones, GraduationCap, ChartAreaIcon } from 'lucide-react';
 import AppLogo from './app-logo';
 import { CreateFolderModal } from '@/components/create-folder-modal';
 import axios from 'axios';
@@ -31,6 +31,11 @@ const mainNavItems: NavItem[] = [
         tooltip: t('Coming soon'),
     },
     {
+        title: t('Statistics'),
+        url: '/statistics',
+        icon: ChartAreaIcon,
+    },
+    {
         title: t('Podcast') + ' (' + t('Coming soon') + ')',
         url: '#',
         icon: Headphones,
@@ -46,7 +51,7 @@ const mainNavItems: NavItem[] = [
 
 const footerNavItems: NavItem[] = [
     {
-        title: t('Create folder'),
+        title: t('create_folder'),
         url: '#', // Changed to # to prevent navigation
         icon: Folder,
     },
