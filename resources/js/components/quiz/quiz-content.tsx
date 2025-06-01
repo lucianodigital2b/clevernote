@@ -44,57 +44,69 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
     const handleExportPDF = () => {
         const doc = new jsPDF();
         let yOffset = 20;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 20;
+        const maxWidth = pageWidth - (margin * 2); // Available width for text
 
         // Add title
         doc.setFontSize(20);
         doc.setTextColor(0, 0, 0); // Black color for title
-        doc.text('Quiz Summary', 20, yOffset);
+        doc.text('Quiz Summary', margin, yOffset);
         yOffset += 20;
 
         // Add quiz details
         doc.setFontSize(12);
         doc.setTextColor(0, 0, 0); // Black color for details
-        doc.text(`Total Questions: ${questions.length}`, 20, yOffset);
+        doc.text(`Total Questions: ${questions.length}`, margin, yOffset);
         yOffset += 20;
 
         // Add each question and its details
         questions.forEach((question, index) => {
-            // Add question
+            // Add question with text wrapping
             doc.setFontSize(14);
             doc.setTextColor(0, 0, 0); // Black color for questions
-            doc.text(`Question ${index + 1}: ${question.question}`, 20, yOffset);
-            yOffset += 10;
+            const questionText = `Question ${index + 1}: ${question.question}`;
+            const wrappedQuestion = doc.splitTextToSize(questionText, maxWidth);
+            doc.text(wrappedQuestion, margin, yOffset);
+            yOffset += wrappedQuestion.length * 7; // Adjust spacing based on number of lines
+            yOffset += 5; // Extra spacing after question
 
-            // Add options
+            // Add options with text wrapping
             doc.setFontSize(12);
             question.options.forEach((option) => {
                 if (option.is_correct) {
                     // Set red color for correct answers
                     doc.setTextColor(255, 0, 0); // Red color (RGB: 255, 0, 0)
-                    const optionText = `${option.text} (CORRECT)`;
-                    doc.text(optionText, 30, yOffset);
+                    const optionText = `✓ ${option.text} (CORRECT)`;
+                    const wrappedOption = doc.splitTextToSize(optionText, maxWidth - 10); // Slightly less width for indentation
+                    doc.text(wrappedOption, margin + 10, yOffset);
+                    yOffset += wrappedOption.length * 6; // Adjust spacing based on number of lines
                 } else {
                     // Set black color for incorrect answers
                     doc.setTextColor(0, 0, 0); // Black color
                     const optionText = `  ${option.text}`;
-                    doc.text(optionText, 30, yOffset);
+                    const wrappedOption = doc.splitTextToSize(optionText, maxWidth - 10); // Slightly less width for indentation
+                    doc.text(wrappedOption, margin + 10, yOffset);
+                    yOffset += wrappedOption.length * 6; // Adjust spacing based on number of lines
                 }
-                yOffset += 8;
             });
 
-            // Add explanation if available
+            // Add explanation if available with text wrapping
             if (question.explanation) {
                 doc.setFontSize(10);
                 doc.setTextColor(0, 0, 0); // Black color for explanations
-                doc.text(`Explanation: ${question.explanation}`, 30, yOffset);
-                yOffset += 15;
+                const explanationText = `Explanation: ${question.explanation}`;
+                const wrappedExplanation = doc.splitTextToSize(explanationText, maxWidth - 10);
+                doc.text(wrappedExplanation, margin + 10, yOffset);
+                yOffset += wrappedExplanation.length * 5; // Adjust spacing based on number of lines
+                yOffset += 5; // Extra spacing after explanation
             }
 
             // Add spacing between questions
             yOffset += 10;
 
-            // Check if we need a new page
-            if (yOffset > 270) {
+            // Check if we need a new page (with more conservative threshold)
+            if (yOffset > 250) {
                 doc.addPage();
                 yOffset = 20;
             }
@@ -313,14 +325,14 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
                         <Button
                             onClick={handleSubmitAnswer}
                             disabled={!selectedOptionId}
-                            className="bg-indigo-600 hover:bg-indigo-700"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white"
                         >
                             {t('quiz_submit_answer')}
                         </Button>
                     ) : (
                         <Button
                             onClick={handleNextQuestion}
-                            className="bg-indigo-600 hover:bg-indigo-700"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white"
                         >
                             {currentQuestionIndex === questions.length - 1 ? t('quiz_finish') : t('quiz_next_question')}
                         </Button>
