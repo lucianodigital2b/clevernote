@@ -119,7 +119,7 @@
   "pricing_subheading": "Seja você um anotador casual ou um estudante sério, temos um plano que se adapta às suas necessidades.",
   "pricing_monthly": "Mensal",
   "pricing_annual": "Anual",
-  "pricing_save_20": "Economize 20%",
+  "pricing_save_20": "Economize 50%",
   "pricing_most_popular": "Mais Popular",
   "Student": "Estudante",
   "pricing_student_description": "Ideal para estudantes individuais",
@@ -193,6 +193,16 @@
   "visualize_concepts": "Visualizar conceitos e conexões",
   "quiz_shuffle": "Embaralhar",
   "quiz_export_pdf": "Exportar PDF",
+
+  "study_well_done": "Muito bem!",
+  "study_learning_continues": "Sua experiência de aprendizado não para aqui",
+  "study_review_all": "Revisar Tudo",
+  "study_create_new_note": "Criar uma nova nota",
+  "study_no_cards_due": "Nenhum cartão pendente para revisão",
+  "study_title_prefix": "Estudar",
+  "study_flashcard_of": "Cartão {{current}} de {{total}}",
+  "study_previous": "Anterior",
+  "study_flip_card": "Virar Cartão",
   "quiz_question_of": "Questão {{current}} de {{total}}",
   "quiz_score_of": "Pontuação: {{current}}/{{total}}",
   "quiz_congratulations": "Parabéns! 🎉",
@@ -212,6 +222,10 @@
   "cancel": "Cancelar",
   "free_notes_left": "Notas Gratuitas Restantes",
   "upgrade_for_unlimited_notes": "Atualizar para notas ilimitadas",
-  "free_notes_left_upgrade_unlimited": "{{count}} notas gratuitas restantes - Atualizar para ilimitadas"
+  "free_notes_left_upgrade_unlimited": "{{count}} notas gratuitas restantes - Atualizar para ilimitadas",
+  "flashcard_recall_again": "Novamente",
+  "flashcard_recall_hard": "Difícil",
+  "flashcard_recall_good": "Bom",
+  "flashcard_recall_easy": "Fácil"
 
 }
