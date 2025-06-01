@@ -226,6 +226,22 @@
   "flashcard_recall_again": "Novamente",
   "flashcard_recall_hard": "Difícil",
   "flashcard_recall_good": "Bom",
-  "flashcard_recall_easy": "Fácil"
+  "flashcard_recall_easy": "Fácil",
+  "performance_over_weeks": "Desempenho ao longo das semanas",
+  "you": "Você",
+  "goal": "Meta",
+  "one_month": "1 mês",
+  "your_accuracy": "Sua precisão",
+  "questions_answered": "Perguntas respondidas",
+  "study_activity": "Atividade de Estudo",
+  "studied_cards_today": "Estudou {{count}} cartões em {{minutes}} minutos hoje ({{seconds}}s/cartão)",
+  "daily_average": "Média diária",
+  "days_learned": "Dias aprendidos",
+  "longest_streak": "Sequência mais longa",
+  "current_streak": "Sequência atual",
+  "track_learning_progress": "Acompanhe seu progresso de aprendizado e desempenho",
+  "cards": "cartões",
+  "days": "dias",
+  "activities": "atividades"
 
 }

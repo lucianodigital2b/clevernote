@@ -29,7 +29,7 @@ class StatisticsController extends Controller
             'maxStreak' => $this->getMaxStreak($user),
             'dailyAverage' => $this->getDailyAverage($user)
         ];
-        
+
         return Inertia::render('statistics/index', [
             'weeklyStats' => $weeklyStats,
             'yearlyHeatmap' => $yearlyHeatmap,

@@ -225,6 +225,22 @@
   "cancel": "Cancelar",
   "free_notes_left": "Notas Gratuitas Restantes",
   "upgrade_for_unlimited_notes": "Actualizar para notas ilimitadas",
-  "free_notes_left_upgrade_unlimited": "{{count}} notas gratuitas restantes - Actualizar para ilimitadas"
+  "free_notes_left_upgrade_unlimited": "{{count}} notas gratuitas restantes - Actualizar para ilimitadas",
+  "performance_over_weeks": "Rendimiento a lo largo de las semanas",
+  "you": "Tú",
+  "goal": "Objetivo",
+  "one_month": "1 mes",
+  "your_accuracy": "Tu precisión",
+  "questions_answered": "Preguntas respondidas",
+  "study_activity": "Actividad de Estudio",
+  "studied_cards_today": "Estudiaste {{count}} tarjetas en {{minutes}} minutos hoy ({{seconds}}s/tarjeta)",
+  "daily_average": "Promedio diario",
+  "days_learned": "Días aprendidos",
+  "longest_streak": "Racha más larga",
+  "current_streak": "Racha actual",
+  "track_learning_progress": "Sigue tu progreso de aprendizaje y rendimiento",
+  "cards": "tarjetas",
+  "days": "días",
+  "activities": "actividades"
 
 }
