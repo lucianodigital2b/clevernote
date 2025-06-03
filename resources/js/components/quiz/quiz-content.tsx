@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,6 +6,7 @@ import { CheckCircleIcon, XCircleIcon, ArrowPathIcon, DocumentArrowDownIcon } fr
 import { jsPDF } from 'jspdf';
 import { toastConfig } from '@/lib/toast';
 import { useTranslation } from 'react-i18next';
+import { Link } from '@inertiajs/react';
 
 type QuizOption = {
     id: string;
@@ -192,6 +193,11 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
 
     if (isFinished) {
         const percentage = Math.round((score / questions.length) * 100);
+        const correctAnswers = score;
+        const incorrectAnswers = questions.length - score;
+        const halfCorrect = Math.floor(score / 2);
+        const skipped = 0; // For future implementation
+        
         let message = t('quiz_congratulations');
         let encouragingMessage = '';
         
@@ -205,27 +211,121 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
             encouragingMessage = t('quiz_keep_practicing_message');
         }
 
+        // Calculate stroke dash array for donut chart
+        const radius = 45;
+        const circumference = 2 * Math.PI * radius;
+        const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
+
         return (
-            <div className="max-w-3xl mx-auto text-center space-y-8 py-12">
-                <h2 className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{message}</h2>
-                <div className="text-xl">
-                    {t('quiz_score_message', { score, total: questions.length, percentage })}
+            <div className="max-w-4xl mx-auto text-center space-y-8 py-8 sm:py-12 px-4">
+                {/* Header with emoji and title */}
+                <div className="space-y-4">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{message}</h2>
+                    <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                        {t('quiz_score_message', { score, total: questions.length, percentage })}
+                    </p>
                 </div>
-                <p className="text-lg text-gray-600 dark:text-gray-400">{encouragingMessage}</p>
-                <div className="flex justify-center gap-4 mt-8">
+
+                {/* Donut Chart */}
+                <div className="flex justify-center mb-8">
+                    <div className="relative w-32 h-32 sm:w-40 sm:h-40">
+                        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                            {/* Background circle */}
+                            <circle
+                                cx="50"
+                                cy="50"
+                                r={radius}
+                                stroke="#e5e7eb"
+                                strokeWidth="8"
+                                fill="transparent"
+                                className="dark:stroke-gray-700"
+                            />
+                            {/* Progress circle */}
+                            <circle
+                                cx="50"
+                                cy="50"
+                                r={radius}
+                                stroke="#10b981"
+                                strokeWidth="8"
+                                fill="transparent"
+                                strokeDasharray={strokeDasharray}
+                                strokeLinecap="round"
+                                className="transition-all duration-1000 ease-out"
+                            />
+                        </svg>
+                        {/* Percentage in center */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                                {percentage}%
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Stats Cards */}
+                <div className="flex justify-center mb-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl">
+                        {/* Total Questions */}
+                        <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl p-6 shadow-sm border border-blue-200 dark:border-blue-700/30 text-center">
+                            <div className="text-3xl sm:text-4xl font-bold text-blue-700 dark:text-blue-300 mb-2">
+                                {questions.length}
+                            </div>
+                            <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                                Total Questions
+                            </div>
+                        </div>
+
+                        {/* Correct Answers */}
+                        <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl p-6 shadow-sm border border-green-200 dark:border-green-700/30 text-center">
+                            <div className="flex items-center justify-center mb-2">
+                                <div className="text-3xl sm:text-4xl font-bold text-green-700 dark:text-green-300">
+                                    {correctAnswers}
+                                </div>
+                                <div className="w-3 h-3 bg-green-500 rounded-full ml-2"></div>
+                            </div>
+                            <div className="text-sm text-green-600 dark:text-green-400 font-medium">
+                                Correct • {Math.round((correctAnswers / questions.length) * 100)}%
+                            </div>
+                        </div>
+
+                        {/* Incorrect Answers */}
+                        <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 rounded-xl p-6 shadow-sm border border-red-200 dark:border-red-700/30 text-center">
+                            <div className="flex items-center justify-center mb-2">
+                                <div className="text-3xl sm:text-4xl font-bold text-red-700 dark:text-red-300">
+                                    {incorrectAnswers}
+                                </div>
+                                <div className="w-3 h-3 bg-red-500 rounded-full ml-2"></div>
+                            </div>
+                            <div className="text-sm text-red-600 dark:text-red-400 font-medium">
+                                Incorrect • {Math.round((incorrectAnswers / questions.length) * 100)}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Encouraging Message */}
+                <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                    {encouragingMessage}
+                </p>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
                     <Button
                         onClick={handleReset}
                         variant="outline"
-                        className="flex items-center gap-2"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3"
                     >
-                        <ArrowPathIcon className="w-5 h-5" />
+                        <ArrowPathIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                         {t('quiz_restart')}
                     </Button>
                     <Button
-                        onClick={() => window.history.back()}
-                        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3"
+                        asChild
+                        variant={'outline'}
                     >
-                        {t('back_to_quizzes')}
+                        <Link href="/quizzes">
+                            {t('back_to_quizzes')}
+                        </Link>
                     </Button>
                 </div>
             </div>
@@ -233,50 +333,65 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
     }
 
     return (
-        <div className="max-w-3xl mx-auto space-y-6">
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-4">
-                    <span>{t('quiz_question_of', { current: currentQuestionIndex + 1, total: questions.length })}</span>
+        <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 px-4">
+            {/* Header Section */}
+            <div className="space-y-3 sm:space-y-4">
+                {/* Question Counter and Score */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
+                    <span className="text-sm sm:text-base font-medium">
+                        {t('quiz_question_of', { current: currentQuestionIndex + 1, total: questions.length })}
+                    </span>
+                    <span className="text-sm sm:text-base text-indigo-600 dark:text-indigo-400 font-medium">
+                        {t('quiz_score_of', { current: score, total: currentQuestionIndex + 1 })}
+                    </span>
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-2">
                     <Button
                         variant="outline"
                         size="sm"
                         onClick={handleShuffle}
                         disabled={isAnswered}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
                     >
-                        <ArrowPathIcon className="w-4 h-4" />
-                        {t('quiz_shuffle')}
+                        <ArrowPathIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">{t('quiz_shuffle')}</span>
+                        <span className="sm:hidden">Shuffle</span>
                     </Button>
                     <Button
                         variant="outline"
                         size="sm"
                         onClick={handleExportPDF}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
                     >
-                        <DocumentArrowDownIcon className="w-4 h-4" />
-                        {t('quiz_export_pdf')}
+                        <DocumentArrowDownIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">{t('quiz_export_pdf')}</span>
+                        <span className="sm:hidden">PDF</span>
                     </Button>
                     <Button
                         variant="outline"
                         size="sm"
                         onClick={handleReset}
-                        className="flex items-center gap-2 text-yellow-600 hover:text-yellow-700"
+                        className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-yellow-600 hover:text-yellow-700"
                     >
-                        <ArrowPathIcon className="w-4 h-4" />
-                        {t('quiz_reset')}
+                        <ArrowPathIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">{t('quiz_reset')}</span>
+                        <span className="sm:hidden">Reset</span>
                     </Button>
                 </div>
-                <span className="text-indigo-600 dark:text-indigo-400">{t('quiz_score_of', { current: score, total: currentQuestionIndex + 1 })}</span>
             </div>
 
-            <div className="mb-6">
+            {/* Progress Bar */}
+            <div className="mb-4 sm:mb-6">
                 <Progress value={progress} className="h-2 bg-indigo-100 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400" />
             </div>
 
-            <div className="space-y-6">
-                <h2 className="text-xl font-semibold">{currentQuestion.question}</h2>
+            {/* Quiz Content */}
+            <div className="space-y-4 sm:space-y-6">
+                <h2 className="text-lg sm:text-xl font-semibold leading-relaxed">{currentQuestion.question}</h2>
 
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                     <AnimatePresence>
                         {currentQuestion.options.map((option) => (
                             <motion.div
@@ -285,21 +400,22 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
                                 transition={{ duration: 0.2 }}
-                                className={`p-4 rounded-lg cursor-pointer transition-all duration-200 ${getOptionClassName(option.id)}`}
+                                className={`p-3 sm:p-4 rounded-lg cursor-pointer transition-all duration-200 ${getOptionClassName(option.id)}`}
                                 onClick={() => handleOptionSelect(option.id)}
                             >
-                                <div className="flex items-center justify-between">
-                                    <span>{option.text}</span>
+                                <div className="flex items-center justify-between gap-3">
+                                    <span className="text-sm sm:text-base leading-relaxed flex-1">{option.text}</span>
                                     {isAnswered && (
                                         <motion.div
                                             initial={{ scale: 0 }}
                                             animate={{ scale: 1 }}
                                             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                                            className="flex-shrink-0"
                                         >
                                             {option.is_correct ? (
-                                                <CheckCircleIcon className="w-6 h-6 text-green-500" />
+                                                <CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
                                             ) : option.id === selectedOptionId ? (
-                                                <XCircleIcon className="w-6 h-6 text-red-500" />
+                                                <XCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
                                             ) : null}
                                         </motion.div>
                                     )}
@@ -313,26 +429,31 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800"
+                        className="mt-4 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800"
                     >
-                        <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">{t('quiz_explanation')}:</h3>
-                        <p className="text-blue-700 dark:text-blue-200">{currentQuestion.explanation}</p>
+                        <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-2 text-sm sm:text-base">
+                            {t('quiz_explanation')}:
+                        </h3>
+                        <p className="text-blue-700 dark:text-blue-200 text-sm sm:text-base leading-relaxed">
+                            {currentQuestion.explanation}
+                        </p>
                     </motion.div>
                 )}
 
-                <div className="flex justify-end gap-3 mt-6">
+                {/* Action Button */}
+                <div className="flex justify-end mt-4 sm:mt-6">
                     {!isAnswered ? (
                         <Button
                             onClick={handleSubmitAnswer}
                             disabled={!selectedOptionId}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                            className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white"
                         >
                             {t('quiz_submit_answer')}
                         </Button>
                     ) : (
                         <Button
                             onClick={handleNextQuestion}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                            className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white"
                         >
                             {currentQuestionIndex === questions.length - 1 ? t('quiz_finish') : t('quiz_next_question')}
                         </Button>

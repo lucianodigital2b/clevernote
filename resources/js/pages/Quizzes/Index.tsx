@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PencilIcon, MoreVertical, ClipboardList } from 'lucide-react';
+import { PencilIcon, MoreVertical, ClipboardList, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog';
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AppLayout from '@/layouts/app-layout';
 import { useTranslation } from 'react-i18next';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface QuizOption {
   id: number;
@@ -41,9 +42,10 @@ interface Props {
     links: any;
     meta: any;
   };
+  isLoading?: boolean;
 }
 
-export default function Index({ quizzes }: Props) {
+export default function Index({ quizzes, isLoading = false }: Props) {
   const { t } = useTranslation(['translation']);
   const [hoveredQuiz, setHoveredQuiz] = useState<number | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -61,16 +63,36 @@ export default function Index({ quizzes }: Props) {
       <div className="container mx-auto py-6 px-4">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">{t('My Quizzes')}</h1>
-          {/* <Button asChild>
-            <Link href="/quizzes/create">
-              Create Quiz
+          <Button asChild>
+            <Link href="/quizzes/create" className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              {t('Create Quiz')}
             </Link>
-          </Button> */}
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          <AnimatePresence>
-            {quizzes.data.map((quiz) => (
+          {isLoading ? (
+            Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="bg-white dark:bg-neutral-800 rounded-xl p-6 shadow-sm border border-neutral-200 dark:border-neutral-700">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-9 w-9 rounded-lg" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-5 w-32" />
+                      <Skeleton className="h-4 w-20" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-8 w-8 rounded" />
+                </div>
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-3/4 mb-4" />
+                <Skeleton className="h-9 w-full rounded-md" />
+              </div>
+            ))
+          ) : (
+            <AnimatePresence>
+              {quizzes.data.map((quiz) => (
               <motion.div
                 key={quiz.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -117,9 +139,7 @@ export default function Index({ quizzes }: Props) {
                   )}
 
                   <div className="flex justify-between items-center text-sm text-neutral-500">
-                    <span>{t('Created')} {new Date(quiz.created_at).toLocaleDateString()}</span>
-                    
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="outline" size="default" asChild className='dark:text-white w-full dark:border-1 dark:hover:border-gray-300'>
                       <Link href={`/quizzes/${quiz.id}`} className="flex items-center gap-2">
                         {t('Take Quiz')}
                         <PencilIcon className="h-4 w-4" />
@@ -128,8 +148,9 @@ export default function Index({ quizzes }: Props) {
                   </div>
                 </div>
               </motion.div>
-            ))}
-          </AnimatePresence>
+              ))}
+            </AnimatePresence>
+          )}
         </div>
 
         {quizzes.data.length === 0 && (

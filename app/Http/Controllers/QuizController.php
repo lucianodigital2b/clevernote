@@ -26,16 +26,33 @@ class QuizController extends Controller
         $this->quizGeneratorService = $quizGeneratorService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $quizzes = Quiz::with(['questions.options'])
             ->where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'quizzes' => $quizzes
+            ]);
+        }
+
         return Inertia::render('Quizzes/Index', [
             'quizzes' => $quizzes
         ]);
+    }
+
+    public function create(Request $request)
+    {
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Create quiz form data'
+            ]);
+        }
+
+        return Inertia::render('Quizzes/Create');
     }
 
     public function store(Request $request)
@@ -43,11 +60,13 @@ class QuizController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'is_published' => 'boolean',
             'questions' => 'required|array|min:1',
             'questions.*.question' => 'required|string',
             'questions.*.type' => 'required|string|in:multiple-choice,true-false,fill-in-blank',
             'questions.*.explanation' => 'nullable|string',
             'questions.*.options' => 'required|array|min:2',
+            'questions.*.options.*.id' => 'required|string',
             'questions.*.options.*.text' => 'required|string',
             'questions.*.correctOptionId' => 'required|string'
         ]);
@@ -58,6 +77,7 @@ class QuizController extends Controller
             $quiz = Quiz::create([
                 'title' => $validated['title'],
                 'description' => $validated['description'] ?? null,
+                'is_published' => $validated['is_published'] ?? false,
                 'user_id' => Auth::id(),
             ]);
 
@@ -79,17 +99,43 @@ class QuizController extends Controller
             }
 
             DB::commit();
-            return response()->json($quiz->load('questions.options'), 201);
+            
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Quiz created successfully!',
+                    'quiz' => $quiz->load(['questions.options'])
+                ], 201);
+            }
+
+            // Redirect to quiz index with success message
+            return redirect()->route('quizzes.index')
+                ->with('success', 'Quiz created successfully!');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Failed to create quiz'], 500);
+            
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => "Failed to create quiz. {$e->getMessage()}"
+                ], 500);
+            }
+            
+            // Return back with errors for Inertia
+            return back()->withErrors([
+                'general' => "Failed to create quiz. {$e->getMessage()}"
+            ])->withInput();
         }
     }
 
-    public function show(Quiz $quiz)
+    public function show(Request $request, Quiz $quiz)
     {
         $this->authorize('view', $quiz);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'quiz' => $quiz->load(['questions.options'])
+            ]);
+        }
 
         return Inertia::render('Quizzes/Show', [
             'quiz' => $quiz->load(['questions.options'])
@@ -159,7 +205,14 @@ class QuizController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Failed to update quiz'], 500);
+            
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Failed to update quiz'], 500);
+            }
+            
+            return back()->withErrors([
+                'general' => 'Failed to update quiz'
+            ])->withInput();
         }
     }
 
@@ -168,7 +221,7 @@ class QuizController extends Controller
         $this->authorize('delete', $quiz);
 
         $quiz->delete();
-        if($request->wantsJson()) {
+        if ($request->wantsJson()) {
             return response()->json([
                 'message' => __('quiz_deleted_successfully')
             ]);
@@ -218,7 +271,7 @@ class QuizController extends Controller
 
             $attempt->update(['score' => $score]);
 
-            UpdateUserStatistics::dispatch(auth()->id(), Carbon::today());
+            UpdateUserStatistics::dispatch(Auth::user()->id, Carbon::today());
     
             
             DB::commit();
@@ -229,9 +282,15 @@ class QuizController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            dd($e->getMessage());
             DB::rollBack();
-            return response()->json(['message' => 'Failed to submit quiz attempt'], 500);
+            
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Failed to submit quiz attempt'], 500);
+            }
+            
+            return back()->withErrors([
+                'general' => 'Failed to submit quiz attempt'
+            ]);
         }
     }
 
@@ -249,9 +308,15 @@ class QuizController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            dd($e->getMessage());
             DB::rollBack();
-            return response()->json(['message' => 'Failed to submit quiz attempt: ' . $e->getMessage()], 500);
+            
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Failed to generate quiz: ' . $e->getMessage()], 500);
+            }
+            
+            return back()->withErrors([
+                'general' => 'Failed to generate quiz: ' . $e->getMessage()
+            ]);
         }
     }
 }
