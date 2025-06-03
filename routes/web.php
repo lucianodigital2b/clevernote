@@ -57,12 +57,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('notes/{note}/generate-flashcards', [NoteController::class, 'generateFlashcards'])->name('notes.generate-flashcards');
 
     // Quiz routes
+    Route::resource('quizzes', QuizController::class);
     Route::prefix('quizzes')->group(function () {
-        Route::get('/', [QuizController::class, 'index'])->name('quizzes.index');
-        Route::post('/', [QuizController::class, 'store'])->name('quizzes.store');
-        Route::get('/{quiz}', [QuizController::class, 'show'])->name('quizzes.show');
-        Route::put('/{quiz}', [QuizController::class, 'update'])->name('quizzes.update');
-        Route::delete('/{quiz}', [QuizController::class, 'destroy'])->name('quizzes.destroy');
         Route::post('/{quiz}/attempt', [QuizController::class, 'submitAttempt'])->name('quizzes.submit-attempt');
         Route::post('/generate-from-note/{note}', [QuizController::class, 'generateFromNote'])->name('quizzes.generate-from-note');
         

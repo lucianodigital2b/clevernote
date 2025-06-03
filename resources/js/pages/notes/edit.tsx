@@ -144,7 +144,9 @@ export default function Edit({ note }: { note: Note }) {
             // Check if flashcard set already exists in preloaded data
             if (note.flashcard_sets && note.flashcard_sets.length > 0) {
                 setIsFlashcardModalOpen(false);
-                router.visit(`/flashcard-sets/${note.flashcard_sets[0].id}`);
+                // Get the last created flashcard set
+                const lastFlashcardSet = note.flashcard_sets[note.flashcard_sets.length - 1];
+                router.visit(`/flashcard-sets/${lastFlashcardSet.id}`);
                 return;
             }
 
@@ -187,7 +189,9 @@ export default function Edit({ note }: { note: Note }) {
             // Check if quiz already exists in preloaded data
             if (note.quizzes && note.quizzes.length > 0) {
                 setIsQuizModalOpen(false);
-                router.visit(`/quizzes/${note.quizzes[0].id}`);
+                // Get the last created quiz
+                const lastQuiz = note.quizzes[note.quizzes.length - 1];
+                router.visit(`/quizzes/${lastQuiz.id}`);
                 return;
             }
 
@@ -212,7 +216,9 @@ export default function Edit({ note }: { note: Note }) {
         try {
             // Check if mindmap already exists in preloaded data
             if (note.mindmaps && note.mindmaps.length > 0) {
-                router.visit(`/mindmaps/${note.mindmaps[0].id}`);
+                // Get the last created mindmap
+                const lastMindmap = note.mindmaps[note.mindmaps.length - 1];
+                router.visit(`/mindmaps/${lastMindmap.id}`);
                 return;
             }
 
@@ -232,24 +238,24 @@ export default function Edit({ note }: { note: Note }) {
     const actions = [
         { 
             icon: FileText, 
-            label: t('create_flashcards'), 
-            description: t('generate_study_cards'),
+            label: note.flashcard_sets && note.flashcard_sets.length > 0 ? t('review_flashcards') : t('create_flashcards'), 
+            description: note.flashcard_sets && note.flashcard_sets.length > 0 ? t('review_study_cards') : t('generate_study_cards'),
             action: handleCreateFlashcards,
             color: 'bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 hover:text-blue-900',
             loading: isFlashcardModalOpen
         },
         { 
             icon: Brain, 
-            label: t('create_quiz'), 
-            description: t('test_knowledge_ai'),
+            label: note.quizzes && note.quizzes.length > 0 ? t('review_quiz') : t('create_quiz'), 
+            description: note.quizzes && note.quizzes.length > 0 ? t('review_knowledge_test') : t('test_knowledge_ai'),
             action: handleCreateQuizz,
             color: 'bg-green-50 hover:bg-green-100 border-green-200 text-green-700',
             loading: isQuizModalOpen
         },
         { 
             icon: Map, 
-            label: t('generate_mindmap'), 
-            description: t('visualize_concepts'),
+            label: note.mindmaps && note.mindmaps.length > 0 ? t('review_mindmap') : t('generate_mindmap'), 
+            description: note.mindmaps && note.mindmaps.length > 0 ? t('review_concepts') : t('visualize_concepts'),
             action: handleCreateMindmap,
             color: 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700',
             loading: isMindmapLoading

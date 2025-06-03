@@ -19,6 +19,7 @@ import { useRequireSubscription } from '@/hooks/useRequireSubscription';
 import OnboardingForm from '@/components/onboardingForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useTranslation } from 'react-i18next';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -293,8 +294,22 @@ export default function Dashboard() {
                     </div>
                     
                     {isLoadingNotes ? (
-                        <div className="flex justify-center py-8">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-800"></div>
+                        <div className="space-y-3">
+                            {Array.from({ length: 5 }).map((_, index) => (
+                                <div key={index} className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <Skeleton className="h-9 w-9 rounded-full" />
+                                            <div className="space-y-2">
+                                                <Skeleton className="h-4 w-32" />
+                                                <Skeleton className="h-3 w-48" />
+                                                <Skeleton className="h-3 w-24" />
+                                            </div>
+                                        </div>
+                                        <Skeleton className="h-4 w-4" />
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     ) : notesError ? (
                         <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg text-red-800 dark:text-red-200">
