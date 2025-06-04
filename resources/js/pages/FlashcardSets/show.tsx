@@ -52,7 +52,7 @@ const Show = ({ flashcardSet }: Props) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isGridView, setIsGridView] = useState(true);
     const [editingFlashcard, setEditingFlashcard] = useState<number | null>(null);
-    const [editingField, setEditingField] = useState<'question' | 'answer' | null>(null);
+    const [editingField, setEditingField] = useState<'question' | 'answer' | 'both' | null>(null);
     const [isEditingSetDetails, setIsEditingSetDetails] = useState(false);
     const [flashcards, setFlashcards] = useState(flashcardSet.flashcards || []);
     const [deleteFlashcardId, setDeleteFlashcardId] = useState<number | null>(null);
@@ -348,18 +348,19 @@ const Show = ({ flashcardSet }: Props) => {
         URL.revokeObjectURL(link.href);
     };
 
-    const handleEditFlashcard = (flashcard: Flashcard, field: 'question' | 'answer') => {
+    const handleEditFlashcard = (flashcard: Flashcard, field?: 'question' | 'answer') => {
         setEditingFlashcard(flashcard.id);
-        setEditingField(field);
+        setEditingField('both'); // Always edit both fields
         setFlashcardData({
             question: flashcard.question,
             answer: flashcard.answer
         });
         
-        // Set editor content based on field
-        if (field === 'question' && questionEditor) {
+        // Set content for both editors
+        if (questionEditor) {
             questionEditor.commands.setContent(flashcard.question);
-        } else if (field === 'answer' && answerEditor) {
+        }
+        if (answerEditor) {
             answerEditor.commands.setContent(flashcard.answer);
         }
     };
@@ -669,17 +670,49 @@ const Show = ({ flashcardSet }: Props) => {
                 <div className={isGridView ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-4"}>
                     {filteredFlashcards.map((flashcard) => (
                         <Card key={flashcard.id} className={`${isGridView ? "" : "flex flex-col sm:flex-row"} group hover:shadow-md transition-shadow relative`}>
-                            {/* Trash icon in top right corner */}
-                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => setDeleteFlashcardId(flashcard.id)}
-                                    className="text-red-500 hover:text-red-700 h-8 w-8 p-0"
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </div>
+                            {/* Edit and Delete buttons in top right corner */}
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex gap-1">
+                {editingFlashcard === flashcard.id && editingField === 'both' ? (
+                    <>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={handleSaveFlashcard}
+                            disabled={processingFlashcard}
+                            className="text-green-500 hover:text-green-700 h-8 w-8 p-0"
+                        >
+                            <Check className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={handleCancelEdit}
+                            className="text-red-500 hover:text-red-700 h-8 w-8 p-0"
+                        >
+                            <X className="h-4 w-4" />
+                        </Button>
+                    </>
+                ) : (
+                    <>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleEditFlashcard(flashcard)}
+                            className="text-blue-500 hover:text-blue-700 h-8 w-8 p-0"
+                        >
+                            <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setDeleteFlashcardId(flashcard.id)}
+                            className="text-red-500 hover:text-red-700 h-8 w-8 p-0"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </>
+                )}
+            </div>
                             
                             <CardContent className={isGridView ? "p-4 sm:p-6" : "p-4 sm:p-6 flex-1"}>
                                 <div className="space-y-4">
@@ -689,37 +722,9 @@ const Show = ({ flashcardSet }: Props) => {
                                             <h3 className="text-xs sm:text-sm font-medium text-neutral-500 dark:text-neutral-400">
                                                 {t('flashcard_question')}
                                             </h3>
-                                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                {editingFlashcard === flashcard.id && editingField === 'question' ? (
-                                                    <>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={handleSaveFlashcard}
-                                                            disabled={processingFlashcard}
-                                                        >
-                                                            <Check className="h-3 w-3" />
-                                                        </Button>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={handleCancelEdit}
-                                                        >
-                                                            <X className="h-3 w-3" />
-                                                        </Button>
-                                                    </>
-                                                ) : (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        onClick={() => handleEditFlashcard(flashcard, 'question')}
-                                                    >
-                                                        <Pencil className="h-3 w-3" />
-                                                    </Button>
-                                                )}
-                                            </div>
+
                                         </div>
-                                        {editingFlashcard === flashcard.id && editingField === 'question' ? (
+                                        {editingFlashcard === flashcard.id && editingField === 'both' ? (
                                             <div className="border rounded-md overflow-hidden">
                                                 {/* Toolbar */}
                                                 <div className="border-b bg-gray-50 dark:bg-gray-800 p-2 flex gap-1">
@@ -893,7 +898,7 @@ const Show = ({ flashcardSet }: Props) => {
                                         ) : (
                                             <div 
                                                 className="text-sm sm:text-lg cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800 p-2 rounded transition-colors break-words"
-                                                onClick={() => handleEditFlashcard(flashcard, 'question')}
+                                                onClick={() => handleEditFlashcard(flashcard)}
                                                 dangerouslySetInnerHTML={{ __html: flashcard.question }}
                                             />
                                         )}
@@ -905,37 +910,9 @@ const Show = ({ flashcardSet }: Props) => {
                                             <h3 className="text-xs sm:text-sm font-medium text-neutral-500 dark:text-neutral-400">
                                                 {t('flashcard_answer')}
                                             </h3>
-                                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                {editingFlashcard === flashcard.id && editingField === 'answer' ? (
-                                                    <>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={handleSaveFlashcard}
-                                                            disabled={processingFlashcard}
-                                                        >
-                                                            <Check className="h-3 w-3" />
-                                                        </Button>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            onClick={handleCancelEdit}
-                                                        >
-                                                            <X className="h-3 w-3" />
-                                                        </Button>
-                                                    </>
-                                                ) : (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        onClick={() => handleEditFlashcard(flashcard, 'answer')}
-                                                    >
-                                                        <Pencil className="h-3 w-3" />
-                                                    </Button>
-                                                )}
-                                            </div>
+
                                         </div>
-                                        {editingFlashcard === flashcard.id && editingField === 'answer' ? (
+                                        {editingFlashcard === flashcard.id && editingField === 'both' ? (
                                             <div className="border rounded-md overflow-hidden">
                                                 {/* Toolbar */}
                                                 <div className="border-b bg-gray-50 dark:bg-gray-800 p-2 flex gap-1">
@@ -1109,7 +1086,7 @@ const Show = ({ flashcardSet }: Props) => {
                                         ) : (
                                             <div 
                                                 className="text-sm sm:text-lg cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800 p-2 rounded transition-colors break-words"
-                                                onClick={() => handleEditFlashcard(flashcard, 'answer')}
+                                                onClick={() => handleEditFlashcard(flashcard)}
                                                 dangerouslySetInnerHTML={{ __html: flashcard.answer }}
                                             />
                                         )}

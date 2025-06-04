@@ -303,9 +303,9 @@ const Study = ({ flashcardSet }: Props) => {
                                         ${getButtonColor(option.label)}
                                     `}
                                 >
-                                    <div className="flex flex-col items-center justify-center h-full relative z-10">
+                                    <div className="flex gap-2 items-center justify-center h-full relative z-10">
                                         <span className="font-semibold text-xs sm:text-sm text-center leading-tight">{option.label}</span>
-                                        <span className="text-xs opacity-90 font-medium mt-1">
+                                        <span className="text-xs opacity-90 font-medium">
                                             {option.interval >= 1440 
                                                 ? `${Math.floor(option.interval / 1440)}d` 
                                                 : option.interval >= 60 

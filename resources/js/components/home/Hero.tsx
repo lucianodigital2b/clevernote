@@ -43,7 +43,7 @@ const Hero = () => {
       <div className="absolute inset-0 "></div>
       <div className="container mx-auto px-4 md:px-6 relative">
         <div className="flex flex-col items-center text-center gap-12 md:gap-16">
-          <div className="w-full lg:w-2/3 slide-in-animation">
+          <div className="w-full lg:w-2/3 slide-in-animation relative" ref={notesRef}>
             <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-700 mb-6 mx-auto">
               <CheckCircle className="w-4 h-4 mr-1" />
               {t('ai_homework_badge')}
@@ -80,126 +80,89 @@ const Hero = () => {
               </Button>
             </div>
             
-          
-          </div>
-          
-          <div className="w-full lg:w-2/3 relative mx-auto" ref={notesRef}>
-            <div className="relative mx-auto max-w-lg">
-              <div className="absolute inset-0 bg-indigo-50/50 rounded-3xl transform -rotate-1 scale-105"></div>
-              
-              <div className="bg-white rounded-2xl shadow-medium border border-gray-100 p-6 relative z-10 notepad-lines">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full bg-red-400 mr-2"></div>
-                    <div className="w-3 h-3 rounded-full bg-yellow-400 mr-2"></div>
-                    <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                  </div>
-                  <div className="text-sm text-gray-400 font-medium">Clevernote</div>
-                </div>
-                
-                <h3 className="text-lg font-medium text-gray-900 mb-3">{t('homework_title')}</h3>
-                
-                <div className="space-y-3 text-gray-700">
-                  <p className="flex items-start">
-                    <span className="w-4 h-4 mt-1 mr-2 text-indigo-500"><CheckCircle className="w-4 h-4" /></span>
-                    {t('homework_task_1')}
-                  </p>
-                  <p className="flex items-start">
-                    <span className="w-4 h-4 mt-1 mr-2 text-indigo-500"><CheckCircle className="w-4 h-4" /></span>
-                    {t('homework_task_2')}
-                  </p>
-                  <p className="flex items-start">
-                    <span className="w-4 h-4 mt-1 mr-2 text-indigo-500"><CheckCircle className="w-4 h-4" /></span>
-                    {t('homework_task_3')}
-                  </p>
-                </div>
-                
-                <div className="mt-6 text-sm text-gray-500">{t('updated_ago', { time: '2' })}</div>
+            {/* Floating Notes */}
+            <div className="absolute -top-12 -left-16 w-36 h-20 bg-teal-50 rounded-lg shadow-soft p-3 transform rotate-[-5deg] floating-note hidden md:block z-10">
+              <div className="flex items-center mb-1">
+                <Edit3 className="w-3 h-3 text-teal-700 mr-1" />
+                <span className="text-xs font-medium text-teal-700">{t('ai_assist_label')}</span>
               </div>
-              
-              {/* Floating Notes */}
-              <div className="absolute -top-12 -left-16 w-36 h-20 bg-teal-50 rounded-lg shadow-soft p-3 transform rotate-[-5deg] floating-note hidden md:block z-10">
-                <div className="flex items-center mb-1">
-                  <Edit3 className="w-3 h-3 text-teal-700 mr-1" />
-                  <span className="text-xs font-medium text-teal-700">{t('ai_assist_label')}</span>
-                </div>
-                <p className="text-xs text-teal-600 line-clamp-2">{t('ai_assist_message')}</p>
+              <p className="text-xs text-teal-600 line-clamp-2">{t('ai_assist_message')}</p>
+            </div>
+            
+            <div className="absolute top-32 -right-20 w-36 h-24 bg-indigo-50 rounded-lg shadow-soft p-3 transform rotate-[7deg] floating-note hidden md:block z-10">
+              <div className="flex items-center mb-1">
+                <StickyNote className="w-3 h-3 text-indigo-700 mr-1" />
+                <span className="text-xs font-medium text-indigo-700">{t('success_label')}</span>
               </div>
-              
-              <div className="absolute -bottom-6 -right-10 w-36 h-24 bg-indigo-50 rounded-lg shadow-soft p-3 transform rotate-[7deg] floating-note hidden md:block z-10">
-                <div className="flex items-center mb-1">
-                  <StickyNote className="w-3 h-3 text-indigo-700 mr-1" />
-                  <span className="text-xs font-medium text-indigo-700">{t('success_label')}</span>
-                </div>
-                <p className="text-xs text-indigo-600 line-clamp-3">{t('success_message')}</p>
+              <p className="text-xs text-indigo-600 line-clamp-3">{t('success_message')}</p>
+            </div>
+            
+            {/* Flashcard Artifacts */}
+            <div className="absolute top-8 -right-32 w-32 h-20 bg-gradient-to-br from-pink-50 to-rose-100 rounded-xl shadow-lg p-3 transform rotate-[12deg] floating-artifact hidden lg:block z-5">
+              <div className="flex items-center justify-between mb-2">
+                <BookOpen className="w-4 h-4 text-rose-600" />
+                <div className="w-2 h-2 rounded-full bg-rose-300"></div>
               </div>
-              
-              {/* Flashcard Artifacts */}
-              <div className="absolute -top-8 -right-20 w-32 h-20 bg-gradient-to-br from-pink-50 to-rose-100 rounded-xl shadow-lg p-3 transform rotate-[12deg] floating-artifact hidden lg:block z-5">
-                <div className="flex items-center justify-between mb-2">
-                  <BookOpen className="w-4 h-4 text-rose-600" />
-                  <div className="w-2 h-2 rounded-full bg-rose-300"></div>
-                </div>
-                <div className="space-y-1">
-                  <div className="h-1.5 bg-rose-200 rounded w-full"></div>
-                  <div className="h-1.5 bg-rose-200 rounded w-3/4"></div>
-                  <div className="h-1.5 bg-rose-200 rounded w-1/2"></div>
-                </div>
-                <div className="text-[8px] text-rose-500 mt-1 font-medium">Flashcard</div>
+              <div className="space-y-1">
+                <div className="h-1.5 bg-rose-200 rounded w-full"></div>
+                <div className="h-1.5 bg-rose-200 rounded w-3/4"></div>
+                <div className="h-1.5 bg-rose-200 rounded w-1/2"></div>
               </div>
-              
-              <div className="absolute -bottom-12 -left-24 w-28 h-18 bg-gradient-to-br from-purple-50 to-violet-100 rounded-lg shadow-lg p-2.5 transform rotate-[-8deg] floating-artifact hidden lg:block z-5">
-                <div className="flex items-center justify-between mb-1.5">
-                  <Brain className="w-3.5 h-3.5 text-violet-600" />
-                  <div className="flex space-x-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-violet-300"></div>
-                    <div className="w-1.5 h-1.5 rounded-full bg-violet-200"></div>
-                  </div>
+              <div className="text-[8px] text-rose-500 mt-1 font-medium">{t('floating_card_flashcard')}</div>
+            </div>
+            
+            <div className="absolute top-48 -left-24 w-28 h-18 bg-gradient-to-br from-purple-50 to-violet-100 rounded-lg shadow-lg p-2.5 transform rotate-[-8deg] floating-artifact hidden lg:block z-5">
+              <div className="flex items-center justify-between mb-1.5">
+                <Brain className="w-3.5 h-3.5 text-violet-600" />
+                <div className="flex space-x-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-violet-300"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-violet-200"></div>
                 </div>
-                <div className="space-y-1">
-                  <div className="h-1 bg-violet-200 rounded w-full"></div>
-                  <div className="h-1 bg-violet-200 rounded w-2/3"></div>
-                </div>
-                <div className="text-[8px] text-violet-500 mt-1 font-medium">Quiz Mode</div>
               </div>
-              
-              <div className="absolute top-16 -right-32 w-24 h-16 bg-gradient-to-br from-emerald-50 to-green-100 rounded-lg shadow-lg p-2 transform rotate-[18deg] floating-artifact hidden xl:block z-5">
-                <div className="flex items-center justify-between mb-1">
-                  <Zap className="w-3 h-3 text-emerald-600" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-                </div>
-                <div className="space-y-0.5">
-                  <div className="h-1 bg-emerald-200 rounded w-full"></div>
-                  <div className="h-1 bg-emerald-200 rounded w-1/2"></div>
-                </div>
-                <div className="text-[7px] text-emerald-500 mt-0.5 font-medium">Study Boost</div>
+              <div className="space-y-1">
+                <div className="h-1 bg-violet-200 rounded w-full"></div>
+                <div className="h-1 bg-violet-200 rounded w-2/3"></div>
               </div>
-              
-              <div className="absolute top-20 -left-28 w-26 h-14 bg-gradient-to-br from-amber-50 to-yellow-100 rounded-lg shadow-lg p-2 transform rotate-[-12deg] floating-artifact hidden xl:block z-5">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="w-3 h-3 rounded bg-amber-300"></div>
-                  <div className="text-[6px] text-amber-600 font-bold">A+</div>
-                </div>
-                <div className="space-y-0.5">
-                  <div className="h-0.5 bg-amber-200 rounded w-full"></div>
-                  <div className="h-0.5 bg-amber-200 rounded w-3/4"></div>
-                  <div className="h-0.5 bg-amber-200 rounded w-1/2"></div>
-                </div>
-                <div className="text-[7px] text-amber-600 mt-0.5 font-medium">Progress</div>
+              <div className="text-[8px] text-violet-500 mt-1 font-medium">{t('floating_card_quiz_mode')}</div>
+            </div>
+            
+            <div className="absolute top-16 -right-48 w-24 h-16 bg-gradient-to-br from-emerald-50 to-green-100 rounded-lg shadow-lg p-2 transform rotate-[18deg] floating-artifact hidden xl:block z-5">
+              <div className="flex items-center justify-between mb-1">
+                <Zap className="w-3 h-3 text-emerald-600" />
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
               </div>
-              
-              <div className="absolute -bottom-16 right-8 w-20 h-12 bg-gradient-to-br from-cyan-50 to-blue-100 rounded-lg shadow-lg p-1.5 transform rotate-[25deg] floating-artifact hidden lg:block z-5">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="w-2 h-2 rounded-full bg-cyan-400"></div>
-                  <div className="w-2 h-2 rounded-full bg-cyan-300"></div>
-                  <div className="w-2 h-2 rounded-full bg-cyan-200"></div>
-                </div>
-                <div className="h-0.5 bg-cyan-200 rounded w-full mb-0.5"></div>
-                <div className="h-0.5 bg-cyan-200 rounded w-2/3"></div>
-                <div className="text-[6px] text-cyan-600 mt-0.5 font-medium">Memory</div>
+              <div className="space-y-0.5">
+                <div className="h-1 bg-emerald-200 rounded w-full"></div>
+                <div className="h-1 bg-emerald-200 rounded w-1/2"></div>
               </div>
+              <div className="text-[7px] text-emerald-500 mt-0.5 font-medium">{t('floating_card_study_boost')}</div>
+            </div>
+            
+            <div className="absolute top-20 -left-40 w-26 h-14 bg-gradient-to-br from-amber-50 to-yellow-100 rounded-lg shadow-lg p-2 transform rotate-[-12deg] floating-artifact hidden xl:block z-5">
+              <div className="flex items-center justify-between mb-1">
+                <div className="w-3 h-3 rounded bg-amber-300"></div>
+                <div className="text-[6px] text-amber-600 font-bold">A+</div>
+              </div>
+              <div className="space-y-0.5">
+                <div className="h-0.5 bg-amber-200 rounded w-full"></div>
+                <div className="h-0.5 bg-amber-200 rounded w-3/4"></div>
+                <div className="h-0.5 bg-amber-200 rounded w-1/2"></div>
+              </div>
+              <div className="text-[7px] text-amber-600 mt-0.5 font-medium">{t('floating_card_progress')}</div>
+            </div>
+            
+            <div className="absolute top-56 right-8 w-20 h-12 bg-gradient-to-br from-cyan-50 to-blue-100 rounded-lg shadow-lg p-1.5 transform rotate-[25deg] floating-artifact hidden lg:block z-5">
+              <div className="flex items-center justify-between mb-1">
+                <div className="w-2 h-2 rounded-full bg-cyan-400"></div>
+                <div className="w-2 h-2 rounded-full bg-cyan-300"></div>
+                <div className="w-2 h-2 rounded-full bg-cyan-200"></div>
+              </div>
+              <div className="h-0.5 bg-cyan-200 rounded w-full mb-0.5"></div>
+              <div className="h-0.5 bg-cyan-200 rounded w-2/3"></div>
+              <div className="text-[6px] text-cyan-600 mt-0.5 font-medium">{t('floating_card_memory')}</div>
             </div>
           </div>
+
         </div>
       </div>
 

@@ -309,13 +309,22 @@
   "billing_need_help": "¿Necesitas ayuda?",
   "billing_contact_support": "Contacta a nuestro equipo de soporte",
   "auth_register_title": "Crea tu cuenta",
-  "auth_register_description": "Ingresa tus datos a continuación para crear tu cuenta",
+  "auth_register_description": "Ingresa tu información para crear una nueva cuenta",
   "auth_name_label": "Nombre completo",
-  "auth_name_placeholder": "Ingresa tu nombre completo",
+  "auth_name_placeholder": "Tu nombre completo",
   "auth_confirm_password_label": "Confirmar contraseña",
-  "auth_confirm_password_placeholder": "Confirma tu contraseña",
-  "auth_create_account_button": "Crear cuenta",
+  "auth_confirm_password_placeholder": "Confirmar contraseña",
+  "auth_create_account_button": "Crear cuenta con correo",
   "auth_already_have_account": "¿Ya tienes una cuenta?",
-  "auth_login_link": "Iniciar sesión"
+  "auth_login_link": "Inicia sesión",
+  "ai_assist_label": "Tutor IA",
+  "ai_assist_message": "¿Atascado con derivadas? ¡Te guiaré paso a paso!",
+  "success_label": "Historia de Éxito",
+  "success_message": "¡Saqué una A+ en mi examen de cálculo gracias a las explicaciones detalladas!",
+  "floating_card_flashcard": "Tarjeta",
+  "floating_card_quiz_mode": "Modo Quiz",
+  "floating_card_study_boost": "Impulso de Estudio",
+  "floating_card_progress": "Progreso",
+  "floating_card_memory": "Memoria"
 
 }
