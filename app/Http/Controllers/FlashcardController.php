@@ -102,7 +102,13 @@ class FlashcardController extends Controller
 
         $flashcard->update($request->all());
 
-        return redirect()->route('flashcards.index')->with('success', 'Flashcard updated successfully.');
+        if($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Flashcard updated successfully.'
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Flashcard updated successfully.');
     }
 
     /**
