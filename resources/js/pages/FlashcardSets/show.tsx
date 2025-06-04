@@ -593,7 +593,7 @@ const Show = ({ flashcardSet }: Props) => {
                                 onClick={() => setStudyFilter('new')}
                                 className="hover:text-purple-900 bg-purple-100 text-purple-700 hover:bg-purple-200 border-purple-300 text-xs sm:text-sm"
                             >
-                                <span className="hidden sm:inline">🆕 New</span>
+                                <span className="hidden sm:inline">🆕 {t('flashcard_filter_new')}</span>
                                 <span className="sm:hidden">🆕</span>
                                 <span className="ml-1">({statusCounts.new})</span>
                             </Button>
@@ -603,7 +603,7 @@ const Show = ({ flashcardSet }: Props) => {
                                 onClick={() => setStudyFilter('review')}
                                 className="hover:text-orange-900 bg-orange-100 text-orange-700 hover:bg-orange-200 border-orange-300 text-xs sm:text-sm"
                             >
-                                <span className="hidden sm:inline">📝 To Review</span>
+                                <span className="hidden sm:inline">📝 {t('flashcard_filter_review')}</span>
                                 <span className="sm:hidden">📝</span>
                                 <span className="ml-1">({statusCounts.review})</span>
                             </Button>
@@ -613,7 +613,7 @@ const Show = ({ flashcardSet }: Props) => {
                                 onClick={() => setStudyFilter('memorised')}
                                 className="hover:text-green-900 bg-green-100 text-green-700 hover:bg-green-200 border-green-300 text-xs sm:text-sm"
                             >
-                                <span className="hidden sm:inline">✅ Memorised</span>
+                                <span className="hidden sm:inline">✅ {t('flashcard_filter_memorised')}</span>
                                 <span className="sm:hidden">✅</span>
                                 <span className="ml-1">({statusCounts.memorised})</span>
                             </Button>
