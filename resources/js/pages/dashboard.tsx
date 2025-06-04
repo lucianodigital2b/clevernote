@@ -16,8 +16,6 @@ import { WebLinkModal } from '@/components/modals/web-link-modal';
 import { usePage } from '@inertiajs/react';
 import { UpgradeModal } from '@/components/upgrade-modal';
 import { useRequireSubscription } from '@/hooks/useRequireSubscription';
-import OnboardingForm from '@/components/onboardingForm';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -37,7 +35,6 @@ export default function Dashboard() {
     const debouncedSearch = useDebounce(searchQuery, 300);
     const { folderId } = usePage().props as { folderId?: string | number };
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
     const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
     const { auth } = usePage().props;
 
@@ -45,12 +42,7 @@ export default function Dashboard() {
 
     const user = (auth as any).user;
 
-    useEffect(() => {
-        // Show onboarding modal if user hasn't completed it
-        if (!user.onboarding_completed) {
-            setIsOnboardingOpen(true);
-        }
-    }, [user.onboarding_completed]);
+
     
     // Query for notes with pagination
     const { 
@@ -439,19 +431,7 @@ export default function Dashboard() {
                 onClose={() => setIsModalOpen(false)} 
             />
 
-            <Dialog open={isOnboardingOpen} onOpenChange={setIsOnboardingOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>{t('welcome_title')}</DialogTitle>
-                    </DialogHeader>
-                    <OnboardingForm 
-                        onComplete={() => {
-                            setIsOnboardingOpen(false);
-                            setIsModalOpen(true);
-                        }}
-                    />
-                </DialogContent>
-            </Dialog>
+
         </AppLayout>
     );
 }

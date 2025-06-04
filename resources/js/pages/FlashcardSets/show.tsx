@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Brain, Plus, Pencil, Check, X, Trash2, Save } from 'lucide-react';
+import { Brain, Plus, Pencil, Check, X, Trash2, Save, Loader2 } from 'lucide-react';
 import { FlashcardSet, Flashcard } from '@/types';
 import { Search, Grid, List } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -13,9 +13,8 @@ import { useTranslation } from 'react-i18next';
 import { useEditor, EditorContent } from '@tiptap/react';
 import axios from 'axios';
 import StarterKit from '@tiptap/starter-kit';
-import Bold from '@tiptap/extension-bold';
-import Italic from '@tiptap/extension-italic';
 import Image from '@tiptap/extension-image';
+import Highlight from '@tiptap/extension-highlight';
 import { toastConfig } from '@/lib/toast';
 import { Bold as BoldIcon, Italic as ItalicIcon, ImageIcon } from 'lucide-react';
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog';
@@ -27,6 +26,12 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
 
@@ -53,6 +58,12 @@ const Show = ({ flashcardSet }: Props) => {
     const [deleteFlashcardId, setDeleteFlashcardId] = useState<number | null>(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [studyFilter, setStudyFilter] = useState<StudyFilter>('all');
+    const [questionHighlightDropdownOpen, setQuestionHighlightDropdownOpen] = useState(false);
+    const [answerHighlightDropdownOpen, setAnswerHighlightDropdownOpen] = useState(false);
+    const [newQuestionHighlightDropdownOpen, setNewQuestionHighlightDropdownOpen] = useState(false);
+    const [newAnswerHighlightDropdownOpen, setNewAnswerHighlightDropdownOpen] = useState(false);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
+    const [uploadingEditor, setUploadingEditor] = useState<string | null>(null);
 
     // Form for editing set details
     const { data: setData, setData: setSetData, put: putSet, processing: processingSet, errors: setErrors } = useForm({
@@ -63,7 +74,8 @@ const Show = ({ flashcardSet }: Props) => {
     // Form for editing individual flashcards
     const { data: flashcardData, setData: setFlashcardData, put: putFlashcard, post: postFlashcard, delete: deleteFlashcard, processing: processingFlashcard, errors: flashcardErrors, reset: resetFlashcard } = useForm({
         question: '',
-        answer: ''
+        answer: '',
+        flashcard_set_id: flashcardSet.id
     });
 
     // Form for adding new flashcards
@@ -75,8 +87,35 @@ const Show = ({ flashcardSet }: Props) => {
 
     // Tiptap editor for question editing
     const questionEditor = useEditor({
-        extensions: [StarterKit],
+        extensions: [
+            StarterKit,
+            Image.configure({
+                inline: false,
+                allowBase64: false,
+            }),
+            Highlight.configure({
+                multicolor: true,
+            })
+        ],
         content: '',
+        editorProps: {
+            handlePaste: (view, event, slice) => {
+                const file = event.clipboardData?.files?.[0];
+                if (file && file.type.startsWith('image/') && editingFlashcard) {
+                    uploadExistingFlashcardImage(file, questionEditor, editingFlashcard);
+                    return true;
+                }
+                return false;
+            },
+            handleDrop: (view, event, slice, moved) => {
+                const file = event.dataTransfer?.files?.[0];
+                if (file && file.type.startsWith('image/') && editingFlashcard) {
+                    uploadExistingFlashcardImage(file, questionEditor, editingFlashcard);
+                    return true;
+                }
+                return false;
+            },
+        },
         onUpdate: ({ editor }) => {
             setFlashcardData('question', editor.getHTML());
         },
@@ -84,20 +123,55 @@ const Show = ({ flashcardSet }: Props) => {
 
     // Tiptap editor for answer editing
     const answerEditor = useEditor({
-        extensions: [StarterKit],
+        extensions: [
+            StarterKit,
+            Image.configure({
+                inline: false,
+                allowBase64: false,
+            }),
+            Highlight.configure({
+                multicolor: true,
+            })
+        ],
         content: '',
+        editorProps: {
+            handlePaste: (view, event, slice) => {
+                const file = event.clipboardData?.files?.[0];
+                if (file && file.type.startsWith('image/') && editingFlashcard) {
+                    uploadExistingFlashcardImage(file, answerEditor, editingFlashcard);
+                    return true;
+                }
+                return false;
+            },
+            handleDrop: (view, event, slice, moved) => {
+                const file = event.dataTransfer?.files?.[0];
+                if (file && file.type.startsWith('image/') && editingFlashcard) {
+                    uploadExistingFlashcardImage(file, answerEditor, editingFlashcard);
+                    return true;
+                }
+                return false;
+            },
+        },
         onUpdate: ({ editor }) => {
             setFlashcardData('answer', editor.getHTML());
         },
     });
 
-    // Image upload function for flashcards
-    const uploadFlashcardImage = async (file: File, editor: any) => {
+    // Image upload function for new flashcards (requires flashcard ID)
+    const uploadNewFlashcardImage = async (file: File, editor: any, flashcardId?: number) => {
         const formData = new FormData();
         formData.append('file', file);
         
+        setIsUploadingImage(true);
+        setUploadingEditor(editor === newQuestionEditor ? 'newQuestion' : 'newAnswer');
+        
         try {
-            const res = await axios.post(`/api/flashcard-sets/${flashcardSet.id}/media`, formData, {
+            // If flashcardId is provided, upload to specific flashcard, otherwise upload to flashcard set
+            const endpoint = flashcardId 
+                ? `/api/flashcards/${flashcardId}/media`
+                : `/api/flashcard-sets/${flashcardSet.id}/media`;
+                
+            const res = await axios.post(endpoint, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -107,6 +181,34 @@ const Show = ({ flashcardSet }: Props) => {
             editor?.chain().focus().setImage({ src: url }).run();
         } catch (error) {
             toastConfig.error('Failed to upload image');
+        } finally {
+            setIsUploadingImage(false);
+            setUploadingEditor(null);
+        }
+    };
+
+    // Image upload function for existing flashcards
+    const uploadExistingFlashcardImage = async (file: File, editor: any, flashcardId: number) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        setIsUploadingImage(true);
+        setUploadingEditor(editor === questionEditor ? 'question' : 'answer');
+        
+        try {
+            const res = await axios.post(`/api/flashcards/${flashcardId}/media`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            
+            const { url } = res.data;
+            editor?.chain().focus().setImage({ src: url }).run();
+        } catch (error) {
+            toastConfig.error('Failed to upload image');
+        } finally {
+            setIsUploadingImage(false);
+            setUploadingEditor(null);
         }
     };
 
@@ -114,11 +216,12 @@ const Show = ({ flashcardSet }: Props) => {
     const newQuestionEditor = useEditor({
         extensions: [
             StarterKit,
-            Bold,
-            Italic,
             Image.configure({
                 inline: false,
                 allowBase64: false,
+            }),
+            Highlight.configure({
+                multicolor: true,
             })
         ],
         content: '',
@@ -126,15 +229,15 @@ const Show = ({ flashcardSet }: Props) => {
             handlePaste: (view, event, slice) => {
                 const file = event.clipboardData?.files?.[0];
                 if (file && file.type.startsWith('image/')) {
-                    uploadFlashcardImage(file, newQuestionEditor);
+                    uploadNewFlashcardImage(file, newQuestionEditor);
                     return true;
                 }
                 return false;
             },
-            handleDrop: (view, event) => {
+            handleDrop: (view, event, slice, moved) => {
                 const file = event.dataTransfer?.files?.[0];
                 if (file && file.type.startsWith('image/')) {
-                    uploadFlashcardImage(file, newQuestionEditor);
+                    uploadNewFlashcardImage(file, newQuestionEditor);
                     return true;
                 }
                 return false;
@@ -148,11 +251,12 @@ const Show = ({ flashcardSet }: Props) => {
     const newAnswerEditor = useEditor({
         extensions: [
             StarterKit,
-            Bold,
-            Italic,
             Image.configure({
                 inline: false,
                 allowBase64: false,
+            }),
+            Highlight.configure({
+                multicolor: true,
             })
         ],
         content: '',
@@ -160,15 +264,15 @@ const Show = ({ flashcardSet }: Props) => {
             handlePaste: (view, event, slice) => {
                 const file = event.clipboardData?.files?.[0];
                 if (file && file.type.startsWith('image/')) {
-                    uploadFlashcardImage(file, newAnswerEditor);
+                    uploadNewFlashcardImage(file, newAnswerEditor);
                     return true;
                 }
                 return false;
             },
-            handleDrop: (view, event) => {
+            handleDrop: (view, event, slice, moved) => {
                 const file = event.dataTransfer?.files?.[0];
                 if (file && file.type.startsWith('image/')) {
-                    uploadFlashcardImage(file, newAnswerEditor);
+                    uploadNewFlashcardImage(file, newAnswerEditor);
                     return true;
                 }
                 return false;
@@ -206,8 +310,10 @@ const Show = ({ flashcardSet }: Props) => {
     // Filter flashcards based on search query and study filter
     const filteredFlashcards = flashcards.filter(flashcard => {
         // First apply search filter
-        const matchesSearch = flashcard.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            flashcard.answer.toLowerCase().includes(searchQuery.toLowerCase());
+        const question = flashcard.question || '';
+        const answer = flashcard.answer || '';
+        const matchesSearch = question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            answer.toLowerCase().includes(searchQuery.toLowerCase());
         
         if (!matchesSearch) return false;
         
@@ -261,7 +367,7 @@ const Show = ({ flashcardSet }: Props) => {
     const handleSaveFlashcard = () => {
         if (!editingFlashcard) return;
         
-        putFlashcard(`/flashcard-sets/${flashcardSet.id}/flashcards/${editingFlashcard}`, {
+        putFlashcard(`/flashcards/${editingFlashcard}`, {
             onSuccess: () => {
                 // Update local state
                 setFlashcards(prev => prev.map(fc => 
@@ -302,15 +408,65 @@ const Show = ({ flashcardSet }: Props) => {
         setDeleteFlashcardId(null);
     };
 
-    const handleAddFlashcard = () => {
-        setIsAddModalOpen(true);
-        // Reset form and editors
-        resetNewFlashcard();
-        if (newQuestionEditor) {
-            newQuestionEditor.commands.setContent('');
+    const handleAddFlashcard = async () => {
+        // Create a temporary flashcard with a temporary ID
+        const tempId = Date.now(); // Use timestamp as temporary ID
+        const tempFlashcard = {
+            id: tempId,
+            question: '',
+            answer: '',
+            difficulty: null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            flashcard_set_id: flashcardSet.id,
+            user_progress: []
+        } as Flashcard;
+
+        // Add the temporary flashcard to local state immediately
+        setFlashcards(prev => [...prev, tempFlashcard]);
+        
+        // Scroll to bottom after adding flashcard
+        setTimeout(() => {
+            window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: 'smooth'
+            });
+        }, 100);
+        
+        // Start editing the new flashcard immediately
+        setEditingFlashcard(tempId);
+        setEditingField('question');
+        setFlashcardData({
+            question: '',
+            answer: ''
+        });
+        if (questionEditor) {
+            questionEditor.commands.setContent('');
         }
-        if (newAnswerEditor) {
-            newAnswerEditor.commands.setContent('');
+
+        // Save to backend quietly using axios
+        try {
+            const response = await axios.post('/flashcards', {
+                question: '',
+                answer: '',
+                flashcard_set_id: flashcardSet.id
+            });
+            
+            const realFlashcard = response.data.flashcard as Flashcard;
+            
+            // Replace the temporary flashcard with the real one
+            setFlashcards(prev => prev.map(fc => 
+                fc.id === tempId ? realFlashcard : fc
+            ));
+            
+            // Update editing state to use real ID
+            setEditingFlashcard(realFlashcard.id);
+        } catch (error) {
+            // Remove the temporary flashcard if save failed
+            setFlashcards(prev => prev.filter(fc => fc.id !== tempId));
+            setEditingFlashcard(null);
+            setEditingField(null);
+            toastConfig.error('Failed to create flashcard');
         }
     };
 
@@ -564,12 +720,175 @@ const Show = ({ flashcardSet }: Props) => {
                                             </div>
                                         </div>
                                         {editingFlashcard === flashcard.id && editingField === 'question' ? (
-                                            <div className="border rounded-md p-2">
-                                                <EditorContent 
-                                                    editor={questionEditor} 
-                                                    className="prose dark:prose-invert max-w-none min-h-[60px] focus:outline-none text-sm sm:text-base"
-                                                />
-                                                <InputError message={flashcardErrors.question} />
+                                            <div className="border rounded-md overflow-hidden">
+                                                {/* Toolbar */}
+                                                <div className="border-b bg-gray-50 dark:bg-gray-800 p-2 flex gap-1">
+                                                    <Button 
+                                                        type="button"
+                                                        size="sm" 
+                                                        variant="ghost" 
+                                                        className={questionEditor?.isActive('bold') ? 'bg-gray-200 dark:bg-gray-700' : ''}
+                                                        onClick={() => questionEditor?.chain().focus().toggleBold().run()}
+                                                    >
+                                                        <BoldIcon className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button 
+                                                        type="button"
+                                                        size="sm" 
+                                                        variant="ghost" 
+                                                        className={questionEditor?.isActive('italic') ? 'bg-gray-200 dark:bg-gray-700' : ''}
+                                                        onClick={() => questionEditor?.chain().focus().toggleItalic().run()}
+                                                    >
+                                                        <ItalicIcon className="h-4 w-4" />
+                                                    </Button>
+                                                    <DropdownMenu open={questionHighlightDropdownOpen} onOpenChange={setQuestionHighlightDropdownOpen}>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button 
+                                                                type="button"
+                                                                size="sm" 
+                                                                variant="ghost" 
+                                                                className={questionEditor?.isActive('highlight') ? 'bg-gray-200 dark:bg-gray-700' : ''}
+                                                            >
+                                                                <Pencil className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent className="w-48">
+                                                            <div className="grid grid-cols-5 gap-1 p-2">
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-yellow-200 hover:bg-yellow-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        questionEditor?.chain().focus().toggleHighlight({ color: '#fef08a' }).run();
+                                                                        setQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Yellow"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-pink-200 hover:bg-pink-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        questionEditor?.chain().focus().toggleHighlight({ color: '#fbcfe8' }).run();
+                                                                        setQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Pink"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-green-200 hover:bg-green-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        questionEditor?.chain().focus().toggleHighlight({ color: '#bbf7d0' }).run();
+                                                                        setQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Green"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-blue-200 hover:bg-blue-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        questionEditor?.chain().focus().toggleHighlight({ color: '#bfdbfe' }).run();
+                                                                        setQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Blue"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-purple-200 hover:bg-purple-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        questionEditor?.chain().focus().toggleHighlight({ color: '#e9d5ff' }).run();
+                                                                        setQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Purple"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-orange-200 hover:bg-orange-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        questionEditor?.chain().focus().toggleHighlight({ color: '#fed7aa' }).run();
+                                                                        setQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Orange"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-red-200 hover:bg-red-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        questionEditor?.chain().focus().toggleHighlight({ color: '#fecaca' }).run();
+                                                                        setQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Red"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-indigo-200 hover:bg-indigo-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        questionEditor?.chain().focus().toggleHighlight({ color: '#c7d2fe' }).run();
+                                                                        setQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Indigo"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-teal-200 hover:bg-teal-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        questionEditor?.chain().focus().toggleHighlight({ color: '#99f6e4' }).run();
+                                                                        setQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Teal"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-gray-200 hover:bg-gray-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        questionEditor?.chain().focus().toggleHighlight({ color: '#e5e7eb' }).run();
+                                                                        setQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Gray"
+                                                                />
+                                                            </div>
+                                                            <DropdownMenuItem
+                                                                onClick={() => {
+                                                                    questionEditor?.chain().focus().unsetHighlight().run();
+                                                                    setQuestionHighlightDropdownOpen(false);
+                                                                }}
+                                                                className="text-sm"
+                                                            >
+                                                                Remove Highlight
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                    <Button 
+                                                        type="button"
+                                                        size="sm" 
+                                                        variant="ghost" 
+                                                        onClick={() => {
+                                                            const input = document.createElement('input');
+                                                            input.type = 'file';
+                                                            input.accept = 'image/*';
+                                                            input.onchange = (e) => {
+                                                                const file = (e.target as HTMLInputElement).files?.[0];
+                                                                if (file && editingFlashcard) {
+                                                                    uploadExistingFlashcardImage(file, answerEditor, editingFlashcard);
+                                                                }
+                                                            };
+                                                            input.click();
+                                                        }}
+                                                        title="Upload Image"
+                                                    >
+                                                        <ImageIcon className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                                <div className="p-2 relative">
+                                                    <EditorContent 
+                                                        editor={questionEditor} 
+                                                        className={`prose dark:prose-invert max-w-none min-h-[60px] focus:outline-none text-sm sm:text-base ${isUploadingImage && uploadingEditor === 'question' ? 'pointer-events-none opacity-50' : ''}`}
+                                                    />
+                                                    {isUploadingImage && uploadingEditor === 'question' && (
+                                                        <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-black/50 rounded">
+                                                            <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                                                        </div>
+                                                    )}
+                                                    <InputError message={flashcardErrors.question} />
+                                                </div>
                                             </div>
                                         ) : (
                                             <div 
@@ -617,12 +936,175 @@ const Show = ({ flashcardSet }: Props) => {
                                             </div>
                                         </div>
                                         {editingFlashcard === flashcard.id && editingField === 'answer' ? (
-                                            <div className="border rounded-md p-2">
-                                                <EditorContent 
-                                                    editor={answerEditor} 
-                                                    className="prose dark:prose-invert max-w-none min-h-[60px] focus:outline-none text-sm sm:text-base"
-                                                />
-                                                <InputError message={flashcardErrors.answer} />
+                                            <div className="border rounded-md overflow-hidden">
+                                                {/* Toolbar */}
+                                                <div className="border-b bg-gray-50 dark:bg-gray-800 p-2 flex gap-1">
+                                                    <Button 
+                                                        type="button"
+                                                        size="sm" 
+                                                        variant="ghost" 
+                                                        className={answerEditor?.isActive('bold') ? 'bg-gray-200 dark:bg-gray-700' : ''}
+                                                        onClick={() => answerEditor?.chain().focus().toggleBold().run()}
+                                                    >
+                                                        <BoldIcon className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button 
+                                                        type="button"
+                                                        size="sm" 
+                                                        variant="ghost" 
+                                                        className={answerEditor?.isActive('italic') ? 'bg-gray-200 dark:bg-gray-700' : ''}
+                                                        onClick={() => answerEditor?.chain().focus().toggleItalic().run()}
+                                                    >
+                                                        <ItalicIcon className="h-4 w-4" />
+                                                    </Button>
+                                                    <DropdownMenu open={answerHighlightDropdownOpen} onOpenChange={setAnswerHighlightDropdownOpen}>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button 
+                                                                type="button"
+                                                                size="sm" 
+                                                                variant="ghost" 
+                                                                className={answerEditor?.isActive('highlight') ? 'bg-gray-200 dark:bg-gray-700' : ''}
+                                                            >
+                                                                <Pencil className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent className="w-48">
+                                                            <div className="grid grid-cols-5 gap-1 p-2">
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-yellow-200 hover:bg-yellow-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        answerEditor?.chain().focus().toggleHighlight({ color: '#fef08a' }).run();
+                                                                        setAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Yellow"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-pink-200 hover:bg-pink-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        answerEditor?.chain().focus().toggleHighlight({ color: '#fbcfe8' }).run();
+                                                                        setAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Pink"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-green-200 hover:bg-green-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        answerEditor?.chain().focus().toggleHighlight({ color: '#bbf7d0' }).run();
+                                                                        setAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Green"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-blue-200 hover:bg-blue-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        answerEditor?.chain().focus().toggleHighlight({ color: '#bfdbfe' }).run();
+                                                                        setAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Blue"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-purple-200 hover:bg-purple-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        answerEditor?.chain().focus().toggleHighlight({ color: '#e9d5ff' }).run();
+                                                                        setAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Purple"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-orange-200 hover:bg-orange-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        answerEditor?.chain().focus().toggleHighlight({ color: '#fed7aa' }).run();
+                                                                        setAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Orange"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-red-200 hover:bg-red-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        answerEditor?.chain().focus().toggleHighlight({ color: '#fecaca' }).run();
+                                                                        setAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Red"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-indigo-200 hover:bg-indigo-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        answerEditor?.chain().focus().toggleHighlight({ color: '#c7d2fe' }).run();
+                                                                        setAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Indigo"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-teal-200 hover:bg-teal-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        answerEditor?.chain().focus().toggleHighlight({ color: '#99f6e4' }).run();
+                                                                        setAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Teal"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-gray-200 hover:bg-gray-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        answerEditor?.chain().focus().toggleHighlight({ color: '#e5e7eb' }).run();
+                                                                        setAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Gray"
+                                                                />
+                                                            </div>
+                                                            <DropdownMenuItem
+                                                                onClick={() => {
+                                                                    answerEditor?.chain().focus().unsetHighlight().run();
+                                                                    setAnswerHighlightDropdownOpen(false);
+                                                                }}
+                                                                className="text-sm"
+                                                            >
+                                                                Remove Highlight
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                    <Button 
+                                                        type="button"
+                                                        size="sm" 
+                                                        variant="ghost" 
+                                                        onClick={() => {
+                                                            const input = document.createElement('input');
+                                                            input.type = 'file';
+                                                            input.accept = 'image/*';
+                                                            input.onchange = (e) => {
+                                                                const file = (e.target as HTMLInputElement).files?.[0];
+                                                                if (file && editingFlashcard) {
+                                                                    uploadExistingFlashcardImage(file, answerEditor, editingFlashcard);
+                                                                }
+                                                            };
+                                                            input.click();
+                                                        }}
+                                                        title="Upload Image"
+                                                    >
+                                                        <ImageIcon className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                                <div className="p-2 relative">
+                                                    <EditorContent 
+                                                        editor={answerEditor} 
+                                                        className={`prose dark:prose-invert max-w-none min-h-[60px] focus:outline-none text-sm sm:text-base ${isUploadingImage && uploadingEditor === 'answer' ? 'pointer-events-none opacity-50' : ''}`}
+                                                    />
+                                                    {isUploadingImage && uploadingEditor === 'answer' && (
+                                                        <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-black/50 rounded">
+                                                            <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                                                        </div>
+                                                    )}
+                                                    <InputError message={flashcardErrors.answer} />
+                                                </div>
                                             </div>
                                         ) : (
                                             <div 
@@ -701,20 +1183,144 @@ const Show = ({ flashcardSet }: Props) => {
                                                 input.accept = 'image/*';
                                                 input.onchange = (e) => {
                                                     const file = (e.target as HTMLInputElement).files?.[0];
-                                                    if (file) uploadFlashcardImage(file, newQuestionEditor);
+                                                    if (file) uploadNewFlashcardImage(file, newQuestionEditor);
                                                 };
                                                 input.click();
                                             }}
                                         >
                                             <ImageIcon className="h-4 w-4" />
                                         </Button>
+                                        <DropdownMenu open={newQuestionHighlightDropdownOpen} onOpenChange={setNewQuestionHighlightDropdownOpen}>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button 
+                                                                type="button"
+                                                                size="sm" 
+                                                                variant="ghost" 
+                                                                className={newQuestionEditor?.isActive('highlight') ? 'bg-gray-200 dark:bg-gray-700' : ''}
+                                                            >
+                                                                <Pencil className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent className="w-48">
+                                                            <div className="grid grid-cols-5 gap-1 p-2">
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-yellow-200 hover:bg-yellow-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newQuestionEditor?.chain().focus().toggleHighlight({ color: '#fef08a' }).run();
+                                                                        setNewQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Yellow"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-pink-200 hover:bg-pink-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newQuestionEditor?.chain().focus().toggleHighlight({ color: '#fbcfe8' }).run();
+                                                                        setNewQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Pink"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-green-200 hover:bg-green-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newQuestionEditor?.chain().focus().toggleHighlight({ color: '#bbf7d0' }).run();
+                                                                        setNewQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Green"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-blue-200 hover:bg-blue-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newQuestionEditor?.chain().focus().toggleHighlight({ color: '#bfdbfe' }).run();
+                                                                        setNewQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Blue"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-purple-200 hover:bg-purple-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newQuestionEditor?.chain().focus().toggleHighlight({ color: '#e9d5ff' }).run();
+                                                                        setNewQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Purple"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-orange-200 hover:bg-orange-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newQuestionEditor?.chain().focus().toggleHighlight({ color: '#fed7aa' }).run();
+                                                                        setNewQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Orange"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-red-200 hover:bg-red-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newQuestionEditor?.chain().focus().toggleHighlight({ color: '#fecaca' }).run();
+                                                                        setNewQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Red"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-indigo-200 hover:bg-indigo-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newQuestionEditor?.chain().focus().toggleHighlight({ color: '#c7d2fe' }).run();
+                                                                        setNewQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Indigo"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-teal-200 hover:bg-teal-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newQuestionEditor?.chain().focus().toggleHighlight({ color: '#99f6e4' }).run();
+                                                                        setNewQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Teal"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-gray-200 hover:bg-gray-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newQuestionEditor?.chain().focus().toggleHighlight({ color: '#e5e7eb' }).run();
+                                                                        setNewQuestionHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Gray"
+                                                                />
+                                                            </div>
+                                                            <DropdownMenuItem
+                                                                onClick={() => {
+                                                                    newQuestionEditor?.chain().focus().unsetHighlight().run();
+                                                                    setNewQuestionHighlightDropdownOpen(false);
+                                                                }}
+                                                                className="text-sm"
+                                                            >
+                                                                Remove Highlight
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
                                     </div>
                                     {/* Editor */}
-                                    <div className="p-2 sm:p-3 min-h-[80px] sm:min-h-[100px]">
+                                    <div className="p-2 sm:p-3 min-h-[80px] sm:min-h-[100px] relative">
                                         <EditorContent 
                                             editor={newQuestionEditor} 
-                                            className="prose dark:prose-invert max-w-none focus:outline-none text-sm sm:text-base h-full"
+                                            className={`prose dark:prose-invert max-w-none focus:outline-none text-sm sm:text-base h-full ${
+                                                isUploadingImage && uploadingEditor === 'newQuestion' 
+                                                    ? 'opacity-50 pointer-events-none' 
+                                                    : ''
+                                            }`}
                                         />
+                                        {isUploadingImage && uploadingEditor === 'newQuestion' && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-900/50">
+                                                <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 <InputError message={newFlashcardErrors.question} className="mt-1" />
@@ -753,20 +1359,144 @@ const Show = ({ flashcardSet }: Props) => {
                                                 input.accept = 'image/*';
                                                 input.onchange = (e) => {
                                                     const file = (e.target as HTMLInputElement).files?.[0];
-                                                    if (file) uploadFlashcardImage(file, newAnswerEditor);
+                                                    if (file) uploadNewFlashcardImage(file, newAnswerEditor);
                                                 };
                                                 input.click();
                                             }}
                                         >
                                             <ImageIcon className="h-4 w-4" />
                                         </Button>
+                                        <DropdownMenu open={newAnswerHighlightDropdownOpen} onOpenChange={setNewAnswerHighlightDropdownOpen}>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button 
+                                                                type="button"
+                                                                size="sm" 
+                                                                variant="ghost" 
+                                                                className={newAnswerEditor?.isActive('highlight') ? 'bg-gray-200 dark:bg-gray-700' : ''}
+                                                            >
+                                                                <Pencil className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent className="w-48">
+                                                            <div className="grid grid-cols-5 gap-1 p-2">
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-yellow-200 hover:bg-yellow-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newAnswerEditor?.chain().focus().toggleHighlight({ color: '#fef08a' }).run();
+                                                                        setNewAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Yellow"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-pink-200 hover:bg-pink-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newAnswerEditor?.chain().focus().toggleHighlight({ color: '#fbcfe8' }).run();
+                                                                        setNewAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Pink"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-green-200 hover:bg-green-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newAnswerEditor?.chain().focus().toggleHighlight({ color: '#bbf7d0' }).run();
+                                                                        setNewAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Green"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-blue-200 hover:bg-blue-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newAnswerEditor?.chain().focus().toggleHighlight({ color: '#bfdbfe' }).run();
+                                                                        setNewAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Blue"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-purple-200 hover:bg-purple-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newAnswerEditor?.chain().focus().toggleHighlight({ color: '#e9d5ff' }).run();
+                                                                        setNewAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Purple"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-orange-200 hover:bg-orange-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newAnswerEditor?.chain().focus().toggleHighlight({ color: '#fed7aa' }).run();
+                                                                        setNewAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Orange"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-red-200 hover:bg-red-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newAnswerEditor?.chain().focus().toggleHighlight({ color: '#fecaca' }).run();
+                                                                        setNewAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Red"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-indigo-200 hover:bg-indigo-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newAnswerEditor?.chain().focus().toggleHighlight({ color: '#c7d2fe' }).run();
+                                                                        setNewAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Indigo"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-teal-200 hover:bg-teal-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newAnswerEditor?.chain().focus().toggleHighlight({ color: '#99f6e4' }).run();
+                                                                        setNewAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Teal"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-6 h-6 rounded bg-gray-200 hover:bg-gray-300 border border-gray-300"
+                                                                    onClick={() => {
+                                                                        newAnswerEditor?.chain().focus().toggleHighlight({ color: '#e5e7eb' }).run();
+                                                                        setNewAnswerHighlightDropdownOpen(false);
+                                                                    }}
+                                                                    title="Gray"
+                                                                />
+                                                            </div>
+                                                            <DropdownMenuItem
+                                                                onClick={() => {
+                                                                    newAnswerEditor?.chain().focus().unsetHighlight().run();
+                                                                    setNewAnswerHighlightDropdownOpen(false);
+                                                                }}
+                                                                className="text-sm"
+                                                            >
+                                                                Remove Highlight
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
                                     </div>
                                     {/* Editor */}
-                                    <div className="p-2 sm:p-3 min-h-[80px] sm:min-h-[100px]">
+                                    <div className="p-2 sm:p-3 min-h-[80px] sm:min-h-[100px] relative">
                                         <EditorContent 
                                             editor={newAnswerEditor} 
-                                            className="prose dark:prose-invert max-w-none focus:outline-none text-sm sm:text-base h-full"
+                                            className={`prose dark:prose-invert max-w-none focus:outline-none text-sm sm:text-base h-full ${
+                                                isUploadingImage && uploadingEditor === 'newAnswer' 
+                                                    ? 'opacity-50 pointer-events-none' 
+                                                    : ''
+                                            }`}
                                         />
+                                        {isUploadingImage && uploadingEditor === 'newAnswer' && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-900/50">
+                                                <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 <InputError message={newFlashcardErrors.answer} className="mt-1" />

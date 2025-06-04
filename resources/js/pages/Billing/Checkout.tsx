@@ -10,6 +10,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, CreditCard, ShoppingCartIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
@@ -44,6 +46,7 @@ const CARD_ELEMENT_OPTIONS = {
 
 
 function CheckoutForm() {
+    const { t } = useTranslation();
     const stripe = useStripe();
     const elements = useElements();
     
@@ -75,14 +78,14 @@ function CheckoutForm() {
         setLoading(true);
 
         if (!stripe || !elements) {
-            setError('Stripe is not loaded.');
+            setError(t('billing_stripe_not_loaded'));
             setLoading(false);
             return;
         }
 
         const cardElement = elements.getElement(CardElement);
         if (!cardElement) {
-            setError('Card element not found.');
+            setError(t('billing_card_element_not_found'));
             setLoading(false);
             return;
         }
@@ -95,7 +98,7 @@ function CheckoutForm() {
         });
 
         if (stripeError) {
-            setError(stripeError.message || 'Payment method creation failed.');
+            setError(stripeError.message || t('billing_payment_method_creation_failed'));
             setLoading(false);
             return;
         }
@@ -124,14 +127,14 @@ function CheckoutForm() {
             // Handle SCA
             const { error: confirmError } = await stripe.confirmCardPayment(result.payment_intent_client_secret);
             if (confirmError) {
-                setError(confirmError.message || 'Payment confirmation failed.');
+                setError(confirmError.message || t('billing_payment_confirmation_failed'));
                 setLoading(false);
             } else {
                 setLoading(false);
                 router.visit('/billing/success');
             }
         } else {
-            setError(result.message || 'Subscription failed.');
+            setError(result.message || t('billing_subscription_failed'));
             setLoading(false);
         }
     };
@@ -147,25 +150,25 @@ function CheckoutForm() {
       <div className="mb-6 flex flex-col gap-2">
         <div className="flex items-center">
           <ShoppingCartIcon className="text-[oklch(0.511_0.262_276.966)] mr-2" size={32} />
-          <span className="font-bold text-xl text-[oklch(0.511_0.262_276.966)]">Order Summary</span>
+          <span className="font-bold text-xl text-[oklch(0.511_0.262_276.966)]">{t('billing_order_summary')}</span>
         </div>
       </div>
       <div className="rounded-xl border border-purple-100 bg-purple-50 p-5">
         <div className="mb-3">
           <h2 className="font-semibold text-lg text-gray-800">
-            Clevernote Pro
+            {t('billing_clevernote_pro')}
           </h2>
           <p className="text-gray-500 text-sm mt-1">
-            Unlock powerful AI features for your notes.
+            {t('billing_unlock_ai_features')}
           </p>
         </div>
         <div className="flex justify-between text-gray-700 mt-4">
-          <span>Price</span>
+          <span>{t('billing_price')}</span>
           <span>${currentPrice}</span>
         </div>
         <div className="border-t border-purple-200 my-3 opacity-50" />
         <div className="flex justify-between font-bold text-base">
-          <span>Total</span>
+          <span>{t('billing_total')}</span>
           <span className="text-[oklch(0.511_0.262_276.966)]">${currentPrice}</span>
         </div>
       </div>
@@ -176,14 +179,14 @@ function CheckoutForm() {
       onClick={() => router.visit("/")}
     >
       <ArrowLeft size={16} />
-      Back to Home
+      {t('billing_back_to_home')}
     </Button>
   </div>
   {/* Right: Payment */}
   <div className="flex flex-col justify-center bg-white p-8 relative">
     <h2 className="text-xl font-bold mb-6 text-[oklch(0.511_0.262_276.966)] flex items-center gap-2">
       <CreditCard size={22} />
-      Payment Details
+      {t('billing_payment_details')}
     </h2>
     <form
       className="flex flex-col gap-5"
@@ -243,14 +246,16 @@ function CheckoutForm() {
       </div>
       <div>
         <label htmlFor="card-name" className="block mb-1 text-gray-700 font-semibold text-sm">
-          Name on Card
+          {t('billing_name_on_card')}
         </label>
         <input
           id="card-name"
           type="text"
           className="block w-full rounded-lg border border-purple-100 bg-gray-50 px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-[oklch(0.511_0.262_276.966)] transition"
-          placeholder="Full name"
+          placeholder={t('billing_full_name_placeholder')}
           autoComplete="cc-name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           required
         />
       </div>
@@ -269,11 +274,11 @@ function CheckoutForm() {
             className="w-full mt-4 py-5 text-lg bg-[oklch(0.511_0.262_276.966)] hover:bg-[oklch(0.461_0.262_276.966)] text-white rounded-lg shadow transition-colors flex items-center justify-center gap-2"
         >
             <CreditCard size={20} className="mr-1" />
-            {loading ? 'Processing...' : 'Subscribe'}
+            {loading ? t('billing_processing') : t('billing_subscribe')}
         </Button>
     </form>
     <p className="text-xs text-center text-gray-400 mt-6">
-      Secure payment with 256-bit SSL encryption.
+      {t('billing_secure_payment')}
     </p>
   </div>
 </div>
@@ -284,7 +289,7 @@ function CheckoutForm() {
 export default function CheckoutPage() {
     return (
         <>
-            <Head title="Subscribe" />
+            <Head title={t('billing_subscribe')} />
             <Elements stripe={stripePromise}>
                 <CheckoutForm />
             </Elements>

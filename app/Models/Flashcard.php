@@ -25,6 +25,16 @@ class Flashcard extends Model implements HasMedia
         'next_review' => 'datetime',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::deleting(function ($flashcard) {
+            $flashcard->clearMediaCollection();
+        });
+    }
+
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
