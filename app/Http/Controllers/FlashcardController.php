@@ -46,7 +46,15 @@ class FlashcardController extends Controller
      */
     public function store(StoreFlashcardRequest $request) // Use the form request for validation
     {
-        $flashcard = FlashcardSet::find($request->flashcard_set_id)->flashcards()->create($request->validated());
+        $flashcardSet = FlashcardSet::find($request->flashcard_set_id);
+        $flashcard = $flashcardSet->flashcards()->create($request->validated());
+        
+        // Handle image uploads if present in the request
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $flashcardSet->addMedia($image)->toMediaCollection('flashcard-images');
+            }
+        }
         
         if ($request->wantsJson()) {
             return response()->json([

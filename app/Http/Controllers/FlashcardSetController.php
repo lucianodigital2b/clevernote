@@ -182,4 +182,19 @@ class FlashcardSetController extends Controller
 
         return response()->json($flashcards);
     }
+
+    public function uploadMedia(Request $request, FlashcardSet $flashcardSet)
+    {
+        $this->authorize('update', $flashcardSet);
+
+        $request->validate([
+            'file' => 'required|image|max:5120', // max 5MB
+        ]);
+
+        $media = $flashcardSet->addMediaFromRequest('file')->toMediaCollection('flashcard-images');
+
+        return response()->json([
+            'url' => $media->getUrl(),
+        ]);
+    }
 }

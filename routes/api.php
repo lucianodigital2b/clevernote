@@ -23,6 +23,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/check-subscription', [SubscriptionController::class, 'checkSubscription']);
     Route::resource('notes', NoteController::class);
     Route::post('/notes/{note}/media', [NoteController::class, 'upload']);
+    Route::post('/flashcard-sets/{flashcardSet}/media', [\App\Http\Controllers\FlashcardSetController::class, 'uploadMedia']);
 
     Route::get('/folders-with-counts', [FolderController::class, 'getFoldersWithCounts']);
 

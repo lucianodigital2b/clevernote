@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
-import { Share, MoreHorizontal, Maximize2, X, ArrowLeft, Save, Clock, CheckCircle2, Folder, Trash2, Sparkles, Brain, Map, FileText, Loader2, ChevronRight } from 'lucide-react';
+import { Share, MoreHorizontal, Maximize2, X, ArrowLeft, Save, Clock, CheckCircle2, Folder, Trash2, Sparkles, Brain, Map, FileText, Loader2, ChevronRight, Layers } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -237,7 +237,7 @@ export default function Edit({ note }: { note: Note }) {
 
     const actions = [
         { 
-            icon: FileText, 
+            icon: Layers, 
             label: note.flashcard_sets && note.flashcard_sets.length > 0 ? t('review_flashcards') : t('create_flashcards'), 
             description: note.flashcard_sets && note.flashcard_sets.length > 0 ? t('review_study_cards') : t('generate_study_cards'),
             action: handleCreateFlashcards,
