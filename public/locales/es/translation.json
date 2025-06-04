@@ -91,10 +91,10 @@
   "No notes yet": "Aún no hay notas",
   "Create your first note": "Crea tu primera nota grabando audio, subiendo un archivo o añadiendo un enlace web desde las opciones anteriores.",
   "learning_journey": "Tu viaje de aprendizaje, simplificado",
-  "hero_title": "Toma hermosas",
-  "notes": "notas",
-  "hero_title_suffix": "que potencian el aprendizaje",
-  "hero_description": "Clevernote transforma la manera en que capturas, organizas y retienes información con un bloc de notas digital intuitivo diseñado para estudiantes modernos.",
+  "hero_title": "Deja de luchar con",
+  "hero_highlight": "tareas",
+  "hero_title_suffix": "Deja que la IA las resuelva por ti",
+  "hero_description": "Nuestro solucionador de tareas con IA Premium entiende tus asignaciones al instante y entrega soluciones precisas en segundos. No más noches en vela, no más frustración.",
   "start_free": "Empezar gratis",
   "free_trial": "Prueba gratuita de 3 días",
   "biology_notes": "Notas de Biología 101",
@@ -122,20 +122,20 @@
   "ai_summaries_title": "Resúmenes con IA",
 
   "frequently_asked_questions": "Preguntas Frecuentes",
-  "what_is_clevernote": "¿Qué es CleverNote?",
-  "what_is_clevernote_answer": "CleverNote es un compañero inteligente de aprendizaje que te ayuda a comprender temas complejos convirtiendo tus notas en contenido interactivo y fácil de digerir.",
+  "what_is_clevernote": "¿Qué es Clevernote?",
+  "what_is_clevernote_answer": "Clevernote es un compañero inteligente de aprendizaje que te ayuda a comprender temas complejos convirtiendo tus notas en contenido interactivo y fácil de digerir.",
   
-  "how_it_works": "¿Cómo funciona CleverNote?",
-  "how_it_works_answer": "CleverNote simplifica el aprendizaje utilizando IA para transformar tus notas en cuestionarios, resúmenes y esquemas estructurados, haciendo el estudio más efectivo y agradable.",
+  "how_it_works": "¿Cómo funciona Clevernote?",
+  "how_it_works_answer": "Clevernote simplifica el aprendizaje utilizando IA para transformar tus notas en cuestionarios, resúmenes y esquemas estructurados, haciendo el estudio más efectivo y agradable.",
   
-  "is_clevernote_free": "¿CleverNote es gratuito?",
-  "is_clevernote_free_answer": "¡Sí! CleverNote tiene una versión gratuita que incluye funciones esenciales. También puedes actualizar para obtener herramientas más avanzadas y soporte personalizado.",
+  "is_clevernote_free": "¿Clevernote es gratuito?",
+  "is_clevernote_free_answer": "¡Sí! Clevernote tiene una versión gratuita que incluye funciones esenciales. También puedes actualizar para obtener herramientas más avanzadas y soporte personalizado.",
   
-  "has_mobile_app": "¿Existe una aplicación de CleverNote para iOS y Android?",
+  "has_mobile_app": "¿Existe una aplicación de Clevernote para iOS y Android?",
   "has_mobile_app_answer": "No, aún no, pero mantente atento",
   
   "is_it_legal_in_school": "¿Es legal en mi escuela?",
-  "is_it_legal_in_school_answer": "Definitivamente. CleverNote está diseñado para apoyar tu aprendizaje, no para reemplazarlo. Solo asegúrate de seguir las políticas de integridad académica de tu escuela.",
+  "is_it_legal_in_school_answer": "Definitivamente. Clevernote está diseñado para apoyar tu aprendizaje, no para reemplazarlo. Solo asegúrate de seguir las políticas de integridad académica de tu escuela.",
   "back_to_notes": "Volver a las Notas",
   "ai_summaries_description": "Obtén resúmenes instantáneos generados por IA de contenido extenso para enfocarte en lo más importante.",
   "study_modes_title": "Modos de Estudio",
@@ -273,6 +273,8 @@
   "Add Option": "Adicionar Opção",
   "Option": "Opção",
   "Explanation (Optional)": "Explicação (Opcional)",
+  "premium_cta_google": "Start with Google",
+  "premium_cta_email": "Start learning",
   "Explain why this is the correct answer...": "Explique por que esta é a resposta correta..."
 
 }

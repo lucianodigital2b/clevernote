@@ -11,8 +11,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Download } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useEditor, EditorContent } from '@tiptap/react';
+import axios from 'axios';
 import StarterKit from '@tiptap/starter-kit';
+import Bold from '@tiptap/extension-bold';
+import Italic from '@tiptap/extension-italic';
+import Image from '@tiptap/extension-image';
 import { toastConfig } from '@/lib/toast';
+import { Bold as BoldIcon, Italic as ItalicIcon, ImageIcon } from 'lucide-react';
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog';
 import {
     Dialog,
@@ -86,18 +91,89 @@ const Show = ({ flashcardSet }: Props) => {
         },
     });
 
+    // Image upload function for flashcards
+    const uploadFlashcardImage = async (file: File, editor: any) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        try {
+            const res = await axios.post(`/api/flashcard-sets/${flashcardSet.id}/media`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            
+            const { url } = res.data;
+            editor?.chain().focus().setImage({ src: url }).run();
+        } catch (error) {
+            toastConfig.error('Failed to upload image');
+        }
+    };
+
     // Tiptap editors for new flashcard modal
     const newQuestionEditor = useEditor({
-        extensions: [StarterKit],
+        extensions: [
+            StarterKit,
+            Bold,
+            Italic,
+            Image.configure({
+                inline: false,
+                allowBase64: false,
+            })
+        ],
         content: '',
+        editorProps: {
+            handlePaste: (view, event, slice) => {
+                const file = event.clipboardData?.files?.[0];
+                if (file && file.type.startsWith('image/')) {
+                    uploadFlashcardImage(file, newQuestionEditor);
+                    return true;
+                }
+                return false;
+            },
+            handleDrop: (view, event) => {
+                const file = event.dataTransfer?.files?.[0];
+                if (file && file.type.startsWith('image/')) {
+                    uploadFlashcardImage(file, newQuestionEditor);
+                    return true;
+                }
+                return false;
+            },
+        },
         onUpdate: ({ editor }) => {
             setNewFlashcardData('question', editor.getHTML());
         },
     });
 
     const newAnswerEditor = useEditor({
-        extensions: [StarterKit],
+        extensions: [
+            StarterKit,
+            Bold,
+            Italic,
+            Image.configure({
+                inline: false,
+                allowBase64: false,
+            })
+        ],
         content: '',
+        editorProps: {
+            handlePaste: (view, event, slice) => {
+                const file = event.clipboardData?.files?.[0];
+                if (file && file.type.startsWith('image/')) {
+                    uploadFlashcardImage(file, newAnswerEditor);
+                    return true;
+                }
+                return false;
+            },
+            handleDrop: (view, event) => {
+                const file = event.dataTransfer?.files?.[0];
+                if (file && file.type.startsWith('image/')) {
+                    uploadFlashcardImage(file, newAnswerEditor);
+                    return true;
+                }
+                return false;
+            },
+        },
         onUpdate: ({ editor }) => {
             setNewFlashcardData('answer', editor.getHTML());
         },
@@ -594,22 +670,104 @@ const Show = ({ flashcardSet }: Props) => {
                         <div className="space-y-4">
                             <div>
                                 <Label htmlFor="new-question" className="text-sm sm:text-base">Question</Label>
-                                <div className="mt-2 border rounded-md p-2 sm:p-3 min-h-[80px] sm:min-h-[100px]">
-                                    <EditorContent 
-                                        editor={newQuestionEditor} 
-                                        className="prose dark:prose-invert max-w-none focus:outline-none text-sm sm:text-base"
-                                    />
+                                <div className="mt-2 border rounded-md overflow-hidden">
+                                    {/* Toolbar */}
+                                    <div className="border-b bg-gray-50 dark:bg-gray-800 p-2 flex gap-1">
+                                        <Button 
+                                            type="button"
+                                            size="sm" 
+                                            variant="ghost" 
+                                            className={newQuestionEditor?.isActive('bold') ? 'bg-gray-200 dark:bg-gray-700' : ''}
+                                            onClick={() => newQuestionEditor?.chain().focus().toggleBold().run()}
+                                        >
+                                            <BoldIcon className="h-4 w-4" />
+                                        </Button>
+                                        <Button 
+                                            type="button"
+                                            size="sm" 
+                                            variant="ghost" 
+                                            className={newQuestionEditor?.isActive('italic') ? 'bg-gray-200 dark:bg-gray-700' : ''}
+                                            onClick={() => newQuestionEditor?.chain().focus().toggleItalic().run()}
+                                        >
+                                            <ItalicIcon className="h-4 w-4" />
+                                        </Button>
+                                        <Button 
+                                            type="button"
+                                            size="sm" 
+                                            variant="ghost" 
+                                            onClick={() => {
+                                                const input = document.createElement('input');
+                                                input.type = 'file';
+                                                input.accept = 'image/*';
+                                                input.onchange = (e) => {
+                                                    const file = (e.target as HTMLInputElement).files?.[0];
+                                                    if (file) uploadFlashcardImage(file, newQuestionEditor);
+                                                };
+                                                input.click();
+                                            }}
+                                        >
+                                            <ImageIcon className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                    {/* Editor */}
+                                    <div className="p-2 sm:p-3 min-h-[80px] sm:min-h-[100px]">
+                                        <EditorContent 
+                                            editor={newQuestionEditor} 
+                                            className="prose dark:prose-invert max-w-none focus:outline-none text-sm sm:text-base h-full"
+                                        />
+                                    </div>
                                 </div>
                                 <InputError message={newFlashcardErrors.question} className="mt-1" />
                             </div>
                             
                             <div>
                                 <Label htmlFor="new-answer" className="text-sm sm:text-base">Answer</Label>
-                                <div className="mt-2 border rounded-md p-2 sm:p-3 min-h-[80px] sm:min-h-[100px]">
-                                    <EditorContent 
-                                        editor={newAnswerEditor} 
-                                        className="prose dark:prose-invert max-w-none focus:outline-none text-sm sm:text-base"
-                                    />
+                                <div className="mt-2 border rounded-md overflow-hidden">
+                                    {/* Toolbar */}
+                                    <div className="border-b bg-gray-50 dark:bg-gray-800 p-2 flex gap-1">
+                                        <Button 
+                                            type="button"
+                                            size="sm" 
+                                            variant="ghost" 
+                                            className={newAnswerEditor?.isActive('bold') ? 'bg-gray-200 dark:bg-gray-700' : ''}
+                                            onClick={() => newAnswerEditor?.chain().focus().toggleBold().run()}
+                                        >
+                                            <BoldIcon className="h-4 w-4" />
+                                        </Button>
+                                        <Button 
+                                            type="button"
+                                            size="sm" 
+                                            variant="ghost" 
+                                            className={newAnswerEditor?.isActive('italic') ? 'bg-gray-200 dark:bg-gray-700' : ''}
+                                            onClick={() => newAnswerEditor?.chain().focus().toggleItalic().run()}
+                                        >
+                                            <ItalicIcon className="h-4 w-4" />
+                                        </Button>
+                                        <Button 
+                                            type="button"
+                                            size="sm" 
+                                            variant="ghost" 
+                                            onClick={() => {
+                                                const input = document.createElement('input');
+                                                input.type = 'file';
+                                                input.accept = 'image/*';
+                                                input.onchange = (e) => {
+                                                    const file = (e.target as HTMLInputElement).files?.[0];
+                                                    if (file) uploadFlashcardImage(file, newAnswerEditor);
+                                                };
+                                                input.click();
+                                            }}
+                                        >
+                                            <ImageIcon className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                    {/* Editor */}
+                                    <div className="p-2 sm:p-3 min-h-[80px] sm:min-h-[100px]">
+                                        <EditorContent 
+                                            editor={newAnswerEditor} 
+                                            className="prose dark:prose-invert max-w-none focus:outline-none text-sm sm:text-base h-full"
+                                        />
+                                    </div>
                                 </div>
                                 <InputError message={newFlashcardErrors.answer} className="mt-1" />
                             </div>
