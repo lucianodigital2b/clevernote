@@ -52,7 +52,7 @@ class FlashcardController extends Controller
         // Handle image uploads if present in the request
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $flashcardSet->addMedia($image)->toMediaCollection('flashcard-images');
+                $flashcard->addMedia($image)->toMediaCollection('flashcard-images');
             }
         }
         
@@ -96,11 +96,11 @@ class FlashcardController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreFlashcardRequest $request, Flashcard $flashcard) // Use form request for validation
+    public function update(Request $request, Flashcard $flashcard) // Use form request for validation
     {
-        $this->authorize('update', $flashcard);
+        // $this->authorize('update', $flashcard);
 
-        $flashcard->update($request->validated());
+        $flashcard->update($request->all());
 
         return redirect()->route('flashcards.index')->with('success', 'Flashcard updated successfully.');
     }
@@ -121,5 +121,23 @@ class FlashcardController extends Controller
         }
 
         return redirect()->back()->with('success', 'Flashcard deleted successfully.');
+    }
+
+    /**
+     * Upload media for a specific flashcard.
+     */
+    public function uploadMedia(Request $request, Flashcard $flashcard)
+    {
+        // $this->authorize('update', $flashcard);
+
+        $request->validate([
+            'file' => 'required|image|max:5120', // max 5MB
+        ]);
+
+        $media = $flashcard->addMediaFromRequest('file')->toMediaCollection('flashcard-images');
+
+        return response()->json([
+            'url' => $media->getUrl(),
+        ]);
     }
 }

@@ -37,7 +37,6 @@ const FAQ = () => {
           <h2 className="text-3xl md:text-4xl font-display font-bold text-gray-900 mb-4">
             {t('frequently_asked_questions')}
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto"></p>
         </div>
 
         <div className="max-w-3xl mx-auto space-y-4">
@@ -47,7 +46,7 @@ const FAQ = () => {
               className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden"
             >
               <button
-                className="w-full px-6 py-4 text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+                className="w-full px-6 py-4 text-left flex justify-between items-center"
                 onClick={() => setActiveIndex(activeIndex === index ? null : index)}
               >
                 <span className="text-lg font-medium text-gray-900">{item.question}</span>

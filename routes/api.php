@@ -24,6 +24,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('notes', NoteController::class);
     Route::post('/notes/{note}/media', [NoteController::class, 'upload']);
     Route::post('/flashcard-sets/{flashcardSet}/media', [\App\Http\Controllers\FlashcardSetController::class, 'uploadMedia']);
+    Route::post('/flashcards/{flashcard}/media', [\App\Http\Controllers\FlashcardController::class, 'uploadMedia']);
 
     Route::get('/folders-with-counts', [FolderController::class, 'getFoldersWithCounts']);
 

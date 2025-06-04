@@ -32,8 +32,8 @@ class StoreFlashcardRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'question' => ['required', 'string', 'max:65535'], // Max TEXT size
-            'answer' => ['required', 'string', 'max:65535'], // Max TEXT size
+            'question' => ['nullable', 'string', 'max:65535'], // Max TEXT size
+            'answer' => ['nullable', 'string', 'max:65535'], // Max TEXT size
             'flashcard_set_id' => ['required', 'integer',], 
             'folder_id' => [
                 'nullable',
