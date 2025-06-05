@@ -328,6 +328,26 @@
   "floating_card_quiz_mode": "Modo Quiz",
   "floating_card_study_boost": "Impulso de Estudio",
   "floating_card_progress": "Progreso",
-  "floating_card_memory": "Memoria"
+  "floating_card_memory": "Memoria",
+  "upgrade_to_clevernote_pro": "Actualizar a Clevernote Pro",
+  "unlock_full_potential": "Desbloquea todo el potencial de tu experiencia de toma de notas",
+  "monthly": "Mensual",
+  "yearly": "Anual",
+  "month": "mes",
+  "most_popular": "MÁS POPULAR",
+  "save_percentage": "AHORRA {percentage}",
+  "billed_period": "Facturado {period}",
+  "everything_you_get": "Todo lo que obtienes:",
+  "unlimited_note_generations": "Generaciones de notas ilimitadas",
+  "unlimited_audio_calls": "Audio o llamadas telefónicas ilimitadas",
+  "unlimited_podcasts_youtube": "Podcasts y videos de YouTube ilimitados",
+  "unlimited_quiz_flashcards": "Cuestionarios y tarjetas de memoria ilimitados",
+  "support_100_languages": "Soporte para más de 100 idiomas",
+  "best_transcription_summarization": "Transcripción y resumen de primera clase",
+  "customer_support_24_7": "Atención al cliente 24/7",
+  "priority_access_features": "Acceso prioritario a nuevas funciones",
+  "and_more": "Y más...",
+  "upgrade_now": "Actualizar ahora",
+  "maybe_later": "Tal vez más tarde"
 
 }
