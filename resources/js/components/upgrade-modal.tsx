@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CheckIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/button';
 import { router } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 
 type Plan = {
     id: string;
@@ -21,26 +22,27 @@ type UpgradeModalProps = {
 };
 
 export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
+    const { t } = useTranslation();
     const [selectedPlan, setSelectedPlan] = useState<string>('monthly');
 
     // Plan details
     const plans: Plan[] = [
         // { id: 'weekly', name: 'Weekly', price: '9.99', period: 'week', popular: false },
-        { id: 'monthly', name: 'Monthly', price: '6.99', period: 'month', popular: true },
-        { id: 'yearly', name: 'Yearly', price: '3.50', period: 'month', billed: 'yearly', popular: false, savings: '50%' }
+        { id: 'monthly', name: t('monthly'), price: '6.99', period: t('month'), popular: true },
+        { id: 'yearly', name: t('yearly'), price: '3.50', period: t('month'), billed: 'yearly', popular: false, savings: '50%' }
     ];
 
     // Features list
     const features = [
-        "Unlimited note generations",
-        "Unlimited audio or phone calls",
-        "Unlimited podcasts and youtube videos",
-        "Unlimited quiz and flashcards",
-        "Support for 100+ languages",
-        "Best-in-class Transcription and Summarization",
-        "Customer support 24/7",
-        "Priority Access to new features",
-        "And more..."
+        t('unlimited_note_generations'),
+        t('unlimited_audio_calls'),
+        t('unlimited_podcasts_youtube'),
+        t('unlimited_quiz_flashcards'),
+        t('support_100_languages'),
+        t('best_transcription_summarization'),
+        t('customer_support_24_7'),
+        t('priority_access_features'),
+        t('and_more')
     ];
 
     const handleUpgrade = () => {
@@ -54,11 +56,11 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                 <DialogHeader className="p-6 pb-0 sticky top-0 bg-gradient-to-br from-white to-purple-50 dark:from-gray-900 dark:to-gray-800 z-10">
                     <DialogTitle className="text-center text-2xl font-bold flex items-center justify-center gap-2">
                         <SparklesIcon className="h-6 w-6 text-yellow-400 animate-pulse" />
-                        <span>Upgrade to Clevernote Pro</span>
+                        <span>{t('upgrade_to_clevernote_pro')}</span>
                         <SparklesIcon className="h-6 w-6 text-yellow-400 animate-pulse" />
                     </DialogTitle>
                     <p className="text-center text-gray-600 dark:text-gray-300 mt-2">
-                        Unlock the full potential of your note-taking experience
+                        {t('unlock_full_potential')}
                     </p>
                 </DialogHeader>
 
@@ -82,12 +84,12 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                                 >
                                     {plan.popular && (
                                         <div className="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full inline-block mb-2">
-                                            MOST POPULAR
+                                            {t('most_popular')}
                                         </div>
                                     )}
                                     {plan.savings && (
                                         <div className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full inline-block mb-2 ml-2">
-                                            SAVE {plan.savings}
+                                            {t('save_percentage', { percentage: plan.savings })}
                                         </div>
                                     )}
                                     <h3 className="text-lg font-bold">{plan.name}</h3>
@@ -96,7 +98,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                                         <span className="text-gray-500 dark:text-gray-400">/{plan.period}</span>
                                         {plan.billed && (
                                             <span className="text-sm text-gray-500 dark:text-gray-400 block">
-                                                Billed {plan.billed}
+                                                {t('billed_period', { period: plan.billed })}
                                             </span>
                                         )}
                                     </div>
@@ -116,7 +118,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
 
                     {/* Features List */}
                     <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm mb-6">
-                        <h3 className="text-lg font-bold mb-4">Everything you get:</h3>
+                        <h3 className="text-lg font-bold mb-4">{t('everything_you_get')}</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {features.map((feature, index) => (
                                 <motion.div
@@ -139,13 +141,13 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                             className="dark:text-white w-full py-6 text-lg font-bold bg-indigo-600 hover:bg-indigo-700 transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
                             onClick={handleUpgrade}
                         >
-                            Upgrade Now
+                            {t('upgrade_now')}
                         </Button>
                         <button 
                             className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                             onClick={onClose}
                         >
-                            Maybe later
+                            {t('maybe_later')}
                         </button>
                     </div>
                 </div>
