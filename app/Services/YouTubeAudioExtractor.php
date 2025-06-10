@@ -12,7 +12,7 @@ class YouTubeAudioExtractor
     public function extractAudio(string $youtubeUrl): ?UploadedFile
     {
         $videoId = Str::random(10);
-        $outputPath = storage_path("app/tmp/{$videoId}.mp3");
+        $outputPath = storage_path("app/tmp/{$videoId}.flac");
 
         if (!is_dir(storage_path('app/tmp'))) {
             mkdir(storage_path('app/tmp'), 0775, true);
@@ -24,10 +24,10 @@ class YouTubeAudioExtractor
         $command = [
             $ytdlp,
             '--extract-audio',
-            '--audio-format', 'mp3',
-            '--audio-quality', '128K', // Lower quality for faster processing
+            '--audio-format', 'flac',
             '--no-playlist', // Ensure only single video is processed
             '--ffmpeg-location', $ffmpeg,
+            '--postprocessor-args', 'ffmpeg:-ar 16000 -ac 1 -map 0:a -c:a flac',
             '-o', $outputPath,
             $youtubeUrl,
         ];
@@ -42,8 +42,8 @@ class YouTubeAudioExtractor
             if (file_exists($outputPath)) {
                 return new UploadedFile(
                     $outputPath,
-                    "{$videoId}.mp3",
-                    'audio/mpeg',
+                    "{$videoId}.flac",
+                    'audio/flac',
                     null,
                     true // Mark it as test mode (i.e. skip file validity check)
                 );
