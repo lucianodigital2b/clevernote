@@ -8,6 +8,7 @@ import { initializeTheme } from './hooks/use-appearance';
 import axios from 'axios';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './i18n';
+import Clarity from '@microsoft/clarity';
 
 declare global {
     const route: typeof routeFn;
@@ -17,6 +18,8 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 // Create a client
 const queryClient = new QueryClient();
+
+Clarity.init('rxc01yuo0y');
 
 // Fix for import.meta.glob issue
 const pages = import.meta.glob('./pages/**/*.tsx', { eager: false });
