@@ -25,7 +25,7 @@ class DeepSeekService extends AbstractAIService
 
     protected function getSystemPrompt(): string
     {
-        return 'You are a study assistant that always responds in valid JSON format.';
+        return 'You are an expert educational content creator and study assistant. Your role is to transform raw content into comprehensive, detailed study materials that help students deeply understand complex topics. Always respond in valid JSON format with rich, educational content that demonstrates mastery-level understanding of the subject matter.';
     }
 
     public function createStudyNote(string $transcription, ?string $language = null): array
