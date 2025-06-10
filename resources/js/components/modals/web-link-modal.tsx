@@ -172,14 +172,14 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="">
+            <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Add from Youtube</DialogTitle>
                     <DialogDescription>
                         Create a new note from a youtube video (max {MAX_DURATION_HOURS} hour)
                     </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
+                <div className="grid gap-4 py-4 overflow-y-auto flex-1">
                     <div className="grid gap-2">
                         <Label htmlFor="web-link">URL</Label>
                         <Input
@@ -202,12 +202,12 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
                         {videoInfo && (
                             <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                                 <div className="flex items-center gap-2 text-sm">
-                                    <Clock className="h-4 w-4 text-green-600" />
+                                    <Clock className="h-4 w-4 text-green-600 flex-shrink-0" />
                                     <span className="font-medium text-green-800 dark:text-green-200">
                                         Duration: {formatDuration(videoInfo.duration)}
                                     </span>
                                 </div>
-                                <p className="text-sm text-green-700 dark:text-green-300 mt-1 truncate">
+                                <p className="text-sm text-green-700 dark:text-green-300 mt-1 break-words line-clamp-2" title={videoInfo.title}>
                                     {videoInfo.title}
                                 </p>
                             </div>
