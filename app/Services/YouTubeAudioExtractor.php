@@ -29,11 +29,12 @@ class YouTubeAudioExtractor
             '--no-playlist', // Ensure only single video is processed
             '--ffmpeg-location', $ffmpeg,
             '--postprocessor-args', 'ffmpeg:-ar 16000 -ac 1 -map 0:a -c:a flac',
-            '--cookies-from-browser', 'chrome',
             '--cookies', $cookiesPath,
             '-o', $outputPath,
             $youtubeUrl,
         ];
+
+        dump($cookiesPath);
 
         $process = new Process($command);
         $process->setTimeout(config('app.ytdlp_timeout', 600));
