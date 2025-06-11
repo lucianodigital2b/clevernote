@@ -72,7 +72,18 @@ class NoteController extends Controller
     {
         try {
             $validated = $request->validated();
-            $validated['user_id'] = Auth::id();
+            $user = Auth::user();
+            $validated['user_id'] = $user->id;
+
+            // Check subscription status and note count
+            if ($user->notes_count >= 3 && $user->activeSubscriptions->isEmpty()) {
+                if ($request->wantsJson()) {
+                    return response()->json(['error' => 'You have reached the maximum number of notes for free users. Please subscribe to create more notes.'], 403);
+                }
+                return redirect()
+                    ->back()
+                    ->withErrors(['error' => 'You have reached the maximum number of notes for free users. Please subscribe to create more notes.']);
+            }
             
             // Create a placeholder note immediately
             $note = Note::create([
@@ -85,7 +96,7 @@ class NoteController extends Controller
             ]);
 
             // Increment user's notes count
-            Auth::user()->increment('notes_count');
+            $user->increment('notes_count');
 
 
             if (isset($validated['pdf_file'])) {
