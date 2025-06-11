@@ -113,14 +113,14 @@ export default function Dashboard() {
     
     // Modify the new note section handler to check subscription
     const handleNewNote = async (action: () => void) => {
-        if (user.notes_count >= 3) {
-            const canProceed = await requireSubscription();
+        // if (user.notes_count >= 3) {
+        //     const canProceed = await requireSubscription();
             
-            if (!canProceed) {
-                setIsModalOpen(true)
-                return;
-            }
-        }
+        //     if (!canProceed) {
+        //         setIsModalOpen(true)
+        //         return;
+        //     }
+        // }
         action();
     };
 

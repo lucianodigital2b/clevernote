@@ -20,6 +20,7 @@ class YouTubeAudioExtractor
 
         $ytdlp = config('app.ytdlp_path');
         $ffmpeg = config('app.ffmpeg_bin');
+        $cookiesPath = base_path('cookies.txt');
 
         $command = [
             $ytdlp,
@@ -28,6 +29,7 @@ class YouTubeAudioExtractor
             '--no-playlist', // Ensure only single video is processed
             '--ffmpeg-location', $ffmpeg,
             '--postprocessor-args', 'ffmpeg:-ar 16000 -ac 1 -map 0:a -c:a flac',
+            '--cookies', $cookiesPath,
             '-o', $outputPath,
             $youtubeUrl,
         ];
