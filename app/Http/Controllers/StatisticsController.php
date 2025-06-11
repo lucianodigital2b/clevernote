@@ -20,15 +20,7 @@ class StatisticsController extends Controller
         
         $weeklyStats = $this->statisticsService->getWeeklyStats($user);
         $yearlyHeatmap = $this->statisticsService->getYearlyHeatmap($user);
-        
-        // Calculate overall statistics
-        $overallStats = [
-            'totalQuestions' => $user->quizAttempts()->sum('total_questions'),
-            'accuracy' => $this->calculateOverallAccuracy($user),
-            'currentStreak' => $this->getCurrentStreak($user),
-            'maxStreak' => $this->getMaxStreak($user),
-            'dailyAverage' => $this->getDailyAverage($user)
-        ];
+        $overallStats = $this->statisticsService->getOverallStats($user);
 
         return Inertia::render('statistics/index', [
             'weeklyStats' => $weeklyStats,
@@ -36,39 +28,5 @@ class StatisticsController extends Controller
             'overallStats' => $overallStats
         ]);
     }
-    
-    private function calculateOverallAccuracy($user): float
-    {
-        $attempts = $user->quizAttempts();
-        $totalQuestions = $attempts->sum('total_questions');
-        $correctAnswers = $attempts->sum('score');
-        
-        return $totalQuestions > 0 ? round(($correctAnswers / $totalQuestions) * 100, 1) : 0;
-    }
-    
-    private function getCurrentStreak($user): int
-    {
-        return $user->statistics()
-            ->latest('date')
-            ->value('current_streak') ?? 0;
-    }
-    
-    private function getMaxStreak($user): int
-    {
-        return $user->statistics()
-            ->max('max_streak') ?? 0;
-    }
-    
-    private function getDailyAverage($user): int
-    {
-        $stats = $user->statistics()
-            ->where('date', '>=', Carbon::now()->subDays(30))
-            ->get();
-            
-        $totalActivity = $stats->sum(function($stat) {
-            return $stat->quiz_total_questions + $stat->flashcard_reviews;
-        });
-        
-        return $stats->count() > 0 ? round($totalActivity / $stats->count()) : 0;
-    }
+
 }

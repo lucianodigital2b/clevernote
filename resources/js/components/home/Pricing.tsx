@@ -8,9 +8,9 @@ import { useTranslation } from "react-i18next";
 const pricingPlans = [
   {
     name: "Student",
-    monthlyPrice: "$6.99",
+    monthlyPrice: "$7.99",
     annualPrice: "$41.99",
-    billedMonthly: "$6.99",
+    billedMonthly: "$7.99",
     billedAnnually: "$3.50",
     description: "pricing_student_description",
     features: [

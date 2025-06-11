@@ -52,10 +52,49 @@ class StatisticsService
             ->whereBetween('date', [$startDate, $endDate])
             ->orderBy('date')
             ->get()
-            ->groupBy(function($stat) {
-                return $stat->date->dayOfWeek;
-            })
             ->toArray();
+    }
+    
+    public function getOverallStats(User $user): array
+    {
+        // Get total questions from quiz attempts
+        $totalQuestions = $user->quizAttempts()->sum('total_questions');
+        
+        // Calculate accuracy
+        $totalCorrect = $user->quizAttempts()->sum('score');
+        $accuracy = $totalQuestions > 0 ? round(($totalCorrect / $totalQuestions) * 100, 1) : 0;
+        
+        // Get current and max streak
+        $latestStats = $user->statistics()->latest('date')->first();
+        $currentStreak = $latestStats ? $latestStats->current_streak : 0;
+        $maxStreak = $user->statistics()->max('max_streak') ?? 0;
+        
+        // Calculate daily average (last 30 days)
+        $recentStats = $user->statistics()
+            ->where('date', '>=', Carbon::now()->subDays(30))
+            ->get();
+            
+        $totalActivity = $recentStats->sum(function($stat) {
+            return $stat->quiz_total_questions + $stat->flashcard_reviews;
+        });
+        
+        $dailyAverage = $recentStats->count() > 0 ? round($totalActivity / $recentStats->count()) : 0;
+        
+        // Calculate days learned percentage (days with activity in last 30 days)
+        $daysWithActivity = $recentStats->filter(function($stat) {
+            return ($stat->quiz_total_questions + $stat->flashcard_reviews) > 0;
+        })->count();
+        
+        $daysLearnedPercentage = $recentStats->count() > 0 ? round(($daysWithActivity / min(30, $recentStats->count())) * 100) : 0;
+        
+        return [
+            'totalQuestions' => $totalQuestions,
+            'accuracy' => $accuracy,
+            'currentStreak' => $currentStreak,
+            'maxStreak' => $maxStreak,
+            'dailyAverage' => $dailyAverage,
+            'daysLearnedPercentage' => $daysLearnedPercentage
+        ];
     }
     
     public function getYearlyHeatmap(User $user, ?int $year = null): array

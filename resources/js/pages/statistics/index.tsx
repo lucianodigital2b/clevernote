@@ -13,6 +13,7 @@ interface Props {
         currentStreak: number;
         maxStreak: number;
         dailyAverage: number;
+        daysLearnedPercentage: number;
     };
 }
 

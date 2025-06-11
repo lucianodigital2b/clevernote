@@ -36,7 +36,7 @@ const CARD_ELEMENT_OPTIONS = {
   const plans = {
       monthly: {
         id: 'price_1RGgabCUBbBYXpQTdE8BtNm0',
-        price: 6.99
+        price: 7.99
       },
       yearly: {
         id: 'price_1RGgbDCUBbBYXpQTsrR61FU7',
