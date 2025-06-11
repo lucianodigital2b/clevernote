@@ -12,6 +12,7 @@ interface StatisticsProps {
         currentStreak: number;
         maxStreak: number;
         dailyAverage: number;
+        daysLearnedPercentage: number;
     };
 }
 
@@ -116,12 +117,10 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                         <div>
                             <p className="text-3xl font-bold">{overallStats.accuracy}%</p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">{t('your_accuracy')}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-500">Goal: 98%</p>
                         </div>
                         <div>
                             <p className="text-3xl font-bold">{overallStats.totalQuestions.toLocaleString()}</p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">{t('questions_answered')}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-500">Goal: 12413</p>
                         </div>
                     </div>
                 </CardContent>
@@ -189,7 +188,7 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                             <p className="text-gray-600 dark:text-gray-400">{t('daily_average')}</p>
                         </div>
                         <div>
-                            <p className="font-semibold text-green-600">100%</p>
+                            <p className="font-semibold text-green-600">{overallStats.daysLearnedPercentage}%</p>
                             <p className="text-gray-600 dark:text-gray-400">{t('days_learned')}</p>
                         </div>
                         <div>
