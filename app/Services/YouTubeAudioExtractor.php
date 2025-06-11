@@ -34,13 +34,10 @@ class YouTubeAudioExtractor
             $youtubeUrl,
         ];
 
-        dump($cookiesPath);
 
         $process = new Process($command);
         $process->setTimeout(config('app.ytdlp_timeout', 600));
         $process->setIdleTimeout(config('app.ytdlp_idle_timeout', 120));
-
-        dump($process);
         try {
             $process->mustRun();
 
