@@ -371,5 +371,10 @@
   "auth_confirm_password_placeholder": "Confirm your password",
   "auth_create_account_button": "Create account",
   "auth_already_have_account": "Already have an account?",
-  "auth_login_link": "Log in"
+  "auth_login_link": "Log in",
+  "question_statistics": "Question Statistics",
+  "correct": "Correct",
+  "incorrect": "Incorrect",
+  "total_questions": "Total Questions",
+  "accuracy": "Accuracy"
 }
