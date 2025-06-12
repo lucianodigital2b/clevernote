@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useTranslation } from 'react-i18next';
 
 interface StatisticsProps {
@@ -113,14 +113,85 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                         </ResponsiveContainer>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-8">
-                        <div>
-                            <p className="text-3xl font-bold">{overallStats.accuracy}%</p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('your_accuracy')}</p>
+
+                </CardContent>
+            </Card>
+            
+            {/* Question Statistics */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>{t('question_statistics')}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                            <div className="h-64">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={[
+                                                {
+                                                    name: t('correct'),
+                                                    value: Math.round(overallStats.totalQuestions * overallStats.accuracy / 100),
+                                                    color: '#3b82f6'
+                                                },
+                                                {
+                                                    name: t('incorrect'),
+                                                    value: Math.round(overallStats.totalQuestions * (100 - overallStats.accuracy) / 100),
+                                                    color: '#ef4444'
+                                                }
+                                            ]}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={60}
+                                            outerRadius={100}
+                                            paddingAngle={5}
+                                            dataKey="value"
+                                            stroke="none"
+                                            cornerRadius={10}
+                                        >
+                                            <Cell fill="#3b82f6" />
+                                            <Cell fill="#ef4444" />
+                                        </Pie>
+                                        <Tooltip 
+                                            contentStyle={{
+                                                backgroundColor: 'var(--background)',
+                                                border: '1px solid var(--border)',
+                                                borderRadius: '6px',
+                                                color: 'var(--foreground)'
+                                            }}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-3xl font-bold">{overallStats.totalQuestions.toLocaleString()}</p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('questions_answered')}</p>
+                        <div className="flex-1 pl-8">
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                                        <span className="text-sm">{t('correct')}</span>
+                                    </div>
+                                    <span className="font-bold text-lg">{Math.round(overallStats.totalQuestions * overallStats.accuracy / 100).toLocaleString()}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 bg-red-500 rounded"></div>
+                                        <span className="text-sm">{t('incorrect')}</span>
+                                    </div>
+                                    <span className="font-bold text-lg">{Math.round(overallStats.totalQuestions * (100 - overallStats.accuracy) / 100).toLocaleString()}</span>
+                                </div>
+                                <div className="border-t pt-4">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-600 dark:text-gray-400">{t('total_questions')}</span>
+                                        <span className="font-bold text-lg">{overallStats.totalQuestions.toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between mt-2">
+                                        <span className="text-sm text-gray-600 dark:text-gray-400">{t('accuracy')}</span>
+                                        <span className="font-bold text-lg">{overallStats.accuracy}%</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </CardContent>
@@ -132,7 +203,7 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                     <CardTitle>{t('study_activity')}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="mb-4">
+                    {/* <div className="mb-4">
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                             {t('studied_cards_today', {
                                 dailyAverage: overallStats.dailyAverage,
@@ -140,19 +211,11 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                                 seconds: (overallStats.dailyAverage * 0.15).toFixed(1)
                             })}
                         </p>
-                    </div>
+                    </div> */}
                     
                     {/* Month labels */}
-                    <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
-                        <span>Jan '25</span>
-                        <span>Feb '25</span>
-                        <span>Mar '25</span>
-                        <span>Apr '25</span>
-                        <span>May '25</span>
-                        <span>Jun '25</span>
-                        <span>Jul '25</span>
-                        <span>Aug '25</span>
-                        <span>Sep '25</span>
+                    <div className="flex justify-center text-xs text-gray-500 dark:text-gray-400 mb-2">
+                        <span>{new Date().toLocaleDateString('en-US', { month: 'short', year: '2-digit' })}</span>
                     </div>
                     
                     {/* Day labels */}

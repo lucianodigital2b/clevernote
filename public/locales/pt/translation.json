@@ -353,6 +353,10 @@
   "priority_access_features": "Acesso prioritário a novos recursos",
   "and_more": "E mais...",
   "upgrade_now": "Atualizar agora",
-  "maybe_later": "Talvez mais tarde"
-
+  "maybe_later": "Talvez mais tarde",
+  "question_statistics": "Estatísticas de Perguntas",
+  "correct": "Corretas",
+  "incorrect": "Incorretas",
+  "total_questions": "Total de Perguntas",
+  "accuracy": "Precisão"
 }
