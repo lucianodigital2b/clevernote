@@ -16,10 +16,6 @@ class ProductSeeder extends Seeder
         Product::create([
             'name' => 'Student',
             'stripe_product_id' => null, // To be set when Stripe product is created
-            'monthly_price' => 7.99,
-            'annual_price' => 41.99,
-            'billed_monthly' => 7.99,
-            'billed_annually' => 3.50,
             'description' => 'pricing_student_description',
             'features' => [
                 ['included' => true, 'text' => 'pricing_feature_unlimited_notes'],
