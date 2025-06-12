@@ -378,3 +378,49 @@
 .rhap_additional-controls {
   display: none !important;
 }
+
+/* Custom styles for Cal-Heatmap */
+.cal-heatmap-container {
+  margin: 20px 0;
+}
+
+/* Adjust colors for dark mode */
+.dark .cal-heatmap-container .ch-domain-text,
+.dark .cal-heatmap-container .ch-subdomain-text {
+  fill: var(--foreground) !important;
+}
+
+.dark .cal-heatmap-container .ch-domain {
+  stroke: var(--border) !important;
+}
+
+/* Legend styling */
+.ch-plugin-legend {
+  margin-top: 10px;
+}
+
+.dark .ch-plugin-legend-scale-rect {
+  stroke: var(--border) !important;
+}
+
+.dark .ch-plugin-legend-text {
+  fill: var(--foreground) !important;
+}
+
+/* Tooltip styling */
+.ch-plugin-tooltip {
+  background-color: var(--background) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+  color: var(--foreground) !important;
+  padding: 8px 12px !important;
+  font-size: 0.875rem !important;
+}
+
+/* Adjust cell sizes for better mobile display */
+@media (max-width: 768px) {
+  .cal-heatmap-container .ch-subdomain-cell {
+    width: 10px !important;
+    height: 10px !important;
+  }
+}
