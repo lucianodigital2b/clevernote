@@ -72,7 +72,7 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
             {/* Weekly Performance Chart */}
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
+                    <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                         <span>{t('performance_over_weeks')}</span>
                         <div className="flex gap-4 text-sm">
                             <span className="flex items-center gap-2">
@@ -87,11 +87,11 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="mb-4 flex gap-2">
-                        <button className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">{t('one_month')}</button>
-                        <button className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">3</button>
-                        <button className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">6</button>
-                        <button className="px-3 py-1 text-sm bg-blue-500 text-white rounded">2025</button>
+                    <div className="mb-4 flex flex-wrap gap-2">
+                        <button className="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded min-w-[40px] text-center">{t('one_month')}</button>
+                        <button className="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded min-w-[40px] text-center">3</button>
+                        <button className="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded min-w-[40px] text-center">6</button>
+                        <button className="px-3 py-2 text-sm bg-blue-500 text-white rounded min-w-[40px] text-center">2025</button>
                     </div>
                     
                     <div className="h-64 mb-4">
@@ -123,8 +123,8 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                     <CardTitle>{t('question_statistics')}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex items-center justify-between">
-                        <div className="flex-1">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                        <div className="w-full md:w-1/2 max-w-[300px] mx-auto md:mx-0">
                             <div className="h-64">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
@@ -165,7 +165,7 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                                 </ResponsiveContainer>
                             </div>
                         </div>
-                        <div className="flex-1 pl-8">
+                        <div className="w-full md:w-1/2">
                             <div className="space-y-6">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
@@ -245,7 +245,7 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                         </div>
                     </div>
                     
-                    <div className="grid grid-cols-4 gap-4 text-sm mt-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mt-4">
                         <div>
                             <p className="font-semibold text-green-600">{overallStats.dailyAverage} {t('cards')}</p>
                             <p className="text-gray-600 dark:text-gray-400">{t('daily_average')}</p>
