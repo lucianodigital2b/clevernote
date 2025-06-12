@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useTranslation } from 'react-i18next';
+import CalHeatmap from 'cal-heatmap';
+import Legend from 'cal-heatmap/plugins/Legend';
+import Tooltip from 'cal-heatmap/plugins/Tooltip';
+import 'cal-heatmap/cal-heatmap.css';
 
 interface StatisticsProps {
     weeklyStats: any[];
@@ -19,6 +23,8 @@ interface StatisticsProps {
 export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }: StatisticsProps) {
     const { t } = useTranslation();
     const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const calendarRef = useRef<HTMLDivElement>(null);
+    const calInstanceRef = useRef<CalHeatmap | null>(null); // Added ref for CalHeatmap instance
     
     // Prepare weekly chart data
     const weeklyChartData = weekDays.map((day, index) => {
@@ -32,9 +38,9 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
         };
     });
     
-    // Generate heatmap grid (similar to GitHub)
-    const generateHeatmapGrid = () => {
-        const weeks = [];
+    // Format data for Cal-Heatmap
+    const formatCalHeatmapData = () => {
+        const data = [];
         const startDate = new Date(new Date().getFullYear(), 0, 1);
         const endDate = new Date();
         
@@ -45,27 +51,111 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
             const dayStats = yearlyHeatmap[dateStr];
             const activity = dayStats ? (dayStats.quiz_total_questions + dayStats.flashcard_reviews) : 0;
             
-            weeks.push({
-                date: dateStr,
-                activity,
-                level: getActivityLevel(activity)
-            });
+            if (activity > 0) {
+                data.push({
+                    date: dateStr,
+                    value: activity
+                });
+            }
             
             currentDate.setDate(currentDate.getDate() + 1);
         }
         
-        return weeks;
+        return data;
     };
     
-    const getActivityLevel = (activity: number) => {
-        if (activity === 0) return 0;
-        if (activity < 10) return 1;
-        if (activity < 25) return 2;
-        if (activity < 50) return 3;
-        return 4;
+    useEffect(() => {
+        if (calendarRef.current) {
+            // Clear any existing calendar
+            calendarRef.current.innerHTML = '';
+            
+            const cal = new CalHeatmap();
+            calInstanceRef.current = cal; // Store instance in ref
+            
+            cal.paint({
+                itemSelector: calendarRef.current,
+                range: 1,
+                domain: {
+                    type: 'month',
+                    label: {
+                        text: null
+                    }
+                },
+                subDomain: { 
+                    type: 'day',
+                    radius: 8,
+                    width: 30,
+                    height: 30,
+                    gutter: 4,
+                    sort: 'asc',
+                    verticalOrientation: false,
+                    colLimit: 7,
+                    rowLimit: 7,
+                    label: {
+                        position: 'top',
+                        offset: {
+                            x: 0,
+                            y: -25
+                        },
+                        text: (timestamp) => {
+                            const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+                            return days[new Date(timestamp).getDay()];
+                        },
+                        style: {
+                            fontSize: '14px',
+                            fill: '#374151',
+                            fontWeight: 'bold'
+                        }
+                    }
+                },
+                date: { 
+                    start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+                    highlight: [new Date()]
+                },
+                data: {
+                    source: formatCalHeatmapData(),
+                    type: 'json',
+                    x: 'date',
+                    y: 'value'
+                },
+                scale: {
+                    color: {
+                        range: ['#e5f5e0', '#c7e9c0', '#a1d99b', '#74c476', '#31a354'],
+                        domain: [1, 10, 25, 50, 100],
+                        type: 'threshold'
+                    }
+                },
+                theme: 'light',
+                highlight: {
+                    radius: 2,
+                    borderWidth: 2,
+                    borderColor: '#3b82f6'
+                }
+            }, [
+                [Legend, {
+                    itemSelector: '#cal-heatmap-legend-container',
+                    label: null
+                }],
+                [Tooltip, {
+                    text: function(date, value, dayjsDate) {
+                        return value ? `${dayjsDate.format('LL')}: ${value} ${t('activities')}` : `${dayjsDate.format('LL')}: 0 ${t('activities')}`;
+                    }
+                }]
+            ]);
+        }
+    }, [yearlyHeatmap, t]);
+
+    const handlePrevious = () => {
+        if (calInstanceRef.current) {
+            calInstanceRef.current.previous();
+        }
     };
-    
-    const heatmapData = generateHeatmapGrid();
+
+    const handleNext = () => {
+        if (calInstanceRef.current) {
+            calInstanceRef.current.next();
+        }
+    };
     
     return (
         <div className="space-y-6">
@@ -100,7 +190,7 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-600" />
                                 <XAxis dataKey="day" tick={{ fill: '#6b7280' }} className="dark:fill-gray-300" />
                                 <YAxis tick={{ fill: '#6b7280' }} className="dark:fill-gray-300" />
-                                <Tooltip 
+                                <RechartsTooltip 
                                     contentStyle={{
                                         backgroundColor: 'var(--background)',
                                         border: '1px solid var(--border)',
@@ -153,7 +243,7 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                                             <Cell fill="#3b82f6" />
                                             <Cell fill="#ef4444" />
                                         </Pie>
-                                        <Tooltip 
+                                        <RechartsTooltip 
                                             contentStyle={{
                                                 backgroundColor: 'var(--background)',
                                                 border: '1px solid var(--border)',
@@ -203,47 +293,14 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                     <CardTitle>{t('study_activity')}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {/* <div className="mb-4">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {t('studied_cards_today', {
-                                dailyAverage: overallStats.dailyAverage,
-                                minutes: Math.round(overallStats.dailyAverage * 0.15),
-                                seconds: (overallStats.dailyAverage * 0.15).toFixed(1)
-                            })}
-                        </p>
-                    </div> */}
-                    
-                    {/* Month labels */}
-                    <div className="flex justify-center text-xs text-gray-500 dark:text-gray-400 mb-2">
-                        <span>{new Date().toLocaleDateString('en-US', { month: 'short', year: '2-digit' })}</span>
+                    <div className="flex justify-between items-center mb-4">
+                        <button onClick={handlePrevious} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">{t('previous')}</button>
+                        <button onClick={handleNext} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">{t('next')}</button>
                     </div>
-                    
-                    {/* Day labels */}
-                    <div className="flex">
-                        <div className="flex flex-col text-xs text-gray-500 dark:text-gray-400 mr-2 justify-between h-20">
-                            <span>M</span>
-                            <span>W</span>
-                            <span>F</span>
-                            <span>S</span>
-                        </div>
-                        
-                        {/* Heatmap Grid */}
-                        <div className="grid grid-cols-53 gap-1 mb-4">
-                            {heatmapData.map((day, index) => (
-                                <div
-                                    key={index}
-                                    className={`w-4 h-4 ${
-                                        day.level === 0 ? 'bg-gray-100 dark:bg-gray-700' :
-                                        day.level === 1 ? 'bg-green-200 dark:bg-green-800' :
-                                        day.level === 2 ? 'bg-green-300 dark:bg-green-700' :
-                                        day.level === 3 ? 'bg-green-400 dark:bg-green-600' :
-                                        'bg-green-500 dark:bg-green-500'
-                                    }`}
-                                    title={`${day.date}: ${day.activity} ${t('activities')}`}
-                                />
-                            ))}
-                        </div>
-                    </div>
+                    {/* Cal-Heatmap Container */}
+                    <div ref={calendarRef} id="cal-heatmap-container" className="cal-heatmap-container w-full h-[250px] flex items-center justify-center rounded-xl bg-gray-50 dark:bg-gray-800/50"></div>
+                    {/* Dedicated container for the legend */}
+                    <div id="cal-heatmap-legend-container" className="mt-2 flex justify-center rounded-lg"></div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mt-4">
                         <div>
@@ -265,6 +322,9 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                     </div>
                 </CardContent>
             </Card>
+
+            {/* Overall Statistics - This was duplicated and is now removed by ensuring the structure above is correct and not adding it again. */}
+            {/* The original Overall Statistics card is above the Activity Heatmap card and should remain as is. */}
         </div>
     );
 }
