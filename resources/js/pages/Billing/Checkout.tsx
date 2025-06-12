@@ -33,16 +33,12 @@ const CARD_ELEMENT_OPTIONS = {
   };
 
 
-  const plans = {
-      monthly: {
-        id: 'price_1RGgabCUBbBYXpQTdE8BtNm0',
-        price: 7.99
-      },
-      yearly: {
-        id: 'price_1RGgbDCUBbBYXpQTsrR61FU7',
-        price: 41.99
-      }
-  };
+  // Get pricing data from URL parameters
+  const searchParams = new URLSearchParams(window.location.search);
+  const plan = searchParams.get('plan') || 'yearly';
+  const priceId = searchParams.get('price_id');
+  const amount = searchParams.get('amount');
+  const productId = searchParams.get('product_id');
 
 
 function CheckoutForm() {
@@ -50,21 +46,22 @@ function CheckoutForm() {
     const stripe = useStripe();
     const elements = useElements();
     
-    // Use URLSearchParams instead of Ziggy
+    // Get pricing data from URL parameters
     const searchParams = new URLSearchParams(window.location.search);
-    const billing = searchParams.get('plan') || 'yearly';
+    const plan = searchParams.get('plan') || 'yearly';
+    const priceId = searchParams.get('price_id');
+    const rawAmount = searchParams.get('amount');
+    const productId = searchParams.get('product_id');
 
     const [setupIntent, setSetupIntent] = useState<any>(null);
     const [name, setName] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     
-    // Set planId and price based on URL parameters
-    const selectedPlan = plans[billing as 'monthly' | 'yearly'];
-    const [planId, setPlanId] = useState(selectedPlan?.id || plans.yearly.id);
-    const currentPrice = selectedPlan?.price || plans.yearly.price;
+    // Parse the amount from URL (remove $ and convert to number)
+    const currentPrice = rawAmount ? parseFloat(rawAmount.replace('$', '')) : 0;
+    const [planId, setPlanId] = useState(priceId || '');
 
-    console.log(selectedPlan);
     
     useEffect(() => {
         fetch('/setup-intent', { credentials: 'include' })
@@ -251,7 +248,7 @@ function CheckoutForm() {
         <input
           id="card-name"
           type="text"
-          className="block w-full rounded-lg border border-purple-100 bg-gray-50 px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-[oklch(0.511_0.262_276.966)] transition"
+          className="block w-full rounded-lg border border-purple-100 bg-gray-50 px-4 py-3 text-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-[oklch(0.511_0.262_276.966)] transition"
           placeholder={t('billing_full_name_placeholder')}
           autoComplete="cc-name"
           value={name}

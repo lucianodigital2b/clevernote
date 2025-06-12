@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Cashier\Exceptions\IncompletePayment;
 use Illuminate\Validation\ValidationException;
+use App\Models\Price;
 
 class SubscriptionController extends Controller
 {
@@ -25,7 +26,34 @@ class SubscriptionController extends Controller
 
     public function success(Request $request)
     {
-        return Inertia::render('Billing/Success'); // create this React page
+        $user = $request->user();
+        $subscriptionData = null;
+        
+        // Get the latest subscription for the user
+        $subscription = $user->subscriptions()->latest()->first();
+        
+        if ($subscription) {
+            // Get the price and product details
+            $price = Price::where('stripe_price_id', $subscription->stripe_price)
+                ->with('product')
+                ->first();
+                
+            if ($price) {
+                $subscriptionData = [
+                    'product_name' => $price->product->name,
+                    'amount' => $price->amount,
+                    'currency' => $price->currency,
+                    'interval' => $price->interval,
+                    'features' => $price->product->features,
+                    'subscription_id' => $subscription->id,
+                    'created_at' => $subscription->created_at->format('Y-m-d H:i:s')
+                ];
+            }
+        }
+        
+        return Inertia::render('Billing/Success', [
+            'subscription' => $subscriptionData
+        ]);
     }
 
     public function cancel(Request $request, $subscriptionId)
@@ -77,11 +105,12 @@ class SubscriptionController extends Controller
 
     public function subscribe(Request $request)
     {
-        $request->validate([
-            'payment_method' => 'required|string',
-            'plan_id' => 'required|string',
-            'name' => 'nullable|string|max:255',
-        ]);
+
+        // $request->validate([
+            // 'payment_method' => 'required|string',
+            // 'plan_id' => 'required|string',
+            // 'name' => 'nullable|string|max:255',
+        // ]);
 
         $user = $request->user();
 
@@ -97,9 +126,23 @@ class SubscriptionController extends Controller
             $subscription = $user->newSubscription('default', $request->plan_id)
                 ->create($request->payment_method);
 
-            return response()->json(['success' => true]);
+            // Get the product details for the subscribed plan
+            $price = Price::where('stripe_price_id', $request->plan_id)->with('product')->first();
+            
+            return response()->json([
+                'success' => true,
+                'subscription_id' => $subscription->id,
+                'product' => $price ? [
+                    'name' => $price->product->name,
+                    'amount' => $price->amount,
+                    'currency' => $price->currency,
+                    'interval' => $price->interval,
+                    'features' => $price->product->features
+                ] : null
+            ]);
         } catch (IncompletePayment $exception) {
             // Payment requires additional action
+
             return response()->json([
                 'success' => false,
                 'requires_action' => true,
@@ -107,6 +150,7 @@ class SubscriptionController extends Controller
                 'message' => 'Payment requires additional action.',
             ], 402);
         } catch (\Exception $e) {
+
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
