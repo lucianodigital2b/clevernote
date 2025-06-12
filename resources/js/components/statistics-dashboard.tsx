@@ -21,13 +21,19 @@ interface StatisticsProps {
 }
 
 export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }: StatisticsProps) {
-    const { t } = useTranslation();
-    const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const { t, i18n } = useTranslation();
+    const weekDays = {
+        en: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        es: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+        pt: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
+    };
     const calendarRef = useRef<HTMLDivElement>(null);
     const calInstanceRef = useRef<CalHeatmap | null>(null); // Added ref for CalHeatmap instance
     
     // Prepare weekly chart data
-    const weeklyChartData = weekDays.map((day, index) => {
+    const currentLang = i18n.language.split('-')[0];
+    const localizedWeekDays = weekDays[currentLang as keyof typeof weekDays] || weekDays.en;
+    const weeklyChartData = localizedWeekDays.map((day, index) => {
         const dayStats = weeklyStats.find(stat => new Date(stat.date).getDay() === (index + 1) % 7);
         return {
             day,
@@ -98,8 +104,9 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                             y: -25
                         },
                         text: (timestamp) => {
-                            const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-                            return days[new Date(timestamp).getDay()];
+                            const currentLang = i18n.language.split('-')[0];
+                            const localizedDays = weekDays[currentLang as keyof typeof weekDays] || weekDays.en;
+                            return localizedDays[new Date(timestamp).getDay()]?.charAt(0);
                         },
                         style: {
                             fontSize: '14px',
@@ -164,16 +171,6 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                 <CardHeader>
                     <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                         <span>{t('performance_over_weeks')}</span>
-                        <div className="flex gap-4 text-sm">
-                            <span className="flex items-center gap-2">
-                                <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                                {t('you')}
-                            </span>
-                            <span className="flex items-center gap-2">
-                                <div className="w-3 h-3 bg-orange-500 rounded"></div>
-                                {t('goal')}
-                            </span>
-                        </div>
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -194,11 +191,12 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                                     contentStyle={{
                                         backgroundColor: 'var(--background)',
                                         border: '1px solid var(--border)',
-                                        borderRadius: '6px',
-                                        color: 'var(--foreground)'
+                                        borderRadius: '12px',
+                                        color: 'var(--foreground)',
+                                        padding: '8px 12px'
                                     }}
                                 />
-                                <Bar dataKey="questions" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+                                <Bar dataKey="questions" fill="#3b82f6" radius={[8, 8, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
