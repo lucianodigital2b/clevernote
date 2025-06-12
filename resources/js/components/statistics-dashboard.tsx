@@ -298,7 +298,7 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                         <button onClick={handleNext} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">{t('next')}</button>
                     </div>
                     {/* Cal-Heatmap Container */}
-                    <div ref={calendarRef} id="cal-heatmap-container" className="cal-heatmap-container w-full h-[250px] flex items-center justify-center rounded-xl bg-gray-50 dark:bg-gray-800/50"></div>
+                    <div ref={calendarRef} id="cal-heatmap-container" className="cal-heatmap-container w-full h-[250px] flex items-center justify-center rounded-xl bg-gray-50 dark:bg-transparent"></div>
                     {/* Dedicated container for the legend */}
                     <div id="cal-heatmap-legend-container" className="mt-2 flex justify-center rounded-lg"></div>
                     
