@@ -5,30 +5,11 @@ import { Button } from "@/components/ui/button";
 import { router } from "@inertiajs/react";
 import { useTranslation } from "react-i18next";
 
-const pricingPlans = [
-  {
-    name: "Student",
-    monthlyPrice: "$7.99",
-    annualPrice: "$41.99",
-    billedMonthly: "$7.99",
-    billedAnnually: "$3.50",
-    description: "pricing_student_description",
-    features: [
-      { included: true, text: "pricing_feature_unlimited_notes" },
-      { included: true, text: "pricing_feature_advanced_formatting" },
-      { included: true, text: "pricing_feature_flashcards" },
-      { included: true, text: "pricing_feature_quizzes" },
-      { included: true, text: "pricing_feature_ai_summaries" },
-      { included: true, text: "pricing_feature_spaced_repetition" },
-      { included: true, text: "pricing_feature_collaboration" },
-      { included: true, text: "pricing_feature_priority_support" },
-    ],
-    cta: "pricing_start_trial",
-    popular: true,
-  },
-];
+interface PricingProps {
+  pricingPlans: any[];
+}
 
-const Pricing = () => {
+const Pricing = ({ pricingPlans }: PricingProps) => {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("annual");
   const { t } = useTranslation();
 
@@ -114,7 +95,7 @@ const Pricing = () => {
                         ? "bg-indigo-600 hover:bg-indigo-700 text-white"
                         : "bg-white border border-gray-200 text-gray-800 hover:bg-gray-50"
                     }`}
-                    onClick={() => router.visit('/register')}
+                    onClick={() => router.visit('/login')}
                   >
                     {t(plan.cta)}
                   </Button>

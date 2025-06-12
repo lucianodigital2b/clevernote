@@ -4,8 +4,41 @@ import { motion } from "framer-motion";
 import { router } from "@inertiajs/react";
 import { useTranslation } from 'react-i18next';
 
-const PaymentSuccess = () => {
+interface SubscriptionData {
+  product_name: string;
+  amount: number;
+  currency: string;
+  interval: string;
+  features: (string | { text: string; included: boolean })[];
+  subscription_id: string;
+  created_at: string;
+}
+
+interface PaymentSuccessProps {
+  subscription?: SubscriptionData;
+}
+
+const PaymentSuccess = ({ subscription }: PaymentSuccessProps) => {
   const { t } = useTranslation();
+  
+  const subtotal = subscription?.amount;
+  const total = subtotal;
+  
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: subscription?.currency?.toUpperCase() || 'USD'
+    }).format(amount);
+  };
+  
+  // Get plan display name
+  const getPlanDisplayName = () => {
+    if (!subscription) return t('billing_noteai_premium_annual');
+    
+    const interval = subscription.interval === 'month' ? t('monthly') : t('yearly');
+    return `${subscription.product_name} ${interval}`;
+  };
   
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-tr from-purple-50 to-white">
@@ -34,39 +67,54 @@ const PaymentSuccess = () => {
           <div className="mb-8 bg-purple-50 rounded-lg p-4">
             <h2 className="font-semibold text-gray-700">{t('billing_order_summary')}</h2>
             <div className="flex justify-between mt-3 text-sm">
-              <span className="text-gray-600">{t('billing_noteai_premium_annual')}</span>
-              <span className="font-medium">$89.99</span>
+              <span className="text-gray-600">{getPlanDisplayName()}</span>
+              <span className="font-medium">{formatCurrency(subtotal)}</span>
             </div>
-            <div className="flex justify-between mt-1 text-sm">
-              <span className="text-gray-600">{t('billing_tax')}</span>
-              <span className="font-medium">$4.99</span>
-            </div>
+           
             <div className="border-t border-purple-200 my-3"></div>
             <div className="flex justify-between font-bold">
               <span>{t('billing_total')}</span>
-              <span className="text-[oklch(0.511_0.262_276.966)]">$94.98</span>
+              <span className="text-[oklch(0.511_0.262_276.966)]">{formatCurrency(total)}</span>
             </div>
           </div>
           
           <div className="space-y-3 mb-8">
             <h3 className="font-medium text-gray-700">{t('billing_access_to')}</h3>
             <ul className="space-y-2 text-sm text-gray-600">
-              <li className="flex items-center">
-                <CheckCircle size={16} className="text-green-500 mr-2" />
-                <span>{t('billing_unlimited_ai_organization')}</span>
-              </li>
-              <li className="flex items-center">
-                <CheckCircle size={16} className="text-green-500 mr-2" />
-                <span>{t('billing_advanced_search')}</span>
-              </li>
-              <li className="flex items-center">
-                <CheckCircle size={16} className="text-green-500 mr-2" />
-                <span>{t('billing_cross_platform_sync')}</span>
-              </li>
-              <li className="flex items-center">
-                <CheckCircle size={16} className="text-green-500 mr-2" />
-                <span>{t('billing_priority_support')}</span>
-              </li>
+              {subscription?.features && subscription.features.length > 0 ? (
+                subscription.features.map((feature, index) => {
+                  // Handle both string features and object features with text property
+                  const featureText = typeof feature === 'string' ? feature : feature.text;
+                  const isIncluded = typeof feature === 'string' ? true : feature.included;
+                  
+                  return isIncluded ? (
+                    <li key={index} className="flex items-center">
+                      <CheckCircle size={16} className="text-green-500 mr-2" />
+                      <span>{t(featureText)}</span>
+                    </li>
+                  ) : null;
+                })
+              ) : (
+                // Fallback to default features if no subscription data
+                <>
+                  <li className="flex items-center">
+                    <CheckCircle size={16} className="text-green-500 mr-2" />
+                    <span>{t('billing_unlimited_ai_organization')}</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle size={16} className="text-green-500 mr-2" />
+                    <span>{t('billing_advanced_search')}</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle size={16} className="text-green-500 mr-2" />
+                    <span>{t('billing_cross_platform_sync')}</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle size={16} className="text-green-500 mr-2" />
+                    <span>{t('billing_priority_support')}</span>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
           
@@ -95,7 +143,7 @@ const PaymentSuccess = () => {
             {t('billing_confirmation_sent')}
           </p>
           <p className="text-sm text-gray-400 mt-1">
-            {t('billing_order_id')}
+            {subscription?.subscription_id ? `${t('billing_order_id_prefix')} ${subscription.subscription_id}` : t('billing_order_id')}
           </p>
         </div>
       </motion.div>
@@ -107,7 +155,7 @@ const PaymentSuccess = () => {
         transition={{ delay: 0.7, duration: 0.5 }}
         className="mt-6 text-center"
       >
-        <p className="text-gray-600">{t('billing_need_help')} <a href="#" className="text-[oklch(0.511_0.262_276.966)] hover:underline">{t('billing_contact_support')}</a></p>
+        <p className="text-gray-600">{t('billing_need_help')} <a href="mailto:luciano@getclevernote.app" className="text-[oklch(0.511_0.262_276.966)] hover:underline">{t('billing_contact_support')}</a></p>
       </motion.div>
     </div>
   );

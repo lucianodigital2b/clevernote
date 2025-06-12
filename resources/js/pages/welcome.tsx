@@ -9,7 +9,11 @@ import Pricing from "../components/home/Pricing";
 import CallToAction from "../components/home/CallToAction";
 import Footer from "../components/home/Footer";
 
-const Welcome = () => {
+interface WelcomeProps {
+  pricingPlans: any[];
+}
+
+const Welcome = ({ pricingPlans }: WelcomeProps) => {
   // Smooth scroll for anchor links with improved easing
   useEffect(() => {
     const handleLinkClick = (e: MouseEvent) => {
@@ -70,7 +74,7 @@ const Welcome = () => {
       <Hero />
       <section id="features"><Features /></section>
       {/* <section id="testimonials"><Testimonials /></section> */}
-      <section id="pricing"><Pricing /></section>
+      <section id="pricing"><Pricing pricingPlans={pricingPlans} /></section>
       <section id="faq"><FAQ /></section>
       <section id="cta"><CallToAction /></section>
       <Footer />

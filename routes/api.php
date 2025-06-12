@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\FolderController;
 use App\Http\Controllers\NoteController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SubscriptionController;
 
 Route::get('/user', function (Request $request) {
@@ -30,8 +31,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/folders-with-counts', [FolderController::class, 'getFoldersWithCounts']);
 
-
 });
+
+// Public pricing plans route (no auth required)
+Route::get('/pricing-plans', [ProductController::class, 'getPricingPlans']);
 
 Route::post('login', [AuthenticatedSessionController::class, 'store']);
 Route::post('register', [RegisteredUserController::class, 'store']);

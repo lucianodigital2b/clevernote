@@ -16,9 +16,7 @@ use App\Http\Controllers\QuizSharingController;
 use App\Http\Controllers\StatisticsController;
 use Laravel\Horizon\Horizon;
 
-Route::get('/', function () {
-    return Inertia::render('welcome');
-})->name('home');
+Route::get('/', [App\Http\Controllers\WelcomeController::class, 'index'])->name('home');
 
 
 Route::middleware(['auth'])->group(function () {
