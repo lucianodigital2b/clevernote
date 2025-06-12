@@ -30,8 +30,6 @@
     },
     "dependencies": {
         "@aarkue/tiptap-math-extension": "^1.3.5",
-        "@cal-heatmap/legend": "^1.0.0-beta.3",
-        "@cal-heatmap/tooltip": "^1.0.0-beta.0",
         "@headlessui/react": "^2.2.0",
         "@heroicons/react": "^2.2.0",
         "@inertiajs/react": "^2.0.0",
