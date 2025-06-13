@@ -11,6 +11,7 @@ use App\Models\QuizOption;
 use App\Models\QuizAttempt;
 use App\Models\QuizAnswer;
 use App\Services\QuizGeneratorService;
+use App\Jobs\GenerateQuizFromNote;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -297,26 +298,34 @@ class QuizController extends Controller
     public function generateFromNote(Request $request, Note $note)
     {
         try {
-            DB::beginTransaction();
-
-            $quiz = $this->quizGeneratorService->generateFromNote($note);
-
-            DB::commit();
+            // Create quiz immediately with pending status
+            $quiz = Quiz::create([
+                'title' => $note->title,
+                'user_id' => Auth::id(),
+                'note_id' => $note->id,
+                'is_published' => false,
+                'status' => 'generating' // Add status field to track generation
+            ]);
+            
+            // Dispatch job to generate questions in background
+            GenerateQuizFromNote::dispatch($note->id, $quiz->id);
+            
             return response()->json([
-                'message' => 'Quiz generated successfully',
-                'quiz' => $quiz
+                'message' => 'Quiz generation started',
+                'quiz_id' => $quiz->id,
+                'note' => $note
             ]);
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            
             if ($request->wantsJson()) {
-                return response()->json(['message' => 'Failed to generate quiz: ' . $e->getMessage()], 500);
+                return response()->json(['message' => 'Failed to start quiz generation: ' . $e->getMessage()], 500);
             }
             
             return back()->withErrors([
-                'general' => 'Failed to generate quiz: ' . $e->getMessage()
+                'general' => 'Failed to start quiz generation: ' . $e->getMessage()
             ]);
         }
     }
+
+
 }

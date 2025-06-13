@@ -56,7 +56,7 @@ class QuizGeneratorService extends AbstractAIService
         ]);
 
 
-        foreach ($questions['quiz'] as $index => $questionData) {
+        foreach ($questions['questions'] as $index => $questionData) {
             $question = $quiz->questions()->create([
                 'question' => $questionData['question'],
                 'type' => $questionData['type'],
