@@ -113,7 +113,65 @@ class AIPrompts
 
     public static function quizPrompt(string $content): string
     {
-        return "Create a multiple-choice quiz based on the following content. Content:\n\n" . $content;
+        return <<<EOT
+            Generate a comprehensive multiple-choice quiz based on the following content.
+            
+            Requirements:
+            - Create 10-15 questions that test understanding of key concepts
+            - Only one option should be correct
+            - Include a mix of difficulty levels (easy, medium, hard)
+            - Focus on important concepts, facts, and relationships from the content
+            - Avoid trivial or overly specific details
+            - Make incorrect options plausible but clearly wrong
+            
+            Output Format:
+            Return a valid JSON object with the following structure:
+            {
+                "quiz": [
+                    {
+                        "question": "Question text",
+                        "type": "multiple_choice",
+                        "explanation": "Brief explanation of why the correct answer is right",
+                        "options": [
+                            {
+                                "text": "First option",
+                                "is_correct": true or false,
+                                "order": 1
+                            },
+                            {
+                                "text": "Second option",
+                                "is_correct": 1,
+                                "order": 2
+                            },
+                            {
+                                "text": "Third option",
+                                "is_correct": true or false,
+                                "order": 3
+                            },
+                            {
+                                "text": "Fourth option",
+                                "is_correct": true or false,
+                                "order": 4
+                            }
+                        ]
+                    }
+                ]
+            }
+            
+            Important Notes:
+            - Set "is_correct" to "1" for the correct answer, empty string "" for incorrect answers
+            - Each question must have exactly 4 options
+            - Order should be numbered 1, 2, 3, 4
+            - Type should always be "multiple_choice"
+            
+            Language Instructions:
+            - Analyze the content to determine its primary language
+            - Generate all quiz content (questions, options, explanations) in the detected language
+            - If unable to detect language confidently, default to English
+            
+            Content to analyze:
+            {$content}
+            EOT;
     }
 
 
