@@ -53,11 +53,9 @@ export default function Edit({ note }: { note: Note }) {
     const { t } = useTranslation();
     const { errors } = usePage().props;
     
-    // Add state for processing status and polling
-    const [isProcessing, setIsProcessing] = useState(note.status === 'processing');
+    // Add state for failed status
     const [isFailed, setIsFailed] = useState(note.status === 'failed');
     const [currentNote, setCurrentNote] = useState(note);
-    const [pollingIntervalId, setPollingIntervalId] = useState<NodeJS.Timeout | null>(null);
     
     // Word count utility function
     const getWordCount = (htmlContent: string): number => {
@@ -103,7 +101,6 @@ export default function Edit({ note }: { note: Note }) {
     const handleRetryProcessing = async () => {
         try {
             setIsFailed(false);
-            setIsProcessing(true);
             
             const response = await axios.post(`/notes/${note.id}/retry`);
             
@@ -113,7 +110,6 @@ export default function Edit({ note }: { note: Note }) {
         } catch (error) {
             console.error('Error retrying processing:', error);
             setIsFailed(true);
-            setIsProcessing(false);
             toastConfig.error('Failed to retry processing');
         }
     };
@@ -197,14 +193,46 @@ export default function Edit({ note }: { note: Note }) {
 
             // If no existing quiz, create a new one
             const response = await axios.post(`/quizzes/generate-from-note/${note.id}`);
-            if (response.data) {
-                setIsQuizModalOpen(false);
-                router.visit(`/quizzes/${response.data.quiz.id}`);
-                toastConfig.success("Quiz generated successfully");
+            if (response.data && response.data.quiz_id) {
+                const quizId = response.data.quiz_id;
+                toastConfig.success("Quiz generation started");
+                
+                // Start polling for quiz status
+                const intervalId = setInterval(async () => {
+                    try {
+                        const quizResponse = await axios.get(`/quizzes/${quizId}`);
+                        const quizData = quizResponse.data.quiz;
+                        
+                        
+                        if (quizData.status === 'completed') {
+                            clearInterval(intervalId);
+                            setIsQuizModalOpen(false);
+                            console.log('chego', quizData);
+                            router.visit(`/quizzes/${quizId}`);
+                            
+                        } else if (quizData.status === 'failed') {
+                            clearInterval(intervalId);
+                            setIsQuizModalOpen(false);
+                            toastConfig.error("Quiz generation failed");
+                        }
+                        // Continue polling if status is 'generating'
+                    } catch (error) {
+                        clearInterval(intervalId);
+                        setIsQuizModalOpen(false);
+                        toastConfig.error("Failed to check quiz generation status");
+                    }
+                }, 2000); // Poll every 2 seconds
+                
+                // Set a timeout to stop polling after 5 minutes
+                setTimeout(() => {
+                    clearInterval(intervalId);
+                    setIsQuizModalOpen(false);
+                    toastConfig.error("Quiz generation timed out");
+                }, 300000); // 5 minutes
             }
         } catch (error) {
             setIsQuizModalOpen(false);
-            toastConfig.error("Failed to generate quiz");
+            toastConfig.error("Failed to start quiz generation");
         }
     };
 
@@ -334,55 +362,15 @@ export default function Edit({ note }: { note: Note }) {
     //   }, [editor]);
 
 
-    // Add useEffect for polling mechanism
-    useEffect(() => {
-        let intervalId: NodeJS.Timeout | null = null;
 
-        if (isProcessing) {
-            intervalId = setInterval(async () => {
-                try {
-                    const response = await axios.get(`/api/notes/${note.id}`);
-                    const updatedNote = response.data;
-                    
-                    if (updatedNote.status !== 'processing') {
-                        clearInterval(intervalId);
-                        setIsProcessing(false);
-                        
-                        if (updatedNote.status === 'failed') {
-                            setIsFailed(true);
-                        } else {
-                            setIsFailed(false);
-                            setCurrentNote(updatedNote);
-                            if (editor) {
-                                editor.commands.setContent(updatedNote.content);
-                            }
-                            setContent(updatedNote.content);
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error checking note status:', error);
-                    clearInterval(intervalId);
-                    setIsProcessing(false);
-                    setIsFailed(true);
-                    toastConfig.error('Failed to check note status');
-                }
-            }, 3000); // Poll every 3 seconds
-        }
-
-        return () => {
-            if (intervalId) {
-                clearInterval(intervalId);
-            }
-        };
-    }, [isProcessing, note.id, editor]);
     
     // Add useEffect for autosave
     useEffect(() => {
-        // Only save if the editor is ready, content has changed (debounced), and not currently processing
-        if (editor && debouncedContent !== note.content && !isProcessing) {
+        // Only save if the editor is ready, content has changed (debounced)
+        if (editor && debouncedContent !== note.content) {
             handleUpdate();
         }
-    }, [debouncedContent, editor, isProcessing, note.content]);
+    }, [debouncedContent, editor, note.content]);
 
 
 
@@ -470,12 +458,10 @@ export default function Edit({ note }: { note: Note }) {
                             
                             <div className="flex items-center gap-2">
                                 <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-white">
-                                    {!isProcessing && (
-                                        <div className="flex items-center gap-1">
-                                            <CheckCircle2 className="h-4 w-4 text-green-500" />
-                                            <span>Auto-saved</span>
-                                        </div>
-                                    )}
+                                    <div className="flex items-center gap-1">
+                                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                        <span>Auto-saved</span>
+                                    </div>
                                     <div className="flex items-center gap-1">
                                         <Badge variant="secondary" className="text-xs ">
                                             {wordCount} {wordCount === 1 ? t('word') : t('words')}
@@ -509,29 +495,7 @@ export default function Edit({ note }: { note: Note }) {
                             </div>
                         </div>
 
-                        {isProcessing ? (
-            <Card className="border-2 border-dashed border-purple-200 bg-purple-50/50 dark:bg-purple-900/10">
-                <CardContent className="flex flex-col items-center justify-center min-h-[500px] p-12">
-                    <div className="relative">
-                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600"></div>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <Brain className="h-6 w-6 text-purple-600" />
-                        </div>
-                    </div>
-                    <div className="text-center mt-6">
-                        <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-                            Processing your note
-                        </h3>
-                        <p className="text-neutral-600 dark:text-neutral-400 mb-1">
-                            Our AI is analyzing and enhancing your content
-                        </p>
-                        <p className="text-sm text-neutral-500">
-                            This usually takes 30-60 seconds
-                        </p>
-                    </div>
-                </CardContent>
-            </Card>
-        ) : isFailed ? (
+                        {isFailed ? (
             <Card className="border-2 border-dashed border-red-200 bg-red-50/50 dark:bg-red-900/10">
                 <CardContent className="flex flex-col items-center justify-center min-h-[500px] p-12">
                     <div className="relative">
@@ -635,7 +599,7 @@ export default function Edit({ note }: { note: Note }) {
                                                             variant="ghost"
                                                             className="w-full h-auto p-1 sm:p-2 flex items-start gap-2 sm:gap-3 md:gap-4 text-left hover:bg-transparent word-break overflow-visible whitespace-normal"
                                                             onClick={action.action}
-                                                            disabled={isProcessing || action.loading}
+                                                            disabled={action.loading}
                                                         >
                                                             <div className="flex-shrink-0 mt-1">
                                                                 {action.loading ? (
