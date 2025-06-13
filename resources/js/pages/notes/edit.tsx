@@ -223,12 +223,7 @@ export default function Edit({ note }: { note: Note }) {
                     }
                 }, 2000); // Poll every 2 seconds
                 
-                // Set a timeout to stop polling after 5 minutes
-                setTimeout(() => {
-                    clearInterval(intervalId);
-                    setIsQuizModalOpen(false);
-                    toastConfig.error("Quiz generation timed out");
-                }, 300000); // 5 minutes
+               
             }
         } catch (error) {
             setIsQuizModalOpen(false);
