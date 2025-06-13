@@ -43,38 +43,11 @@ class QuizGeneratorService extends AbstractAIService
                
     }
 
-    public function generateFromNote(Note $note): Quiz
+    public function generateFromNote(Note $note)
     {
         $prompt = AIPrompts::quizPrompt($note->content);
-        $questions = $this->sendRequest($prompt);
-
-        $quiz = Quiz::create([
-            'title' => Str::limit($note->title, 255),
-            'description' => $note->summary,
-            'user_id' => $note->user_id,
-            'is_published' => false
-        ]);
-
-
-        foreach ($questions['questions'] as $index => $questionData) {
-            $question = $quiz->questions()->create([
-                'question' => $questionData['question'],
-                'type' => $questionData['type'],
-                'explanation' => $questionData['explanation'],
-                'order' => $index + 1
-            ]);
-
-            foreach ($questionData['options'] as $option) {
-                $question->options()->create([
-                    'text' => $option['text'],
-                    'is_correct' => $option['is_correct'],
-                    'order' => $option['order']
-                ]);
-            }
-        }
-
-
-        return $quiz->load('questions.options');
+        
+        return $this->sendRequest($prompt);
     }
 
 

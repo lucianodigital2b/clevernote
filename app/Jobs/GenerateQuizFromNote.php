@@ -34,28 +34,29 @@ class GenerateQuizFromNote implements ShouldQueue
             // Update quiz status to generating
             $quiz->update(['status' => 'generating']);
             
-            $generatedQuiz = $quizGeneratorService->generateFromNote($note);
+            $response = $quizGeneratorService->generateFromNote($note);
             
-            // Copy questions from generated quiz to our existing quiz
-            foreach ($generatedQuiz->questions as $question) {
+            // Extract questions from the JSON response
+            $questions = $response['quiz'] ?? [];
+            
+            // Create questions from the JSON response
+            foreach ($questions as $index => $questionData) {
                 $newQuestion = $quiz->questions()->create([
-                    'question' => $question->question,
-                    'type' => $question->type,
-                    'explanation' => $question->explanation,
-                    'order' => $question->order
+                    'question' => $questionData['question'],
+                    'type' => $questionData['type'] ?? 'multiple_choice',
+                    'explanation' => $questionData['explanation'] ?? '',
+                    'order' => $index + 1
                 ]);
                 
-                foreach ($question->options as $option) {
+                // Create options from the JSON response
+                foreach ($questionData['options'] as $optionData) {
                     $newQuestion->options()->create([
-                        'text' => $option->text,
-                        'is_correct' => $option->is_correct,
-                        'order' => $option->order
+                        'text' => $optionData['text'],
+                        'is_correct' => $optionData['is_correct'] === '1' || $optionData['is_correct'] === 1,
+                        'order' => $optionData['order']
                     ]);
                 }
             }
-            
-            // Delete the temporary generated quiz
-            $generatedQuiz->delete();
             
             // Update quiz status to completed
             $quiz->update(['status' => 'completed']);
