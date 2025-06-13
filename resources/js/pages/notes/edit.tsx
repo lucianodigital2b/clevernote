@@ -149,12 +149,36 @@ export default function Edit({ note }: { note: Note }) {
             // If no existing flashcard set, create a new one
             const response = await axios.post(`/notes/${note.id}/generate-flashcards`);
             if (response.data && response.data.flashcardSetId) {
-                setIsFlashcardModalOpen(false);
-                router.visit(`/flashcard-sets/${response.data.flashcardSetId}/study`);
+                const flashcardSetId = response.data.flashcardSetId;
+                toastConfig.success("Flashcard generation started");
+                
+                // Start polling for flashcard set status
+                const intervalId = setInterval(async () => {
+                    try {
+                        const flashcardResponse = await axios.get(`/flashcard-sets/${flashcardSetId}`);
+                        const flashcardData = flashcardResponse.data.flashcardSet;
+                        
+                        if (flashcardData.status === 'completed') {
+                            clearInterval(intervalId);
+                            setIsFlashcardModalOpen(false);
+                            router.visit(`/flashcard-sets/${flashcardSetId}`);
+                            
+                        } else if (flashcardData.status === 'failed') {
+                            clearInterval(intervalId);
+                            setIsFlashcardModalOpen(false);
+                            toastConfig.error("Flashcard generation failed");
+                        }
+                        // Continue polling if status is 'generating' or 'pending'
+                    } catch (error) {
+                        clearInterval(intervalId);
+                        setIsFlashcardModalOpen(false);
+                        toastConfig.error("Failed to check flashcard generation status");
+                    }
+                }, 5000); // Poll every 5 seconds
             }
         } catch (error) {
             setIsFlashcardModalOpen(false);
-            toastConfig.error("Failed to generate flashcards");
+            toastConfig.error("Failed to start flashcard generation");
         }
     };
 
@@ -207,7 +231,6 @@ export default function Edit({ note }: { note: Note }) {
                         if (quizData.status === 'completed') {
                             clearInterval(intervalId);
                             setIsQuizModalOpen(false);
-                            console.log('chego', quizData);
                             router.visit(`/quizzes/${quizId}`);
                             
                         } else if (quizData.status === 'failed') {
@@ -264,7 +287,7 @@ export default function Edit({ note }: { note: Note }) {
             label: note.flashcard_sets && note.flashcard_sets.length > 0 ? t('review_flashcards') : t('create_flashcards'), 
             description: note.flashcard_sets && note.flashcard_sets.length > 0 ? t('review_study_cards') : t('generate_study_cards'),
             action: handleCreateFlashcards,
-            color: 'bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 hover:text-blue-900',
+            color: 'bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 hover:text-blue-900 dark:text-white dark:border-transparent',
             loading: isFlashcardModalOpen
         },
         { 
@@ -272,7 +295,7 @@ export default function Edit({ note }: { note: Note }) {
             label: note.quizzes && note.quizzes.length > 0 ? t('review_quiz') : t('create_quiz'), 
             description: note.quizzes && note.quizzes.length > 0 ? t('review_knowledge_test') : t('test_knowledge_ai'),
             action: handleCreateQuizz,
-            color: 'bg-green-50 hover:bg-green-100 border-green-200 text-green-700',
+            color: 'bg-green-50 hover:bg-green-100 border-green-200 text-green-700 dark:text-white dark:border-transparent',
             loading: isQuizModalOpen
         },
         { 
@@ -280,7 +303,7 @@ export default function Edit({ note }: { note: Note }) {
             label: note.mindmaps && note.mindmaps.length > 0 ? t('review_mindmap') : t('generate_mindmap'), 
             description: note.mindmaps && note.mindmaps.length > 0 ? t('review_concepts') : t('visualize_concepts'),
             action: handleCreateMindmap,
-            color: 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700',
+            color: 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700 dark:text-white dark:border-transparent',
             loading: isMindmapLoading
         },
     ];

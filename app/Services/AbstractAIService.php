@@ -76,8 +76,7 @@ abstract class AbstractAIService
         $data = json_decode($content, true);
         
 
-        Log::error(print_r($data, true));
-        // Log::error('chegou');
+        // Log::error(print_r($data, true));
 
         // if (json_last_error() !== JSON_ERROR_NONE) {
         //     Log::error('JSON Parsing Error', [

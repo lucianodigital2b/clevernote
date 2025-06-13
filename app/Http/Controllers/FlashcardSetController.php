@@ -53,7 +53,7 @@ class FlashcardSetController extends Controller
         return redirect()->route('flashcard-sets.index')->with('success', 'Flashcard set created successfully.');
     }
 
-    public function show(FlashcardSet $flashcardSet)
+    public function show(Request $request, FlashcardSet $flashcardSet)
     {
         $this->authorize('view', $flashcardSet);
 
@@ -65,6 +65,12 @@ class FlashcardSetController extends Controller
                 }]);
             }
         ]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'flashcardSet' => $flashcardSet
+            ]);
+        }
 
         return Inertia::render('FlashcardSets/show', [
             'flashcardSet' => $flashcardSet,

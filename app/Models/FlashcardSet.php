@@ -18,6 +18,8 @@ class FlashcardSet extends Model implements HasMedia
         'name',
         'description',
         'folder_id',
+        'status',
+        'note_id'
     ];
 
     public function registerMediaCollections(): void
