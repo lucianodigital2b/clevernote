@@ -7,6 +7,7 @@ use App\Services\NoteService;
 use App\Services\TranscriptionService;
 use App\Http\Requests\StoreNoteRequest;
 use App\Http\Requests\UpdateNoteRequest;
+use App\Jobs\GenerateFlashcardsFromNote;
 use App\Jobs\ProcessAudioNote;
 use App\Jobs\ProcessLinkNote;
 use App\Jobs\ProcessPdfNote;
@@ -238,38 +239,17 @@ class NoteController extends Controller
     {
         $this->authorize('update', $note);
 
-        // 1. Create a new FlashcardSet
+        // 1. Create a new FlashcardSet with pending status
         $flashcardSet = FlashcardSet::create([
             'user_id' => $note->user_id,
             'name' => $note->title . ' Flashcards',
             'folder_id' => $note->folder_id ?? null,
+            'note_id' => $note->id,
+            'status' => 'pending'
         ]);
 
-        // 2. Generate flashcards using DeepSeek AI
-        try {
-            $flashcards = $this->deepseekService->generateFlashcardsFromNote($note->content);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to generate flashcards: ' . $e->getMessage(),
-            ], 500);
-        }
-
-
-        // 3. Save flashcards and attach them to the flashcard set
-        $createdFlashcards = collect($flashcards['flashcards'])->map(function ($card) use ($note) {
-            return Flashcard::create([
-                'folder_id' => $note->folder_id ?? null,
-                'question' => $card['question'],
-                'answer' => $card['answer'],
-            ]);
-        });
-
-        // Attach all flashcards to the flashcard set using the pivot table
-        $flashcardSet->flashcards()->attach($createdFlashcards->pluck('id'));
-
-        $flashcardSet->note_id = $note->id;
-        $flashcardSet->save();
+        // 2. Dispatch the job to generate flashcards
+        GenerateFlashcardsFromNote::dispatch($note->id, $flashcardSet->id);
 
         return response()->json([
             'success' => true,
