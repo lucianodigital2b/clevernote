@@ -114,7 +114,7 @@
   "add_option": "Add Option",
   "explanation_optional": "Explanation (Optional)",
   "add_question": "Add Question",
-  "save_changes": "Save Changes",
+  "save": "Save",
   "pricing_feature_advanced_formatting": "Advanced formatting",
   "pricing_feature_flashcards": "Flashcards",
   "pricing_feature_quizzes": "Quizzes",
@@ -374,6 +374,7 @@
   "auth_login_link": "Log in",
   "question_statistics": "Question Statistics",
   "correct": "Correct",
+  "words": "words",
   "incorrect": "Incorrect",
   "total_questions": "Total Questions",
   "accuracy": "Accuracy"

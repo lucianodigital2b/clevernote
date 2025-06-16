@@ -354,8 +354,10 @@
   "upgrade_now": "Actualizar ahora",
   "maybe_later": "Tal vez más tarde",
   "question_statistics": "Estadísticas de Preguntas",
+  "save": "Salvar",
   "correct": "Correctas",
   "incorrect": "Incorrectas",
+  "words": "palabras",
   "total_questions": "Total de Preguntas",
   "accuracy": "Precisión"
 

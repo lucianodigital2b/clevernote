@@ -356,7 +356,9 @@
   "maybe_later": "Talvez mais tarde",
   "question_statistics": "Estatísticas de Perguntas",
   "correct": "Corretas",
+  "words": "palavras",
   "incorrect": "Incorretas",
+  "save": "Salvar",
   "total_questions": "Total de Perguntas",
   "accuracy": "Precisão"
 }

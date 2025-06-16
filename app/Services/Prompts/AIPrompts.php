@@ -127,7 +127,7 @@ class AIPrompts
             Output Format:
             Return a valid JSON object with the following structure:
             {
-                "quiz": [
+                [
                     {
                         "question": "Question text",
                         "type": "multiple_choice",
