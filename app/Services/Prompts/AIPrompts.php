@@ -195,6 +195,13 @@ class AIPrompts
 
                 A position object (you can generate default x/y values like { x: 0, y: 0 })
 
+                A style object with backgroundColor, color, and borderRadius properties based on hierarchy level:
+                - Level 0 (root): backgroundColor: '#E0F2FE', color: '#0F172A', borderRadius: '20px'
+                - Level 1 (main topics): backgroundColor: '#DCFCE7', color: '#0F172A', borderRadius: '20px'
+                - Level 2 (subtopics): backgroundColor: '#FEF3C7', color: '#0F172A', borderRadius: '20px'
+                - Level 3 (details): backgroundColor: '#FEE2E2', color: '#0F172A', borderRadius: '20px'
+                - Level 4+ (further details): backgroundColor: '#F3E8FF', color: '#0F172A', borderRadius: '20px'
+
                 Edges should connect child nodes to their respective parent using source and target IDs.
 
                 Nodes should be in the language of the note content.
