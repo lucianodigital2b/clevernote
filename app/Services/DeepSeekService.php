@@ -12,6 +12,7 @@ use Illuminate\Http\Client\RequestException;
 
 class DeepSeekService extends AbstractAIService
 {
+
     protected function initialize()
     {
         $this->apiKey = config('services.openai.api_key');
