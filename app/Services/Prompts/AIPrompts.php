@@ -177,13 +177,19 @@ class AIPrompts
 
     public static function mindmapPrompt(string $content): string
     {
-        return "Generate a comprehensive mindmap structure based on the following note content.
+        return "Generate a comprehensive mindmap structure in a TREE LAYOUT based on the following note content.
 
                 The output must be in React Flow-compatible JSON format, including both nodes and edges.
 
-                Nodes should reflect the hierarchy and relationships within the content, with clear parent-child connections.
+                IMPORTANT: Structure the mindmap as a hierarchical tree with the root node at the top center, and child nodes branching downward and outward in a tree-like pattern.
 
-                Include a root node that summarizes the overall topic, followed by key concepts, subtopics, and supporting ideas.
+                POSITIONING GUIDELINES:
+                - Root node (Level 0): Position at { x: 400, y: 50 }
+                - Level 1 nodes: Spread horizontally below root (y: 150), with x positions like 100, 300, 500, 700
+                - Level 2 nodes: Position below their parents (y: 250), distributed under each Level 1 node
+                - Level 3+ nodes: Continue the tree pattern downward (y: 350, 450, etc.)
+                - Maintain 200px horizontal spacing between sibling nodes
+                - Maintain 100px vertical spacing between levels
 
                 Each node should have:
 
@@ -193,7 +199,7 @@ class AIPrompts
 
                 A data field with a label (short, descriptive title)
 
-                A position object (you can generate default x/y values like { x: 0, y: 0 })
+                A position object with calculated x/y coordinates following the tree structure above
 
                 A style object with backgroundColor, color, and borderRadius properties based on hierarchy level:
                 - Level 0 (root): backgroundColor: '#E0F2FE', color: '#0F172A', borderRadius: '20px'
