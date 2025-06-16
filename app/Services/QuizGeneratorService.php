@@ -12,9 +12,9 @@ class QuizGeneratorService extends AbstractAIService
 {
     protected function initialize()
     {
-        $this->apiKey = config('services.deepseek.api_key');
-        $this->apiEndpoint = 'https://api.deepseek.com/v1/chat/completions';
-        $this->model = 'deepseek-chat';
+        $this->apiKey = config('services.openai.api_key');
+        $this->apiEndpoint = 'https://api.openai.com/v1/chat/completions';
+        $this->model = 'gpt-4o';
     }
 
     protected function getSystemPrompt(): string

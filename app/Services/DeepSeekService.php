@@ -14,13 +14,9 @@ class DeepSeekService extends AbstractAIService
 {
     protected function initialize()
     {
-        $this->apiKey = config('services.deepseek.api_key');
-        $this->apiEndpoint = 'https://api.deepseek.com/v1/chat/completions';
-        $this->model = 'deepseek-chat';
-        
-        if (empty($this->apiKey)) {
-            throw new \RuntimeException('DeepSeek API key is not configured');
-        }
+        $this->apiKey = config('services.openai.api_key');
+        $this->apiEndpoint = 'https://api.openai.com/v1/chat/completions';
+        $this->model = 'gpt-4o';
     }
 
     protected function getSystemPrompt(): string
@@ -51,22 +47,11 @@ class DeepSeekService extends AbstractAIService
     }
 
 
-    public function createMindMap(Note $note): Mindmap
+    public function createMindMap(Note $note)
     {
         $language = $language ?? $this->defaultLanguage;
         
         $prompt = AIPrompts::mindmapPrompt($note->content);
-        $mindmapData = $this->sendRequest($prompt);
-
-        $mindmap = Mindmap::create([
-            'note_id' => $note->id,
-            'title' => $note->title . ' Mindmap',
-            'nodes' => $mindmapData['nodes'],
-            'edges' => $mindmapData['edges'],
-            'user_id' => $note->user_id,
-        ]);
-
-        return $mindmap;
-
+        return $this->sendRequest($prompt);
     }
 }

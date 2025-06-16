@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Mindmap extends Model
 {
-    protected $fillable = ['note_id', 'user_id', 'title', 'nodes', 'edges'];
+    protected $fillable = ['note_id', 'user_id', 'title', 'nodes', 'edges', 'status'];
 
     protected $casts = [
         'nodes' => 'array',

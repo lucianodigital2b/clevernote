@@ -55,6 +55,7 @@ export default function Edit({ note }: { note: Note }) {
     
     // Add state for failed status
     const [isFailed, setIsFailed] = useState(note.status === 'failed');
+    const [isProcessing, setIsProcessing] = useState(note.status === 'processing');
     const [currentNote, setCurrentNote] = useState(note);
     
     // Word count utility function
@@ -262,6 +263,7 @@ export default function Edit({ note }: { note: Note }) {
         try {
             // Check if mindmap already exists in preloaded data
             if (note.mindmaps && note.mindmaps.length > 0) {
+                setIsMindmapLoading(false);
                 // Get the last created mindmap
                 const lastMindmap = note.mindmaps[note.mindmaps.length - 1];
                 router.visit(`/mindmaps/${lastMindmap.id}`);
@@ -271,13 +273,36 @@ export default function Edit({ note }: { note: Note }) {
             // If no existing mindmap, create a new one
             const response = await axios.post(`/notes/${note.id}/generate-mindmap`);
             if (response.data && response.data.mindmap) {
-                router.visit(`/mindmaps/${response.data.mindmap.id}`);
-                toastConfig.success("Mindmap generated successfully");
+                const mindmapId = response.data.mindmap.id;
+                toastConfig.success("Mindmap generation started");
+                
+                // Start polling for mindmap status
+                const intervalId = setInterval(async () => {
+                    try {
+                        const mindmapResponse = await axios.get(`/api/mindmaps/${mindmapId}/status`);
+                        const mindmapData = mindmapResponse.data.mindmap;
+                        
+                        if (mindmapData.status === 'completed') {
+                            clearInterval(intervalId);
+                            setIsMindmapLoading(false);
+                            router.visit(`/mindmaps/${mindmapId}`);
+                            
+                        } else if (mindmapData.status === 'failed') {
+                            clearInterval(intervalId);
+                            setIsMindmapLoading(false);
+                            toastConfig.error("Mindmap generation failed");
+                        }
+                        // Continue polling if status is 'generating' or 'pending'
+                    } catch (error) {
+                        clearInterval(intervalId);
+                        setIsMindmapLoading(false);
+                        toastConfig.error("Failed to check mindmap generation status");
+                    }
+                }, 3000); // Poll every 3 seconds
             }
         } catch (error) {
-            toastConfig.error("Failed to generate mindmap");
-        } finally {
             setIsMindmapLoading(false);
+            toastConfig.error("Failed to generate mindmap");
         }
     };
 
@@ -540,6 +565,42 @@ export default function Edit({ note }: { note: Note }) {
                         </div>
                         <p className="text-xs text-neutral-500 mt-4">
                             If this problem persists, please contact support
+                        </p>
+                    </div>
+                </CardContent>
+            </Card>
+        ) : isProcessing ? (
+            <Card className="border-2 border-dashed border-blue-200 bg-blue-50/50 dark:bg-blue-900/10">
+                <CardContent className="flex flex-col items-center justify-center min-h-[500px] p-12">
+                    <div className="relative">
+                        <div className="rounded-full h-16 w-16 bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
+                            <Loader2 className="h-8 w-8 text-blue-600 dark:text-blue-400 animate-spin" />
+                        </div>
+                    </div>
+                    <div className="text-center mt-6">
+                        <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
+                            Processing your note
+                        </h3>
+                        <p className="text-neutral-600 dark:text-neutral-400 mb-6">
+                            We're analyzing and processing your content. This usually takes a few moments.
+                        </p>
+                        
+                        {/* Skeleton Content */}
+                        <div className="max-w-2xl mx-auto space-y-4">
+                            <div className="animate-pulse">
+                                <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-3/4 mx-auto mb-3"></div>
+                                <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-full mb-3"></div>
+                                <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-5/6 mx-auto mb-3"></div>
+                                <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-4/5 mx-auto mb-6"></div>
+                                
+                                <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-2/3 mx-auto mb-3"></div>
+                                <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-full mb-3"></div>
+                                <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-3/4 mx-auto mb-3"></div>
+                            </div>
+                        </div>
+                        
+                        <p className="text-xs text-neutral-500 mt-6">
+                            Please wait while we process your content...
                         </p>
                     </div>
                 </CardContent>

@@ -7,6 +7,7 @@ use App\Models\Mindmap;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Services\DeepSeekService;
+use App\Jobs\GenerateMindmapFromNote;
 
 class MindmapController extends Controller
 {
@@ -26,9 +27,24 @@ class MindmapController extends Controller
 
     public function generate(Note $note)
     {
-        
-        $mindmap = $this->deepseekService->createMindMap($note);
+        // Create a new mindmap record with pending status
+        $mindmap = Mindmap::create([
+            'note_id' => $note->id,
+            'user_id' => auth()->id(),
+            'title' => $note->title . ' - Mindmap',
+            'nodes' => [],
+            'edges' => [],
+            'status' => 'pending'
+        ]);
 
+        // Dispatch the job to generate the mindmap
+        GenerateMindmapFromNote::dispatch($note->id, $mindmap->id);
+
+        return response()->json(['mindmap' => $mindmap]);
+    }
+
+    public function getMindmap(Mindmap $mindmap)
+    {
         return response()->json(['mindmap' => $mindmap]);
     }
 

@@ -82,6 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/notes/{note}/generate-mindmap', [MindmapController::class, 'generate']);
     Route::get('/mindmaps/{mindmap}', [MindmapController::class, 'show'])->name('mindmaps.show');
+    Route::get('/mindmaps/{mindmap}/status', [MindmapController::class, 'getMindmap'])->name('mindmaps.status');
     Route::patch('/mindmaps/{mindmap}', [MindmapController::class, 'update'])->name('mindmaps.update');
 
     
