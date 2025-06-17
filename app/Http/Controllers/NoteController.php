@@ -320,4 +320,11 @@ class NoteController extends Controller
         }
     }
 
+    public function status(Note $note)
+    {
+        return [
+            'status' => $note->status,
+        ];
+    }
+
 }
