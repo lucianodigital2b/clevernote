@@ -94,7 +94,6 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth'])->group(function () {
 
     Route::post('/check-subscription', [SubscriptionController::class, 'checkSubscription']);
-    Route::resource('notes', NoteController::class);
     Route::post('/notes/{note}/media', [NoteController::class, 'upload']);
     Route::post('/flashcard-sets/{flashcardSet}/media', [\App\Http\Controllers\FlashcardSetController::class, 'uploadMedia']);
     Route::post('/flashcards/{flashcard}/media', [\App\Http\Controllers\FlashcardController::class, 'uploadMedia']);
