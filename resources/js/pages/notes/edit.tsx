@@ -407,6 +407,44 @@ export default function Edit({ note }: { note: Note }) {
 
 
     
+    // Add useEffect for note status polling
+    useEffect(() => {
+        let intervalId: NodeJS.Timeout;
+        
+        if (isProcessing) {
+            intervalId = setInterval(async () => {
+                try {
+                    const response = await axios.get(`/api/notes/${note.id}/status`);
+                    const noteData = response.data;
+                    
+                    if (noteData.status === 'processed') {
+                        clearInterval(intervalId);
+                        setIsProcessing(false);
+                        setCurrentNote(noteData);
+                        window.location.reload();
+                        
+                    } else if (noteData.status === 'failed') {
+                        clearInterval(intervalId);
+                        setIsProcessing(false);
+                        setIsFailed(true);
+                        setCurrentNote(noteData);
+                        toastConfig.error("Note processing failed");
+                    }
+                    // Continue polling if status is still 'processing'
+                } catch (error) {
+                    console.error('Error checking note status:', error);
+                    // Don't clear interval on error, continue polling
+                }
+            }, 3000); // Poll every 3 seconds
+        }
+        
+        return () => {
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+        };
+    }, [isProcessing, note.id]);
+
     // Add useEffect for autosave
     useEffect(() => {
         // Only save if the editor is ready, content has changed (debounced)
@@ -599,9 +637,6 @@ export default function Edit({ note }: { note: Note }) {
                             </div>
                         </div>
                         
-                        <p className="text-xs text-neutral-500 mt-6">
-                            Please wait while we process your content...
-                        </p>
                     </div>
                 </CardContent>
             </Card>
