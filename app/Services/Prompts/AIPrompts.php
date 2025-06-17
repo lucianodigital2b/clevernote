@@ -97,14 +97,21 @@ class AIPrompts
             Questions should cover key concepts, facts, and important details from the note. 
             Answers should be concise and accurate.
 
+            Language Instructions:
+            1. First, determine the target language:
+               - If {$language} is specified, use that language for ALL flashcard content.
+               - If {$language} is 'autodetect':
+                 a. Analyze the input content's language patterns and characteristics
+                 b. Identify the primary language used in the content
+                 c. Use the detected language for ALL flashcard questions and answers
+                 d. Only default to English if language detection confidence is below 50%
+            2. Generate ALL flashcard content (questions and answers) in the determined target language
+            3. Preserve technical terms and proper nouns in their original form
+
             Requirements:
             - Return only a valid JSON array, no extra text.
             - Each item in the array must be an object with "question" and "answer" fields.
-            Language Instructions:
-            - If {$language} is 'autodetect', first analyze the input content to determine its primary language.
-            - Generate all flashcards (questions and answers) in the detected language.
-            - If unable to confidently detect the language, default to English.
-            - If {$language} is specified, use that language for all flashcards.
+            - Generate flashcards in the same language as the input content
 
             Note content:
             {$content}
@@ -181,6 +188,12 @@ class AIPrompts
 
                 The output must be in React Flow-compatible JSON format, including both nodes and edges.
 
+                Language Instructions:
+                1. Analyze the input content to determine its primary language
+                2. Generate ALL node labels and content in the same language as the input content
+                3. Preserve technical terms and proper nouns in their original form
+                4. If unable to detect the language confidently, default to English
+
                 IMPORTANT: Structure the mindmap as a hierarchical tree with the root node at the top center, and child nodes branching downward and outward in a tree-like pattern.
 
                 POSITIONING GUIDELINES:
@@ -197,7 +210,7 @@ class AIPrompts
 
                 A type of 'default'
 
-                A data field with a label (short, descriptive title)
+                A data field with a label (short, descriptive title in the content's language)
 
                 A position object with calculated x/y coordinates following the tree structure above
 
@@ -210,7 +223,6 @@ class AIPrompts
 
                 Edges should connect child nodes to their respective parent using source and target IDs.
 
-                Nodes should be in the language of the note content.
                 Return only the JSON object with nodes and edges in a format ready to be used in React Flow.\n\nContent:\n" . $content;
     }
 }

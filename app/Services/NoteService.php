@@ -59,7 +59,7 @@ class NoteService
         return $query->with(['tags', 'folder'])
                     ->orderBy('is_pinned', 'desc')
                     ->orderBy('updated_at', 'desc')
-                    ->paginate(15);
+                    ->paginate(5);
     }
 
     /**

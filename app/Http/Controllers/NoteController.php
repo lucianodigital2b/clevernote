@@ -43,6 +43,7 @@ class NoteController extends Controller
      */
     public function index(Request $request)
     {
+
         $notes = $this->noteService->getUserNotes(Auth::id(), $request->all());
 
         if($request->wantsJson()){
