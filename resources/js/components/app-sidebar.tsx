@@ -6,7 +6,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarGroupContent } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, ChevronRight, Plus, Layers, MessageSquare, BrainCircuit, Headphones, GraduationCap, ChartAreaIcon, HelpCircle } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, ChevronRight, Plus, Layers, MessageSquare, BrainCircuit, Headphones, GraduationCap, ChartAreaIcon, HelpCircle, Phone } from 'lucide-react';
 import AppLogo from './app-logo';
 import { CreateFolderModal } from '@/components/create-folder-modal';
 import axios from 'axios';
@@ -64,6 +64,11 @@ const footerNavItems: NavItem[] = [
         title: t('Feedback'),
         url: 'https://clevernote.featurebase.app/',
         icon: MessageSquare,
+    },
+    {
+        title: t('Support'),
+        url: 'https://wa.me/5527997798070',
+        icon: Phone,
     }
 ];
 

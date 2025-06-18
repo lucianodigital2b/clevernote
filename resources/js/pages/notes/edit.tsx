@@ -749,7 +749,10 @@ export default function Edit({ note }: { note: Note }) {
                                                 <div className="p-6">
                                                     <EditorContent 
                                                         editor={editor} 
-                                                        className="prose dark:prose-invert max-w-none min-h-[500px] focus:outline-none prose-headings:text-neutral-900 dark:prose-headings:text-neutral-100 prose-p:text-neutral-700 dark:prose-p:text-neutral-300" 
+                                                        className="prose dark:prose-invert max-w-none min-h-[500px] focus:outline-none prose-headings:text-neutral-900 dark:prose-headings:text-neutral-100 prose-p:text-neutral-700 dark:prose-p:text-neutral-300 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:ml-0" 
+                                                        style={{
+                                                            '--tw-prose-bullets': 'disc',
+                                                        } as React.CSSProperties}
                                                     />
                                                 </div>
                                             </>
