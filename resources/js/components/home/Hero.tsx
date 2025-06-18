@@ -51,9 +51,9 @@ const Hero = () => {
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight text-gray-900 mb-6">
               {t('hero_title')} <span className="bg-indigo-100 text-gray-900 px-5">{t('hero_highlight')}</span>
             </h1>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight text-gray-900 mb-6">
+            {/* <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight text-gray-900 mb-6">
               {t('hero_title_suffix')}
-            </h1>
+            </h1> */}
             <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed max-w-lg mx-auto">
               {t('hero_description')}
             </p>
