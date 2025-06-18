@@ -32,7 +32,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Notes routes
     Route::resource('notes', NoteController::class);
     Route::post('/notes/{note}/retry', [NoteController::class, 'retryProcessing'])->name('notes.retry');
-    Route::get('/notes/{note}/status', [NoteController::class, 'status'])->name('notes.status');
     
     Route::post('/subscriptions/resume/{subscriptionId}', [SubscriptionController::class, 'resume']);
     Route::get('/subscriptions/list', [SubscriptionController::class, 'list']);
@@ -83,7 +82,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/notes/{note}/generate-mindmap', [MindmapController::class, 'generate']);
     Route::get('/mindmaps/{mindmap}', [MindmapController::class, 'show'])->name('mindmaps.show');
-    Route::get('/mindmaps/{mindmap}/status', [MindmapController::class, 'getMindmap'])->name('mindmaps.status');
     Route::patch('/mindmaps/{mindmap}', [MindmapController::class, 'update'])->name('mindmaps.update');
 
     
