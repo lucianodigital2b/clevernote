@@ -325,7 +325,7 @@ export default function Dashboard() {
                                                 {getIconComponent(note.icon)}
                                                 <div>
                                                     <h3 className="font-medium">{note.title}</h3>
-                                                    <p className="text-sm text-neutral-500 line-clamp-1 mt-0.5">
+                                                    <p className="text-sm opacity-75 leading-tight w-full line-clamp-1 mt-0.5">
                                                         {note.summary || 'No summary available'}
                                                     </p>
                                                     <div className="flex items-center gap-2 text-sm text-neutral-500 mt-1">

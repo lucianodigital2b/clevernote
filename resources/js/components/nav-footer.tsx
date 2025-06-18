@@ -40,32 +40,35 @@ export function NavFooter({
     return (
         <SidebarGroup {...props} className={`${className || ''}`}>
             {/* Full Progress Bar (Expanded Sidebar) */}
-            <div className={`px-2 mb-2 transition-all duration-200 ${isCollapsed ? 'hidden' : 'block'}`}>
-                <div className="bg-neutral-100 dark:bg-neutral-800 rounded-md p-3">
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300">
-                            {t('free_notes_left')}
-                        </span>
-                        <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-200">
-                            {freeNotesUsed}/{freeNotesLimit}
-                        </span>
-                    </div>
-                    <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
-                        <div 
-                            className="bg-indigo-500 h-2 rounded-full" 
-                            style={{ width: `${100 - progressPercentage}%` }}
-                        ></div>
-                    </div>
-                    <div className="mt-2 text-center">
-                        <button 
-                            onClick={() => setIsModalOpen(true)}
-                            className="text-xs text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 cursor-pointer"
-                        >
-                            {t('upgrade_for_unlimited_notes')}
-                        </button>
+            {user.active_subscriptions?.length == 0 && (
+
+                <div className={`px-2 mb-2 transition-all duration-200 ${isCollapsed ? 'hidden' : 'block'}`}>
+                    <div className="bg-neutral-100 dark:bg-neutral-800 rounded-md p-3">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300">
+                                {t('free_notes_left')}
+                            </span>
+                            <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-200">
+                                {freeNotesUsed}/{freeNotesLimit}
+                            </span>
+                        </div>
+                        <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
+                            <div 
+                                className="bg-indigo-500 h-2 rounded-full" 
+                                style={{ width: `${100 - progressPercentage}%` }}
+                            ></div>
+                        </div>
+                        <div className="mt-2 text-center">
+                            <button 
+                                onClick={() => setIsModalOpen(true)}
+                                className="text-xs text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 cursor-pointer"
+                            >
+                                {t('upgrade_for_unlimited_notes')}
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Compact Progress Icon (Collapsed Sidebar) */}
             <div className={`transition-all duration-200 ${isCollapsed ? 'block' : 'hidden'}`}>

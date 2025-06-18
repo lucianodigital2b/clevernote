@@ -697,12 +697,7 @@ export default function Edit({ note }: { note: Note }) {
 
                                 {/* AI Actions Section */}
                                 <div className="mb-8">
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <Sparkles className="h-5 w-5 text-purple-600" />
-                                        <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-                                            AI-Powered Study Tools
-                                        </h2>
-                                    </div>
+                                   
                                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
                                         {actions.map((action, index) => {
                                             const IconComponent = action.icon;
