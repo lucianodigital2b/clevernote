@@ -86,6 +86,8 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
 
+    // How page route
+    Route::get('/how', fn () => Inertia::render('how'))->name('how');
 
 });
 

@@ -6,7 +6,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarGroupContent } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, ChevronRight, Plus, Layers, MessageSquare, BrainCircuit, Headphones, GraduationCap, ChartAreaIcon } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, ChevronRight, Plus, Layers, MessageSquare, BrainCircuit, Headphones, GraduationCap, ChartAreaIcon, HelpCircle } from 'lucide-react';
 import AppLogo from './app-logo';
 import { CreateFolderModal } from '@/components/create-folder-modal';
 import axios from 'axios';
@@ -56,6 +56,11 @@ const footerNavItems: NavItem[] = [
         icon: Folder,
     },
     {
+        title: t('how'),
+        url: '/how',
+        icon: HelpCircle,
+    },
+    {
         title: t('Feedback'),
         url: 'https://clevernote.featurebase.app/',
         icon: MessageSquare,
@@ -85,7 +90,8 @@ export function AppSidebar() {
     const folders = data || [];
 
     const handleNavItemClick = (item: NavItem) => {
-        if (item.title === 'Create folder') {
+        // Check by URL or icon instead of localized title
+        if (item.url === '#' && item.icon === Folder) {
             setIsFolderModalOpen(true);
             return true; // Return true to prevent default navigation
         }
@@ -159,14 +165,13 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                {user.active_subscriptions?.length == 0 && (
                 <NavFooter 
                     items={footerNavItems} 
                     className="mt-auto" 
                     onItemClick={handleNavItemClick}
                     user={user}
                 />
-                )}
+                
                 <NavUser />
             </SidebarFooter>
 

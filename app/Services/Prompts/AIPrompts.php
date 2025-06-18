@@ -91,11 +91,34 @@ class AIPrompts
     public static function flashcardPrompt(string $content, string $language): string
     {
         return <<<EOT
-            You are an AI assistant that creates flashcards for studying. 
-            Given the following note content, generate a JSON array of flashcards. Create as many as possible!
-            Each flashcard should have a "question" and an "answer" field. 
-            Questions should cover key concepts, facts, and important details from the note. 
-            Answers should be concise and accurate.
+            You are an AI assistant that creates COLLEGE-LEVEL flashcards for advanced studying. 
+            Given the following note content, generate a JSON array of challenging, academically rigorous flashcards.
+            
+            DIFFICULTY REQUIREMENTS - COLLEGE GRADE LEVEL:
+            - Create questions that require critical thinking, analysis, and synthesis
+            - Focus on complex concepts, theoretical frameworks, and advanced applications
+            - Include questions that test understanding of relationships between concepts
+            - Ask for explanations of processes, mechanisms, and underlying principles
+            - Require students to compare, contrast, evaluate, and apply knowledge
+            - Use higher-order thinking skills (analysis, synthesis, evaluation)
+            - Avoid simple recall or definition-based questions
+            
+            QUESTION TYPES TO INCLUDE:
+            - "Explain the relationship between X and Y and how it affects Z"
+            - "Analyze the implications of [concept] in the context of [scenario]"
+            - "Compare and contrast [concept A] with [concept B], highlighting key differences"
+            - "Evaluate the effectiveness of [method/theory] and justify your reasoning"
+            - "Apply [principle] to solve [complex scenario] and explain your approach"
+            - "Synthesize information from multiple sources to explain [phenomenon]"
+            - "Critically assess the strengths and limitations of [theory/approach]"
+            
+            ANSWER REQUIREMENTS:
+            - Provide comprehensive, detailed explanations (not just brief definitions)
+            - Include multiple components or steps when applicable
+            - Explain the reasoning behind concepts
+            - Connect ideas to broader theoretical frameworks
+            - Include examples or applications where relevant
+            - Demonstrate deep understanding rather than surface-level knowledge
 
             Language Instructions:
             1. First, determine the target language:
@@ -112,6 +135,7 @@ class AIPrompts
             - Return only a valid JSON array, no extra text.
             - Each item in the array must be an object with "question" and "answer" fields.
             - Generate flashcards in the same language as the input content
+            - Ensure ALL flashcards are college-level difficulty with complex, analytical questions
 
             Note content:
             {$content}
