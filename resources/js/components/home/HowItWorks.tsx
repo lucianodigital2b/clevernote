@@ -1,20 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Upload, Zap, BookOpen, ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const HowItWorks = () => {
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(0);
-  const [animatedCard, setAnimatedCard] = useState(0);
-
-  // Auto-cycle through cards for animation
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAnimatedCard((prev) => (prev + 1) % 3);
-    }, 3000); // Change every 3 seconds
-
-    return () => clearInterval(interval);
-  }, []);
 
   const steps = [
     {
@@ -66,9 +56,7 @@ const HowItWorks = () => {
           <div className="grid grid-cols-3 gap-8">
             {steps.map((step, index) => (
               <div key={step.id} className="relative">
-                <div className={`bg-white rounded-2xl shadow-lg border-2 border-gray-100 p-8 h-full hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${
-                  animatedCard === index ? 'animate-bounce-soft' : ''
-                }`}>
+                <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-100 p-8 h-full hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                   {/* Step number and icon */}
                   <div className="flex items-center justify-center mb-6">
                     <div className="relative">
