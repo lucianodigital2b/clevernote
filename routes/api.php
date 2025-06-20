@@ -107,6 +107,12 @@ Route::post('login', [AuthenticatedSessionController::class, 'store']);
 Route::post('register', [RegisteredUserController::class, 'store']);
 
 
+// Apple OAuth Routes
+Route::get('auth/apple', [\App\Http\Controllers\Auth\AppleController::class, 'redirectToApple'])
+    ->name('auth.apple');
+Route::get('auth/apple/callback', [\App\Http\Controllers\Auth\AppleController::class, 'handleAppleCallback'])
+    ->name('auth.apple.callback');
+    
 Route::get('/test', function(){
     return 'test';
 });

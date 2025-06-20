@@ -188,6 +188,7 @@
   "Flashcards": "Tarjetas de memoria",
   "auth_login_description": "Ingresa tu correo electrónico y contraseña para iniciar sesión",
   "auth_continue_google": "Continuar con Google",
+  "auth_continue_apple": "Continuar con Apple",
   "auth_continue_email": "O continuar con correo electrónico",
   "auth_email_label": "Correo electrónico",
   "auth_email_placeholder": "correo@ejemplo.com",
