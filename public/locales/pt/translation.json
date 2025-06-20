@@ -156,6 +156,7 @@
   "Flashcards": "Cartões de memória",
   "auth_login_description": "Digite seu e-mail e senha abaixo para entrar",
   "auth_continue_google": "Continuar com Google",
+  "auth_continue_apple": "Continuar com Apple",
   "auth_continue_email": "Ou continuar com e-mail",
   "auth_email_label": "Endereço de e-mail",
   "auth_email_placeholder": "email@exemplo.com",

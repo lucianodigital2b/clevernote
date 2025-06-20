@@ -101,6 +101,17 @@ Route::get('auth/google', [\App\Http\Controllers\Auth\GoogleController::class, '
 Route::get('auth/google/callback', [\App\Http\Controllers\Auth\GoogleController::class, 'handleGoogleCallback'])
     ->name('auth.google.callback');
 
+// Apple OAuth Routes
+Route::get('auth/apple', [\App\Http\Controllers\Auth\AppleController::class, 'redirectToApple'])
+    ->name('auth.apple');
+Route::get('auth/apple/callback', [\App\Http\Controllers\Auth\AppleController::class, 'handleAppleCallback'])
+    ->name('auth.apple.callback');
+
+// Apple JWT generation (for testing/admin purposes)
+Route::get('/auth/apple/generate-jwt', [\App\Http\Controllers\Auth\AppleController::class, 'generateClientSecret'])
+    ->name('auth.apple.generate-jwt')
+    ->middleware(['auth', 'admin']); // Add appropriate middleware
+
 require __DIR__.'/settings.php';
 
 require __DIR__.'/auth.php';
