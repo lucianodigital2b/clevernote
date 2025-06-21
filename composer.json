@@ -11,7 +11,6 @@
     "require": {
         "php": "^8.2",
         "dompdf/dompdf": "^3.1",
-        "firebase/php-jwt": "*",
         "inertiajs/inertia-laravel": "^2.0",
         "jijunair/laravel-referral": "^1.0",
         "laravel/cashier": "^15.6",
@@ -20,6 +19,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.20",
         "laravel/tinker": "^2.10.1",
+        "lcobucci/jwt": "*",
         "league/flysystem-aws-s3-v3": "^3.29",
         "openai-php/laravel": "^0.11.0",
         "phpoffice/phpword": "^1.2",

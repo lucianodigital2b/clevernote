@@ -26,7 +26,10 @@ class AppleController extends Controller
     public function handleAppleCallback()
     {
         try {
-            $appleUser = Socialite::driver('apple')->user();
+            // Generate fresh client secret on each request
+            config()->set('services.apple.client_secret', $this->appleJWTService->generate());
+            
+            $appleUser = Socialite::driver('apple')->stateless()->user();
             
             $user = User::where('email', $appleUser->email)->first();
             
@@ -55,16 +58,17 @@ class AppleController extends Controller
     /**
      * Generate a new Apple Client Secret JWT
      * This method can be used for testing or manual token generation
+     * Note: With the new approach, tokens are generated on-demand and expire in 1 hour
      */
     public function generateClientSecret()
     {
         try {
-            $jwt = $this->appleJWTService->generateClientSecret();
+            $jwt = $this->appleJWTService->generate();
             
             return response()->json([
                 'success' => true,
                 'client_secret' => $jwt,
-                'message' => 'Apple Client Secret generated successfully. Add this to your .env file as APPLE_CLIENT_SECRET.'
+                'message' => 'Apple Client Secret generated successfully. This token expires in 1 hour and is generated fresh on each authentication request.'
             ]);
         } catch (\Exception $e) {
             return response()->json([
