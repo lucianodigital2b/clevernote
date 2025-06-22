@@ -30,7 +30,6 @@ class AppleController extends Controller
             config()->set('services.apple.client_secret', $this->appleJWTService->generate());
             
             $appleUser = Socialite::driver('apple')->stateless()->user();
-            dd($appleUser);
             $user = User::where('email', $appleUser->email)->first();
             
             if (!$user) {
