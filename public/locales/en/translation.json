@@ -402,5 +402,13 @@
   "Step": "Step",
   "Previous": "Previous",
   "Next": "Next",
-  "Get Started": "Get Started"
+  "Get Started": "Get Started",
+  "how_main_title": "Learn to Get the Most Out of Clevernote",
+  "how_main_subtitle": "Follow these simple steps to transform your learning experience",
+  "how_upload_your_content": "Upload Your Content",
+  "how_upload_description": "Upload audio, video, text, or notes in any format to get started",
+  "how_choose_what_to_create": "Choose What to Create",
+  "how_choose_description": "Convert your content into podcasts, quizzes, flashcards, mind maps, or memory games",
+  "how_study_smarter": "Study Smarter",
+  "how_study_description": "Use our AI-powered tools to learn faster and more efficiently"
 }

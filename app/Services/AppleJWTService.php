@@ -44,7 +44,7 @@ class AppleJWTService
             ->relatedTo(config('services.apple.client_id'))
             ->withHeader('kid', config('services.apple.key_id'))
             ->getToken($this->jwtConfig->signer(), $this->jwtConfig->signingKey());
-
+            
         return $token->toString();
     }
 
