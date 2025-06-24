@@ -11,6 +11,7 @@
     "require": {
         "php": "^8.2",
         "dompdf/dompdf": "^3.1",
+        "google/apiclient": "^2.18",
         "inertiajs/inertia-laravel": "^2.0",
         "jijunair/laravel-referral": "^1.0",
         "laravel/cashier": "^15.6",

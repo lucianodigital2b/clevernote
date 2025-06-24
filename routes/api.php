@@ -106,6 +106,7 @@ Route::get('/pricing-plans', [ProductController::class, 'getPricingPlans']);
 Route::post('login', [AuthenticatedSessionController::class, 'store']);
 Route::post('register', [RegisteredUserController::class, 'store']);
 
+Route::post('auth/google/callback', [\App\Http\Controllers\Auth\GoogleController::class, 'handleMobileGoogleAuth']);
 
     
 Route::get('/test', function(){

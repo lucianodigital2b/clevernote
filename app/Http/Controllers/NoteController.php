@@ -216,6 +216,9 @@ class NoteController extends Controller
         $delete_related_items = $request->input('delete_related_items', false);
         $this->noteService->deleteNote($note, $delete_related_items);
 
+        if($request->wantsJson()){
+            return response()->json(['success' => true]);
+        }
 
         return redirect()
             ->route('dashboard')

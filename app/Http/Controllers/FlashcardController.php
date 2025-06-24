@@ -17,8 +17,14 @@ class FlashcardController extends Controller
     public function index(Request $request)
     {
 
-        $flashcards = Flashcard::whereHas('flashcardSets', function($query) {
+        $data = $request->all();
+        $flashcards = Flashcard::whereHas('flashcardSets', function($query) use ($data){
             $query->where('user_id', Auth::id());
+
+            if(isset($data['flashcard_set_id'])){
+                $query->where('id', $data['flashcard_set_id']);
+            }
+            
         })
         ->latest()
         ->paginate(12);
