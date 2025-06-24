@@ -22,6 +22,10 @@ class FlashcardSetController extends Controller
             ->paginate(10);
 
 
+        if ($request->wantsJson()) {
+            return response()->json($flashcards);
+        }
+
         return Inertia::render('FlashcardSets/index', [
             'flashcardSets' => $flashcards,
         ]);
@@ -48,6 +52,10 @@ class FlashcardSetController extends Controller
 
         if (!empty($validated['flashcard_ids'])) {
             $flashcardSet->flashcards()->attach($validated['flashcard_ids']);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json($flashcardSet);
         }
 
         return redirect()->route('flashcard-sets.index')->with('success', 'Flashcard set created successfully.');
@@ -128,10 +136,18 @@ class FlashcardSetController extends Controller
             $flashcardSet->flashcards()->detach($removedIds);
         }
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Flashcard set updated successfully.',
+            ]);
+        }
+
+
         return redirect()->back()->with('success', 'Flashcard set updated successfully.');
     }
 
-    public function destroy(FlashcardSet $flashcardSet) {
+    public function destroy(Request $request, FlashcardSet $flashcardSet) {
+
 
         $this->authorize('delete', $flashcardSet);
     
@@ -140,6 +156,12 @@ class FlashcardSetController extends Controller
     
         // Delete the flashcard set
         $flashcardSet->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Flashcard set and its flashcards deleted successfully.',
+            ]);
+        }
     
         return redirect()->route('flashcard-sets.index')
             ->with('success', 'Flashcard set and its flashcards deleted successfully.');
