@@ -13,6 +13,15 @@ import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import { t } from 'i18next';
 
+
+export function AppSidebar() {
+    const { t } = useTranslation();
+    const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
+    
+    const { auth } = usePage().props;
+    const user = (auth as any).user;
+
+    
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
@@ -52,7 +61,7 @@ const mainNavItems: NavItem[] = [
 const footerNavItems: NavItem[] = [
     {
         title: t('create_folder'),
-        url: '#', // Changed to # to prevent navigation
+        url: '#', 
         icon: Folder,
     },
     {
@@ -72,13 +81,6 @@ const footerNavItems: NavItem[] = [
     }
 ];
 
-
-export function AppSidebar() {
-    const { t } = useTranslation();
-    const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
-    
-    const { auth } = usePage().props;
-    const user = (auth as any).user;
 
     // Replace useEffect with useQuery
     const { data, isLoading, error } = useQuery({
