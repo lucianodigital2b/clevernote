@@ -93,7 +93,8 @@ Route::middleware(['auth'])->group(function () {
 
 
 
-
+Route::get('/terms', fn () => Inertia::render('Terms'))->name('terms');
+Route::get('/policy', fn () => Inertia::render('Policy'))->name('policy');
 
 // Google OAuth Routes
 Route::get('auth/google', [\App\Http\Controllers\Auth\GoogleController::class, 'redirectToGoogle'])
