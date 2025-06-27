@@ -148,6 +148,7 @@
   "Loading folders...": "Carregando pastas...",
   "loading": "Carregando...",
   "No folders yet": "Ainda não há pastas",
+  "created": "Criado",
   "create_folder": "Criar pasta",
   "Feedback": "Portal de Feedback",
   "Coming soon": "Em breve",
@@ -386,5 +387,8 @@
   "how_step": "Passo",
   "how_previous": "Anterior",
   "how_next": "Próximo",
-  "how_get_started": "Começar"
+  "how_get_started": "Começar",
+  "folder": "Pasta",
+  "select": "Selecionar"
+
 }
