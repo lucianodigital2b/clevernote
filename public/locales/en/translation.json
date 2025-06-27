@@ -411,5 +411,9 @@
   "how_choose_description": "Convert your content into podcasts, quizzes, flashcards, mind maps, or memory games",
   "how_study_smarter": "Study Smarter",
   "how_study_description": "Use our AI-powered tools to learn faster and more efficiently",
-  "how": "How"
+  "select": "Select",
+  "how": "How",
+  "folder": "Folder",
+  "created": "Created",
+  "Support": "Support"
 }
