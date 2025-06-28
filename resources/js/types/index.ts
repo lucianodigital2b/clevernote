@@ -30,6 +30,7 @@ export type Note = {
     summary: string;
     transcription: string;
     folder_id?: number | null;
+    user_id: number;
     flashcard_sets: FlashcardSet[];
     quizzes: Quiz[];
     mindmaps: Mindmap[];

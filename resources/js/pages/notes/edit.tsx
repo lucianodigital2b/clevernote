@@ -711,14 +711,12 @@ export default function Edit({ note }: { note: Note }) {
                                                                 <button
                                                                     onClick={() => handleSubmitFeedback(true)}
                                                                     className="p-2 rounded-full bg-green-100 text-green-600"
-                                                                    disabled={note.user_id === user.id}
                                                                 >
                                                                     <ThumbsUp className="w-5 h-5" />
                                                                 </button>
                                                                 <button
                                                                     onClick={() => setFeedbackModalOpen(true)}
                                                                     className="p-2 rounded-full bg-red-100 text-red-600"
-                                                                    disabled={note.user_id === user.id}
                                                                 >
                                                                     <ThumbsDown className="w-5 h-5" />
                                                                 </button>
