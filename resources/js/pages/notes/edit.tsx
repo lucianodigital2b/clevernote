@@ -51,17 +51,10 @@ import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
 
 export default function Edit({ note }: { note: Note }) {
-  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
-  const [feedbackReason, setFeedbackReason] = useState('');
-  
-const [deleteRelatedItems, setDeleteRelatedItems] = useState(false);
+    const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+    const [feedbackReason, setFeedbackReason] = useState('');
+    const [deleteRelatedItems, setDeleteRelatedItems] = useState(false);
 
-  const [feedbackStats, setFeedbackStats] = useState<{
-    total: number;
-    positive: number;
-    negative: number;
-    positive_percentage: number;
-  } | null>(null);
 
     const { t } = useTranslation();
     const { errors } = usePage().props;
@@ -110,20 +103,6 @@ const [deleteRelatedItems, setDeleteRelatedItems] = useState(false);
     }
 
   };
-
-  const fetchFeedbackStats = () => {
-    router.get(`/feedback/stats`, {
-      feedbackable_type: 'note',
-      feedbackable_id: note.id,
-    }, {
-      onSuccess: (res) => {
-        setFeedbackStats(res.props.feedbackStats);
-      }
-    });
-  };
-
- 
-
 
   const handleUpdate = () => {
         router.patch(`/notes/${note.id}`, {
