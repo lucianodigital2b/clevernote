@@ -25,6 +25,7 @@
         "openai-php/laravel": "^0.11.0",
         "phpoffice/phpword": "^1.2",
         "prism-php/prism": "^0.65.2",
+        "resend/resend-laravel": "^0.19.0",
         "sentry/sentry-laravel": "^4.13",
         "smalot/pdfparser": "^2.12",
         "socialiteproviders/apple": "^5.6",

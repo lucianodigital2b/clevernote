@@ -16,7 +16,7 @@ export default function TiptapToolbar({ editor }: { editor: Editor | null }) {
   // Memoize the isActive function to prevent unnecessary re-renders
   const isActive = useCallback((name: string, attrs = {}) => {
     if (!editor) return '';
-    return editor.isActive(name, attrs) ? 'bg-purple-100 dark:bg-purple-900 text-purple-700' : '';
+    return editor.isActive(name, attrs) ? 'bg-purple-50 dark:bg-purple-900 text-purple-700' : '';
   }, [editor]);
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export default function TiptapToolbar({ editor }: { editor: Editor | null }) {
       shouldShow={({ view }) => {
         return shouldShow && view.state.selection.content().size > 0;
       }}
-      className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow rounded-md p-1 flex gap-1 z-50 w-100"
+      className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow  p-1 flex gap-1 z-50 w-100"
     >
       <Button size="icon" variant="ghost" className={isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()}>
         <Bold className="h-4 w-4" />
@@ -56,7 +56,8 @@ export default function TiptapToolbar({ editor }: { editor: Editor | null }) {
       <Button size="icon" variant="ghost" className={isActive('heading', { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>
         <Heading2 className="h-4 w-4" />
       </Button>
-      <Button size="icon" variant="ghost" className={isActive('blockquote')} onClick={() => editor.chain().focus().toggleBlockquote().run()}>
+      <Button  size="icon" variant="ghost" className={isActive('blockquote')} onClick={() => editor.chain().focus().toggleBlockquote().run()}>
+
         <Quote className="h-4 w-4" />
       </Button>
       <Button size="icon" variant="ghost" className={isActive('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()}>

@@ -50,6 +50,11 @@ class Flashcard extends Model implements HasMedia
         return $this->belongsToMany(FlashcardSet::class, 'flashcard_flashcard_set');
     }
 
+    public function feedback()
+    {
+        return $this->morphMany(Feedback::class, 'feedbackable');
+    }
+
     public function userProgress()
     {
         return $this->hasMany(FlashcardProgress::class);

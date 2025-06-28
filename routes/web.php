@@ -8,12 +8,15 @@ use App\Http\Controllers\FlashcardController;
 use App\Http\Controllers\FlashcardSetController;
 use App\Http\Controllers\FolderFlashcardController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\MindmapController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\QuizSharingController;
 use App\Http\Controllers\StatisticsController;
+use App\Models\User;
+use App\Notifications\NewUserFeedback;
 use Laravel\Horizon\Horizon;
 
 Route::get('/', [App\Http\Controllers\WelcomeController::class, 'index'])->name('home');
@@ -25,6 +28,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Notes routes
     Route::resource('notes', NoteController::class);
+    Route::resource('feedback', FeedbackController::class);
     Route::post('/notes/{note}/retry', [NoteController::class, 'retryProcessing'])->name('notes.retry');
     
 
