@@ -101,7 +101,6 @@ const [deleteRelatedItems, setDeleteRelatedItems] = useState(false);
         
         setFeedbackModalOpen(false);
         setFeedbackReason('');
-        // fetchFeedbackStats();
 
         toastConfig.error('Thanks for the feedback');
 
@@ -725,42 +724,30 @@ const [deleteRelatedItems, setDeleteRelatedItems] = useState(false);
                                             .filter(media => media.collection_name === 'note-audio')
                                             .map((audioFile, index) => (
                                                 <div key={audioFile.id} className="space-y-2">
-                                                    {index > 0  && <>  <Separator className="my-4" />
-          
-          <div className="mt-4">
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleSubmitFeedback(true)}
-                className="p-2 rounded-full bg-green-100 text-green-600"
-                disabled={note.user_id === user.id}
-              >
-                <ThumbsUp className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setFeedbackModalOpen(true)}
-                className="p-2 rounded-full bg-red-100 text-red-600"
-                disabled={note.user_id === user.id}
-              >
-                <ThumbsDown className="w-5 h-5" />
-              </button>
-            </div>
-            
-            {feedbackStats && (
-              <div className="mt-2 text-sm text-gray-500">
-                {feedbackStats.total > 0 ? (
-                  <>
-                    <span>{feedbackStats.positive_percentage}% positive feedback</span>
-                    <span> • </span>
-                    <span>{feedbackStats.total} total ratings</span>
-                  </>
-                ) : (
-                  <span>No feedback yet</span>
-                )}
-              </div>
-            )}
-          </div>
-          </>
-          }
+                                                    {index > 0  && 
+                                                        <>  
+                                                            <Separator className="my-4" />
+                                                            <div className="mt-4">
+                                                                <div className="flex gap-2">
+                                                                <button
+                                                                    onClick={() => handleSubmitFeedback(true)}
+                                                                    className="p-2 rounded-full bg-green-100 text-green-600"
+                                                                    disabled={note.user_id === user.id}
+                                                                >
+                                                                    <ThumbsUp className="w-5 h-5" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setFeedbackModalOpen(true)}
+                                                                    className="p-2 rounded-full bg-red-100 text-red-600"
+                                                                    disabled={note.user_id === user.id}
+                                                                >
+                                                                    <ThumbsDown className="w-5 h-5" />
+                                                                </button>
+                                                                </div>
+                                                            
+                                                            </div>
+                                                        </>
+                                                    }
                                                     <AudioPlayer
                                                         src={audioFile.original_url}
                                                         onPlay={e => console.log("onPlay")}
@@ -869,7 +856,7 @@ const [deleteRelatedItems, setDeleteRelatedItems] = useState(false);
                                             onClick={() => handleSubmitFeedback(true)}
                                             className="text-green-600 hover:bg-green-50"
                                         >
-                                            <ThumbsUp className="w-4 h-4 mr-1" /> Helpful
+                                            <ThumbsUp className="w-4 h-4 mr-1" /> 
                                         </Button>
                                         <Button 
                                             variant="ghost" 
@@ -877,7 +864,7 @@ const [deleteRelatedItems, setDeleteRelatedItems] = useState(false);
                                             onClick={() => handleSubmitFeedback(false)}
                                             className="text-red-600 hover:bg-red-50"
                                         >
-                                            <ThumbsDown className="w-4 h-4 mr-1" /> Not Helpful
+                                            <ThumbsDown className="w-4 h-4 mr-1" /> 
                                         </Button>
                                     </div>
                                 </div>
