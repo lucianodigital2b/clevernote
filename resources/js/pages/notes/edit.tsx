@@ -95,7 +95,7 @@ export default function Edit({ note }: { note: Note }) {
         setFeedbackModalOpen(false);
         setFeedbackReason('');
 
-        toastConfig.error('Thanks for the feedback');
+        toastConfig.success('Thanks for the feedback');
 
     } catch (error) {
         console.error('Error submitting feedback:', error);
