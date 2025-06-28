@@ -31,6 +31,11 @@ class Quiz extends Model
         return $this->hasMany(QuizQuestion::class)->orderBy('order');
     }
 
+    public function feedback()
+    {
+        return $this->morphMany(Feedback::class, 'feedbackable');
+    }
+
     public function attempts(): HasMany
     {
         return $this->hasMany(QuizAttempt::class);

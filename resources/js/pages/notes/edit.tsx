@@ -1,4 +1,5 @@
 import { router, Head, usePage } from '@inertiajs/react';
+import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -50,6 +51,18 @@ import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
 
 export default function Edit({ note }: { note: Note }) {
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [feedbackReason, setFeedbackReason] = useState('');
+  
+const [deleteRelatedItems, setDeleteRelatedItems] = useState(false);
+
+  const [feedbackStats, setFeedbackStats] = useState<{
+    total: number;
+    positive: number;
+    negative: number;
+    positive_percentage: number;
+  } | null>(null);
+
     const { t } = useTranslation();
     const { errors } = usePage().props;
     
@@ -74,7 +87,46 @@ export default function Edit({ note }: { note: Note }) {
     
 
 
-    const handleUpdate = () => {
+  
+  const handleSubmitFeedback = async (isPositive: boolean) => {
+    
+    try {
+        const res = await axios.post(`/feedback`, {
+            feedbackable_type: 'note',
+            feedbackable_id: note.id,
+            is_positive: isPositive,
+            reason: isPositive ? null : feedbackReason,
+        })
+
+        
+        setFeedbackModalOpen(false);
+        setFeedbackReason('');
+        // fetchFeedbackStats();
+
+        toastConfig.error('Thanks for the feedback');
+
+    } catch (error) {
+        console.error('Error submitting feedback:', error);
+        toastConfig.error('Failed to submit feedback');
+    }
+
+  };
+
+  const fetchFeedbackStats = () => {
+    router.get(`/feedback/stats`, {
+      feedbackable_type: 'note',
+      feedbackable_id: note.id,
+    }, {
+      onSuccess: (res) => {
+        setFeedbackStats(res.props.feedbackStats);
+      }
+    });
+  };
+
+ 
+
+
+  const handleUpdate = () => {
         router.patch(`/notes/${note.id}`, {
             content,
             folder_id: selectedFolder,
@@ -455,8 +507,6 @@ export default function Edit({ note }: { note: Note }) {
 
 
 
-    const [deleteRelatedItems, setDeleteRelatedItems] = useState(false);
-
     const handleDelete = () => {
         router.delete(`/notes/${note.id}`, {
             data: {
@@ -472,24 +522,37 @@ export default function Edit({ note }: { note: Note }) {
         });
     };
 
-    // In the return statement, add this before the closing div of the content section
-    // <div className="mt-6 flex justify-end">
-    //     <Button
-    //         onClick={handleUpdate}
-    //         className="bg-purple-600 hover:bg-purple-700"
-    //     >
-    //         Save Changes
-    //     </Button>
-    // </div>
 
     return (
         <AppLayout>
-            <Head title={`${currentNote.title} - Note`} />
+            <Dialog open={feedbackModalOpen} onOpenChange={setFeedbackModalOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-medium">What was the issue with this note?</h3>
+                        <textarea 
+                            className="w-full p-2 border rounded min-h-[100px]"
+                            value={feedbackReason}
+                            onChange={(e) => setFeedbackReason(e.target.value)}
+                            placeholder="Please describe the issue..."
+                        />
+                        <div className="flex justify-end gap-2">
+                            <Button variant="outline" onClick={() => setFeedbackModalOpen(false)}>
+                                {t('cancel')}
+                            </Button>
+                            <Button onClick={() => handleSubmitFeedback(false)}>
+                                {t('save')}
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            <Head title={`${currentNote.title}`} />
             
             <Dialog open={isFolderModalOpen} onOpenChange={setIsFolderModalOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                     <div className="space-y-4">
-                        <h3 className="text-lg font-medium">Select Folder</h3>
+                        <h3 className="text-lg font-medium">{t('select')}</h3>
                         <select 
                             className="w-full p-2 border rounded"
                             value={selectedFolder || ''}
@@ -502,10 +565,10 @@ export default function Edit({ note }: { note: Note }) {
                         </select>
                         <div className="flex justify-end gap-2">
                             <Button variant="outline" onClick={() => setIsFolderModalOpen(false)}>
-                                Cancel
+                                {t('cancel')}
                             </Button>
                             <Button onClick={handleSaveFolder}>
-                                Save
+                                {t('save')}
                             </Button>
                         </div>
                     </div>
@@ -557,7 +620,7 @@ export default function Edit({ note }: { note: Note }) {
                                     className="flex items-center gap-2"
                                 >
                                     <Folder className="h-4 w-4" />
-                                    <span className="hidden sm:inline">Folder</span>
+                                    <span className="hidden sm:inline">{t('folder')}</span>
                                 </Button>
                                 
                                 <DropdownMenu>
@@ -577,37 +640,37 @@ export default function Edit({ note }: { note: Note }) {
                         </div>
 
                         {isFailed ? (
-            <Card className="border-2 border-dashed border-red-200 bg-red-50/50 dark:bg-red-900/10">
-                <CardContent className="flex flex-col items-center justify-center min-h-[500px] p-12">
-                    <div className="relative">
-                        <div className="rounded-full h-16 w-16 bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
-                            <X className="h-8 w-8 text-red-600 dark:text-red-400" />
-                        </div>
-                    </div>
-                    <div className="text-center mt-6">
-                        <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-                            Processing failed
-                        </h3>
-                        <p className="text-neutral-600 dark:text-neutral-400 mb-4">
-                            We encountered an error while processing your note. This could be due to content complexity or a temporary service issue.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                            <Button 
-                                onClick={handleRetryProcessing}
-                                className="bg-red-600 hover:bg-red-700 text-white"
-                            >
-                                <Brain className="h-4 w-4 mr-2" />
-                                Try Again
-                            </Button>
-                            
-                        </div>
-                        <p className="text-xs text-neutral-500 mt-4">
-                            If this problem persists, please contact support
-                        </p>
-                    </div>
-                </CardContent>
-            </Card>
-        ) : isProcessing ? (
+                                <Card className="border-2 border-dashed border-red-200 bg-red-50/50 dark:bg-red-900/10">
+                                    <CardContent className="flex flex-col items-center justify-center min-h-[500px] p-12">
+                                        <div className="relative">
+                                            <div className="rounded-full h-16 w-16 bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                                                <X className="h-8 w-8 text-red-600 dark:text-red-400" />
+                                            </div>
+                                        </div>
+                                        <div className="text-center mt-6">
+                                            <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
+                                                Processing failed
+                                            </h3>
+                                            <p className="text-neutral-600 dark:text-neutral-400 mb-4">
+                                                We encountered an error while processing your note. This could be due to content complexity or a temporary service issue.
+                                            </p>
+                                            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                                                <Button 
+                                                    onClick={handleRetryProcessing}
+                                                    className="bg-red-600 hover:bg-red-700 text-white"
+                                                >
+                                                    <Brain className="h-4 w-4 mr-2" />
+                                                    Try Again
+                                                </Button>
+                                                
+                                            </div>
+                                            <p className="text-xs text-neutral-500 mt-4">
+                                                If this problem persists, please contact support
+                                            </p>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                ) : isProcessing ? (
             <Card className="border-2 border-dashed border-blue-200 bg-blue-50/50 dark:bg-blue-900/10">
                 <CardContent className="flex flex-col items-center justify-center min-h-[500px] p-12">
                     <div className="relative">
@@ -648,9 +711,7 @@ export default function Edit({ note }: { note: Note }) {
                                         {currentNote.title}
                                     </h1>
                                     <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-500">
-                                        <span>Created {dayjs(currentNote.created_at).format('MMM DD, YYYY')}</span>
-                                        <span>•</span>
-                                        <span>Last updated {dayjs(currentNote.updated_at).fromNow()}</span>
+                                        <span>{t('created')} {dayjs(currentNote.created_at).format('MMM DD, YYYY')}</span>
                                     </div>
                                 </div>
 
@@ -664,7 +725,42 @@ export default function Edit({ note }: { note: Note }) {
                                             .filter(media => media.collection_name === 'note-audio')
                                             .map((audioFile, index) => (
                                                 <div key={audioFile.id} className="space-y-2">
-                                                    {index > 0 && <Separator className="my-4" />}
+                                                    {index > 0  && <>  <Separator className="my-4" />
+          
+          <div className="mt-4">
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleSubmitFeedback(true)}
+                className="p-2 rounded-full bg-green-100 text-green-600"
+                disabled={note.user_id === user.id}
+              >
+                <ThumbsUp className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setFeedbackModalOpen(true)}
+                className="p-2 rounded-full bg-red-100 text-red-600"
+                disabled={note.user_id === user.id}
+              >
+                <ThumbsDown className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {feedbackStats && (
+              <div className="mt-2 text-sm text-gray-500">
+                {feedbackStats.total > 0 ? (
+                  <>
+                    <span>{feedbackStats.positive_percentage}% positive feedback</span>
+                    <span> • </span>
+                    <span>{feedbackStats.total} total ratings</span>
+                  </>
+                ) : (
+                  <span>No feedback yet</span>
+                )}
+              </div>
+            )}
+          </div>
+          </>
+          }
                                                     <AudioPlayer
                                                         src={audioFile.original_url}
                                                         onPlay={e => console.log("onPlay")}
@@ -740,10 +836,10 @@ export default function Edit({ note }: { note: Note }) {
                                 <div className="">
                                     
                                     {/* Editor Container */}
-                                    <div className="border border-neutral-200 dark:border-neutral-800 rounded-lg overflow-hidden bg-white dark:bg-neutral-900">
+                                    <div className=" dark:border-neutral-800 rounded-lg overflow-hidden bg-white dark:bg-neutral-900">
                                         {editor ? (
                                             <>
-                                                <div className="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/50">
+                                                <div className=" dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/50">
                                                     <TiptapToolbar editor={editor} />
                                                 </div>
                                                 <div className="p-6">
@@ -764,6 +860,25 @@ export default function Edit({ note }: { note: Note }) {
                                                 </div>
                                             </div>
                                         )}
+                                    </div>
+
+                                    <div className="flex gap-2 mt-5">
+                                        <Button 
+                                            variant="ghost" 
+                                            size="sm"
+                                            onClick={() => handleSubmitFeedback(true)}
+                                            className="text-green-600 hover:bg-green-50"
+                                        >
+                                            <ThumbsUp className="w-4 h-4 mr-1" /> Helpful
+                                        </Button>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="sm"
+                                            onClick={() => handleSubmitFeedback(false)}
+                                            className="text-red-600 hover:bg-red-50"
+                                        >
+                                            <ThumbsDown className="w-4 h-4 mr-1" /> Not Helpful
+                                        </Button>
                                     </div>
                                 </div>
                                 {/* Editor Toolbar */}
@@ -924,6 +1039,8 @@ export default function Edit({ note }: { note: Note }) {
                     </div>
                 </DialogContent>
             </Dialog>
+
+                  
         </AppLayout>
     );
 }
