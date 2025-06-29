@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PlusIcon, TrashIcon, CheckIcon } from '@heroicons/react/24/outline';
@@ -10,6 +10,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/app-layout';
 import { useTranslation } from 'react-i18next';
+import { useEditor, EditorContent } from '@tiptap/react';
+import axios from 'axios';
+import StarterKit from '@tiptap/starter-kit';
+import Image from '@tiptap/extension-image';
+import Highlight from '@tiptap/extension-highlight';
+import { toastConfig } from '@/lib/toast';
+import { Bold as BoldIcon, Italic as ItalicIcon, ImageIcon } from 'lucide-react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface QuizOption {
   id: string;
@@ -37,6 +50,9 @@ interface Props {
 
 export default function Edit({ quiz }: Props) {
   const { t } = useTranslation();
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadingEditor, setUploadingEditor] = useState<string | null>(null);
+  
   const { data, setData, put, processing, errors } = useForm({
     title: quiz.title,
     description: quiz.description || '',
@@ -49,6 +65,156 @@ export default function Edit({ quiz }: Props) {
       }))
     })),
   });
+
+  // Image upload function
+  const uploadImage = async (file: File, editor: any, collection: string) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    setIsUploadingImage(true);
+    setUploadingEditor(collection);
+    
+    try {
+      const res = await axios.post(`/api/quizzes/${quiz.id}/media`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        params: {
+          collection: collection
+        }
+      });
+      
+      const { url } = res.data;
+      editor?.chain().focus().setImage({ src: url }).run();
+    } catch (error) {
+      toastConfig.error('Failed to upload image');
+    } finally {
+      setIsUploadingImage(false);
+      setUploadingEditor(null);
+    }
+  };
+
+  // Description editor
+  const descriptionEditor = useEditor({
+    extensions: [
+      StarterKit,
+      Image.configure({
+        inline: false,
+        allowBase64: false,
+      }),
+      Highlight.configure({
+        multicolor: true,
+      })
+    ],
+    content: data.description,
+    editorProps: {
+      handlePaste: (view, event, slice) => {
+        const file = event.clipboardData?.files?.[0];
+        if (file && file.type.startsWith('image/')) {
+          uploadImage(file, descriptionEditor, 'quiz-description-images');
+          return true;
+        }
+        return false;
+      },
+      handleDrop: (view, event, slice, moved) => {
+        const file = event.dataTransfer?.files?.[0];
+        if (file && file.type.startsWith('image/')) {
+          uploadImage(file, descriptionEditor, 'quiz-description-images');
+          return true;
+        }
+        return false;
+      },
+    },
+    onUpdate: ({ editor }) => {
+      setData('description', editor.getHTML());
+    },
+  });
+
+  // Initialize editors for existing questions and options
+  const [questionEditors, setQuestionEditors] = useState<any[]>([]);
+  const [optionEditors, setOptionEditors] = useState<any[][]>([]);
+
+  // Create question editors
+  const questionEditorsRefs = data.questions.map((question, questionIndex) => 
+    useEditor({
+      extensions: [
+        StarterKit,
+        Image.configure({
+          inline: false,
+          allowBase64: false,
+        }),
+        Highlight.configure({
+          multicolor: true,
+        })
+      ],
+      content: question.question,
+      editorProps: {
+        handlePaste: (view, event, slice) => {
+          const file = event.clipboardData?.files?.[0];
+          if (file && file.type.startsWith('image/')) {
+            uploadImage(file, questionEditorsRefs[questionIndex], 'quiz-question-images');
+            return true;
+          }
+          return false;
+        },
+        handleDrop: (view, event, slice, moved) => {
+          const file = event.dataTransfer?.files?.[0];
+          if (file && file.type.startsWith('image/')) {
+            uploadImage(file, questionEditorsRefs[questionIndex], 'quiz-question-images');
+            return true;
+          }
+          return false;
+        },
+      },
+      onUpdate: ({ editor }) => {
+        const newQuestions = [...data.questions];
+        newQuestions[questionIndex].question = editor.getHTML();
+        setData('questions', newQuestions);
+      },
+    })
+  );
+
+  // Create option editors
+  const optionEditorsRefs = data.questions.map((question, questionIndex) => 
+    question.options.map((option, optionIndex) => 
+      useEditor({
+        extensions: [
+          StarterKit,
+          Image.configure({
+            inline: false,
+            allowBase64: false,
+          }),
+          Highlight.configure({
+            multicolor: true,
+          })
+        ],
+        content: option.text,
+        editorProps: {
+          handlePaste: (view, event, slice) => {
+            const file = event.clipboardData?.files?.[0];
+            if (file && file.type.startsWith('image/')) {
+              uploadImage(file, optionEditorsRefs[questionIndex]?.[optionIndex], 'quiz-option-images');
+              return true;
+            }
+            return false;
+          },
+          handleDrop: (view, event, slice, moved) => {
+            const file = event.dataTransfer?.files?.[0];
+            if (file && file.type.startsWith('image/')) {
+              uploadImage(file, optionEditorsRefs[questionIndex]?.[optionIndex], 'quiz-option-images');
+              return true;
+            }
+            return false;
+          },
+        },
+        onUpdate: ({ editor }) => {
+          const newQuestions = [...data.questions];
+          newQuestions[questionIndex].options[optionIndex].text = editor.getHTML();
+          setData('questions', newQuestions);
+        },
+      })
+    )
+  );
 
   const addQuestion = () => {
     const newQuestion: QuizQuestion = {
@@ -100,7 +266,7 @@ export default function Edit({ quiz }: Props) {
       <form onSubmit={handleSubmit} className="p-6 max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">{t('edit_quiz')}</h1>
 
-        <div className="bg-white rounded-lg shadow p-6 mb-6 space-y-4">
+        <div className="rounded-lg p-6 mb-6 space-y-4">
           <div className="space-y-4">
             <div>
               <Label htmlFor="title">{t('quiz_title')}</Label>
@@ -115,12 +281,68 @@ export default function Edit({ quiz }: Props) {
 
             <div>
               <Label htmlFor="description">{t('quiz_description_optional')}</Label>
-              <Textarea
-                id="description"
-                value={data.description}
-                onChange={(e) => setData('description', e.target.value)}
-                rows={3}
-              />
+              <div className="border rounded-md">
+                <div className="border-b p-2 flex gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => descriptionEditor?.chain().focus().toggleBold().run()}
+                    className={`p-2 rounded text-sm ${
+                      descriptionEditor?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                    }`}
+                    title="Bold"
+                  >
+                    <BoldIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => descriptionEditor?.chain().focus().toggleItalic().run()}
+                    className={`p-2 rounded text-sm ${
+                      descriptionEditor?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                    }`}
+                    title="Italic"
+                  >
+                    <ItalicIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => descriptionEditor?.chain().focus().toggleHighlight().run()}
+                    className={`p-2 rounded text-sm ${
+                      descriptionEditor?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                    }`}
+                    title="Highlight"
+                  >
+                    <span className="w-4 h-4 bg-yellow-300 rounded px-1">H</span>
+                  </button>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        uploadImage(file, descriptionEditor, 'quiz-description-images');
+                      }
+                    }}
+                    className="hidden"
+                    id="description-image-upload"
+                  />
+                  <label
+                    htmlFor="description-image-upload"
+                    className="p-2 rounded text-sm bg-gray-200 cursor-pointer hover:bg-gray-300 flex items-center justify-center"
+                    title={isUploadingImage && uploadingEditor === 'quiz-description-images' ? 'Uploading...' : 'Insert Image'}
+                  >
+                    {isUploadingImage && uploadingEditor === 'quiz-description-images' ? (
+                      <span className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></span>
+                    ) : (
+                      <ImageIcon className="w-4 h-4" />
+                    )}
+                  </label>
+                </div>
+                <EditorContent 
+                  editor={descriptionEditor} 
+                  className="prose max-w-none p-4 min-h-[100px] focus:outline-none"
+                />
+              </div>
+              {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
             </div>
 
             <div className="flex items-center space-x-2">
@@ -143,7 +365,7 @@ export default function Edit({ quiz }: Props) {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <div className="rounded-lg p-6 mb-6 border border-gray-200/50 backdrop-blur-sm bg-white/5">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">{t('question_number', { number: questionIndex + 1 })}</h2>
                   <button
@@ -158,14 +380,67 @@ export default function Edit({ quiz }: Props) {
                 <div className="space-y-4">
                   <div>
                     <Label>{t('question_text')}</Label>
-                    <Input
-                      value={question.question}
-                      onChange={(e) => {
-                        const newQuestions = [...data.questions];
-                        newQuestions[questionIndex].question = e.target.value;
-                        setData('questions', newQuestions);
-                      }}
-                    />
+                    <div className="border rounded-md">
+                      <div className="border-b p-2 flex gap-2 flex-wrap">
+                        <button
+                          type="button"
+                          onClick={() => questionEditorsRefs[questionIndex]?.chain().focus().toggleBold().run()}
+                          className={`p-2 rounded text-sm ${
+                            questionEditorsRefs[questionIndex]?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                          }`}
+                          title="Bold"
+                        >
+                          <BoldIcon className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => questionEditorsRefs[questionIndex]?.chain().focus().toggleItalic().run()}
+                          className={`p-2 rounded text-sm ${
+                            questionEditorsRefs[questionIndex]?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                          }`}
+                          title="Italic"
+                        >
+                          <ItalicIcon className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => questionEditorsRefs[questionIndex]?.chain().focus().toggleHighlight().run()}
+                          className={`p-2 rounded text-sm ${
+                            questionEditorsRefs[questionIndex]?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                          }`}
+                          title="Highlight"
+                        >
+                          <span className="w-4 h-4 bg-yellow-300 rounded px-1">H</span>
+                        </button>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              uploadImage(file, questionEditorsRefs[questionIndex], 'quiz-question-images');
+                            }
+                          }}
+                          className="hidden"
+                          id={`question-${questionIndex}-image-upload`}
+                        />
+                        <label
+                          htmlFor={`question-${questionIndex}-image-upload`}
+                          className="p-2 rounded text-sm bg-gray-200 cursor-pointer hover:bg-gray-300 flex items-center justify-center"
+                          title={isUploadingImage && uploadingEditor === 'quiz-question-images' ? 'Uploading...' : 'Insert Image'}
+                        >
+                          {isUploadingImage && uploadingEditor === 'quiz-question-images' ? (
+                            <span className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></span>
+                          ) : (
+                            <ImageIcon className="w-4 h-4" />
+                          )}
+                        </label>
+                      </div>
+                      <EditorContent 
+                        editor={questionEditorsRefs[questionIndex]} 
+                        className="prose max-w-none p-4 min-h-[100px] focus:outline-none"
+                      />
+                    </div>
                   </div>
 
                   <div>
@@ -196,17 +471,69 @@ export default function Edit({ quiz }: Props) {
                         key={option.id}
                         className="flex gap-2 mb-2"
                       >
-                        <Input
-                          placeholder={t('option_number', { number: optionIndex + 1 })}
-                          value={option.text}
-                          onChange={(e) => {
-                            const newQuestions = [...data.questions];
-                            newQuestions[questionIndex].options[optionIndex].text =
-                              e.target.value;
-                            setData('questions', newQuestions);
-                          }}
-                          className="flex-1"
-                        />
+                        <div className="flex-1">
+                          <div className="border rounded-md">
+                            <div className="border-b p-2 flex gap-2 flex-wrap">
+                              <button
+                                 type="button"
+                                 onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleBold().run()}
+                                 className={`p-2 rounded text-sm ${
+                                   optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                                 }`}
+                                 title="Bold"
+                               >
+                                 <BoldIcon className="w-4 h-4" />
+                               </button>
+                               <button
+                                 type="button"
+                                 onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleItalic().run()}
+                                 className={`p-2 rounded text-sm ${
+                                   optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                                 }`}
+                                 title="Italic"
+                               >
+                                 <ItalicIcon className="w-4 h-4" />
+                               </button>
+                               <button
+                                 type="button"
+                                 onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleHighlight().run()}
+                                 className={`p-2 rounded text-sm ${
+                                   optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                                 }`}
+                                 title="Highlight"
+                               >
+                                 <span className="w-4 h-4 bg-yellow-300 rounded px-1">H</span>
+                               </button>
+                               <input
+                                 type="file"
+                                 accept="image/*"
+                                 onChange={(e) => {
+                                   const file = e.target.files?.[0];
+                                   if (file) {
+                                     uploadImage(file, optionEditorsRefs[questionIndex]?.[optionIndex], 'quiz-option-images');
+                                   }
+                                 }}
+                                 className="hidden"
+                                 id={`option-${questionIndex}-${optionIndex}-image-upload`}
+                               />
+                               <label
+                                 htmlFor={`option-${questionIndex}-${optionIndex}-image-upload`}
+                                 className="p-2 rounded text-sm bg-gray-200 cursor-pointer hover:bg-gray-300 flex items-center justify-center"
+                                 title={isUploadingImage && uploadingEditor === 'quiz-option-images' ? 'Uploading...' : 'Insert Image'}
+                               >
+                                 {isUploadingImage && uploadingEditor === 'quiz-option-images' ? (
+                                   <span className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></span>
+                                 ) : (
+                                   <ImageIcon className="w-4 h-4" />
+                                 )}
+                               </label>
+                             </div>
+                             <EditorContent 
+                               editor={optionEditorsRefs[questionIndex]?.[optionIndex]} 
+                               className="prose max-w-none p-4 min-h-[60px] focus:outline-none"
+                             />
+                          </div>
+                        </div>
                         <button
                           type="button"
                           onClick={() =>

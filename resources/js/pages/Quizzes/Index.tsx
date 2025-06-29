@@ -128,6 +128,11 @@ export default function Index({ quizzes, isLoading = false }: Props) {
                         <DropdownMenuItem className="text-red-500" onClick={() => handleDelete(quiz.id)}>
                           {t('delete')}
                         </DropdownMenuItem>
+                        <DropdownMenuItem className="" asChild>
+                          <Link href={'/quizzes/' + quiz.id + '/edit'}>
+                            {t('edit')}
+                          </Link>
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
