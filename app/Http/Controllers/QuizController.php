@@ -8,6 +8,7 @@ use App\Models\Note;
 use App\Models\Quiz;
 use App\Models\QuizQuestion;
 use App\Models\QuizOption;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use App\Models\QuizAttempt;
 use App\Models\QuizAnswer;
 use App\Services\QuizGeneratorService;
@@ -54,6 +55,13 @@ class QuizController extends Controller
         }
 
         return Inertia::render('Quizzes/Create');
+    }
+
+    public function edit(Request $request, Quiz $quiz)
+    {
+        return Inertia::render('Quizzes/Edit',[
+            'quiz' => $quiz->load('questions.options',),
+        ]);
     }
 
     public function store(Request $request)

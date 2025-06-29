@@ -5,9 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Quiz extends Model
+class Quiz extends Model implements HasMedia
 {
+    use InteractsWithMedia;
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('quiz-question-images')->useDisk('r2');
+        $this->addMediaCollection('quiz-option-images')->useDisk('r2');
+    }
+
     protected $fillable = [
         'title',
         'description',

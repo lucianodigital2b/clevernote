@@ -11,7 +11,7 @@ class FeedbackController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'feedbackable_type' => 'required|string|in:note,flashcard,quiz,general',
+            'feedbackable_type' => 'required|string|in:note,flashcard,quiz',
             'feedbackable_id' => 'required|integer',
             'is_positive' => 'required|boolean',
             'reason' => 'nullable|string|max:500'
@@ -19,7 +19,7 @@ class FeedbackController extends Controller
 
         $feedback = Feedback::create([
             'user_id' => Auth::id(),
-            'feedbackable_type' => $validated['feedbackable_type'] == 'general' ? 'general' : 'App\\Models\\' . ucfirst($validated['feedbackable_type']),
+            'feedbackable_type' => 'App\\Models\\' . ucfirst($validated['feedbackable_type']),
             'feedbackable_id' => $validated['feedbackable_id'],
             'is_positive' => $validated['is_positive'],
             'reason' => $validated['reason'] ?? null

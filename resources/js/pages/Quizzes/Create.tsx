@@ -14,6 +14,7 @@ import AppLayout from '@/layouts/app-layout';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { toastConfig } from '@/lib/toast';
+import { TiptapEditor } from '@/components/ui/tiptap-editor';
 
 interface QuizOption {
   id: string;
@@ -153,12 +154,10 @@ export default function Create() {
 
               <div>
                 <Label htmlFor="description">{t('Description (Optional)')}</Label>
-                <Textarea
-                  id="description"
-                  value={data.description}
-                  onChange={(e) => setData('description', e.target.value)}
-                  rows={3}
-                  placeholder={t('Enter quiz description...')}
+                <TiptapEditor
+                  content={data.description}
+                  onUpdate={(content) => setData('description', content)}
+                  mediaCollection="quiz-description-images"
                 />
               </div>
 
@@ -220,11 +219,14 @@ export default function Create() {
                     <CardContent className="space-y-4">
                       <div>
                         <Label>{t('Question Text')}</Label>
-                        <Textarea
-                          value={question.question}
-                          onChange={(e) => updateQuestion(questionIndex, 'question', e.target.value)}
-                          placeholder={t('Enter your question...')}
-                          rows={2}
+                        <TiptapEditor
+                          content={question.question}
+                          onUpdate={(content) => {
+                            const newQuestions = [...data.questions];
+                            newQuestions[questionIndex].question = content;
+                            setData('questions', newQuestions);
+                          }}
+                          mediaCollection="quiz-question-images"
                         />
                       </div>
 
