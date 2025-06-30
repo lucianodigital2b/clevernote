@@ -16,8 +16,27 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Highlight from '@tiptap/extension-highlight';
 import { toastConfig } from '@/lib/toast';
-import { Bold as BoldIcon, Italic as ItalicIcon, ImageIcon } from 'lucide-react';
+import { Bold as BoldIcon, Italic as ItalicIcon, ImageIcon, GripVertical } from 'lucide-react';
 import { QuizQuestion } from '@/types/quiz';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import {
+  CSS,
+} from '@dnd-kit/utilities';
 
 
 
@@ -31,10 +50,157 @@ interface Props {
   };
 }
 
+// Sortable Option Component
+function SortableOption({ option, questionIndex, optionIndex, question, optionEditorsRefs, isUploadingImage, uploadingEditor, uploadImage, removeOption, errors }: any) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: option.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex gap-2 mb-2 group ${isDragging ? 'z-50' : ''}`}
+    >
+      <div className="flex-1">
+        <div className={`border rounded-md ${
+          errors && errors[`questions.${questionIndex}.options.${optionIndex}.text`] 
+            ? 'border-red-500' : ''
+        }`}>
+          <div className="border-b p-2 flex gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleBold().run()}
+              className={`p-2 rounded text-sm ${
+                optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
+              }`}
+              title="Bold"
+            >
+              <BoldIcon className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleItalic().run()}
+              className={`p-2 rounded text-sm ${
+                optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
+              }`}
+              title="Italic"
+            >
+              <ItalicIcon className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleHighlight().run()}
+              className={`p-2 rounded text-sm ${
+                optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
+              }`}
+              title="Highlight"
+            >
+              <span className="w-4 h-4 bg-purple-200 rounded px-1">H</span>
+            </button>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  uploadImage(file, optionEditorsRefs[questionIndex]?.[optionIndex], 'quiz-option-images');
+                }
+              }}
+              className="hidden"
+              id={`option-${questionIndex}-${optionIndex}-image-upload`}
+            />
+            <label
+              htmlFor={`option-${questionIndex}-${optionIndex}-image-upload`}
+              className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 flex items-center justify-center"
+              title={isUploadingImage && uploadingEditor === 'quiz-option-images' ? 'Uploading...' : 'Insert Image'}
+            >
+              {isUploadingImage && uploadingEditor === 'quiz-option-images' ? (
+                <span className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></span>
+              ) : (
+                <ImageIcon className="w-4 h-4" />
+              )}
+            </label>
+          </div>
+          <EditorContent 
+            editor={optionEditorsRefs[questionIndex]?.[optionIndex]} 
+            className="prose max-w-none p-4 min-h-[60px] focus:outline-none"
+          />
+        </div>
+        {errors && errors[`questions.${questionIndex}.options.${optionIndex}.text`] && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors[`questions.${questionIndex}.options.${optionIndex}.text`]}
+          </p>
+        )}
+      </div>
+      <div className="flex items-center gap-1">
+        <div
+          {...attributes}
+          {...listeners}
+          className="opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing p-2 text-gray-400 hover:text-gray-600"
+          title="Drag to reorder"
+        >
+          <GripVertical className="w-4 h-4" />
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            const newQuestions = [...question.questions];
+            newQuestions[questionIndex] = {
+              ...question,
+              correctOptionId: option.id,
+              options: question.options.map(opt => ({
+                ...opt,
+                is_correct: opt.id === option.id
+              }))
+            };
+            question.setData('questions', newQuestions);
+          }}
+          className={`cursor-pointer p-2 rounded-full transition-colors ${
+            option.is_correct
+              ? 'bg-green-200 text-green-700 hover:bg-green-300'
+              : 'text-primary hover:bg-green-300'
+          }`}
+        >
+          <CheckIcon className="w-5 h-5" />
+        </button>
+        {question.options.length > 2 && (
+          <button
+            type="button"
+            onClick={() => removeOption(questionIndex, option.id)}
+            className="cursor-pointer text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50"
+          >
+            <TrashIcon className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Edit({ quiz }: Props) {
   const { t } = useTranslation();
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadingEditor, setUploadingEditor] = useState<string | null>(null);
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
   
   const { data, setData, put, processing, errors } = useForm({
     title: quiz.title,
@@ -242,6 +408,25 @@ export default function Edit({ quiz }: Props) {
     setData('questions', newQuestions);
   };
 
+  // Handle drag end for options
+  const handleDragEnd = (event: DragEndEvent, questionIndex: number) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      const newQuestions = [...data.questions];
+      const question = newQuestions[questionIndex];
+      const oldIndex = question.options.findIndex((option) => option.id === active.id);
+      const newIndex = question.options.findIndex((option) => option.id === over?.id);
+
+      newQuestions[questionIndex] = {
+        ...question,
+        options: arrayMove(question.options, oldIndex, newIndex),
+      };
+
+      setData('questions', newQuestions);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     put(`/quizzes/${quiz.id}`);
@@ -253,6 +438,23 @@ export default function Edit({ quiz }: Props) {
 
       <form onSubmit={handleSubmit} className="p-6 max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">{t('edit_quiz')}</h1>
+
+        {/* Display general errors */}
+        {Object.keys(errors).length > 0 && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <h3 className="text-red-800 font-semibold mb-2">Please fix the following errors:</h3>
+            <ul className="text-red-700 text-sm space-y-1">
+              {Object.entries(errors).map(([key, message]) => (
+                <li key={key} className="flex items-start">
+                  <span className="text-red-500 mr-2">•</span>
+                  <span>
+                    <strong>{key.replace(/\./g, ' → ')}:</strong> {message}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <div className="rounded-lg mb-6 ">
           <div className="space-y-4">
@@ -368,7 +570,9 @@ export default function Edit({ quiz }: Props) {
                 <div className="space-y-4">
                   <div>
                     <Label>{t('question_text')}</Label>
-                    <div className="border rounded-md">
+                    <div className={`border rounded-md ${
+                      errors[`questions.${questionIndex}.question`] ? 'border-red-500' : ''
+                    }`}>
                       <div className="border-b p-2 flex gap-2 flex-wrap">
                         <button
                           type="button"
@@ -429,135 +633,85 @@ export default function Edit({ quiz }: Props) {
                         className="prose max-w-none p-4 min-h-[100px] focus:outline-none"
                       />
                     </div>
+                    {errors[`questions.${questionIndex}.question`] && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors[`questions.${questionIndex}.question`]}
+                      </p>
+                    )}
                   </div>
 
+                  {/* Question Type Error */}
+                  {errors[`questions.${questionIndex}.type`] && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                      <p className="text-red-700 text-sm">
+                        <strong>Question Type Error:</strong> {errors[`questions.${questionIndex}.type`]}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Correct Option Error */}
+                  {errors[`questions.${questionIndex}.correctOptionId`] && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                      <p className="text-red-700 text-sm">
+                        <strong>Correct Answer Error:</strong> {errors[`questions.${questionIndex}.correctOptionId`]}
+                      </p>
+                    </div>
+                  )}
+
                   <div>
-                    <Label>{t('question_type')}</Label>
+                    <Label className="mb-2">{t('question_type')}</Label>
                     <Select
                       value={question.type}
                       onValueChange={(value) => {
                         const newQuestions = [...data.questions];
-                        newQuestions[questionIndex].type = value as QuizQuestion['type'];
+                        newQuestions[questionIndex].type = value;
                         setData('questions', newQuestions);
                       }}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('select_question_type')} />
+                      <SelectTrigger className={errors[`questions.${questionIndex}.type`] ? 'border-red-500' : ''}>
+                        <SelectValue placeholder="Select question type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="multiple_choice">{t('multiple_choice')}</SelectItem>
-                        <SelectItem value="true_false">{t('true_false')}</SelectItem>
-                        <SelectItem value="fill_in_blank">{t('fill_in_blank')}</SelectItem>
+                        <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
+                        <SelectItem value="true-false">True/False</SelectItem>
+                        <SelectItem value="fill-in-blank">Fill in the Blank</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
+
                   <div>
                     <Label className="mb-2">{t('options')}</Label>
-                    {question.options.map((option, optionIndex) => (
-                      <div
-                        key={option.id}
-                        className="flex gap-2 mb-2"
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={(event) => handleDragEnd(event, questionIndex)}
+                    >
+                      <SortableContext
+                        items={question.options.map((option) => option.id)}
+                        strategy={verticalListSortingStrategy}
                       >
-                        <div className="flex-1">
-                          <div className="border rounded-md">
-                            <div className="border-b p-2 flex gap-2 flex-wrap">
-                              <button
-                                 type="button"
-                                 onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleBold().run()}
-                                 className={`p-2 rounded text-sm ${
-                                   optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
-                                 }`}
-                                 title="Bold"
-                               >
-                                 <BoldIcon className="w-4 h-4" />
-                               </button>
-                               <button
-                                 type="button"
-                                 onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleItalic().run()}
-                                 className={`p-2 rounded text-sm ${
-                                   optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
-                                 }`}
-                                 title="Italic"
-                               >
-                                 <ItalicIcon className="w-4 h-4" />
-                               </button>
-                               <button
-                                 type="button"
-                                 onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleHighlight().run()}
-                                 className={`p-2 rounded text-sm ${
-                                   optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
-                                 }`}
-                                 title="Highlight"
-                               >
-                                 <span className="w-4 h-4 bg-purple-200 rounded px-1">H</span>
-                               </button>
-                               <input
-                                 type="file"
-                                 accept="image/*"
-                                 onChange={(e) => {
-                                   const file = e.target.files?.[0];
-                                   if (file) {
-                                     uploadImage(file, optionEditorsRefs[questionIndex]?.[optionIndex], 'quiz-option-images');
-                                   }
-                                 }}
-                                 className="hidden"
-                                 id={`option-${questionIndex}-${optionIndex}-image-upload`}
-                               />
-                               <label
-                                 htmlFor={`option-${questionIndex}-${optionIndex}-image-upload`}
-                                 className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 flex items-center justify-center"
-                                 title={isUploadingImage && uploadingEditor === 'quiz-option-images' ? 'Uploading...' : 'Insert Image'}
-                               >
-                                 {isUploadingImage && uploadingEditor === 'quiz-option-images' ? (
-                                   <span className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></span>
-                                 ) : (
-                                   <ImageIcon className="w-4 h-4" />
-                                 )}
-                               </label>
-                             </div>
-                             <EditorContent 
-                               editor={optionEditorsRefs[questionIndex]?.[optionIndex]} 
-                               className="prose max-w-none p-4 min-h-[60px] focus:outline-none"
-                             />
-                          </div>
-                        </div>
-                        <div className='d-flex content-center'> 
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newQuestions = [...data.questions];
-                              newQuestions[questionIndex] = {
+                        {question.options.map((option, optionIndex) => (
+                           <SortableOption
+                              key={option.id}
+                              option={option}
+                              questionIndex={questionIndex}
+                              optionIndex={optionIndex}
+                              question={{
                                 ...question,
-                                correctOptionId: option.id,
-                                options: question.options.map(opt => ({
-                                  ...opt,
-                                  is_correct: opt.id === option.id
-                                }))
-                              };
-                              setData('questions', newQuestions);
-                            }}
-                            className={`cursor-pointer p-2 rounded-full transition-colors ${option.is_correct
-                              ? 'bg-green-200 text-green-700 hover:bg-green-300 '
-                              : 'text-primary hover:bg-green-300'}`}
-                          >
-                            <CheckIcon className="w-5 h-5" />
-                          </button>
-
-                          {question.options.length > 2 && (
-                            <button
-                              type="button"
-
-                              onClick={() => removeOption(questionIndex, option.id)}
-                              className="cursor-pointer text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50"
-                            >
-                              <TrashIcon className="w-5 h-5" />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                                questions: data.questions,
+                                setData
+                              }}
+                              optionEditorsRefs={optionEditorsRefs}
+                              isUploadingImage={isUploadingImage}
+                              uploadingEditor={uploadingEditor}
+                              uploadImage={uploadImage}
+                              removeOption={removeOption}
+                              errors={errors}
+                            />
+                         ))}
+                      </SortableContext>
+                    </DndContext>
                     <Button
                       type="button"
                       variant="outline"
