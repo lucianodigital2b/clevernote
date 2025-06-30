@@ -10,7 +10,6 @@ export type QuizQuestion = {
   type: 'multiple_choice' | 'true_false' | 'fill_in_blank';
   explanation?: string;
   options: QuizOption[];
-  correctOptionId: string;
 };
 
 export type QuizSet = {

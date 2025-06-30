@@ -77,7 +77,7 @@ class QuizController extends Controller
             'questions.*.options' => 'required|array|min:2',
             'questions.*.options.*.id' => 'required|string',
             'questions.*.options.*.text' => 'required|string',
-            'questions.*.correctOptionId' => 'required|string'
+            'questions.*.options.*.is_correct' => 'required_if:questions.*.type,multiple-choice,true-false|boolean'
         ]);
 
         try {
@@ -101,7 +101,7 @@ class QuizController extends Controller
                 foreach ($questionData['options'] as $optionIndex => $option) {
                     $question->options()->create([
                         'text' => $option['text'],
-                        'is_correct' => $option['id'] === $questionData['correctOptionId'],
+                        'is_correct' => $option['is_correct'] ?? false,
                         'order' => $optionIndex,
                     ]);
                 }
@@ -162,12 +162,12 @@ class QuizController extends Controller
             'questions' => 'required|array|min:1',
             'questions.*.id' => 'nullable|exists:quiz_questions,id',
             'questions.*.question' => 'required|string',
-            'questions.*.type' => 'required|string|in:multiple_choice,true_false,fill_in_blank',
+            'questions.*.type' => 'required|string|in:multiple-choice,true-false,fill-in-blank',
             'questions.*.explanation' => 'nullable|string',
             'questions.*.options' => 'required|array|min:2',
             'questions.*.options.*.id' => 'nullable|exists:quiz_options,id',
             'questions.*.options.*.text' => 'required|string',
-            'questions.*.correctOptionId' => 'required|string'
+            'questions.*.options.*.is_correct' => 'required_if:questions.*.type,multiple-choice,true-false|boolean'
         ]);
 
         try {
@@ -202,7 +202,7 @@ class QuizController extends Controller
                         ['id' => $option['id'] ?? null],
                         [
                             'text' => $option['text'],
-                            'is_correct' => $option['id'] === $questionData['correctOptionId'],
+                            'is_correct' => $option['is_correct'] ?? false,
                             'order' => $optionIndex,
                         ]
                     );
