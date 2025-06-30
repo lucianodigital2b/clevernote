@@ -162,7 +162,7 @@ class QuizController extends Controller
             'questions' => 'required|array|min:1',
             'questions.*.id' => 'nullable|exists:quiz_questions,id',
             'questions.*.question' => 'required|string',
-            'questions.*.type' => 'required|string|in:multiple-choice,true-false,fill-in-blank',
+            'questions.*.type' => 'required|string|in:multiple_choice,true_false,fill_in_blank',
             'questions.*.explanation' => 'nullable|string',
             'questions.*.options' => 'required|array|min:2',
             'questions.*.options.*.id' => 'nullable|exists:quiz_options,id',
