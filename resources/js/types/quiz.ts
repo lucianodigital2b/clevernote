@@ -1,6 +1,7 @@
 export type QuizOption = {
     id: string;
     text: string;
+    is_correct: boolean;
 };
 
 export type QuizQuestion = {
