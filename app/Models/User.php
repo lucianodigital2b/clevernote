@@ -57,9 +57,9 @@ class User extends Authenticatable
 
     protected static function booted(): void
     {
-        // static::created(function ($user) {
-        //     $user->notify(new NewUserFeedback());
-        // });
+        static::created(function ($user) {
+            $user->notify(new NewUserFeedback());
+        });
     }
 
     public function flashcards(): HasMany
