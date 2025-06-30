@@ -24,6 +24,8 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { ProcessingState } from '@/components/ui/processing-state';
+import { LoadingModal } from '@/components/ui/loading-modal';
 import { Note } from '@/types';
 import { toastConfig } from '@/lib/toast';
 import dayjs from 'dayjs';
@@ -150,12 +152,12 @@ export default function Edit({ note }: { note: Note }) {
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [chatMessage, setChatMessage] = useState('');
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-    const [content, setContent] = useState(note.content);
+    const [content, setContent] = useState(currentNote.content);
 
     // Calculate word count from current content using useMemo for real-time updates
     const wordCount = useMemo(() => {
-        return getWordCount(content || note.content);
-    }, [content, note.content]);
+        return getWordCount(content || currentNote.content);
+    }, [content, currentNote.content]);
 
     const debouncedContent = useDebounce(content, 1000); // Debounce content by 1 second
 
@@ -378,7 +380,7 @@ export default function Edit({ note }: { note: Note }) {
             }),
             MathExtension.configure({ evaluation: true, katexOptions: { macros: { "\\B": "\\mathbb{B}" } }, delimiters: "dollar" }),
         ],
-        content: note.content,
+        content: currentNote.content,
         editorProps: {
             handlePaste: (view, event, slice) => {
               const file = event.clipboardData?.files?.[0]
@@ -395,6 +397,14 @@ export default function Edit({ note }: { note: Note }) {
             setContent(editor.getHTML());
         },
     });
+
+    // Sync editor content when currentNote changes (after processing)
+    useEffect(() => {
+        if (editor && currentNote.content && currentNote.content !== content) {
+            editor.commands.setContent(currentNote.content);
+            setContent(currentNote.content);
+        }
+    }, [currentNote.content, editor, content]);
 
     async function uploadImage(file : any) {
         const formData = new FormData()
@@ -451,7 +461,12 @@ export default function Edit({ note }: { note: Note }) {
                         clearInterval(intervalId);
                         setIsProcessing(false);
                         setCurrentNote(noteData);
-                        window.location.reload();
+                        // Update editor content with processed note content
+                        if (editor && noteData.content) {
+                            editor.commands.setContent(noteData.content);
+                        }
+                        setContent(noteData.content);
+                        toastConfig.success("Note processing completed");
                         
                     } else if (noteData.status === 'failed') {
                         clearInterval(intervalId);
@@ -473,15 +488,29 @@ export default function Edit({ note }: { note: Note }) {
                 clearInterval(intervalId);
             }
         };
-    }, [isProcessing, note.id]);
+    }, [isProcessing, note.id, editor]);
 
     // Add useEffect for autosave
     useEffect(() => {
-        // Only save if the editor is ready, content has changed (debounced)
-        if (editor && debouncedContent !== note.content) {
-            handleUpdate();
+        // Only save if the editor is ready, content has changed (debounced), and not currently processing
+        if (editor && debouncedContent !== currentNote.content && debouncedContent && !isProcessing) {
+            router.patch(`/notes/${note.id}`, {
+                content: debouncedContent,
+                folder_id: selectedFolder,
+                _method: 'PUT'
+            }, {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    // Silent save - no toast notification
+                },
+                onError: (errors) => {
+                    console.log(errors);
+                    toastConfig.error("Failed to update note");
+                }
+            });
         }
-    }, [debouncedContent, editor, note.content]);
+    }, [debouncedContent, editor, currentNote.content, isProcessing, note.id, selectedFolder]);
 
 
 
@@ -618,70 +647,10 @@ export default function Edit({ note }: { note: Note }) {
                         </div>
 
                         {isFailed ? (
-                                <Card className="border-2 border-dashed border-red-200 bg-red-50/50 dark:bg-red-900/10">
-                                    <CardContent className="flex flex-col items-center justify-center min-h-[500px] p-12">
-                                        <div className="relative">
-                                            <div className="rounded-full h-16 w-16 bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
-                                                <X className="h-8 w-8 text-red-600 dark:text-red-400" />
-                                            </div>
-                                        </div>
-                                        <div className="text-center mt-6">
-                                            <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-                                                Processing failed
-                                            </h3>
-                                            <p className="text-neutral-600 dark:text-neutral-400 mb-4">
-                                                We encountered an error while processing your note. This could be due to content complexity or a temporary service issue.
-                                            </p>
-                                            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                                                <Button 
-                                                    onClick={handleRetryProcessing}
-                                                    className="bg-red-600 hover:bg-red-700 text-white"
-                                                >
-                                                    <Brain className="h-4 w-4 mr-2" />
-                                                    Try Again
-                                                </Button>
-                                                
-                                            </div>
-                                            <p className="text-xs text-neutral-500 mt-4">
-                                                If this problem persists, please contact support
-                                            </p>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                ) : isProcessing ? (
-            <Card className="border-2 border-dashed border-blue-200 bg-blue-50/50 dark:bg-blue-900/10">
-                <CardContent className="flex flex-col items-center justify-center min-h-[500px] p-12">
-                    <div className="relative">
-                        <div className="rounded-full h-16 w-16 bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
-                            <Loader2 className="h-8 w-8 text-blue-600 dark:text-blue-400 animate-spin" />
-                        </div>
-                    </div>
-                    <div className="text-center mt-6">
-                        <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-                            Processing your note
-                        </h3>
-                        <p className="text-neutral-600 dark:text-neutral-400 mb-6">
-                            We're analyzing and processing your content. This usually takes a few moments.
-                        </p>
-                        
-                        {/* Skeleton Content */}
-                        <div className="max-w-2xl mx-auto space-y-4">
-                            <div className="animate-pulse">
-                                <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-3/4 mx-auto mb-3"></div>
-                                <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-full mb-3"></div>
-                                <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-5/6 mx-auto mb-3"></div>
-                                <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-4/5 mx-auto mb-6"></div>
-                                
-                                <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-2/3 mx-auto mb-3"></div>
-                                <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-full mb-3"></div>
-                                <div className="h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-3/4 mx-auto mb-3"></div>
-                            </div>
-                        </div>
-                        
-                    </div>
-                </CardContent>
-            </Card>
-        ) : (
+                            <ProcessingState state="failed" onRetry={handleRetryProcessing} />
+                        ) : isProcessing ? (
+                            <ProcessingState state="processing" />
+                        ) : (
                             <>
                                 {/* Title Section */}
                                 <div className="mb-8">
@@ -757,7 +726,6 @@ export default function Edit({ note }: { note: Note }) {
 
                                 {/* AI Actions Section */}
                                 <div className="mb-8">
-                                   
                                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
                                         {actions.map((action, index) => {
                                             const IconComponent = action.icon;
@@ -940,69 +908,10 @@ export default function Edit({ note }: { note: Note }) {
                 </AlertDialogContent>
             </AlertDialog>
             
-            {/* Enhanced Loading Modals */}
-            <Dialog open={isFlashcardModalOpen}>
-                <DialogContent className="sm:max-w-md">
-                    <div className="flex flex-col items-center gap-6 py-8">
-                        <div className="relative">
-                            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600"></div>
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <FileText className="h-6 w-6 text-blue-600" />
-                            </div>
-                        </div>
-                        <div className="text-center">
-                            <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-                                Creating Flashcards
-                            </h3>
-                            <p className="text-neutral-600 dark:text-neutral-400">
-                                AI is analyzing your note to create study cards
-                            </p>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
-            
-            <Dialog open={isQuizModalOpen}>
-                <DialogContent className="sm:max-w-md">
-                    <div className="flex flex-col items-center gap-6 py-8">
-                        <div className="relative">
-                            <div className="animate-spin rounded-full h-16 w-16 border-4 border-green-200 border-t-green-600"></div>
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <Brain className="h-6 w-6 text-green-600" />
-                            </div>
-                        </div>
-                        <div className="text-center">
-                            <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-                                Generating Quiz
-                            </h3>
-                            <p className="text-neutral-600 dark:text-neutral-400">
-                                Creating intelligent questions from your content
-                            </p>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
-            
-            <Dialog open={isMindmapLoading} onOpenChange={setIsMindmapLoading}>
-                <DialogContent className="sm:max-w-md">
-                    <div className="flex flex-col items-center gap-6 py-8">
-                        <div className="relative">
-                            <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600"></div>
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <Map className="h-6 w-6 text-purple-600" />
-                            </div>
-                        </div>
-                        <div className="text-center">
-                            <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-                                Building Mindmap
-                            </h3>
-                            <p className="text-neutral-600 dark:text-neutral-400">
-                                Mapping concepts and connections visually
-                            </p>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
+            {/* Loading Modals */}
+            <LoadingModal open={isFlashcardModalOpen} type="flashcard" />
+            <LoadingModal open={isQuizModalOpen} type="quiz" />
+            <LoadingModal open={isMindmapLoading} type="mindmap" onOpenChange={setIsMindmapLoading} />
 
                   
         </AppLayout>

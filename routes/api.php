@@ -36,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Notes routes
     Route::resource('notes', NoteController::class);
     Route::post('/notes/{note}/retry', [NoteController::class, 'retryProcessing'])->name('notes.retry');
+    Route::get('/notes/{note}/status', [NoteController::class, 'status']);
     
     Route::post('/subscriptions/resume/{subscriptionId}', [SubscriptionController::class, 'resume']);
     Route::get('/subscriptions/list', [SubscriptionController::class, 'list']);

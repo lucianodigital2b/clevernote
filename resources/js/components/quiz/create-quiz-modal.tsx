@@ -111,7 +111,7 @@ export function CreateQuizModal({ isOpen, onClose }: CreateQuizModalProps) {
         <Dialog open={isOpen} onOpenChange={handleClose}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>{t('Create new Quiz')}</DialogTitle>
+                    <DialogTitle>{t('create')}</DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -122,7 +122,7 @@ export function CreateQuizModal({ isOpen, onClose }: CreateQuizModalProps) {
                         {/* Preview */}
                         <div className="flex justify-center">
                             <div 
-                                className="w-32 h-20 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden"
+                                className="w-full h-40 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden"
                                 style={{ backgroundColor: thumbnailPreview ? 'transparent' : selectedColor }}
                             >
                                 {thumbnailPreview ? (
@@ -199,7 +199,6 @@ export function CreateQuizModal({ isOpen, onClose }: CreateQuizModalProps) {
                                 id="title"
                                 value={data.title}
                                 onChange={(e) => setData('title', e.target.value)}
-                                placeholder={t('Enter quiz title')}
                                 className={errors.title ? 'border-red-500' : ''}
                             />
                             {errors.title && (
@@ -208,12 +207,11 @@ export function CreateQuizModal({ isOpen, onClose }: CreateQuizModalProps) {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="description">{t('Description')} ({t('optional')})</Label>
+                            <Label htmlFor="description">{t('description')}</Label>
                             <Textarea
                                 id="description"
                                 value={data.description}
                                 onChange={(e) => setData('description', e.target.value)}
-                                placeholder={t('Let your learners know a little about the quiz')}
                                 rows={3}
                                 className={errors.description ? 'border-red-500' : ''}
                             />
@@ -231,7 +229,7 @@ export function CreateQuizModal({ isOpen, onClose }: CreateQuizModalProps) {
                             onClick={handleClose}
                             disabled={processing}
                         >
-                            {t('Cancel')}
+                            {t('cancel')}
                         </Button>
                         <Button
                             type="submit"

@@ -157,11 +157,11 @@ export default function Index({ quizzes, isLoading = false }: Props) {
                     </DropdownMenu>
                   </div>
                   
-                  {quiz.description && (
+                  {/* {quiz.description && (
                     <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4 line-clamp-2">
                       {quiz.description}
                     </p>
-                  )}
+                  )} */}
 
                   <div className="flex justify-between items-center text-sm text-neutral-500">
                     <Button variant="outline" size="default" asChild className='dark:text-white w-full dark:border-1 dark:hover:border-gray-300'>
