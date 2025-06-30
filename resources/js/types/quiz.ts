@@ -4,12 +4,12 @@ export type QuizOption = {
 };
 
 export type QuizQuestion = {
-    id: string;
-    question: string;
-    type: 'multiple-choice' | 'true-false' | 'fill-in-blank';
-    options: QuizOption[];
-    correctOptionId: string;
-    explanation?: string;
+  id: string;
+  question: string;
+  type: 'multiple_choice' | 'true_false' | 'fill_in_blank';
+  explanation?: string;
+  options: QuizOption[];
+  correctOptionId: string;
 };
 
 export type QuizSet = {

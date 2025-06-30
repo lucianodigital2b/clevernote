@@ -17,26 +17,9 @@ import Image from '@tiptap/extension-image';
 import Highlight from '@tiptap/extension-highlight';
 import { toastConfig } from '@/lib/toast';
 import { Bold as BoldIcon, Italic as ItalicIcon, ImageIcon } from 'lucide-react';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { QuizQuestion } from '@/types/quiz';
 
-interface QuizOption {
-  id: string;
-  text: string;
-}
 
-interface QuizQuestion {
-  id: string;
-  question: string;
-  type: 'multiple-choice' | 'true-false' | 'fill-in-blank';
-  explanation?: string;
-  options: QuizOption[];
-  correctOptionId: string;
-}
 
 interface Props {
   quiz: {
@@ -61,10 +44,14 @@ export default function Edit({ quiz }: Props) {
       ...q,
       options: q.options.map(o => ({
         ...o,
-        id: o.id.toString()
+        id: o.id.toString(),
+        is_correct: o.is_correct
       }))
     })),
   });
+
+  console.log(quiz.questions);
+  
 
   // Image upload function
   const uploadImage = async (file: File, editor: any, collection: string) => {
@@ -220,10 +207,10 @@ export default function Edit({ quiz }: Props) {
     const newQuestion: QuizQuestion = {
       id: Math.random().toString(36).substr(2, 9),
       question: '',
-      type: 'multiple-choice',
+      type: 'multiple_choice',
       options: [
-        { id: Math.random().toString(36).substr(2, 9), text: '' },
-        { id: Math.random().toString(36).substr(2, 9), text: '' },
+        { id: Math.random().toString(36).substr(2, 9), text: '', is_correct: false },
+        { id: Math.random().toString(36).substr(2, 9), text: '', is_correct: false },
       ],
       correctOptionId: '',
     };
@@ -242,6 +229,7 @@ export default function Edit({ quiz }: Props) {
     newQuestions[questionIndex].options.push({
       id: Math.random().toString(36).substr(2, 9),
       text: '',
+      is_correct: false,
     });
     setData('questions', newQuestions);
   };
@@ -266,7 +254,7 @@ export default function Edit({ quiz }: Props) {
       <form onSubmit={handleSubmit} className="p-6 max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">{t('edit_quiz')}</h1>
 
-        <div className="rounded-lg p-6 mb-6 space-y-4">
+        <div className="rounded-lg mb-6 ">
           <div className="space-y-4">
             <div>
               <Label htmlFor="title">{t('quiz_title')}</Label>
@@ -287,7 +275,7 @@ export default function Edit({ quiz }: Props) {
                     type="button"
                     onClick={() => descriptionEditor?.chain().focus().toggleBold().run()}
                     className={`p-2 rounded text-sm ${
-                      descriptionEditor?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                      descriptionEditor?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
                     }`}
                     title="Bold"
                   >
@@ -297,7 +285,7 @@ export default function Edit({ quiz }: Props) {
                     type="button"
                     onClick={() => descriptionEditor?.chain().focus().toggleItalic().run()}
                     className={`p-2 rounded text-sm ${
-                      descriptionEditor?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                      descriptionEditor?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
                     }`}
                     title="Italic"
                   >
@@ -307,11 +295,11 @@ export default function Edit({ quiz }: Props) {
                     type="button"
                     onClick={() => descriptionEditor?.chain().focus().toggleHighlight().run()}
                     className={`p-2 rounded text-sm ${
-                      descriptionEditor?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                      descriptionEditor?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
                     }`}
                     title="Highlight"
                   >
-                    <span className="w-4 h-4 bg-yellow-300 rounded px-1">H</span>
+                    <span className="w-4 h-4 bg-purple-200 rounded px-1">H</span>
                   </button>
                   <input
                     type="file"
@@ -327,7 +315,7 @@ export default function Edit({ quiz }: Props) {
                   />
                   <label
                     htmlFor="description-image-upload"
-                    className="p-2 rounded text-sm bg-gray-200 cursor-pointer hover:bg-gray-300 flex items-center justify-center"
+                    className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 flex items-center justify-center"
                     title={isUploadingImage && uploadingEditor === 'quiz-description-images' ? 'Uploading...' : 'Insert Image'}
                   >
                     {isUploadingImage && uploadingEditor === 'quiz-description-images' ? (
@@ -386,7 +374,7 @@ export default function Edit({ quiz }: Props) {
                           type="button"
                           onClick={() => questionEditorsRefs[questionIndex]?.chain().focus().toggleBold().run()}
                           className={`p-2 rounded text-sm ${
-                            questionEditorsRefs[questionIndex]?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                            questionEditorsRefs[questionIndex]?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
                           }`}
                           title="Bold"
                         >
@@ -396,7 +384,7 @@ export default function Edit({ quiz }: Props) {
                           type="button"
                           onClick={() => questionEditorsRefs[questionIndex]?.chain().focus().toggleItalic().run()}
                           className={`p-2 rounded text-sm ${
-                            questionEditorsRefs[questionIndex]?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                            questionEditorsRefs[questionIndex]?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
                           }`}
                           title="Italic"
                         >
@@ -406,11 +394,11 @@ export default function Edit({ quiz }: Props) {
                           type="button"
                           onClick={() => questionEditorsRefs[questionIndex]?.chain().focus().toggleHighlight().run()}
                           className={`p-2 rounded text-sm ${
-                            questionEditorsRefs[questionIndex]?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                            questionEditorsRefs[questionIndex]?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
                           }`}
                           title="Highlight"
                         >
-                          <span className="w-4 h-4 bg-yellow-300 rounded px-1">H</span>
+                          <span className="w-4 h-4 bg-purple-200 rounded px-1">H</span>
                         </button>
                         <input
                           type="file"
@@ -426,7 +414,7 @@ export default function Edit({ quiz }: Props) {
                         />
                         <label
                           htmlFor={`question-${questionIndex}-image-upload`}
-                          className="p-2 rounded text-sm bg-gray-200 cursor-pointer hover:bg-gray-300 flex items-center justify-center"
+                          className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 flex items-center justify-center"
                           title={isUploadingImage && uploadingEditor === 'quiz-question-images' ? 'Uploading...' : 'Insert Image'}
                         >
                           {isUploadingImage && uploadingEditor === 'quiz-question-images' ? (
@@ -457,9 +445,9 @@ export default function Edit({ quiz }: Props) {
                         <SelectValue placeholder={t('select_question_type')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="multiple-choice">{t('multiple_choice')}</SelectItem>
-                        <SelectItem value="true-false">{t('true_false')}</SelectItem>
-                        <SelectItem value="fill-in-blank">{t('fill_in_blank')}</SelectItem>
+                        <SelectItem value="multiple_choice">{t('multiple_choice')}</SelectItem>
+                        <SelectItem value="true_false">{t('true_false')}</SelectItem>
+                        <SelectItem value="fill_in_blank">{t('fill_in_blank')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -478,7 +466,7 @@ export default function Edit({ quiz }: Props) {
                                  type="button"
                                  onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleBold().run()}
                                  className={`p-2 rounded text-sm ${
-                                   optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                                   optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
                                  }`}
                                  title="Bold"
                                >
@@ -488,7 +476,7 @@ export default function Edit({ quiz }: Props) {
                                  type="button"
                                  onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleItalic().run()}
                                  className={`p-2 rounded text-sm ${
-                                   optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                                   optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
                                  }`}
                                  title="Italic"
                                >
@@ -498,11 +486,11 @@ export default function Edit({ quiz }: Props) {
                                  type="button"
                                  onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleHighlight().run()}
                                  className={`p-2 rounded text-sm ${
-                                   optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                                   optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
                                  }`}
                                  title="Highlight"
                                >
-                                 <span className="w-4 h-4 bg-yellow-300 rounded px-1">H</span>
+                                 <span className="w-4 h-4 bg-purple-200 rounded px-1">H</span>
                                </button>
                                <input
                                  type="file"
@@ -518,7 +506,7 @@ export default function Edit({ quiz }: Props) {
                                />
                                <label
                                  htmlFor={`option-${questionIndex}-${optionIndex}-image-upload`}
-                                 className="p-2 rounded text-sm bg-gray-200 cursor-pointer hover:bg-gray-300 flex items-center justify-center"
+                                 className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 flex items-center justify-center"
                                  title={isUploadingImage && uploadingEditor === 'quiz-option-images' ? 'Uploading...' : 'Insert Image'}
                                >
                                  {isUploadingImage && uploadingEditor === 'quiz-option-images' ? (
@@ -534,33 +522,40 @@ export default function Edit({ quiz }: Props) {
                              />
                           </div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setData('questions', [
-                              ...data.questions.slice(0, questionIndex),
-                              {
-                                ...question,
-                                correctOptionId: option.id,
-                              },
-                              ...data.questions.slice(questionIndex + 1),
-                            ])
-                          }
-                          className={`p-2 rounded-full transition-colors ${question.correctOptionId === option.id
-                            ? 'bg-primary text-white hover:bg-primary/90'
-                            : 'text-primary hover:bg-primary/10'}`}
-                        >
-                          <CheckIcon className="w-5 h-5" />
-                        </button>
-                        {question.options.length > 2 && (
+                        <div className='d-flex content-center'> 
+
                           <button
                             type="button"
-                            onClick={() => removeOption(questionIndex, option.id)}
-                            className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50"
+                            onClick={() => {
+                              const newQuestions = [...data.questions];
+                              newQuestions[questionIndex] = {
+                                ...question,
+                                correctOptionId: option.id,
+                                options: question.options.map(opt => ({
+                                  ...opt,
+                                  is_correct: opt.id === option.id
+                                }))
+                              };
+                              setData('questions', newQuestions);
+                            }}
+                            className={`cursor-pointer p-2 rounded-full transition-colors ${option.is_correct
+                              ? 'bg-green-200 text-green-700 hover:bg-green-300 '
+                              : 'text-primary hover:bg-green-300'}`}
                           >
-                            <TrashIcon className="w-5 h-5" />
+                            <CheckIcon className="w-5 h-5" />
                           </button>
-                        )}
+
+                          {question.options.length > 2 && (
+                            <button
+                              type="button"
+
+                              onClick={() => removeOption(questionIndex, option.id)}
+                              className="cursor-pointer text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50"
+                            >
+                              <TrashIcon className="w-5 h-5" />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                     <Button
@@ -605,7 +600,7 @@ export default function Edit({ quiz }: Props) {
             type="submit"
             disabled={processing}
           >
-            {t('save_changes')}
+            {t('save')}
           </Button>
         </div>
       </form>
