@@ -69,11 +69,7 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
                                 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
                             }}
                         />
-                        {pdfFile && (
-                            <p className="text-sm text-neutral-500 mt-2">
-                                Selected: {pdfFile.name}
-                            </p>
-                        )}
+                        
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="note-title">Title (optional)</Label>
