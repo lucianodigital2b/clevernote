@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PlusIcon, TrashIcon, CheckIcon } from '@heroicons/react/24/outline';
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/app-layout';
 import { useTranslation } from 'react-i18next';
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor, EditorContent, Editor } from '@tiptap/react';
 import axios from 'axios';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
@@ -81,9 +81,9 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
           <div className="border-b p-2 flex gap-2 flex-wrap ">
               <button
                 type="button"
-                onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleBold().run()}
+                onClick={() => optionEditorsRefs.current[questionIndex]?.[optionIndex]?.chain().focus().toggleBold().run()}
                 className={`p-2 rounded text-sm dark:bg-transparent cursor-pointer ${
-                  optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('bold') ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100'
+                  optionEditorsRefs.current[questionIndex]?.[optionIndex]?.isActive('bold') ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100'
                 }`}
                 title="Bold"
               >
@@ -91,9 +91,9 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
               </button>
               <button
                 type="button"
-                onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleItalic().run()}
+                onClick={() => optionEditorsRefs.current[questionIndex]?.[optionIndex]?.chain().focus().toggleItalic().run()}
                 className={`p-2 rounded text-sm dark:bg-transparent cursor-pointer ${
-                  optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('italic') ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100'
+                  optionEditorsRefs.current[questionIndex]?.[optionIndex]?.isActive('italic') ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100'
                 }`}
                 title="Italic"
               >
@@ -101,9 +101,9 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
               </button>
               <button
                 type="button"
-                onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleHighlight().run()}
+                onClick={() => optionEditorsRefs.current[questionIndex]?.[optionIndex]?.chain().focus().toggleHighlight().run()}
                 className={`p-2 rounded text-sm dark:bg-transparent cursor-pointer ${
-                  optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('highlight') ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100'
+                  optionEditorsRefs.current[questionIndex]?.[optionIndex]?.isActive('highlight') ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100'
                 }`}
                 title="Highlight"
               >
@@ -116,7 +116,7 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    uploadImage(file, optionEditorsRefs[questionIndex]?.[optionIndex], 'quiz-option-images');
+                    uploadImage(file, optionEditorsRefs.current[questionIndex]?.[optionIndex], 'quiz-option-images');
                   }
                 }}
                 className="hidden"
@@ -168,7 +168,7 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
             </div>
           </div>
           <EditorContent 
-            editor={optionEditorsRefs[questionIndex]?.[optionIndex]} 
+            editor={optionEditorsRefs.current[questionIndex]?.[optionIndex]} 
             className="prose max-w-none p-4 min-h-[60px] focus:outline-none"
           />
         </div>
@@ -284,87 +284,153 @@ export default function Edit({ quiz }: Props) {
     },
   });
 
-  // Create question editors
-  const questionEditorsRefs = data.questions.map((question, questionIndex) => 
-    useEditor({
-      extensions: [
-        StarterKit,
-        Image.configure({
-          inline: false,
-          allowBase64: false,
-        }),
-        Highlight.configure({
-          multicolor: true,
-        })
-      ],
-      content: question.question,
-      editorProps: {
-        handlePaste: (view, event, slice) => {
-          const file = event.clipboardData?.files?.[0];
-          if (file && file.type.startsWith('image/')) {
-            uploadImage(file, questionEditorsRefs[questionIndex], 'quiz-question-images');
-            return true;
-          }
-          return false;
-        },
-        handleDrop: (view, event, slice, moved) => {
-          const file = event.dataTransfer?.files?.[0];
-          if (file && file.type.startsWith('image/')) {
-            uploadImage(file, questionEditorsRefs[questionIndex], 'quiz-question-images');
-            return true;
-          }
-          return false;
-        },
-      },
-      onUpdate: ({ editor }) => {
-        const newQuestions = [...data.questions];
-        newQuestions[questionIndex].question = editor.getHTML();
-        setData('questions', newQuestions);
-      },
-    })
-  );
+  // Create refs for editors
+  const questionEditorsRefs = useRef<any[]>([]);
+  const optionEditorsRefs = useRef<any[][]>([]);
 
-  // Create option editors
-  const optionEditorsRefs = data.questions.map((question, questionIndex) => 
-    question.options.map((option, optionIndex) => 
-      useEditor({
-        extensions: [
-          StarterKit,
-          Image.configure({
-            inline: false,
-            allowBase64: false,
-          }),
-          Highlight.configure({
-            multicolor: true,
-          })
-        ],
-        content: option.text,
-        editorProps: {
-          handlePaste: (view, event, slice) => {
-            const file = event.clipboardData?.files?.[0];
-            if (file && file.type.startsWith('image/')) {
-              uploadImage(file, optionEditorsRefs[questionIndex]?.[optionIndex], 'quiz-option-images');
-              return true;
-            }
-            return false;
+  // Initialize and manage question editors
+  useEffect(() => {
+    // Clean up old editors that are no longer needed
+    if (questionEditorsRefs.current.length > data.questions.length) {
+      for (let i = data.questions.length; i < questionEditorsRefs.current.length; i++) {
+        questionEditorsRefs.current[i]?.destroy();
+      }
+      questionEditorsRefs.current = questionEditorsRefs.current.slice(0, data.questions.length);
+    }
+
+    // Create or update question editors
+    data.questions.forEach((question, questionIndex) => {
+      if (!questionEditorsRefs.current[questionIndex]) {
+        questionEditorsRefs.current[questionIndex] = new Editor({
+          extensions: [
+            StarterKit,
+            Image.configure({
+              inline: false,
+              allowBase64: false,
+            }),
+            Highlight.configure({
+              multicolor: true,
+            })
+          ],
+          content: question.question,
+          editorProps: {
+            handlePaste: (view, event, slice) => {
+              const file = event.clipboardData?.files?.[0];
+              if (file && file.type.startsWith('image/')) {
+                uploadImage(file, questionEditorsRefs.current[questionIndex], 'quiz-question-images');
+                return true;
+              }
+              return false;
+            },
+            handleDrop: (view, event, slice, moved) => {
+              const file = event.dataTransfer?.files?.[0];
+              if (file && file.type.startsWith('image/')) {
+                uploadImage(file, questionEditorsRefs.current[questionIndex], 'quiz-question-images');
+                return true;
+              }
+              return false;
+            },
           },
-          handleDrop: (view, event, slice, moved) => {
-            const file = event.dataTransfer?.files?.[0];
-            if (file && file.type.startsWith('image/')) {
-              uploadImage(file, optionEditorsRefs[questionIndex]?.[optionIndex], 'quiz-option-images');
-              return true;
-            }
-            return false;
+          onUpdate: ({ editor }) => {
+            const newQuestions = [...data.questions];
+            newQuestions[questionIndex].question = editor.getHTML();
+            setData('questions', newQuestions);
           },
-        },
-        onUpdate: ({ editor }) => {
-          const newQuestions = [...data.questions];
-          newQuestions[questionIndex].options[optionIndex].text = editor.getHTML();
-          setData('questions', newQuestions);
-        },
-      })
-    )
-  );
+        });
+      } else {
+        // Update content if it has changed
+        const currentContent = questionEditorsRefs.current[questionIndex].getHTML();
+        if (currentContent !== question.question) {
+          questionEditorsRefs.current[questionIndex].commands.setContent(question.question);
+        }
+      }
+    });
+  }, [data.questions.length]);
+
+  // Initialize and manage option editors
+  useEffect(() => {
+    // Clean up old option editors
+    if (optionEditorsRefs.current.length > data.questions.length) {
+      for (let i = data.questions.length; i < optionEditorsRefs.current.length; i++) {
+        optionEditorsRefs.current[i]?.forEach(editor => editor?.destroy());
+      }
+      optionEditorsRefs.current = optionEditorsRefs.current.slice(0, data.questions.length);
+    }
+
+    // Create or update option editors
+    data.questions.forEach((question, questionIndex) => {
+      if (!optionEditorsRefs.current[questionIndex]) {
+        optionEditorsRefs.current[questionIndex] = [];
+      }
+
+      // Clean up old option editors for this question
+      if (optionEditorsRefs.current[questionIndex].length > question.options.length) {
+        for (let i = question.options.length; i < optionEditorsRefs.current[questionIndex].length; i++) {
+          optionEditorsRefs.current[questionIndex][i]?.destroy();
+        }
+        optionEditorsRefs.current[questionIndex] = optionEditorsRefs.current[questionIndex].slice(0, question.options.length);
+      }
+
+      question.options.forEach((option, optionIndex) => {
+        if (!optionEditorsRefs.current[questionIndex][optionIndex]) {
+          optionEditorsRefs.current[questionIndex][optionIndex] = new Editor({
+            extensions: [
+              StarterKit,
+              Image.configure({
+                inline: false,
+                allowBase64: false,
+              }),
+              Highlight.configure({
+                multicolor: true,
+              })
+            ],
+            content: option.text,
+            editorProps: {
+              handlePaste: (view, event, slice) => {
+                const file = event.clipboardData?.files?.[0];
+                if (file && file.type.startsWith('image/')) {
+                  uploadImage(file, optionEditorsRefs.current[questionIndex]?.[optionIndex], 'quiz-option-images');
+                  return true;
+                }
+                return false;
+              },
+              handleDrop: (view, event, slice, moved) => {
+                const file = event.dataTransfer?.files?.[0];
+                if (file && file.type.startsWith('image/')) {
+                  uploadImage(file, optionEditorsRefs.current[questionIndex]?.[optionIndex], 'quiz-option-images');
+                  return true;
+                }
+                return false;
+              },
+            },
+            onUpdate: ({ editor }) => {
+              const newQuestions = [...data.questions];
+              newQuestions[questionIndex].options[optionIndex].text = editor.getHTML();
+              setData('questions', newQuestions);
+            },
+          });
+        } else {
+          // Update content if it has changed
+          const currentContent = optionEditorsRefs.current[questionIndex][optionIndex].getHTML();
+          if (currentContent !== option.text) {
+            optionEditorsRefs.current[questionIndex][optionIndex].commands.setContent(option.text);
+          }
+        }
+      });
+    });
+  }, [data.questions.map(q => q.options.length).join(','), data.questions.length]);
+
+  // Cleanup editors on unmount
+  useEffect(() => {
+    return () => {
+      // Destroy all question editors
+      questionEditorsRefs.current.forEach(editor => editor?.destroy());
+      // Destroy all option editors
+      optionEditorsRefs.current.forEach(questionEditors => 
+        questionEditors?.forEach(editor => editor?.destroy())
+      );
+    };
+  }, []);
 
   const addQuestion = () => {
     const newQuestion: QuizQuestion = {
@@ -593,9 +659,9 @@ export default function Edit({ quiz }: Props) {
                       <div className="border-b p-2 flex gap-2 flex-wrap">
                         <button
                           type="button"
-                          onClick={() => questionEditorsRefs[questionIndex]?.chain().focus().toggleBold().run()}
+                          onClick={() => questionEditorsRefs.current[questionIndex]?.chain().focus().toggleBold().run()}
                           className={`p-2 rounded text-sm ${
-                            questionEditorsRefs[questionIndex]?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
+                            questionEditorsRefs.current[questionIndex]?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
                           }`}
                           title="Bold"
                         >
@@ -603,9 +669,9 @@ export default function Edit({ quiz }: Props) {
                         </button>
                         <button
                           type="button"
-                          onClick={() => questionEditorsRefs[questionIndex]?.chain().focus().toggleItalic().run()}
+                          onClick={() => questionEditorsRefs.current[questionIndex]?.chain().focus().toggleItalic().run()}
                           className={`p-2 rounded text-sm ${
-                            questionEditorsRefs[questionIndex]?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
+                            questionEditorsRefs.current[questionIndex]?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
                           }`}
                           title="Italic"
                         >
@@ -613,9 +679,9 @@ export default function Edit({ quiz }: Props) {
                         </button>
                         <button
                           type="button"
-                          onClick={() => questionEditorsRefs[questionIndex]?.chain().focus().toggleHighlight().run()}
+                          onClick={() => questionEditorsRefs.current[questionIndex]?.chain().focus().toggleHighlight().run()}
                           className={`p-2 rounded text-sm ${
-                            questionEditorsRefs[questionIndex]?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
+                            questionEditorsRefs.current[questionIndex]?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
                           }`}
                           title="Highlight"
                         >
@@ -627,7 +693,7 @@ export default function Edit({ quiz }: Props) {
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              uploadImage(file, questionEditorsRefs[questionIndex], 'quiz-question-images');
+                              uploadImage(file, questionEditorsRefs.current[questionIndex], 'quiz-question-images');
                             }
                           }}
                           className="hidden"
@@ -646,7 +712,7 @@ export default function Edit({ quiz }: Props) {
                         </label>
                       </div>
                       <EditorContent 
-                        editor={questionEditorsRefs[questionIndex]} 
+                        editor={questionEditorsRefs.current[questionIndex]} 
                         className="prose max-w-none p-4 min-h-[100px] focus:outline-none"
                       />
                     </div>
@@ -712,7 +778,7 @@ export default function Edit({ quiz }: Props) {
                                 questions: data.questions,
                                 setData
                               }}
-                              optionEditorsRefs={optionEditorsRefs}
+                              optionEditorsRefs={optionEditorsRefs.current}
                               isUploadingImage={isUploadingImage}
                               uploadingEditor={uploadingEditor}
                               uploadImage={uploadImage}
