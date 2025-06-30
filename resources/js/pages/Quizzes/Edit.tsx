@@ -78,60 +78,94 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
           errors && errors[`questions.${questionIndex}.options.${optionIndex}.text`] 
             ? 'border-red-500' : ''
         }`}>
-          <div className="border-b p-2 flex gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleBold().run()}
-              className={`p-2 rounded text-sm ${
-                optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
-              }`}
-              title="Bold"
-            >
-              <BoldIcon className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleItalic().run()}
-              className={`p-2 rounded text-sm ${
-                optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
-              }`}
-              title="Italic"
-            >
-              <ItalicIcon className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleHighlight().run()}
-              className={`p-2 rounded text-sm ${
-                optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
-              }`}
-              title="Highlight"
-            >
-              <span className="w-4 h-4 bg-purple-200 rounded px-1">H</span>
-            </button>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  uploadImage(file, optionEditorsRefs[questionIndex]?.[optionIndex], 'quiz-option-images');
-                }
-              }}
-              className="hidden"
-              id={`option-${questionIndex}-${optionIndex}-image-upload`}
-            />
-            <label
-              htmlFor={`option-${questionIndex}-${optionIndex}-image-upload`}
-              className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 flex items-center justify-center"
-              title={isUploadingImage && uploadingEditor === 'quiz-option-images' ? 'Uploading...' : 'Insert Image'}
-            >
-              {isUploadingImage && uploadingEditor === 'quiz-option-images' ? (
-                <span className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></span>
-              ) : (
-                <ImageIcon className="w-4 h-4" />
+          <div className="border-b p-2 flex gap-2 flex-wrap ">
+              <button
+                type="button"
+                onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleBold().run()}
+                className={`p-2 rounded text-sm dark:bg-transparent cursor-pointer ${
+                  optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('bold') ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100'
+                }`}
+                title="Bold"
+              >
+                <BoldIcon className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleItalic().run()}
+                className={`p-2 rounded text-sm dark:bg-transparent cursor-pointer ${
+                  optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('italic') ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100'
+                }`}
+                title="Italic"
+              >
+                <ItalicIcon className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => optionEditorsRefs[questionIndex]?.[optionIndex]?.chain().focus().toggleHighlight().run()}
+                className={`p-2 rounded text-sm dark:bg-transparent cursor-pointer ${
+                  optionEditorsRefs[questionIndex]?.[optionIndex]?.isActive('highlight') ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100'
+                }`}
+                title="Highlight"
+              >
+                <span className="w-4 h-4 bg-purple-200 rounded px-1">H</span>
+              </button>
+              
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    uploadImage(file, optionEditorsRefs[questionIndex]?.[optionIndex], 'quiz-option-images');
+                  }
+                }}
+                className="hidden"
+                id={`option-${questionIndex}-${optionIndex}-image-upload`}
+              />
+              <label
+                htmlFor={`option-${questionIndex}-${optionIndex}-image-upload`}
+                className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 flex items-center justify-center"
+                title={isUploadingImage && uploadingEditor === 'quiz-option-images' ? 'Uploading...' : 'Insert Image'}
+              >
+                {isUploadingImage && uploadingEditor === 'quiz-option-images' ? (
+                  <span className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  <ImageIcon className="w-4 h-4" />
+                )}
+              </label>
+
+            <div className='ml-auto'>
+              <button
+                type="button"
+                onClick={() => {
+                  const newQuestions = [...question.questions];
+                  newQuestions[questionIndex] = {
+                    ...newQuestions[questionIndex],
+                    options: newQuestions[questionIndex].options.map((opt: QuizOption) => ({
+                      ...opt,
+                      is_correct: opt.id === option.id
+                    }))
+                  };
+                  question.setData('questions', newQuestions);
+                }}
+                className={`cursor-pointer p-2 rounded-full transition-colors ${
+                  option.is_correct
+                    ? 'bg-green-200 text-green-700 hover:bg-green-300'
+                    : 'text-primary hover:bg-green-300'
+                }`}
+              >
+                <CheckIcon className="w-5 h-5" />
+              </button>
+              {question.options.length > 2 && (
+                <button
+                  type="button"
+                  onClick={() => removeOption(questionIndex, option.id)}
+                  className="cursor-pointer text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50"
+                >
+                  <TrashIcon className="w-5 h-5" />
+                </button>
               )}
-            </label>
+            </div>
           </div>
           <EditorContent 
             editor={optionEditorsRefs[questionIndex]?.[optionIndex]} 
@@ -148,43 +182,12 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
         <div
           {...attributes}
           {...listeners}
-          className="opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing p-2 text-gray-400 hover:text-gray-600"
+          className=" transition-opacity cursor-grab active:cursor-grabbing p-2 text-gray-400 hover:text-gray-600"
           title="Drag to reorder"
         >
           <GripVertical className="w-4 h-4" />
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            const newQuestions = [...question.questions];
-            newQuestions[questionIndex] = {
-              ...question,
-              correctOptionId: option.id,
-              options: question.options.map((opt: QuizOption) => ({
-
-                ...opt,
-                is_correct: opt.id === option.id
-              }))
-            };
-            question.setData('questions', newQuestions);
-          }}
-          className={`cursor-pointer p-2 rounded-full transition-colors ${
-            option.is_correct
-              ? 'bg-green-200 text-green-700 hover:bg-green-300'
-              : 'text-primary hover:bg-green-300'
-          }`}
-        >
-          <CheckIcon className="w-5 h-5" />
-        </button>
-        {question.options.length > 2 && (
-          <button
-            type="button"
-            onClick={() => removeOption(questionIndex, option.id)}
-            className="cursor-pointer text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50"
-          >
-            <TrashIcon className="w-5 h-5" />
-          </button>
-        )}
+        
       </div>
     </div>
   );
@@ -205,7 +208,7 @@ export default function Edit({ quiz }: Props) {
   
   const { data, setData, put, processing, errors } = useForm({
     title: quiz.title,
-  description: quiz.description || '',
+    description: quiz.description || '',
     is_published: quiz.is_published,
     questions: quiz.questions.map(q => ({
       ...q,
@@ -216,9 +219,6 @@ export default function Edit({ quiz }: Props) {
       }))
     })),
   });
-
-  console.log(quiz.questions);
-  
 
   // Image upload function
   const uploadImage = async (file: File, editor: any, collection: string) => {
@@ -283,10 +283,6 @@ export default function Edit({ quiz }: Props) {
       setData('description', editor.getHTML());
     },
   });
-
-  // Initialize editors for existing questions and options
-  const [questionEditors, setQuestionEditors] = useState<any[]>([]);
-  const [optionEditors, setOptionEditors] = useState<any[][]>([]);
 
   // Create question editors
   const questionEditorsRefs = data.questions.map((question, questionIndex) => 
@@ -379,7 +375,6 @@ export default function Edit({ quiz }: Props) {
         { id: Math.random().toString(36).substr(2, 9), text: '', is_correct: false },
         { id: Math.random().toString(36).substr(2, 9), text: '', is_correct: false },
       ],
-      correctOptionId: '',
     };
     setData('questions', [...data.questions, newQuestion]);
   };
@@ -391,15 +386,6 @@ export default function Edit({ quiz }: Props) {
     );
   };
 
-  const addOption = (questionIndex: number) => {
-    const newQuestions = [...data.questions];
-    newQuestions[questionIndex].options.push({
-      id: Math.random().toString(36).substr(2, 9),
-      text: '',
-      is_correct: false,
-    });
-    setData('questions', newQuestions);
-  };
 
   const removeOption = (questionIndex: number, optionId: string) => {
     const newQuestions = [...data.questions];
@@ -430,8 +416,38 @@ export default function Edit({ quiz }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate that multiple-choice and true-false questions have exactly one correct option
+    const validationErrors: string[] = [];
+    data.questions.forEach((question, index) => {
+      if (question.type === 'multiple_choice' || question.type === 'true_false') {
+        const correctOptions = question.options.filter(option => option.is_correct);
+        if (correctOptions.length === 0) {
+          validationErrors.push(`Question ${index + 1}: Please select a correct answer`);
+        } else if (correctOptions.length > 1) {
+          validationErrors.push(`Question ${index + 1}: Only one option can be marked as correct`);
+        }
+      }
+    });
+    
+    if (validationErrors.length > 0) {
+      toastConfig.error(validationErrors.join('. '));
+      return;
+    }
+    
     put(`/quizzes/${quiz.id}`);
   };
+
+  const addOption = (questionIndex: number) => {
+    const newQuestions = [...data.questions];
+    newQuestions[questionIndex].options.push({
+      id: Math.random().toString(36).substr(2, 9),
+      text: '',
+      is_correct: false,
+    });
+    setData('questions', newQuestions);
+  };
+
 
   return (
     <AppLayout>
@@ -650,14 +666,7 @@ export default function Edit({ quiz }: Props) {
                     </div>
                   )}
 
-                  {/* Correct Option Error */}
-                  {errors[`questions.${questionIndex}.correctOptionId`] && (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                      <p className="text-red-700 text-sm">
-                        <strong>Correct Answer Error:</strong> {errors[`questions.${questionIndex}.correctOptionId`]}
-                      </p>
-                    </div>
-                  )}
+
 
                   <div>
                     <Label className="mb-2">{t('question_type')}</Label>
