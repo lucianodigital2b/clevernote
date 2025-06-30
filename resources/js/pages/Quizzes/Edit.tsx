@@ -17,7 +17,7 @@ import Image from '@tiptap/extension-image';
 import Highlight from '@tiptap/extension-highlight';
 import { toastConfig } from '@/lib/toast';
 import { Bold as BoldIcon, Italic as ItalicIcon, ImageIcon, GripVertical } from 'lucide-react';
-import { QuizQuestion } from '@/types/quiz';
+import { QuizQuestion, QuizOption } from '@/types/quiz';
 import {
   DndContext,
   closestCenter,
@@ -160,7 +160,8 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
             newQuestions[questionIndex] = {
               ...question,
               correctOptionId: option.id,
-              options: question.options.map(opt => ({
+              options: question.options.map((opt: QuizOption) => ({
+
                 ...opt,
                 is_correct: opt.id === option.id
               }))
@@ -204,7 +205,7 @@ export default function Edit({ quiz }: Props) {
   
   const { data, setData, put, processing, errors } = useForm({
     title: quiz.title,
-    description: quiz.description || '',
+  description: quiz.description || '',
     is_published: quiz.is_published,
     questions: quiz.questions.map(q => ({
       ...q,
