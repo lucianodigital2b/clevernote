@@ -390,5 +390,11 @@
   "how_step": "Paso",
   "how_previous": "Anterior",
   "how_next": "Siguiente",
-  "how_get_started": "Comenzar"
+  "how_get_started": "Comenzar",
+  "updated_successfully": "Registro salvo com sucesso",
+  "multiple_choice": "Opción múltiple",
+  "true_false": "Verdadero o falso",
+    "no_questions_yet": "No questions yet",
+  "add_your_first_question_to_get_started": "Add your first question to get started"
+
 }

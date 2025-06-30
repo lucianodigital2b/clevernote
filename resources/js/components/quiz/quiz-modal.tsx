@@ -4,19 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { QuizQuestion } from '@/types';
 
-type QuizOption = {
-    id: string;
-    text: string;
-};
-
-type QuizQuestion = {
-    id: string;
-    question: string;
-    options: QuizOption[];
-    correctOptionId: string;
-    explanation?: string;
-};
 
 type QuizModalProps = {
     isOpen: boolean;

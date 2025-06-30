@@ -313,6 +313,7 @@ export default function Edit({ quiz }: Props) {
             })
           ],
           content: question.question,
+          editable: true,
           editorProps: {
             handlePaste: (view, event, slice) => {
               const file = event.clipboardData?.files?.[0];
@@ -336,6 +337,12 @@ export default function Edit({ quiz }: Props) {
             newQuestions[questionIndex].question = editor.getHTML();
             setData('questions', newQuestions);
           },
+          onCreate: ({ editor }) => {
+            // Ensure editor is immediately editable
+            setTimeout(() => {
+              editor.setEditable(true);
+            }, 0);
+          },
         });
       } else {
         // Update content if it has changed
@@ -343,6 +350,8 @@ export default function Edit({ quiz }: Props) {
         if (currentContent !== question.question) {
           questionEditorsRefs.current[questionIndex].commands.setContent(question.question);
         }
+        // Ensure editor remains editable
+        questionEditorsRefs.current[questionIndex].setEditable(true);
       }
     });
   }, [data.questions.length]);
@@ -442,7 +451,52 @@ export default function Edit({ quiz }: Props) {
         { id: Math.random().toString(36).substr(2, 9), text: '', is_correct: false },
       ],
     };
-    setData('questions', [...data.questions, newQuestion]);
+    const newQuestions = [...data.questions, newQuestion];
+    setData('questions', newQuestions);
+    
+    // Wait for React to re-render and editors to be created
+    setTimeout(() => {
+      const newQuestionIndex = newQuestions.length - 1;
+      
+      // Ensure the question editor is created and focusable
+      const checkEditor = () => {
+        if (questionEditorsRefs.current[newQuestionIndex]) {
+          // Ensure editor is editable and focus it
+          questionEditorsRefs.current[newQuestionIndex].setEditable(true);
+          setTimeout(() => {
+            questionEditorsRefs.current[newQuestionIndex]?.commands.focus();
+          }, 50);
+        } else {
+          // If editor not ready, check again
+          setTimeout(checkEditor, 50);
+        }
+      };
+      
+      checkEditor();
+      
+      // Enhanced scroll to new question with animation timing consideration
+      setTimeout(() => {
+        const questionElements = document.querySelectorAll('[data-question-index]');
+        const lastQuestionElement = questionElements[questionElements.length - 1];
+        if (lastQuestionElement) {
+          // Add a subtle highlight effect before scrolling
+          lastQuestionElement.style.transform = 'scale(1.02)';
+          lastQuestionElement.style.transition = 'transform 0.3s ease-out';
+          
+          setTimeout(() => {
+            lastQuestionElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+            
+            // Reset the highlight effect
+            setTimeout(() => {
+              lastQuestionElement.style.transform = '';
+            }, 500);
+          }, 200);
+        }
+      }, 300);
+    }, 150); // Allow more time for editors to be created
   };
 
   const removeQuestion = (questionId: string) => {
@@ -501,7 +555,9 @@ export default function Edit({ quiz }: Props) {
       return;
     }
     
-    put(`/quizzes/${quiz.id}`);
+    put(`/quizzes/${quiz.id}`,{
+        onSuccess: () => toastConfig.success(t('updated_successfully')),
+    });
   };
 
   const addOption = (questionIndex: number) => {
@@ -519,7 +575,7 @@ export default function Edit({ quiz }: Props) {
     <AppLayout>
       <Head title={t('edit_quiz')} />
 
-      <form onSubmit={handleSubmit} className="p-6 max-w-4xl mx-auto">
+      <form onSubmit={handleSubmit} className="py-6 max-w-4xl mx-auto" style={{width: '100%'}}>
         <h1 className="text-3xl font-bold mb-6">{t('edit_quiz')}</h1>
 
         {/* Display general errors */}
@@ -629,30 +685,125 @@ export default function Edit({ quiz }: Props) {
           </div>
         </div>
 
-        <AnimatePresence>
-          {data.questions.map((question, questionIndex) => (
-            <motion.div
-              key={question.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
+        {/* Questions Section */}
+        {data.questions.length === 0 ? (
+          <motion.div 
+            className="rounded-lg p-8 mb-6 border-2 border-dashed border-purple-300 text-center bg-purple-50"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+          >
+            <div className="max-w-md mx-auto">
+              <motion.div 
+                className="w-16 h-16 mx-auto mb-4 bg-purple-200 rounded-full flex items-center justify-center"
+              initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, duration: 0.5, type: "spring", stiffness: 200 }}
+              >
+                <PlusIcon className="w-8 h-8 text-purple-400" />
+              </motion.div>
+              <motion.h3 
+                className="text-lg font-medium text-purple-900 mb-2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.3 }}
+              >
+                {t('no_questions_yet')}
+              </motion.h3>
+              <motion.p 
+                className="text-purple-500 mb-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.3 }}
+              >
+                {t('add_your_first_question_to_get_started')}
+              </motion.p>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.3 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  type="button"
+                  onClick={addQuestion}
+                  className="mx-auto"
+                >
+                  <PlusIcon className="w-5 h-5 mr-2" />
+                  {t('add_question')}
+                </Button>
+              </motion.div>
+            </div>
+          </motion.div>
+        ) : (
+          <AnimatePresence mode="popLayout">
+            {data.questions.map((question, questionIndex) => (
+              <motion.div
+                key={question.id}
+                data-question-index={questionIndex}
+                layout
+                initial={{ 
+                  opacity: 0, 
+                  y: 50,
+                  scale: 0.9,
+                  rotateX: -15
+                }}
+                animate={{ 
+                  opacity: 1, 
+                  y: 0,
+                  scale: 1,
+                  rotateX: 0
+                }}
+                exit={{ 
+                  opacity: 0, 
+                  y: -50,
+                  scale: 0.9,
+                  rotateX: 15,
+                  transition: { duration: 0.3, ease: "easeIn" }
+                }}
+                transition={{ 
+                  duration: 0.5,
+                  delay: questionIndex * 0.1,
+                  type: "spring",
+                  stiffness: 100,
+                  damping: 15
+                }}
+                style={{
+                  transformPerspective: 1000
+                }}
+              >
               <div className="rounded-lg p-6 mb-6 border border-gray-200/50 backdrop-blur-sm bg-white/5">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">{t('question_number', { number: questionIndex + 1 })}</h2>
-                  <button
+                  <motion.h2 
+                    className="text-xl font-semibold"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 + questionIndex * 0.1, duration: 0.3 }}
+                  >
+                    {t('question_number', { number: questionIndex + 1 })}
+                  </motion.h2>
+                  <motion.button
                     type="button"
                     onClick={() => removeQuestion(question.id)}
                     className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50"
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3 + questionIndex * 0.1, duration: 0.3, type: "spring" }}
+                    whileHover={{ 
+                      scale: 1.1,
+                      rotate: 5,
+                      transition: { duration: 0.2 }
+                    }}
+                    whileTap={{ scale: 0.9 }}
                   >
                     <TrashIcon className="w-5 h-5" />
-                  </button>
+                  </motion.button>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <Label>{t('question_text')}</Label>
+                    <Label>{t('description')}</Label>
                     <div className={`border rounded-md ${
                       errors[`questions.${questionIndex}.question`] ? 'border-red-500' : ''
                     }`}>
@@ -711,10 +862,12 @@ export default function Edit({ quiz }: Props) {
                           )}
                         </label>
                       </div>
-                      <EditorContent 
-                        editor={questionEditorsRefs.current[questionIndex]} 
-                        className="prose max-w-none p-4 min-h-[100px] focus:outline-none"
-                      />
+                      {questionEditorsRefs.current[questionIndex] && (
+                         <EditorContent 
+                           editor={questionEditorsRefs.current[questionIndex]} 
+                           className="prose max-w-none p-4 min-h-[100px] focus:outline-none"
+                         />
+                       )}
                     </div>
                     {errors[`questions.${questionIndex}.question`] && (
                       <p className="text-red-500 text-sm mt-1">
@@ -735,7 +888,7 @@ export default function Edit({ quiz }: Props) {
 
 
                   <div>
-                    <Label className="mb-2">{t('question_type')}</Label>
+                    <Label className="mb-2">{t('type')}</Label>
                     <Select
                       value={question.type}
                       onValueChange={(value) => {
@@ -748,9 +901,9 @@ export default function Edit({ quiz }: Props) {
                         <SelectValue placeholder="Select question type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
-                        <SelectItem value="true-false">True/False</SelectItem>
-                        <SelectItem value="fill-in-blank">Fill in the Blank</SelectItem>
+                        <SelectItem value="multiple_choice">{t('multiple_choice')}</SelectItem>
+                        {/* <SelectItem value="true-false">True/False</SelectItem>
+                        <SelectItem value="fill-in-blank">Fill in the Blank</SelectItem> */}
                       </SelectContent>
                     </Select>
                   </div>
@@ -816,23 +969,81 @@ export default function Edit({ quiz }: Props) {
             </motion.div>
           ))}
         </AnimatePresence>
+        )}
 
-        <div className="flex gap-4 mb-6">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={addQuestion}
-          >
-            <PlusIcon className="w-5 h-5 mr-2" />
-            {t('add_question')}
-          </Button>
-          <Button
-            type="submit"
-            disabled={processing}
-          >
-            {t('save')}
-          </Button>
-        </div>
+        {/* Fixed floating bottom bar */}
+        <motion.div 
+          className="fixed bottom-5 left-0 right-0 bg-white border shadow-lg p-4 z-50 w-fit mx-auto rounded-2xl"
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.4, type: "spring", stiffness: 100 }}
+        >
+          <div className="max-w-2xl mx-auto flex gap-4 justify-between">
+            <div className="flex gap-4">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addQuestion}
+                >
+                  <PlusIcon className="w-5 h-5 mr-2" />
+                  {t('add_question')}
+                </Button>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => {
+                    if (confirm('Are you sure you want to delete this quiz?')) {
+                      // Add delete functionality here
+                      window.location.href = `/quizzes/${quiz.id}/delete`;
+                    }
+                  }}
+                >
+                  <TrashIcon className="w-5 h-5 mr-2" />
+                  {t('delete')}
+                </Button>
+              </motion.div>
+            </div>
+            <div className="flex gap-4">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => {
+                    window.location.href = `/quizzes/${quiz.id}`;
+                  }}
+                >
+                  {t('Take Quiz')}
+                </Button>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  type="submit"
+                  disabled={processing}
+                >
+                  {t('save')}
+                </Button>
+              </motion.div>
+            </div>
+          </div>
+        </motion.div>
+        
+        {/* Add bottom padding to prevent content from being hidden behind fixed bar */}
+        <div className="h-24"></div>
       </form>
     </AppLayout>
   );

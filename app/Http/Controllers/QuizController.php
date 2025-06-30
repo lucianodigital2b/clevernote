@@ -69,15 +69,15 @@ class QuizController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'is_published' => 'boolean',
-            'questions' => 'required|array|min:1',
-            'questions.*.question' => 'required|string',
-            'questions.*.type' => 'required|string|in:multiple-choice,true-false,fill-in-blank',
-            'questions.*.explanation' => 'nullable|string',
-            'questions.*.options' => 'required|array|min:2',
-            'questions.*.options.*.id' => 'required|string',
-            'questions.*.options.*.text' => 'required|string',
-            'questions.*.options.*.is_correct' => 'required_if:questions.*.type,multiple-choice,true-false|boolean'
+            'is_published' => 'boolean|nullable',
+            // 'questions' => 'required|array|min:1',
+            // 'questions.*.question' => 'required|string',
+            // 'questions.*.type' => 'required|string|in:multiple_choice,true_false,fill-in-blank',
+            // 'questions.*.explanation' => 'nullable|string',
+            // 'questions.*.options' => 'required|array|min:2',
+            // 'questions.*.options.*.id' => 'required|string',
+            // 'questions.*.options.*.text' => 'required|string',
+            // 'questions.*.options.*.is_correct' => 'required_if:questions.*.type,multiple_choice,true_false|boolean'
         ]);
 
         try {
@@ -90,22 +90,22 @@ class QuizController extends Controller
                 'user_id' => Auth::id(),
             ]);
 
-            foreach ($validated['questions'] as $index => $questionData) {
-                $question = $quiz->questions()->create([
-                    'question' => $questionData['question'],
-                    'type' => $questionData['type'],
-                    'explanation' => $questionData['explanation'] ?? null,
-                    'order' => $index,
-                ]);
+            // foreach ($validated['questions'] as $index => $questionData) {
+            //     $question = $quiz->questions()->create([
+            //         'question' => $questionData['question'],
+            //         'type' => $questionData['type'],
+            //         'explanation' => $questionData['explanation'] ?? null,
+            //         'order' => $index,
+            //     ]);
 
-                foreach ($questionData['options'] as $optionIndex => $option) {
-                    $question->options()->create([
-                        'text' => $option['text'],
-                        'is_correct' => $option['is_correct'] ?? false,
-                        'order' => $optionIndex,
-                    ]);
-                }
-            }
+            //     foreach ($questionData['options'] as $optionIndex => $option) {
+            //         $question->options()->create([
+            //             'text' => $option['text'],
+            //             'is_correct' => $option['is_correct'] ?? false,
+            //             'order' => $optionIndex,
+            //         ]);
+            //     }
+            // }
 
             DB::commit();
             
@@ -117,7 +117,7 @@ class QuizController extends Controller
             }
 
             // Redirect to quiz index with success message
-            return redirect()->route('quizzes.index')
+            return redirect()->route('quizzes.edit', $quiz->id)
                 ->with('success', 'Quiz created successfully!');
 
         } catch (\Exception $e) {
@@ -160,14 +160,14 @@ class QuizController extends Controller
             'description' => 'nullable|string',
             'is_published' => 'boolean',
             'questions' => 'required|array|min:1',
-            'questions.*.id' => 'nullable|exists:quiz_questions,id',
+            // 'questions.*.id' => 'nullable|exists:quiz_questions,id',
             'questions.*.question' => 'required|string',
-            'questions.*.type' => 'required|string|in:multiple-choice,true-false,fill-in-blank',
+            'questions.*.type' => 'required|string|in:multiple_choice,true_false,fill-in-blank',
             'questions.*.explanation' => 'nullable|string',
             'questions.*.options' => 'required|array|min:2',
-            'questions.*.options.*.id' => 'nullable|exists:quiz_options,id',
+            // 'questions.*.options.*.id' => 'nullable|exists:quiz_options,id',
             'questions.*.options.*.text' => 'required|string',
-            'questions.*.options.*.is_correct' => 'required_if:questions.*.type,multiple-choice,true-false|boolean'
+            'questions.*.options.*.is_correct' => 'required_if:questions.*.type,multiple_choice,true_false|boolean'
         ]);
 
         try {
@@ -210,8 +210,12 @@ class QuizController extends Controller
             }
 
             DB::commit();
-            return response()->json($quiz->load('questions.options'));
+            if($request->wantsJson()){
+                return response()->json($quiz->load('questions.options'));
 
+            }
+
+            return redirect()->back()->with('success', 'Quiz created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
             

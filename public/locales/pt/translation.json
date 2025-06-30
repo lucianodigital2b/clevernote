@@ -190,6 +190,12 @@
   "start_first_flashcard": "Comece adicionando seu primeiro cartão a este conjunto",
   "flashcards": "Cartões",
   "search_flashcards": "Buscar cartões...",
+  "add_question": "Adicionar questão",
+  "add_option": "Adicionar opção",
+  "explanation_optional": "Explicação (Opcional)",
+  "multiple_choice": "Multipla Escolha",
+  "type": "Tipo",
+  "description": "Descrição",
   "add_flashcard": "Adicionar Cartão",
   "create_flashcards": "Criar cartões de memória",
   "generate_study_cards": "Gerar cartões de estudo a partir de suas notas",
@@ -390,6 +396,10 @@
   "how_get_started": "Começar",
   "folder": "Pasta",
   "select": "Selecionar",
-  "dashboard": "Painel"
+  "dashboard": "Painel",
+  "updated_successfully": "Registro salvo com sucesso",
+  "no_questions_yet": "No questions yet",
+  "add_your_first_question_to_get_started": "Add your first question to get started"
+
 
 }
