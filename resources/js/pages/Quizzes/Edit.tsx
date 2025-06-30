@@ -688,22 +688,22 @@ export default function Edit({ quiz }: Props) {
         {/* Questions Section */}
         {data.questions.length === 0 ? (
           <motion.div 
-            className="rounded-lg p-8 mb-6 border-2 border-dashed border-purple-300 text-center bg-purple-50"
+            className="rounded-lg p-8 mb-6 border-2 border-dashed border-indigo-300 text-center bg-indigo-50"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
           >
             <div className="max-w-md mx-auto">
               <motion.div 
-                className="w-16 h-16 mx-auto mb-4 bg-purple-200 rounded-full flex items-center justify-center"
+                className="w-16 h-16 mx-auto mb-4 bg-indigo-200 rounded-full flex items-center justify-center"
               initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, duration: 0.5, type: "spring", stiffness: 200 }}
               >
-                <PlusIcon className="w-8 h-8 text-purple-400" />
+                <PlusIcon className="w-8 h-8 text-indigo-400" />
               </motion.div>
               <motion.h3 
-                className="text-lg font-medium text-purple-900 mb-2"
+                className="text-lg font-medium text-indigo-900 mb-2"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.3 }}
@@ -711,7 +711,7 @@ export default function Edit({ quiz }: Props) {
                 {t('no_questions_yet')}
               </motion.h3>
               <motion.p 
-                className="text-purple-500 mb-4"
+                className="text-indigo-500 mb-4"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.3 }}
@@ -721,14 +721,15 @@ export default function Edit({ quiz }: Props) {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5, duration: 0.3 }}
+                transition={{ delay: 0.1, duration: 0.3 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <Button
                   type="button"
                   onClick={addQuestion}
-                  className="mx-auto"
+                  className="mx-auto bg-indigo-500 hover:bg-indigo-600"
+
                 >
                   <PlusIcon className="w-5 h-5 mr-2" />
                   {t('add_question')}
@@ -884,8 +885,6 @@ export default function Edit({ quiz }: Props) {
                       </p>
                     </div>
                   )}
-
-
 
                   <div>
                     <Label className="mb-2">{t('type')}</Label>
