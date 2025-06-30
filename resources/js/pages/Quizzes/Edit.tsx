@@ -778,7 +778,7 @@ export default function Edit({ quiz }: Props) {
                                 questions: data.questions,
                                 setData
                               }}
-                              optionEditorsRefs={optionEditorsRefs.current}
+                              optionEditorsRefs={optionEditorsRefs}
                               isUploadingImage={isUploadingImage}
                               uploadingEditor={uploadingEditor}
                               uploadImage={uploadImage}
