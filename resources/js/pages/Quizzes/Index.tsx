@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PencilIcon, MoreVertical, ClipboardList, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DeleteConfirmationDialog } from '@/components/delete-confirmation-dialog';
+import { CreateQuizModal } from '@/components/quiz/create-quiz-modal';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -34,6 +35,8 @@ interface Quiz {
   description?: string;
   questions: QuizQuestion[];
   created_at: string;
+  thumbnail_color?: string;
+  thumbnail_url?: string;
 }
 
 interface Props {
@@ -50,10 +53,24 @@ export default function Index({ quizzes, isLoading = false }: Props) {
   const [hoveredQuiz, setHoveredQuiz] = useState<number | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedQuizId, setSelectedQuizId] = useState<number | null>(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const handleDelete = (id: number) => {
     setSelectedQuizId(id);
     setDeleteDialogOpen(true);
+  };
+
+  const getThumbnailStyle = (quiz: Quiz) => {
+    if (quiz.thumbnail_url) {
+      return {
+        backgroundImage: `url(${quiz.thumbnail_url})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      };
+    }
+    return {
+      backgroundColor: quiz.thumbnail_color || '#3B82F6',
+    };
   };
 
   return (
@@ -63,11 +80,9 @@ export default function Index({ quizzes, isLoading = false }: Props) {
       <div className="container mx-auto py-6 px-4">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">{t('My Quizzes')}</h1>
-          <Button asChild>
-            <Link href="/quizzes/create" className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              {t('Create Quiz')}
-            </Link>
+          <Button onClick={() => setCreateModalOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            {t('Create Quiz')}
           </Button>
         </div>
 
@@ -108,8 +123,13 @@ export default function Index({ quizzes, isLoading = false }: Props) {
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg">
-                        <ClipboardList className="h-5 w-5 text-blue-500" />
+                      <div 
+                        className="p-2 rounded-lg flex items-center justify-center"
+                        style={getThumbnailStyle(quiz)}
+                      >
+                        {!quiz.thumbnail_url && (
+                          <ClipboardList className="h-5 w-5 text-white" />
+                        )}
                       </div>
                       <div>
                         <h3 className="font-medium text-lg">{quiz.title}</h3>
@@ -169,6 +189,12 @@ export default function Index({ quizzes, isLoading = false }: Props) {
           </div>
         )}
       </div>
+
+      {/* Create Quiz Modal */}
+      <CreateQuizModal 
+        isOpen={createModalOpen} 
+        onClose={() => setCreateModalOpen(false)} 
+      />
 
       {selectedQuizId && (
         <DeleteConfirmationDialog

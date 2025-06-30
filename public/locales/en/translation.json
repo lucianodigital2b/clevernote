@@ -112,9 +112,11 @@
   "options": "Options",
   "option_number": "Option {{number}}",
   "add_option": "Add Option",
-  "explanation_optional": "Explanation (Optional)",
   "add_question": "Add Question",
+  "explanation_optional": "Explanation (Optional)",
   "save": "Save",
+  "type": "Type",
+  "description": "Description",
   "pricing_feature_advanced_formatting": "Advanced formatting",
   "pricing_feature_flashcards": "Flashcards",
   "pricing_feature_quizzes": "Quizzes",
@@ -416,5 +418,8 @@
   "folder": "Folder",
   "created": "Created",
   "dashboard": "Dashboard",
-  "Support": "Support"
+  "Support": "Support",
+  "updated_successfully": "Saved successfully",
+  "no_questions_yet": "No questions yet",
+  "add_your_first_question_to_get_started": "Add your first question to get started"
 }
