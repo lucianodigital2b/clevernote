@@ -380,7 +380,7 @@ export default function Edit({ note }: { note: Note }) {
             }),
             MathExtension.configure({ evaluation: true, katexOptions: { macros: { "\\B": "\\mathbb{B}" } }, delimiters: "dollar" }),
         ],
-        content: currentNote.content,
+        content: currentNote.content || '',
         editorProps: {
             handlePaste: (view, event, slice) => {
               const file = event.clipboardData?.files?.[0]
@@ -400,11 +400,14 @@ export default function Edit({ note }: { note: Note }) {
 
     // Sync editor content when currentNote changes (after processing)
     useEffect(() => {
-        if (editor && currentNote.content && currentNote.content !== content) {
-            editor.commands.setContent(currentNote.content);
-            setContent(currentNote.content);
+        if (editor) {
+            // Always update editor content when currentNote changes, especially after processing
+            const newContent = currentNote.content || '';
+            console.log('Syncing editor content:', { newContent, currentNoteStatus: currentNote.status });
+            editor.commands.setContent(newContent);
+            setContent(newContent);
         }
-    }, [currentNote.content, editor, content]);
+    }, [currentNote.content, currentNote.status, editor]);
 
     async function uploadImage(file : any) {
         const formData = new FormData()
@@ -454,18 +457,17 @@ export default function Edit({ note }: { note: Note }) {
         if (isProcessing) {
             intervalId = setInterval(async () => {
                 try {
-                    const response = await axios.get(`/api/notes/${note.id}/status`);
+                    const response = await axios.get(`/api/notes/${note.id}`);
                     const noteData = response.data;
+                    
+                    console.log('Polling result:', { status: noteData.status, hasContent: !!noteData.content });
                     
                     if (noteData.status === 'processed') {
                         clearInterval(intervalId);
                         setIsProcessing(false);
+                        setIsFailed(false); // Ensure failed state is cleared
                         setCurrentNote(noteData);
-                        // Update editor content with processed note content
-                        if (editor && noteData.content) {
-                            editor.commands.setContent(noteData.content);
-                        }
-                        setContent(noteData.content);
+                        // Content will be updated by the separate useEffect
                         toastConfig.success("Note processing completed");
                         
                     } else if (noteData.status === 'failed') {
@@ -488,7 +490,7 @@ export default function Edit({ note }: { note: Note }) {
                 clearInterval(intervalId);
             }
         };
-    }, [isProcessing, note.id, editor]);
+    }, [isProcessing, note.id]);
 
     // Add useEffect for autosave
     useEffect(() => {
