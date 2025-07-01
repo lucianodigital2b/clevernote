@@ -470,6 +470,11 @@ export default function Edit({ note }: { note: Note }) {
                         // Content will be updated by the separate useEffect
                         toastConfig.success("Note processing completed");
                         
+                        // Open feedback modal after processing is complete
+                        setTimeout(() => {
+                            setFeedbackModalOpen(true);
+                        }, 1000); // Small delay to let user see the success message
+                        
                     } else if (noteData.status === 'failed') {
                         clearInterval(intervalId);
                         setIsProcessing(false);
@@ -534,27 +539,55 @@ export default function Edit({ note }: { note: Note }) {
 
     return (
         <AppLayout>
-            <Dialog open={feedbackModalOpen} onOpenChange={setFeedbackModalOpen}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-medium">What was the issue with this note?</h3>
-                        <textarea 
-                            className="w-full p-2 border rounded min-h-[100px]"
-                            value={feedbackReason}
-                            onChange={(e) => setFeedbackReason(e.target.value)}
-                            placeholder="Please describe the issue..."
-                        />
-                        <div className="flex justify-end gap-2">
-                            <Button variant="outline" onClick={() => setFeedbackModalOpen(false)}>
-                                {t('cancel')}
-                            </Button>
-                            <Button onClick={() => handleSubmitFeedback(false)}>
-                                {t('save')}
+            {/* Feedback Modal - Bottom Right Corner */}
+            {feedbackModalOpen && (
+                <div className="fixed bottom-4 right-4 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 max-w-sm">
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-medium text-gray-900 dark:text-white">{t('feedback_modal_title')}</h3>
+                            <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => setFeedbackModalOpen(false)}
+                                className="h-6 w-6 p-0"
+                            >
+                                <X className="h-4 w-4" />
                             </Button>
                         </div>
+                        
+                        <div className="flex items-center gap-3">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleSubmitFeedback(true)}
+                                className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50"
+                            >
+                                <ThumbsUp className="h-4 w-4" />
+                                {t('yes')}
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                    // For negative feedback, we might want to show the reason input
+                                    setFeedbackModalOpen(false);
+                                    // You can add a separate modal for detailed feedback if needed
+                                    handleSubmitFeedback(false);
+                                }}
+                                className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                                <ThumbsDown className="h-4 w-4" />
+                                {t('no')}
+                            </Button>
+                        </div>
+                        
+                        {/* Optional: Show reason input for negative feedback */}
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                            {t('feedback_modal_subtitle')}
+                        </div>
                     </div>
-                </DialogContent>
-            </Dialog>
+                </div>
+            )}
 
             <Head title={`${currentNote.title}`} />
             

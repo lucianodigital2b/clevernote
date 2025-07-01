@@ -397,10 +397,14 @@
   "folder": "Pasta",
   "create": "Criar",
   "select": "Selecionar",
+  "yes": "Sim",
+  "feedback_modal_title": "Esta nota foi gerada de forma satisfatória?",
+  "no": "Não",
+  "feedback_modal_subtitle": "Seu feedback nos ajuda a melhorar a geração de notas",
   "dashboard": "Painel",
   "updated_successfully": "Registro salvo com sucesso",
-  "no_questions_yet": "No questions yet",
-  "add_your_first_question_to_get_started": "Add your first question to get started"
+  "no_questions_yet": "Ainda não há perguntas",
+  "add_your_first_question_to_get_started": "Adicione sua primeira pergunta para começar"
 
 
 }
