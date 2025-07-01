@@ -95,7 +95,7 @@ class ProcessLinkNote implements ShouldQueue
             ]);
         } finally {
             // Clean up the main audio file
-            // $this->cleanupAudioFile($audioPath);
+            $this->cleanupAudioFile($audioPath);
         }
     }
 

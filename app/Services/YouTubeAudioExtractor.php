@@ -16,8 +16,65 @@ class YouTubeAudioExtractor
         return $this->lastError;
     }
     
+    /**
+     * Validate and normalize YouTube URL
+     */
+    private function validateAndNormalizeUrl(string $url): ?string
+    {
+        // Add protocol if missing
+        if (!preg_match('/^https?:\/\//i', $url)) {
+            $url = 'https://' . $url;
+        }
+        
+        // Validate YouTube URL pattern
+        $patterns = [
+            '/^https?:\/\/(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/',
+            '/^https?:\/\/(www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/',
+            '/^https?:\/\/(www\.)?youtube\.com\/v\/([a-zA-Z0-9_-]{11})/',
+        ];
+        
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $url)) {
+                logger()->info('YouTube URL validated and normalized', ['original' => func_get_args()[0], 'normalized' => $url]);
+                return $url;
+            }
+        }
+        
+        logger()->error('Invalid YouTube URL format', ['url' => $url]);
+        return null;
+    }
+    
+    /**
+     * Debug cookie file status for troubleshooting
+     */
+    private function debugCookieFile(string $cookiesPath): void
+    {
+        $status = [
+            'path' => $cookiesPath,
+            'exists' => file_exists($cookiesPath),
+            'readable' => file_exists($cookiesPath) ? is_readable($cookiesPath) : false,
+            'writable' => file_exists($cookiesPath) ? is_writable($cookiesPath) : false,
+            'size' => file_exists($cookiesPath) ? filesize($cookiesPath) : 0,
+            'modified' => file_exists($cookiesPath) ? date('Y-m-d H:i:s', filemtime($cookiesPath)) : null,
+        ];
+        
+        if (file_exists($cookiesPath)) {
+            $permissions = substr(sprintf('%o', fileperms($cookiesPath)), -4);
+            $status['permissions'] = $permissions;
+        }
+        
+        logger()->info('Cookie file status', $status);
+    }
+    
     public function extractAudio(string $youtubeUrl): ?UploadedFile
     {
+        // Validate and normalize URL
+        $youtubeUrl = $this->validateAndNormalizeUrl($youtubeUrl);
+        if (!$youtubeUrl) {
+            $this->lastError = 'Invalid YouTube URL provided';
+            return null;
+        }
+
         $videoId = Str::random(10);
         $outputPath = storage_path("app/tmp/{$videoId}.flac");
 
@@ -28,6 +85,9 @@ class YouTubeAudioExtractor
         $ytdlp = config('app.ytdlp_path');
         $ffmpeg = config('app.ffmpeg_bin');
         $cookiesPath = config('app.ytdlp_cookies_path', storage_path('app/cookies.txt'));
+        
+        // Debug cookie file status
+        $this->debugCookieFile($cookiesPath);
 
         // First, check available formats (try with cookies if available, then without)
         $availableFormats = $this->getAvailableFormats($youtubeUrl, $ytdlp, $cookiesPath);
@@ -48,45 +108,36 @@ class YouTubeAudioExtractor
 
         // Try multiple format strategies based on available formats
         $formatStrategies = $this->buildFormatStrategies($availableFormats);
+        $useCookies = $cookiesPath && file_exists($cookiesPath) && is_readable($cookiesPath);
 
         foreach ($formatStrategies as $format) {
-            $command = [
-                $ytdlp,
-                '--extract-audio',
-                '--audio-format', 'flac',
-                '--no-playlist',
-                '--no-cache-dir', // Disable cache to avoid permission issues
-                '--ffmpeg-location', $ffmpeg,
-                '--postprocessor-args', 'ffmpeg:-ar 16000 -ac 1 -map 0:a -c:a flac',
-            ];
-            
-            // Add cookies and additional authentication options
-            if (file_exists($cookiesPath)) {
-                $command[] = '--cookies';
-                $command[] = $cookiesPath;
-            }
-            
-            // Add additional options to handle bot detection
-            $command[] = '--user-agent';
-            $command[] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
-            $command[] = '--sleep-interval';
-            $command[] = '1';
-            $command[] = '--max-sleep-interval';
-            $command[] = '5';
-            
-            $command = array_merge($command, [
-                '--format', $format,
-                '--ignore-errors',
-                '--no-warnings',
-                '--extractor-retries', '3',
-                '--fragment-retries', '3',
-                '-o', $outputPath,
-                $youtubeUrl,
-            ]);
-
-            $result = $this->tryExtraction($command, $outputPath, $youtubeUrl, $videoId);
-            if ($result !== null) {
-                return $result;
+            // First attempt: with cookies if available
+            if ($useCookies) {
+                $result = $this->attemptExtractionWithFormat($format, $ytdlp, $ffmpeg, $outputPath, $youtubeUrl, $videoId, $cookiesPath);
+                if ($result !== null) {
+                    return $result;
+                }
+                
+                // Check if the error was cookie-related permission issue
+                if ($this->lastError && strpos($this->lastError, 'Permission denied') !== false && strpos($this->lastError, 'cookies') !== false) {
+                    logger()->info('Cookie permission error detected, retrying without cookies', [
+                        'url' => $youtubeUrl,
+                        'format' => $format,
+                        'error' => $this->lastError
+                    ]);
+                    
+                    // Second attempt: without cookies
+                    $result = $this->attemptExtractionWithFormat($format, $ytdlp, $ffmpeg, $outputPath, $youtubeUrl, $videoId, null);
+                    if ($result !== null) {
+                        return $result;
+                    }
+                }
+            } else {
+                // Direct attempt without cookies
+                $result = $this->attemptExtractionWithFormat($format, $ytdlp, $ffmpeg, $outputPath, $youtubeUrl, $videoId, null);
+                if ($result !== null) {
+                    return $result;
+                }
             }
         }
 
@@ -113,9 +164,10 @@ class YouTubeAudioExtractor
         ];
         
         // Add cookies and additional authentication options
-        if ($cookiesPath && file_exists($cookiesPath)) {
+        if ($cookiesPath && file_exists($cookiesPath) && is_readable($cookiesPath)) {
             $command[] = '--cookies';
             $command[] = $cookiesPath;
+            $command[] = '--no-cookies-from-browser'; // Prevent yt-dlp from trying to save cookies back
         }
         
         // Add additional options to handle bot detection
@@ -205,6 +257,56 @@ class YouTubeAudioExtractor
         
         return array_unique($strategies);
     }
+    
+    /**
+     * Attempt extraction with a specific format, with or without cookies
+     */
+    private function attemptExtractionWithFormat(string $format, string $ytdlp, string $ffmpeg, string $outputPath, string $youtubeUrl, string $videoId, ?string $cookiesPath): ?UploadedFile
+    {
+        $command = [
+            $ytdlp,
+            '--extract-audio',
+            '--audio-format', 'flac',
+            '--no-playlist',
+            '--no-cache-dir', // Disable cache to avoid permission issues
+            '--ffmpeg-location', $ffmpeg,
+            '--postprocessor-args', 'ffmpeg:-ar 16000 -ac 1 -map 0:a -c:a flac',
+        ];
+        
+        // Add cookies and additional authentication options
+        if ($cookiesPath && file_exists($cookiesPath) && is_readable($cookiesPath)) {
+            $command[] = '--cookies';
+            $command[] = $cookiesPath;
+            $command[] = '--no-cookies-from-browser'; // Prevent yt-dlp from trying to save cookies back
+            logger()->info('Using cookies for YouTube extraction', ['cookies_path' => $cookiesPath, 'format' => $format]);
+        } else {
+            logger()->info('Extracting without cookies', [
+                'format' => $format,
+                'cookies_path' => $cookiesPath,
+                'reason' => $cookiesPath ? 'Cookie file not accessible' : 'No cookies provided'
+            ]);
+        }
+        
+        // Add additional options to handle bot detection
+        $command[] = '--user-agent';
+        $command[] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
+        $command[] = '--sleep-interval';
+        $command[] = '1';
+        $command[] = '--max-sleep-interval';
+        $command[] = '5';
+        
+        $command = array_merge($command, [
+            '--format', $format,
+            '--ignore-errors',
+            '--no-warnings',
+            '--extractor-retries', '3',
+            '--fragment-retries', '3',
+            '-o', $outputPath,
+            $youtubeUrl,
+        ]);
+
+        return $this->tryExtraction($command, $outputPath, $youtubeUrl, $videoId);
+    }
 
     private function tryExtraction(array $command, string $outputPath, string $youtubeUrl, string $videoId): ?UploadedFile
     {
@@ -231,7 +333,7 @@ class YouTubeAudioExtractor
             $output = $process->getOutput();
             $exitCode = $process->getExitCode();
             
-            // Check for specific bot detection error
+            // Check for specific errors
             if (strpos($errorOutput, 'Sign in to confirm you\'re not a bot') !== false) {
                 $this->lastError = "YouTube bot detection triggered during extraction. This may indicate that cookies are expired or invalid. Please update the cookies file.";
                 logger()->error('YouTube bot detection triggered during extraction', [
@@ -240,6 +342,15 @@ class YouTubeAudioExtractor
                     'error_output' => $errorOutput,
                     'exit_code' => $exitCode,
                     'suggestion' => 'Update cookies file or try again later'
+                ]);
+            } elseif (strpos($errorOutput, 'Permission denied') !== false && strpos($errorOutput, 'cookies.txt') !== false) {
+                $this->lastError = "Permission denied when accessing cookies file. Please check file permissions for cookies.txt.";
+                logger()->error('Cookie file permission error during extraction', [
+                    'url' => $youtubeUrl,
+                    'error' => $e->getMessage(),
+                    'error_output' => $errorOutput,
+                    'exit_code' => $exitCode,
+                    'suggestion' => 'Check cookies.txt file permissions'
                 ]);
             } else {
                 // Capture detailed yt-dlp error for later use
