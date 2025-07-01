@@ -63,7 +63,8 @@ class ProcessLinkNote implements ShouldQueue
 
             $audio = $youtubeAudioExtractor->extractAudio($link);
             if(!$audio) {
-                throw new \Exception('Failed to extract audio from YouTube video. The video may be restricted, unavailable for download, or only contains images/storyboards. Please try a different video or check if the video is publicly accessible.');
+                $detailedError = $youtubeAudioExtractor->getLastError() ?: 'Failed to extract audio from YouTube video. The video may be restricted, unavailable for download, or only contains images/storyboards. Please try a different video or check if the video is publicly accessible.';
+                throw new \Exception($detailedError);
             }
 
             $audioPath = $audio->getPathname();

@@ -9,6 +9,13 @@ use Symfony\Component\Process\Process;
 
 class YouTubeAudioExtractor
 {
+    private ?string $lastError = null;
+    
+    public function getLastError(): ?string
+    {
+        return $this->lastError;
+    }
+    
     public function extractAudio(string $youtubeUrl): ?UploadedFile
     {
         $videoId = Str::random(10);
@@ -31,6 +38,7 @@ class YouTubeAudioExtractor
             $availableFormats = $this->getAvailableFormats($youtubeUrl, $ytdlp, null);
         }
         if (empty($availableFormats)) {
+            $this->lastError = 'No audio/video formats available for YouTube video. Video may be restricted, unavailable, or only contains images/storyboards.';
             logger()->error('No audio/video formats available for YouTube video', [
                 'url' => $youtubeUrl,
                 'reason' => 'Video may be restricted, unavailable, or only contains images/storyboards'
@@ -74,6 +82,9 @@ class YouTubeAudioExtractor
         }
 
         // Log final failure after all attempts
+        if (!$this->lastError) {
+            $this->lastError = 'YouTube audio extraction failed after all format attempts. Available formats: ' . implode(', ', $availableFormats);
+        }
         logger()->error('YouTube audio extraction failed after all attempts', [
             'url' => $youtubeUrl,
             'attempted_formats' => $formatStrategies,
@@ -109,6 +120,7 @@ class YouTubeAudioExtractor
             
             // Check if only images are available
             if (strpos($errorOutput, 'Only images are available for download') !== false) {
+                $this->lastError = 'Only images/storyboards are available for download - video may be restricted or unavailable';
                 logger()->error('YouTube video has no audio/video streams available', [
                     'url' => $youtubeUrl,
                     'reason' => 'Only images/storyboards available - video may be restricted or unavailable'
@@ -130,6 +142,7 @@ class YouTubeAudioExtractor
             
             return array_unique($formats);
         } catch (\Exception $e) {
+            $this->lastError = 'Failed to get available formats: ' . $e->getMessage();
             logger()->warning('Failed to get available formats', [
                 'url' => $youtubeUrl,
                 'error' => $e->getMessage()
@@ -186,16 +199,24 @@ class YouTubeAudioExtractor
 
             return null;
         } catch (ProcessFailedException $e) {
+            $errorOutput = $process->getErrorOutput();
+            $output = $process->getOutput();
+            $exitCode = $process->getExitCode();
+            
+            // Capture detailed yt-dlp error for later use
+            $this->lastError = "yt-dlp extraction failed (exit code: {$exitCode}). Error: " . trim($errorOutput ?: $e->getMessage());
+            
             logger()->warning('YouTube audio extraction attempt failed', [
                 'url' => $youtubeUrl,
                 'error' => $e->getMessage(),
-                'output' => $process->getOutput(),
-                'error_output' => $process->getErrorOutput(),
-                'exit_code' => $process->getExitCode(),
+                'output' => $output,
+                'error_output' => $errorOutput,
+                'exit_code' => $exitCode,
                 'command' => implode(' ', $command)
             ]);
             return null;
         } catch (\Exception $e) {
+            $this->lastError = "yt-dlp extraction exception: " . $e->getMessage();
             logger()->warning('YouTube audio extraction attempt exception', [
                 'url' => $youtubeUrl,
                 'error' => $e->getMessage(),
