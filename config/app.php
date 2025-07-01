@@ -130,6 +130,7 @@ return [
     'open_ai' => env('OPEN_AI', null),
     'ytdlp_timeout' => env('YTDLP_TIMEOUT', null),
     'ytdlp_idle_timeout' => env('YTDLP_IDLE_TIMEOUT', null),
+    'ytdlp_cookies_path' => env('YTDLP_COOKIES_PATH', null),
 
 
 ];
