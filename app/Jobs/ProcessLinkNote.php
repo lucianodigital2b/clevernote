@@ -74,6 +74,8 @@ class ProcessLinkNote implements ShouldQueue
             
             $studyNote = $deepseekService->createStudyNote($transcription['text'], $language);
 
+            Log::error(print_r($studyNote, true));
+
             $noteData = array_merge($this->validatedData, [
                 'content' => $studyNote['study_note']['content'],
                 'title' => $studyNote['study_note']['title'],

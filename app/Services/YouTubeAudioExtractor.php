@@ -84,7 +84,7 @@ class YouTubeAudioExtractor
 
         $ytdlp = config('app.ytdlp_path');
         $ffmpeg = config('app.ffmpeg_bin');
-        $cookiesPath = config('app.ytdlp_cookies_path', storage_path('app/cookies.txt'));
+        $cookiesPath = base_path('cookies.txt');
         
         // Debug cookie file status
         $this->debugCookieFile($cookiesPath);
