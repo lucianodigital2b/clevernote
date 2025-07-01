@@ -71,6 +71,7 @@ class ProcessLinkNote implements ShouldQueue
 
             $transcription = $transcriptionService->transcribeAudio($audioPath, $language);
 
+            
             $studyNote = $deepseekService->createStudyNote($transcription['text'], $language);
 
             $noteData = array_merge($this->validatedData, [

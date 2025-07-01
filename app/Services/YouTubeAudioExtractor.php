@@ -55,15 +55,24 @@ class YouTubeAudioExtractor
                 '--extract-audio',
                 '--audio-format', 'flac',
                 '--no-playlist',
+                '--no-cache-dir', // Disable cache to avoid permission issues
                 '--ffmpeg-location', $ffmpeg,
                 '--postprocessor-args', 'ffmpeg:-ar 16000 -ac 1 -map 0:a -c:a flac',
             ];
             
-            // Add cookies only if file exists
+            // Add cookies and additional authentication options
             if (file_exists($cookiesPath)) {
                 $command[] = '--cookies';
                 $command[] = $cookiesPath;
             }
+            
+            // Add additional options to handle bot detection
+            $command[] = '--user-agent';
+            $command[] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
+            $command[] = '--sleep-interval';
+            $command[] = '1';
+            $command[] = '--max-sleep-interval';
+            $command[] = '5';
             
             $command = array_merge($command, [
                 '--format', $format,
@@ -100,13 +109,22 @@ class YouTubeAudioExtractor
             $ytdlp,
             '--list-formats',
             '--no-playlist',
+            '--no-cache-dir', // Disable cache to avoid permission issues
         ];
         
-        // Add cookies only if path is provided and file exists
+        // Add cookies and additional authentication options
         if ($cookiesPath && file_exists($cookiesPath)) {
             $command[] = '--cookies';
             $command[] = $cookiesPath;
         }
+        
+        // Add additional options to handle bot detection
+        $command[] = '--user-agent';
+        $command[] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
+        $command[] = '--sleep-interval';
+        $command[] = '1';
+        $command[] = '--max-sleep-interval';
+        $command[] = '5';
         
         $command[] = $youtubeUrl;
 
@@ -142,11 +160,23 @@ class YouTubeAudioExtractor
             
             return array_unique($formats);
         } catch (\Exception $e) {
-            $this->lastError = 'Failed to get available formats: ' . $e->getMessage();
-            logger()->warning('Failed to get available formats', [
-                'url' => $youtubeUrl,
-                'error' => $e->getMessage()
-            ]);
+            $errorMessage = $e->getMessage();
+            
+            // Check for specific bot detection error
+            if (strpos($errorMessage, 'Sign in to confirm you\'re not a bot') !== false) {
+                $this->lastError = 'YouTube bot detection triggered. This may indicate that cookies are expired or invalid. Please update the cookies file.';
+                logger()->error('YouTube bot detection triggered', [
+                    'url' => $youtubeUrl,
+                    'error' => $errorMessage,
+                    'suggestion' => 'Update cookies file or try again later'
+                ]);
+            } else {
+                $this->lastError = 'Failed to get available formats: ' . $errorMessage;
+                logger()->warning('Failed to get available formats', [
+                    'url' => $youtubeUrl,
+                    'error' => $errorMessage
+                ]);
+            }
             return [];
         }
     }
@@ -178,8 +208,6 @@ class YouTubeAudioExtractor
 
     private function tryExtraction(array $command, string $outputPath, string $youtubeUrl, string $videoId): ?UploadedFile
     {
-
-
         $process = new Process($command);
         $process->setTimeout(config('app.ytdlp_timeout', 600));
         $process->setIdleTimeout(config('app.ytdlp_idle_timeout', 120));
@@ -203,17 +231,29 @@ class YouTubeAudioExtractor
             $output = $process->getOutput();
             $exitCode = $process->getExitCode();
             
-            // Capture detailed yt-dlp error for later use
-            $this->lastError = "yt-dlp extraction failed (exit code: {$exitCode}). Error: " . trim($errorOutput ?: $e->getMessage());
-            
-            logger()->warning('YouTube audio extraction attempt failed', [
-                'url' => $youtubeUrl,
-                'error' => $e->getMessage(),
-                'output' => $output,
-                'error_output' => $errorOutput,
-                'exit_code' => $exitCode,
-                'command' => implode(' ', $command)
-            ]);
+            // Check for specific bot detection error
+            if (strpos($errorOutput, 'Sign in to confirm you\'re not a bot') !== false) {
+                $this->lastError = "YouTube bot detection triggered during extraction. This may indicate that cookies are expired or invalid. Please update the cookies file.";
+                logger()->error('YouTube bot detection triggered during extraction', [
+                    'url' => $youtubeUrl,
+                    'error' => $e->getMessage(),
+                    'error_output' => $errorOutput,
+                    'exit_code' => $exitCode,
+                    'suggestion' => 'Update cookies file or try again later'
+                ]);
+            } else {
+                // Capture detailed yt-dlp error for later use
+                $this->lastError = "yt-dlp extraction failed (exit code: {$exitCode}). Error: " . trim($errorOutput ?: $e->getMessage());
+                
+                logger()->warning('YouTube audio extraction attempt failed', [
+                    'url' => $youtubeUrl,
+                    'error' => $e->getMessage(),
+                    'output' => $output,
+                    'error_output' => $errorOutput,
+                    'exit_code' => $exitCode,
+                    'command' => implode(' ', $command)
+                ]);
+            }
             return null;
         } catch (\Exception $e) {
             $this->lastError = "yt-dlp extraction exception: " . $e->getMessage();
