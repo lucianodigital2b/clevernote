@@ -27,9 +27,9 @@ class YouTubeAudioExtractor
 
         $ytdlp = config('app.ytdlp_path');
         $ffmpeg = config('app.ffmpeg_bin');
-        $cookiesPath = base_path('cookies.txt');
+        $cookiesPath = config('app.ytdlp_cookies_path', storage_path('app/cookies.txt'));
 
-        // First, check available formats (try with cookies, then without)
+        // First, check available formats (try with cookies if available, then without)
         $availableFormats = $this->getAvailableFormats($youtubeUrl, $ytdlp, $cookiesPath);
         
         // If no formats found with cookies, try without cookies

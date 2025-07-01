@@ -7,6 +7,8 @@
 /storage/*.key
 /storage/pail
 /vendor
+cookies.txt
+/storage/app/cookies.txt
 .env
 .env.backup
 .env.production
