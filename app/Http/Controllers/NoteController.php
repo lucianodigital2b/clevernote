@@ -331,4 +331,24 @@ class NoteController extends Controller
         ];
     }
 
+    public function updateStatus(Request $request, Note $note)
+    {
+        $this->authorize('update', $note);
+
+        $request->validate([
+            'status' => 'required|string|in:processing,processed,failed',
+            'failure_reason' => 'nullable|string'
+        ]);
+
+        $note->update([
+            'status' => $request->status,
+            'failure_reason' => $request->failure_reason
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Note status updated successfully'
+        ]);
+    }
+
 }

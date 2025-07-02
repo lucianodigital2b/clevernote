@@ -249,4 +249,104 @@ class AIPrompts
 
                 Return only the JSON object with nodes and edges in a format ready to be used in React Flow.\n\nContent:\n" . $content;
     }
+
+    public static function studyPlanPrompt(array $surveyData, string $language): string
+    {
+        $surveyJson = json_encode($surveyData, JSON_PRETTY_PRINT);
+        
+        return <<<EOT
+            Language Instructions:
+            1. First, determine the target language:
+               - If {$language} is specified, use that language for ALL output.
+               - If {$language} is 'autodetect', default to English
+            2. Generate ALL content in the determined target language
+            3. Preserve technical terms and proper nouns in their original form
+
+            You are an expert educational consultant and study planner. Based on the user's onboarding survey responses, create a comprehensive, personalized study plan that spans 4 weeks.
+
+            ## Survey Data Analysis:
+            {$surveyJson}
+
+            ## Study Plan Requirements:
+            
+            ### 1. Personalization:
+            - Analyze the user's study experience level, preferred methods, goals, and frequency
+            - Tailor the difficulty and pace according to their experience level
+            - Focus on their primary subject interest and learning goals
+            - Incorporate their preferred study methods throughout the plan
+            
+            ### 2. Structure (4-Week Plan):
+            - Week 1: Foundation building and habit formation
+            - Week 2: Skill development and method integration
+            - Week 3: Advanced techniques and practice
+            - Week 4: Review, assessment, and optimization
+            
+            ### 3. Daily Activities:
+            - Create specific, actionable daily tasks
+            - Include variety in study methods based on user preferences
+            - Balance learning new content with review and practice
+            - Incorporate breaks and reflection time
+            
+            ### 4. Calendar Events Format:
+            Each event should be realistic and achievable, with:
+            - Clear titles that indicate the activity type
+            - Specific time durations (15min to 2hrs max)
+            - Varied activities throughout each day
+            - Rest days and lighter study days included
+            
+            ## Output Format (Valid JSON):
+            {
+                "plan_title": "Personalized study plan title in target language",
+                "plan_description": "2-3 sentence overview of the plan's approach and goals in target language",
+                "weekly_goals": [
+                    {
+                        "week": 1,
+                        "title": "Week title in target language",
+                        "description": "Week description and objectives in target language",
+                        "focus_areas": ["area1", "area2", "area3"]
+                    },
+                    // ... repeat for 4 weeks
+                ],
+                "calendar_events": [
+                    {
+                        "id": "unique_id",
+                        "title": "Activity title in target language",
+                        "start": "2024-01-15T09:00:00",
+                        "end": "2024-01-15T10:30:00",
+                        "description": "Detailed activity description in target language",
+                        "category": "study|review|practice|break|assessment",
+                        "week": 1,
+                        "backgroundColor": "#color_code",
+                        "borderColor": "#color_code"
+                    },
+                    // ... continue for 4 weeks of events
+                ],
+                "study_tips": [
+                    "Personalized tip 1 in target language",
+                    "Personalized tip 2 in target language",
+                    "Personalized tip 3 in target language"
+                ],
+                "success_metrics": [
+                    "Metric 1 for tracking progress in target language",
+                    "Metric 2 for tracking progress in target language"
+                ]
+            }
+            
+            ## Color Coding for Events:
+            - Study sessions: #3B82F6 (blue)
+            - Review sessions: #10B981 (green)
+            - Practice/exercises: #F59E0B (amber)
+            - Breaks/rest: #8B5CF6 (purple)
+            - Assessments: #EF4444 (red)
+            
+            ## Important Guidelines:
+            - Start the calendar from next Monday (calculate appropriate dates)
+            - Create 3-5 events per day, varying in duration and type
+            - Include weekend activities but make them lighter
+            - Ensure the plan is realistic and not overwhelming
+            - Focus on building sustainable study habits
+            - Return ONLY the JSON object, no extra text
+            - Ensure JSON is valid for PHP's json_decode
+        EOT;
+    }
 }

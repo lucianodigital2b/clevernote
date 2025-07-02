@@ -37,7 +37,7 @@ class GoogleController extends Controller
             
             Auth::login($user);
             
-            return redirect()->intended(route('dashboard'));
+            return redirect()->intended(route('onboarding.show'));
             
         } catch (\Exception $e) {
             return redirect()->route('login')

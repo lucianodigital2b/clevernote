@@ -110,6 +110,31 @@ class StatisticsService
             ->toArray();
     }
     
+    public function getDailyStats(User $user, ?Carbon $startDate = null, ?Carbon $endDate = null): array
+    {
+        $startDate = $startDate ?? Carbon::now()->startOfMonth();
+        $endDate = $endDate ?? Carbon::now()->endOfMonth();
+        
+        return UserStatistics::where('user_id', $user->id)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->orderBy('date')
+            ->get()
+            ->map(function($stat) {
+                return [
+                    'date' => $stat->date->format('Y-m-d'),
+                    'quiz_attempts' => $stat->quiz_attempts,
+                    'quiz_correct_answers' => $stat->quiz_correct_answers,
+                    'quiz_total_questions' => $stat->quiz_total_questions,
+                    'flashcard_reviews' => $stat->flashcard_reviews,
+                    'flashcard_correct' => $stat->flashcard_correct,
+                    'study_time_minutes' => $stat->study_time_minutes,
+                    'current_streak' => $stat->current_streak,
+                    'max_streak' => $stat->max_streak
+                ];
+            })
+            ->toArray();
+    }
+    
     private function updateStreaks(User $user, Carbon $date): void
     {
         $yesterday = $date->copy()->subDay();

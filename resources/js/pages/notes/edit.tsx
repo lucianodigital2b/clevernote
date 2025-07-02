@@ -453,10 +453,34 @@ export default function Edit({ note }: { note: Note }) {
     // Add useEffect for note status polling
     useEffect(() => {
         let intervalId: NodeJS.Timeout;
+        let timeoutId: NodeJS.Timeout;
         
         if (isProcessing) {
+            const startTime = Date.now();
+            const TIMEOUT_DURATION = 60000; // 1 minute in milliseconds
+            
             intervalId = setInterval(async () => {
                 try {
+                    // Check if one minute has passed
+                    if (Date.now() - startTime >= TIMEOUT_DURATION) {
+                        clearInterval(intervalId);
+                        setIsProcessing(false);
+                        setIsFailed(true);
+                        
+                        // Update note status to failed on the server
+                        try {
+                            await axios.patch(`/api/notes/${note.id}/status`, {
+                                status: 'failed',
+                                failure_reason: 'Processing timeout after 1 minute'
+                            });
+                        } catch (updateError) {
+                            console.error('Error updating note status to failed:', updateError);
+                        }
+                        
+                        toastConfig.error("Note processing timed out and has been marked as failed");
+                        return;
+                    }
+                    
                     const response = await axios.get(`/api/notes/${note.id}`);
                     const noteData = response.data;
                     
@@ -493,6 +517,9 @@ export default function Edit({ note }: { note: Note }) {
         return () => {
             if (intervalId) {
                 clearInterval(intervalId);
+            }
+            if (timeoutId) {
+                clearTimeout(timeoutId);
             }
         };
     }, [isProcessing, note.id]);

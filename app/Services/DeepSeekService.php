@@ -55,4 +55,12 @@ class DeepSeekService extends AbstractAIService
         $prompt = AIPrompts::mindmapPrompt($note->content);
         return $this->sendRequest($prompt);
     }
+
+    public function generateStudyPlan(array $surveyData, ?string $language = null): array
+    {
+        $language = $language ?? $this->defaultLanguage;
+        $prompt = AIPrompts::studyPlanPrompt($surveyData, $language);
+        
+        return $this->sendRequest($prompt);
+    }
 }

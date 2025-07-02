@@ -18,6 +18,8 @@ import { UpgradeModal } from '@/components/upgrade-modal';
 import { useRequireSubscription } from '@/hooks/useRequireSubscription';
 import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
+import StudyPlanCalendar from '@/components/StudyPlanCalendar';
+import StudyPlanPreview from '@/components/StudyPlanPreview';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -33,9 +35,10 @@ export default function Dashboard() {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const debouncedSearch = useDebounce(searchQuery, 300);
-    const { folderId } = usePage().props as { folderId?: string | number };
+    const { folderId, showUpgrade } = usePage().props as { folderId?: string | number; showUpgrade?: boolean };
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+    const [showStudyPlan, setShowStudyPlan] = useState(false);
     const { auth } = usePage().props;
 
     const { t } = useTranslation();
@@ -83,6 +86,17 @@ export default function Dashboard() {
     
     const folders = data || [];
     
+    // Query for user statistics
+    const { data: userStatistics } = useQuery({
+        queryKey: ['userStatistics'],
+        queryFn: async () => {
+            const response = await axios.get('/api/statistics/daily');
+            return response.data.data;
+        },
+        staleTime: 30000, // Data remains fresh for 30 seconds
+        refetchOnWindowFocus: false // Prevent refetch on window focus
+    });
+    
     // Add back modal states
     const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
     const [isWebLinkModalOpen, setIsWebLinkModalOpen] = useState(false);
@@ -111,6 +125,18 @@ export default function Dashboard() {
 
     const { requireSubscription } = useRequireSubscription();
     
+    // Show upgrade modal if redirected from onboarding
+    useEffect(() => {
+        if (showUpgrade) {
+            setIsModalOpen(true);
+            // Clean up the URL parameter
+            router.visit(route('dashboard'), {
+                replace: true,
+                preserveState: true
+            });
+        }
+    }, [showUpgrade]);
+    
     // Modify the new note section handler to check subscription
     const handleNewNote = async (action: () => void) => {
         if (user.notes_count >= 3) {
@@ -128,6 +154,14 @@ export default function Dashboard() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={t('Dashboard')} />
             <div className="flex sm:flex-start h-full flex-1 flex-col gap-6 p-6 max-w-7xl mx-auto w-full relative">
+                {/* Study Plan Section */}
+                {/* {user.study_plan && (
+                    <StudyPlanPreview 
+                        user={user} 
+                        onViewStudyPlan={() => setShowStudyPlan(true)} 
+                    />
+                )} */}
+
                 {/* New Note Section - Desktop */}
                 <section className="hidden md:block">
                     <h2 className="text-xl font-semibold mb-2">{t('New note')}</h2>
@@ -158,7 +192,7 @@ export default function Dashboard() {
                             </div>
                         </div>
                         
-                        <div 
+                        {/* <div 
                             className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 hover:shadow-md transition-shadow cursor-pointer"
                             onClick={() => handleNewNote(() => setIsWebLinkModalOpen(true))}
                         >
@@ -170,7 +204,7 @@ export default function Dashboard() {
                                     <span className="font-medium">{t('Youtube')}</span>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
                         
                         <div 
                             className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 hover:shadow-md transition-shadow cursor-pointer"
@@ -430,6 +464,21 @@ export default function Dashboard() {
                 isOpen={isModalOpen} 
                 onClose={() => setIsModalOpen(false)} 
             />
+
+            {/* Study Plan Modal */}
+            {showStudyPlan && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+                    <div className="bg-white dark:bg-gray-900 rounded-lg w-full max-w-7xl max-h-[90vh] overflow-y-auto">
+                        <div className="p-6">
+                            <StudyPlanCalendar 
+                                studyPlan={user.study_plan} 
+                                userStatistics={userStatistics || []}
+                                onClose={() => setShowStudyPlan(false)}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
 
 
         </AppLayout>

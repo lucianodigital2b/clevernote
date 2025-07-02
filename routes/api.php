@@ -37,6 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('notes', NoteController::class);
     Route::post('/notes/{note}/retry', [NoteController::class, 'retryProcessing'])->name('notes.retry');
     Route::get('/notes/{note}/status', [NoteController::class, 'status']);
+    Route::patch('/notes/{note}/status', [NoteController::class, 'updateStatus'])->name('notes.update-status');
     
     Route::post('/subscriptions/resume/{subscriptionId}', [SubscriptionController::class, 'resume']);
     Route::get('/subscriptions/list', [SubscriptionController::class, 'list']);
@@ -91,6 +92,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     
     Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
+    Route::get('/statistics/daily', [StatisticsController::class, 'daily'])->name('statistics.daily');
 });
 
 

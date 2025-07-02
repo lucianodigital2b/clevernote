@@ -210,10 +210,10 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                         </Button>
                         
                         {/* Money-back guarantee */}
-                        <div className="flex items-center justify-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
+                        {/* <div className="flex items-center justify-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
                             <ShieldCheckIcon className="h-4 w-4" />
                             <span>30-day money-back guarantee</span>
-                        </div>
+                        </div> */}
                         
                         {/* Star rating */}
                         <div className="flex items-center justify-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-4">

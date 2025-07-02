@@ -59,6 +59,6 @@ class RegisteredUserController extends Controller
 
 
 
-        return to_route('dashboard');
+        return to_route('onboarding.show');
     }
 }

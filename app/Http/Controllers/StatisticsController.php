@@ -28,5 +28,19 @@ class StatisticsController extends Controller
             'overallStats' => $overallStats
         ]);
     }
+    
+    public function daily(Request $request)
+    {
+        $user = Auth::user();
+        
+        $startDate = $request->start_date ? Carbon::parse($request->start_date) : null;
+        $endDate = $request->end_date ? Carbon::parse($request->end_date) : null;
+        
+        $dailyStats = $this->statisticsService->getDailyStats($user, $startDate, $endDate);
+        
+        return response()->json([
+            'data' => $dailyStats
+        ]);
+    }
 
 }
