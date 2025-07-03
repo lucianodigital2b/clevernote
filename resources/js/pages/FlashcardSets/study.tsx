@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, PlusCircle, RotateCw } from 'lucide-react';
+import { ArrowLeft, PlusCircle, RotateCw, Shuffle } from 'lucide-react';
 import { FlashcardSet } from '@/types';
 import { Progress } from "@/components/ui/progress";
 import { useTranslation } from 'react-i18next';
@@ -88,6 +88,14 @@ const Study = ({ flashcardSet }: Props) => {
 
     const handleFlip = () => {
         setIsFlipped(!isFlipped);
+    };
+
+    const handleShuffle = () => {
+        if (dueIndexes.length === 0) return;
+        const shuffled = [...dueIndexes].sort(() => Math.random() - 0.5);
+        setDueIndexes(shuffled);
+        setCurrentIndex(shuffled[0]);
+        setIsFlipped(false);
     };
 
     const recallOptions: RecallOption[] = [
@@ -290,6 +298,14 @@ const Study = ({ flashcardSet }: Props) => {
                             <RotateCw className="h-4 w-4 mr-2" />
                             {t('study_flip_card')}
                         </Button>
+                        <button
+                            onClick={handleShuffle}
+                            disabled={dueIndexes.length <= 1}
+                            className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Shuffle cards"
+                        >
+                            <Shuffle className="h-4 w-4" />
+                        </button>
                     </div>
                     {/* Recall options are now always visible */}
                     <div className="grid grid-cols-2 sm:flex sm:justify-center gap-2 sm:gap-3 mt-6 sm:mt-8">
