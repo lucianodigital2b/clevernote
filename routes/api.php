@@ -39,6 +39,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notes/{note}/status', [NoteController::class, 'status']);
     Route::patch('/notes/{note}/status', [NoteController::class, 'updateStatus'])->name('notes.update-status');
     
+    Route::get('/mindmaps/{mindmap}/status', [MindmapController::class, 'status']);
+
     Route::post('/subscriptions/resume/{subscriptionId}', [SubscriptionController::class, 'resume']);
     Route::get('/subscriptions/list', [SubscriptionController::class, 'list']);
     Route::post('/subscriptions/cancel/{subscriptionId}', [SubscriptionController::class, 'cancel']);

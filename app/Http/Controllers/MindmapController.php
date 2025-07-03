@@ -59,4 +59,11 @@ class MindmapController extends Controller
 
         return response()->json(['mindmap' => $mindmap]);
     }
+
+    public function status(Mindmap $mindmap)
+    {
+        return [
+            'status' => $mindmap->status,
+        ];
+    }
 }
