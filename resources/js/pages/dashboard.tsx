@@ -155,12 +155,12 @@ export default function Dashboard() {
             <Head title={t('Dashboard')} />
             <div className="flex sm:flex-start h-full flex-1 flex-col gap-6 p-6 max-w-7xl mx-auto w-full relative">
                 {/* Study Plan Section */}
-                {/* {user.study_plan && (
+                {user.study_plan && (
                     <StudyPlanPreview 
                         user={user} 
                         onViewStudyPlan={() => setShowStudyPlan(true)} 
                     />
-                )} */}
+                )}
 
                 {/* New Note Section - Desktop */}
                 <section className="hidden md:block">
@@ -192,7 +192,7 @@ export default function Dashboard() {
                             </div>
                         </div>
                         
-                        {/* <div 
+                        <div 
                             className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 hover:shadow-md transition-shadow cursor-pointer"
                             onClick={() => handleNewNote(() => setIsWebLinkModalOpen(true))}
                         >
@@ -204,7 +204,7 @@ export default function Dashboard() {
                                     <span className="font-medium">{t('Youtube')}</span>
                                 </div>
                             </div>
-                        </div> */}
+                        </div>
                         
                         <div 
                             className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 hover:shadow-md transition-shadow cursor-pointer"

@@ -138,6 +138,7 @@ const Study = ({ flashcardSet }: Props) => {
             efactor: currentProgress.efactor,
             nextReview: new Date(nextReviewTime)
         };
+        setProgress(newProgress);
 
         try {
             await axios.post(`/flashcard-sets/${flashcardSet.id}/progress`, {
@@ -152,7 +153,6 @@ const Study = ({ flashcardSet }: Props) => {
             return;
         }
 
-        setProgress(newProgress);
         // After updating progress, useEffect will update dueIndexes and currentIndex
     };
 
@@ -178,6 +178,15 @@ const Study = ({ flashcardSet }: Props) => {
                                 onClick={() => {
                                     // Restart session: all cards due again
                                     const allIndexes = flashcardSet.flashcards.map((_, idx) => idx);
+                                    // Reset progress to make all cards due
+                                    const resetProgress = flashcardSet.flashcards.map(flashcard => ({
+                                        id: flashcard.id.toString(),
+                                        interval: 1,
+                                        repetition: 0,
+                                        efactor: 2.5,
+                                        nextReview: new Date()
+                                    }));
+                                    setProgress(resetProgress);
                                     setDueIndexes(allIndexes);
                                     setCurrentIndex(allIndexes.length > 0 ? allIndexes[0] : null);
                                     setIsFlipped(false);
@@ -192,7 +201,7 @@ const Study = ({ flashcardSet }: Props) => {
                                 className="flex-1"
                                 asChild
                             >
-                                <Link href="/dashboard" className="flex items-center gap-2">
+                                <Link href="/flashcard-sets" className="flex items-center gap-2">
                                     <PlusCircle className="h-4 w-4 mr-2" />
                                     {t('study_create_new_note')}
                                 </Link>
