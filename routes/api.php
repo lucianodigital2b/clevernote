@@ -31,13 +31,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/flashcards/generate', [FlashcardAIController::class, 'generate']);
     Route::post('/folders/{folder}/flashcards/generate', [FlashcardAIController::class, 'generateForFolder']);
     // Folder routes
-    Route::resource('folders', FolderController::class);
+    Route::resource('folders', FolderController::class)->names('api.folders');
     
     // Notes routes
-    Route::resource('notes', NoteController::class);
-    Route::post('/notes/{note}/retry', [NoteController::class, 'retryProcessing'])->name('notes.retry');
+    Route::resource('notes', NoteController::class)->names('api.notes');
+    Route::post('/notes/{note}/retry', [NoteController::class, 'retryProcessing']);
     Route::get('/notes/{note}/status', [NoteController::class, 'status']);
-    Route::patch('/notes/{note}/status', [NoteController::class, 'updateStatus'])->name('notes.update-status');
+    Route::patch('/notes/{note}/status', [NoteController::class, 'updateStatus']);
     
     Route::get('/mindmaps/{mindmap}/status', [MindmapController::class, 'status']);
 
@@ -58,43 +58,41 @@ Route::middleware('auth:sanctum')->group(function () {
     // });
 
     // Flashcard Routes
-    Route::resource('flashcards', FlashcardController::class);
-    Route::resource('folders.flashcards', FolderFlashcardController::class);
-    Route::resource('flashcard-sets', FlashcardSetController::class);
-    Route::get('flashcard-sets/{flashcardSet}/study', [FlashcardSetController::class, 'study'])->name('flashcard-sets.study');
-    Route::post('flashcard-sets/{flashcardSet}/progress', [FlashcardSetController::class, 'saveProgress'])->name('flashcard-sets.progress.store');
-    Route::post('notes/{note}/generate-flashcards', [NoteController::class, 'generateFlashcards'])->name('notes.generate-flashcards');
+    Route::resource('flashcards', FlashcardController::class)->names('api.flashcards');
+    // Route::resource('folders.flashcards', FolderFlashcardController::class)->names('api.flashcard-sets');
+    Route::resource('flashcard-sets', FlashcardSetController::class)->names('api.flashcard-sets');
+    Route::get('flashcard-sets/{flashcardSet}/study', [FlashcardSetController::class, 'study']);
+    Route::post('flashcard-sets/{flashcardSet}/progress', [FlashcardSetController::class, 'saveProgress']);
+    Route::post('notes/{note}/generate-flashcards', [NoteController::class, 'generateFlashcards']);
 
     // Quiz routes
-    Route::resource('quizzes', QuizController::class);
+    Route::resource('quizzes', QuizController::class)->names('api.quizzes');
     Route::prefix('quizzes')->group(function () {
-        Route::post('/{quiz}/attempt', [QuizController::class, 'submitAttempt'])->name('quizzes.submit-attempt');
-        Route::post('/generate-from-note/{note}', [QuizController::class, 'generateFromNote'])->name('quizzes.generate-from-note');
+        Route::post('/{quiz}/attempt', [QuizController::class, 'submitAttempt']);
+        Route::post('/generate-from-note/{note}', [QuizController::class, 'generateFromNote']);
         
         // Quiz Sharing and Leaderboard routes
-        Route::get('/shared', [QuizSharingController::class, 'index'])->name('quizzes.shared');
-        Route::get('/shared/{quiz}', [QuizSharingController::class, 'show'])->name('quizzes.shared.show');
-        Route::post('/{quiz}/toggle-sharing', [QuizSharingController::class, 'toggleSharing'])->name('quizzes.toggle-sharing');
-        Route::get('/{quiz}/leaderboard', [QuizSharingController::class, 'leaderboard'])->name('quizzes.leaderboard');
+        Route::get('/shared', [QuizSharingController::class, 'index']);
+        Route::get('/shared/{quiz}', [QuizSharingController::class, 'show']);
+        Route::post('/{quiz}/toggle-sharing', [QuizSharingController::class, 'toggleSharing']);
+        Route::get('/{quiz}/leaderboard', [QuizSharingController::class, 'leaderboard']);
     });
 
-    Route::post('/subscribe', [SubscriptionController::class, 'subscribe'])->name('billing.subscribe');
-    Route::get('/setup-intent', [SubscriptionController::class, 'createSetupIntent'])->name('billing.setup-intent');
-    Route::get('/billing/success', [SubscriptionController::class, 'success'])->name('billing.success');
-    Route::get('/billing/cancel', [SubscriptionController::class, 'cancel'])->name('billing.cancel');
+    Route::post('/subscribe', [SubscriptionController::class, 'subscribe']);
+    Route::get('/setup-intent', [SubscriptionController::class, 'createSetupIntent']);
+    Route::get('/billing/success', [SubscriptionController::class, 'success']);
+    Route::get('/billing/cancel', [SubscriptionController::class, 'cancel']);
 
-    Route::get('/onboarding', [OnboardingController::class, 'show'])
-        ->name('onboarding.show');
-    Route::post('/onboarding', [OnboardingController::class, 'store'])
-        ->name('onboarding.store');
+    Route::get('/onboarding', [OnboardingController::class, 'show']);
+    Route::post('/onboarding', [OnboardingController::class, 'store']);
 
     Route::post('/notes/{note}/generate-mindmap', [MindmapController::class, 'generate']);
-    Route::get('/mindmaps/{mindmap}', [MindmapController::class, 'show'])->name('mindmaps.show');
-    Route::patch('/mindmaps/{mindmap}', [MindmapController::class, 'update'])->name('mindmaps.update');
+    Route::get('/mindmaps/{mindmap}', [MindmapController::class, 'show']);
+    Route::patch('/mindmaps/{mindmap}', [MindmapController::class, 'update']);
 
     
-    Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
-    Route::get('/statistics/daily', [StatisticsController::class, 'daily'])->name('statistics.daily');
+    Route::get('/statistics', [StatisticsController::class, 'index']);
+    Route::get('/statistics/daily', [StatisticsController::class, 'daily']);
 });
 
 
