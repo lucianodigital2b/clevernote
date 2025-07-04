@@ -506,5 +506,15 @@
   "personalized_study_plan": "Personalized Study Plan",
   "ai_generated_study_schedule": "AI-generated study schedule based on your preferences",
   "study_plan_not_available": "Study plan not available",
-  "study_plan_generate_first": "Please complete the onboarding to generate your study plan"
+  "study_plan_generate_first": "Please complete the onboarding to generate your study plan",
+  "study_mode_selection_title": "Choose Study Mode",
+  "study_mode_selection_description": "Select how you'd like to study this flashcard set",
+  "fast_review_title": "Fast Review",
+  "fast_review_description": "Quick review with simplified options for rapid learning",
+  "spaced_repetition_title": "Spaced Repetition",
+  "spaced_repetition_description": "Optimized review schedule based on memory retention",
+  "fast_review_mode_indicator": "⚡ Fast Review Mode",
+  "fast_review_keyboard_shortcuts": "Space/Enter to flip/next, ← → to navigate, 1/2 for recall",
+  "fast_review_recall_remember": "Remember",
+  "fast_review_recall_forgot": "Forgot"
 }

@@ -463,7 +463,17 @@
   "dashboard": "Painel",
   "updated_successfully": "Registro salvo com sucesso",
   "no_questions_yet": "Ainda não há perguntas",
-  "add_your_first_question_to_get_started": "Adicione sua primeira pergunta para começar"
+  "add_your_first_question_to_get_started": "Adicione sua primeira pergunta para começar",
+  "study_mode_selection_title": "Escolher Modo de Estudo",
+  "study_mode_selection_description": "Selecione como você gostaria de estudar este conjunto de cartões",
+  "fast_review_title": "Revisão Rápida",
+  "fast_review_description": "Revisão rápida com opções simplificadas para aprendizado acelerado",
+  "spaced_repetition_title": "Repetição Espaçada",
+  "spaced_repetition_description": "Cronograma de revisão otimizado baseado na retenção de memória",
+  "fast_review_mode_indicator": "⚡ Modo de Revisão Rápida",
+  "fast_review_keyboard_shortcuts": "Espaço/Enter para virar/próximo, ← → para navegar, 1/2 para lembrar",
+  "fast_review_recall_remember": "Lembrar",
+  "fast_review_recall_forgot": "Esqueci"
 
 
 }

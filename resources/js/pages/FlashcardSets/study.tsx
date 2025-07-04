@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, PlusCircle, RotateCw, Shuffle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, PlusCircle, RotateCw, Shuffle } from 'lucide-react';
 import { FlashcardSet } from '@/types';
 import { Progress } from "@/components/ui/progress";
 import { useTranslation } from 'react-i18next';
@@ -35,6 +35,10 @@ const Study = ({ flashcardSet }: Props) => {
     const [currentIndex, setCurrentIndex] = useState<number | null>(null);
     const [isFlipped, setIsFlipped] = useState(false);
     const [isComplete, setIsComplete] = useState(false);
+    
+    // Check if we're in fast review mode
+    const urlParams = new URLSearchParams(window.location.search);
+    const isFastMode = urlParams.get('mode') === 'fast';
 
     // Initialize progress and dueIndexes
     useEffect(() => {
@@ -98,12 +102,74 @@ const Study = ({ flashcardSet }: Props) => {
         setIsFlipped(false);
     };
 
-    const recallOptions: RecallOption[] = [
+    const recallOptions: RecallOption[] = isFastMode ? [
+        { label: t('flashcard_recall_again'), interval: 1, quality: 0 },      // Again - show again soon
+        { label: t('flashcard_recall_good'), interval: 10, quality: 3 },      // Good - normal interval
+    ] : [
         { label: t('flashcard_recall_again'), interval: 1, quality: 0 },      // 1 minute - forgot completely
         { label: t('flashcard_recall_hard'), interval: 6, quality: 2 },       // 6 minutes - difficult recall
         { label: t('flashcard_recall_good'), interval: 10, quality: 3 },      // 10 minutes - normal recall
         { label: t('flashcard_recall_easy'), interval: 5760, quality: 5 },    // 4 days - easy recall
     ];
+
+    // Fast mode navigation
+    const handleNext = () => {
+        if (dueIndexes.length === 0 || currentIndex === null) return;
+        const currentIdx = dueIndexes.indexOf(currentIndex);
+        if (currentIdx < dueIndexes.length - 1) {
+            setCurrentIndex(dueIndexes[currentIdx + 1]);
+            setIsFlipped(false);
+        } else {
+            // Reached the end, mark as complete
+            setIsComplete(true);
+        }
+    };
+
+
+
+    // Keyboard shortcuts for fast mode
+    useEffect(() => {
+        if (!isFastMode) return;
+        
+        const handleKeyPress = (e: KeyboardEvent) => {
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+            
+            switch (e.key) {
+                case ' ':
+                case 'Enter':
+                    e.preventDefault();
+                    if (!isFlipped) {
+                        handleFlip();
+                    } else {
+                        handleNext();
+                    }
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    handlePrevious();
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    handleNext();
+                    break;
+                case '1':
+                    e.preventDefault();
+                    if (isFlipped && recallOptions[0]) {
+                        handleRecall(recallOptions[0]);
+                    }
+                    break;
+                case '2':
+                    e.preventDefault();
+                    if (isFlipped && recallOptions[1]) {
+                        handleRecall(recallOptions[1]);
+                    }
+                    break;
+            }
+        };
+        
+        window.addEventListener('keydown', handleKeyPress);
+        return () => window.removeEventListener('keydown', handleKeyPress);
+    }, [isFastMode, isFlipped, currentIndex, dueIndexes, recallOptions]);
 
     // Calculate progress percentages for visual feedback
     const getProgressPercentage = (quality: number) => {
@@ -154,6 +220,13 @@ const Study = ({ flashcardSet }: Props) => {
         }
 
         // After updating progress, useEffect will update dueIndexes and currentIndex
+        
+        // In fast mode, automatically advance to next card after recall
+        if (isFastMode) {
+            setTimeout(() => {
+                handleNext();
+            }, 300); // Small delay to show the selection
+        }
     };
 
     const studyProgress = dueIndexes.length === 0
@@ -238,12 +311,25 @@ const Study = ({ flashcardSet }: Props) => {
                             <ArrowLeft className="h-4 w-4" />
                         </Link>
                     </Button>
-                    <h1 className="text-lg sm:text-2xl font-semibold flex-1 text-center px-2 truncate">{flashcardSet.name}</h1>
+                    <div className="flex-1 text-center px-2">
+                        <h1 className="text-lg sm:text-2xl font-semibold truncate">{flashcardSet.name}</h1>
+                        {isFastMode && (
+                            <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full mt-1">
+                                <span>⚡</span>
+                                <span>{t('fast_review_mode_indicator')}</span>
+                            </div>
+                        )}
+                    </div>
                     <div className="w-9 shrink-0"></div>
                 </div>
 
                 <div className="max-w-2xl mx-auto w-full">
                     <Progress value={studyProgress} className="mb-4 sm:mb-6" />
+                    {isFastMode && (
+                        <div className="text-center text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            <span className="font-medium">{t('keyboard_shortcuts_label')}</span> {t('keyboard_shortcuts_help')}
+                        </div>
+                    )}
                     <div 
                         className="relative min-h-[300px] sm:min-h-[400px] perspective-1000 cursor-pointer"
                         onClick={handleFlip}
@@ -286,35 +372,86 @@ const Study = ({ flashcardSet }: Props) => {
                     </div>
 
                     <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 mt-4 sm:mt-6">
-                        <Button 
-                            variant="outline" 
-                            onClick={handlePrevious}
-                            disabled={
-                                dueIndexes.length === 0 ||
-                                currentIndex === null ||
-                                dueIndexes.indexOf(currentIndex) === 0
-                            }
-                            className="w-full sm:w-auto"
-                        >
-                            <ArrowLeft className="h-4 w-4 mr-2" />
-                            {t('study_previous')}
-                        </Button>
-                        <Button 
-                            variant="outline" 
-                            onClick={handleFlip}
-                            className="w-full sm:w-auto"
-                        >
-                            <RotateCw className="h-4 w-4 mr-2" />
-                            {t('study_flip_card')}
-                        </Button>
-                        <button
-                            onClick={handleShuffle}
-                            disabled={dueIndexes.length <= 1}
-                            className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Shuffle cards"
-                        >
-                            <Shuffle className="h-4 w-4" />
-                        </button>
+                        {isFastMode ? (
+                            // Fast mode navigation
+                            <>
+                                <Button 
+                                    variant="outline" 
+                                    onClick={handlePrevious}
+                                    disabled={
+                                        dueIndexes.length === 0 ||
+                                        currentIndex === null ||
+                                        dueIndexes.indexOf(currentIndex) === 0
+                                    }
+                                    className="w-full sm:w-auto"
+                                >
+                                    <ArrowLeft className="h-4 w-4 mr-2" />
+                                    {t('study_previous')}
+                                </Button>
+                                <Button 
+                                    variant="outline" 
+                                    onClick={handleFlip}
+                                    className="w-full sm:w-auto"
+                                >
+                                    <RotateCw className="h-4 w-4 mr-2" />
+                                    {t('study_flip_card')}
+                                </Button>
+                                <Button 
+                                    variant="outline" 
+                                    onClick={handleNext}
+                                    disabled={
+                                        dueIndexes.length === 0 ||
+                                        currentIndex === null ||
+                                        dueIndexes.indexOf(currentIndex) === dueIndexes.length - 1
+                                    }
+                                    className="w-full sm:w-auto"
+                                >
+                                    <ArrowRight className="h-4 w-4 mr-2" />
+                                    {t('study_next')}
+                                </Button>
+                                <button
+                                    onClick={handleShuffle}
+                                    disabled={dueIndexes.length <= 1}
+                                    className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Shuffle cards"
+                                >
+                                    <Shuffle className="h-4 w-4" />
+                                </button>
+                            </>
+                        ) : (
+                            // Normal spaced repetition mode
+                            <>
+                                <Button 
+                                    variant="outline" 
+                                    onClick={handlePrevious}
+                                    disabled={
+                                        dueIndexes.length === 0 ||
+                                        currentIndex === null ||
+                                        dueIndexes.indexOf(currentIndex) === 0
+                                    }
+                                    className="w-full sm:w-auto"
+                                >
+                                    <ArrowLeft className="h-4 w-4 mr-2" />
+                                    {t('study_previous')}
+                                </Button>
+                                <Button 
+                                    variant="outline" 
+                                    onClick={handleFlip}
+                                    className="w-full sm:w-auto"
+                                >
+                                    <RotateCw className="h-4 w-4 mr-2" />
+                                    {t('study_flip_card')}
+                                </Button>
+                                <button
+                                    onClick={handleShuffle}
+                                    disabled={dueIndexes.length <= 1}
+                                    className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Shuffle cards"
+                                >
+                                    <Shuffle className="h-4 w-4" />
+                                </button>
+                            </>
+                        )}
                     </div>
                     {/* Recall options are now always visible */}
                     <div className="grid grid-cols-2 sm:flex sm:justify-center gap-2 sm:gap-3 mt-6 sm:mt-8">

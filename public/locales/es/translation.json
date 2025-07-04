@@ -458,7 +458,17 @@
   "create": "Crear",
   "multiple_choice": "Opción múltiple",
   "true_false": "Verdadero o falso",
-  "no_questions_yet": "No questions yet",
-  "add_your_first_question_to_get_started": "Add your first question to get started"
+  "no_questions_yet": "Aún no hay preguntas",
+  "add_your_first_question_to_get_started": "Añade tu primera pregunta para comenzar",
+  "study_mode_selection_title": "Elegir Modo de Estudio",
+  "study_mode_selection_description": "Selecciona cómo te gustaría estudiar este conjunto de tarjetas",
+  "fast_review_title": "Revisión Rápida",
+  "fast_review_description": "Revisión rápida con opciones simplificadas para aprendizaje acelerado",
+  "spaced_repetition_title": "Repetición Espaciada",
+  "spaced_repetition_description": "Horario de revisión optimizado basado en la retención de memoria",
+  "fast_review_mode_indicator": "⚡ Modo de Revisión Rápida",
+  "fast_review_keyboard_shortcuts": "Espacio/Enter para voltear/siguiente, ← → para navegar, 1/2 para recordar",
+  "fast_review_recall_remember": "Recordar",
+  "fast_review_recall_forgot": "Olvidé"
 
 }
