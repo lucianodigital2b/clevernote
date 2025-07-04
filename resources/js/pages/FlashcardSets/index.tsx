@@ -14,6 +14,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {DeleteConfirmationDialog} from '@/components/delete-confirmation-dialog';
+import { StudyModeSelectionModal } from '@/components/study-mode-selection-modal';
 import { t } from 'i18next';
 
 interface Props {
@@ -24,11 +25,20 @@ interface Props {
 export default function Index({ flashcardSets, isLoading = false }: Props) {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [selectedSetId, setSelectedSetId] = useState<number | null>(null);
+    const [isStudyModeModalOpen, setIsStudyModeModalOpen] = useState(false);
+    const [studySetId, setStudySetId] = useState<number | null>(null);
 
     const handleDelete = (id: number) => {
         setSelectedSetId(id);
         setDeleteDialogOpen(true);
     };
+
+    const handleStudy = (id: number) => {
+        setStudySetId(id);
+        setIsStudyModeModalOpen(true);
+    };
+
+
 
     return (
         <AppLayout>
@@ -122,11 +132,14 @@ export default function Index({ flashcardSets, isLoading = false }: Props) {
                                 <div className="flex justify-between items-center text-sm text-neutral-500">
                                     <span>{t('created_date', { date: new Date(set.created_at).toLocaleDateString() })}</span>
                                     
-                                    <Button variant="outline" size="sm" asChild className='dark:text-white'>
-                                        <Link href={`/flashcard-sets/${set.id}/study`} className="flex items-center gap-2">
-                                            {t('study_now')}
-                                            <ArrowRight className="h-4 w-4" />
-                                        </Link>
+                                    <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        className='dark:text-white'
+                                        onClick={() => handleStudy(set.id)}
+                                    >
+                                        {t('study_now')}
+                                        <ArrowRight className="h-4 w-4 ml-2" />
                                     </Button>
                                 </div>
                             </div>
@@ -157,6 +170,13 @@ export default function Index({ flashcardSets, isLoading = false }: Props) {
                     errorMessage={t('delete_error')}
                 />
             )}
+
+            {/* Study Mode Selection Modal */}
+            <StudyModeSelectionModal
+                open={isStudyModeModalOpen}
+                onOpenChange={setIsStudyModeModalOpen}
+                flashcardSetId={studySetId}
+            />
         </AppLayout>
     );
 }

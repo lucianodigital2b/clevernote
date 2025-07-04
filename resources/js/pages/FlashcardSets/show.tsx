@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Brain, Plus, Pencil, Check, X, Trash2, Save, Loader2, Zap, Clock } from 'lucide-react';
+import { Brain, Plus, Pencil, Check, X, Trash2, Save, Loader2 } from 'lucide-react';
 import { FlashcardSet, Flashcard } from '@/types';
 import { Search, Grid, List } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
+import { StudyModeSelectionModal } from '@/components/study-mode-selection-modal';
 
 interface Props {
     flashcardSet: FlashcardSet;
@@ -1517,64 +1518,11 @@ const Show = ({ flashcardSet }: Props) => {
             />
 
             {/* Study Mode Selection Modal */}
-            <Dialog open={isStudyModeModalOpen} onOpenChange={setIsStudyModeModalOpen}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle className="text-center">{t('study_mode_selection_title')}</DialogTitle>
-                        <DialogDescription className="text-center">
-                            {t('study_mode_selection_description')}
-                        </DialogDescription>
-                    </DialogHeader>
-                    
-                    <div className="grid grid-cols-1 gap-4 py-4">
-                        {/* Fast Review Mode */}
-                        <Card 
-                            className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-blue-300"
-                            onClick={() => {
-                                setIsStudyModeModalOpen(false);
-                                router.visit(`/flashcard-sets/${flashcardSet.id}/study?mode=fast`);
-                            }}
-                        >
-                            <CardContent className="p-6">
-                                <div className="flex items-center space-x-4">
-                                    <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-full">
-                                        <Zap className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className="font-semibold text-lg">{t('fast_review_title')}</h3>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                            {t('fast_review_description')}
-                                        </p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Spaced Repetition Mode */}
-                        <Card 
-                            className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-green-300"
-                            onClick={() => {
-                                setIsStudyModeModalOpen(false);
-                                router.visit(`/flashcard-sets/${flashcardSet.id}/study`);
-                            }}
-                        >
-                            <CardContent className="p-6">
-                                <div className="flex items-center space-x-4">
-                                    <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-full">
-                                        <Clock className="h-6 w-6 text-green-600 dark:text-green-400" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className="font-semibold text-lg">{t('spaced_repetition_title')}</h3>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                            {t('spaced_repetition_description')}
-                                        </p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </DialogContent>
-            </Dialog>
+            <StudyModeSelectionModal
+                open={isStudyModeModalOpen}
+                onOpenChange={setIsStudyModeModalOpen}
+                flashcardSetId={flashcardSet.id}
+            />
         </AppLayout>
     );
 };

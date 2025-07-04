@@ -1,19 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Play } from 'lucide-react';
 import { FlashcardSet } from '@/types';
 import InputError from '@/components/input-error';
+import { StudyModeSelectionModal } from '@/components/study-mode-selection-modal';
 
 interface Props {
     flashcardSet: FlashcardSet;
 }
 
 const Edit = ({ flashcardSet }: Props) => {
+    const [isStudyModeModalOpen, setIsStudyModeModalOpen] = useState(false);
+    
     const { data, setData, put, processing, errors } = useForm({
         name: flashcardSet.name,
         description: flashcardSet.description || '',
@@ -44,11 +47,21 @@ const Edit = ({ flashcardSet }: Props) => {
             <div className="container mx-auto py-6 px-4">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-semibold">Edit Flashcard Set</h1>
-                    <Button asChild variant="outline">
-                        <Link href={`/flashcard-sets/${flashcardSet.id}`}>
-                            Back to Set
-                        </Link>
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button 
+                            variant="default" 
+                            onClick={() => setIsStudyModeModalOpen(true)}
+                            className="flex items-center gap-2"
+                        >
+                            <Play className="h-4 w-4" />
+                            Study Now
+                        </Button>
+                        <Button asChild variant="outline">
+                            <Link href={`/flashcard-sets/${flashcardSet.id}`}>
+                                Back to Set
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -145,6 +158,13 @@ const Edit = ({ flashcardSet }: Props) => {
                     </div>
                 </form>
             </div>
+            
+            {/* Study Mode Selection Modal */}
+            <StudyModeSelectionModal
+                open={isStudyModeModalOpen}
+                onOpenChange={setIsStudyModeModalOpen}
+                flashcardSetId={flashcardSet.id}
+            />
         </AppLayout>
     );
 };
