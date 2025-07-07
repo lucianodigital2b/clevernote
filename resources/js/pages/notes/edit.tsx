@@ -457,11 +457,11 @@ export default function Edit({ note }: { note: Note }) {
         
         if (isProcessing) {
             const startTime = Date.now();
-            const TIMEOUT_DURATION = 60000; // 1 minute in milliseconds
+            const TIMEOUT_DURATION = 180000; // 3 minutes in milliseconds
             
             intervalId = setInterval(async () => {
                 try {
-                    // Check if one minute has passed
+                    // Check if 3 minutes have passed
                     if (Date.now() - startTime >= TIMEOUT_DURATION) {
                         clearInterval(intervalId);
                         setIsProcessing(false);
@@ -471,7 +471,7 @@ export default function Edit({ note }: { note: Note }) {
                         try {
                             await axios.patch(`/api/notes/${note.id}/status`, {
                                 status: 'failed',
-                                failure_reason: 'Processing timeout after 1 minute'
+                                failure_reason: 'Processing timeout after 3 minutes'
                             });
                         } catch (updateError) {
                             console.error('Error updating note status to failed:', updateError);

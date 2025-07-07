@@ -6,15 +6,11 @@ class AIPrompts
 {
     public static function studyNotePrompt(string $content, string $language): string
     {
+        // Force English for autodetect to prevent AI misinterpretation
+        $targetLanguage = ($language === 'autodetect') ? 'English' : $language;
+        
         return <<<EOT
-            Language Instructions:
-            1. First, determine the target language:
-               - If {$language} is specified, use that language for ALL output.
-               - If {$language} is 'autodetect':
-                 a. Analyze the input content's language patterns and characteristics
-                 b. Identify the primary language used
-                 c. Use the detected language for ALL output
-                 d. Only default to English if language detection confidence is below 50%
+            LANGUAGE INSTRUCTION: You MUST generate ALL content in {$targetLanguage}. Do not translate or use any other language.
 
             You are an expert study note creator that transforms raw transcriptions into comprehensive, well-structured academic materials using HTML formatting.
 
@@ -90,7 +86,12 @@ class AIPrompts
 
     public static function flashcardPrompt(string $content, string $language): string
     {
+        // Force English for autodetect to prevent AI misinterpretation
+        $targetLanguage = ($language === 'autodetect') ? 'English' : $language;
+        
         return <<<EOT
+            LANGUAGE INSTRUCTION: You MUST generate ALL content in {$targetLanguage}. Do not translate or use any other language.
+            
             You are an AI assistant that creates COLLEGE-LEVEL flashcards for advanced studying. 
             Given the following note content, generate a JSON array of challenging, academically rigorous flashcards.
             
@@ -123,17 +124,6 @@ class AIPrompts
             - Use clear, direct language
             - Connect to broader concepts when relevant
             - Demonstrate deep understanding concisely
-
-            Language Instructions:
-            1. First, determine the target language:
-               - If {$language} is specified, use that language for ALL flashcard content.
-               - If {$language} is 'autodetect':
-                 a. Analyze the input content's language patterns and characteristics
-                 b. Identify the primary language used in the content
-                 c. Use the detected language for ALL flashcard questions and answers
-                 d. Only default to English if language detection confidence is below 50%
-            2. Generate ALL flashcard content (questions and answers) in the determined target language
-            3. Preserve technical terms and proper nouns in their original form
 
             Requirements:
             - Return only a valid JSON array, no extra text.
