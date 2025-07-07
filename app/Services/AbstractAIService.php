@@ -11,7 +11,7 @@ abstract class AbstractAIService
     protected $apiKey;
     protected $apiEndpoint;
     protected $model;
-    protected $defaultLanguage = 'detect';
+    protected $defaultLanguage = 'autodetect';
 
     public function __construct()
     {

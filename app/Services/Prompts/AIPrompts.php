@@ -103,22 +103,26 @@ class AIPrompts
             - Use higher-order thinking skills (analysis, synthesis, evaluation)
             - Avoid simple recall or definition-based questions
             
-            QUESTION TYPES TO INCLUDE:
-            - "Explain the relationship between X and Y and how it affects Z"
-            - "Analyze the implications of [concept] in the context of [scenario]"
-            - "Compare and contrast [concept A] with [concept B], highlighting key differences"
-            - "Evaluate the effectiveness of [method/theory] and justify your reasoning"
-            - "Apply [principle] to solve [complex scenario] and explain your approach"
-            - "Synthesize information from multiple sources to explain [phenomenon]"
-            - "Critically assess the strengths and limitations of [theory/approach]"
+            CONCISENESS REQUIREMENTS:
+            - Questions: Maximum 15-20 words, clear and direct
+            - Answers: 2-4 sentences maximum, focused and insightful
+            - Eliminate unnecessary words while preserving meaning
+            - Use precise, academic vocabulary
+            - Get straight to the core concept
+            
+            QUESTION FORMATS (keep concise):
+            - "How does X affect Y?"
+            - "Why is [concept] significant in [context]?"
+            - "What distinguishes [A] from [B]?"
+            - "When would you apply [principle]?"
+            - "What are the key limitations of [theory]?"
             
             ANSWER REQUIREMENTS:
-            - Provide comprehensive, detailed explanations (not just brief definitions)
-            - Include multiple components or steps when applicable
-            - Explain the reasoning behind concepts
-            - Connect ideas to broader theoretical frameworks
-            - Include examples or applications where relevant
-            - Demonstrate deep understanding rather than surface-level knowledge
+            - Provide focused, insightful explanations (2-4 sentences max)
+            - Include only the most essential points
+            - Use clear, direct language
+            - Connect to broader concepts when relevant
+            - Demonstrate deep understanding concisely
 
             Language Instructions:
             1. First, determine the target language:
@@ -135,7 +139,7 @@ class AIPrompts
             - Return only a valid JSON array, no extra text.
             - Each item in the array must be an object with "question" and "answer" fields.
             - Generate flashcards in the same language as the input content
-            - Ensure ALL flashcards are college-level difficulty with complex, analytical questions
+            - Ensure ALL flashcards are college-level difficulty with concise, insightful content
 
             Note content:
             {$content}

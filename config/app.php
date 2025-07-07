@@ -132,5 +132,23 @@ return [
     'ytdlp_idle_timeout' => env('YTDLP_IDLE_TIMEOUT', null),
     'ytdlp_cookies_path' => env('YTDLP_COOKIES_PATH', null),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Decodo Proxy Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for Decodo proxy service used by YouTube audio extractor.
+    | These settings allow routing yt-dlp requests through a proxy service.
+    |
+    */
+
+    'decodo_proxy' => [
+        'enabled' => env('DECODO_PROXY_ENABLED', true),
+        'host' => env('DECODO_PROXY_HOST', 'gate.decodo.com'),
+        'port' => env('DECODO_PROXY_PORT', '10001'),
+        'user' => env('DECODO_PROXY_USER', ''),
+        'password' => env('DECODO_PROXY_PASSWORD', ''),
+    ],
+
 
 ];

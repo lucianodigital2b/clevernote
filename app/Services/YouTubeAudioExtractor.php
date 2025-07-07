@@ -10,10 +10,102 @@ use Symfony\Component\Process\Process;
 class YouTubeAudioExtractor
 {
     private ?string $lastError = null;
+    private array $proxyConfig = [];
     
     public function getLastError(): ?string
     {
         return $this->lastError;
+    }
+    
+    /**
+     * Configure Decodo proxy settings
+     */
+    private function configureDecodoProxy(): array
+    {
+        if (empty($this->proxyConfig)) {
+            $this->proxyConfig = [
+                'proxy' => config('app.decodo_proxy.host') . ':' . config('app.decodo_proxy.port'),
+                'user' => config('app.decodo_proxy.user'),
+                'password' => config('app.decodo_proxy.password')
+            ];
+        }
+        
+        return $this->proxyConfig;
+    }
+    
+    /**
+     * Test proxy connection
+     */
+    public function testProxyConnection(): bool
+    {
+        $proxyConfig = $this->configureDecodoProxy();
+        
+        try {
+            $ch = curl_init('http://ip.decodo.com/json');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_PROXY, $proxyConfig['proxy']);
+            curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxyConfig['user'] . ':' . $proxyConfig['password']);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+            
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $error = curl_error($ch);
+            curl_close($ch);
+            
+            if ($response !== false && $httpCode === 200) {
+                logger()->info('Decodo proxy connection successful', [
+                    'proxy' => $proxyConfig['proxy'],
+                    'response' => $response
+                ]);
+                return true;
+            } else {
+                logger()->error('Decodo proxy connection failed', [
+                    'proxy' => $proxyConfig['proxy'],
+                    'http_code' => $httpCode,
+                    'error' => $error
+                ]);
+                return false;
+            }
+        } catch (\Exception $e) {
+            logger()->error('Decodo proxy test exception', [
+                'proxy' => $proxyConfig['proxy'],
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+    
+    /**
+     * Add proxy options to yt-dlp command
+     */
+    private function addProxyToCommand(array $command): array
+    {
+        // Check if proxy is enabled
+        if (!config('app.decodo_proxy.enabled', true)) {
+            logger()->info('Decodo proxy is disabled via configuration');
+            return $command;
+        }
+        
+        $proxyConfig = $this->configureDecodoProxy();
+        
+        if (!empty($proxyConfig['proxy']) && !empty($proxyConfig['user']) && !empty($proxyConfig['password'])) {
+            $command[] = '--proxy';
+            $command[] = "http://{$proxyConfig['user']}:{$proxyConfig['password']}@{$proxyConfig['proxy']}";
+            
+            logger()->info('Using Decodo proxy for yt-dlp', [
+                'proxy' => $proxyConfig['proxy'],
+                'user' => $proxyConfig['user']
+            ]);
+        } else {
+            logger()->warning('Decodo proxy configuration incomplete, skipping proxy usage', [
+                'has_proxy' => !empty($proxyConfig['proxy']),
+                'has_user' => !empty($proxyConfig['user']),
+                'has_password' => !empty($proxyConfig['password'])
+            ]);
+        }
+        
+        return $command;
     }
     
     /**
@@ -178,6 +270,9 @@ class YouTubeAudioExtractor
         $command[] = '--max-sleep-interval';
         $command[] = '5';
         
+        // Add proxy configuration
+        $command = $this->addProxyToCommand($command);
+        
         $command[] = $youtubeUrl;
 
         $process = new Process($command);
@@ -294,6 +389,9 @@ class YouTubeAudioExtractor
         $command[] = '1';
         $command[] = '--max-sleep-interval';
         $command[] = '5';
+        
+        // Add proxy configuration
+        $command = $this->addProxyToCommand($command);
         
         $command = array_merge($command, [
             '--format', $format,

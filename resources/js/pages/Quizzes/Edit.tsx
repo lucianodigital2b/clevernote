@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AppLayout from '@/layouts/app-layout';
 import { useTranslation } from 'react-i18next';
 import { useEditor, EditorContent, Editor } from '@tiptap/react';
@@ -16,7 +17,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Highlight from '@tiptap/extension-highlight';
 import { toastConfig } from '@/lib/toast';
-import { Bold as BoldIcon, Italic as ItalicIcon, ImageIcon, GripVertical } from 'lucide-react';
+import { Bold as BoldIcon, Italic as ItalicIcon, ImageIcon, GripVertical, Share, Play, Save } from 'lucide-react';
 import { QuizQuestion, QuizOption } from '@/types/quiz';
 import {
   DndContext,
@@ -197,6 +198,7 @@ export default function Edit({ quiz }: Props) {
   const { t } = useTranslation();
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadingEditor, setUploadingEditor] = useState<string | null>(null);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   // Drag and drop sensors
   const sensors = useSensors(
@@ -972,78 +974,131 @@ export default function Edit({ quiz }: Props) {
 
         {/* Fixed floating bottom bar */}
         <motion.div 
-          className="fixed bottom-5 left-0 right-0 bg-white border shadow-lg p-4 z-50 w-fit mx-auto rounded-2xl"
+          className="fixed bottom-5 left-0 right-0 bg-white border shadow-lg p-4 z-50 w-fit mx-auto rounded-3xl"
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.4, type: "spring", stiffness: 100 }}
         >
-          <div className="max-w-2xl mx-auto flex gap-4 justify-between">
-            <div className="flex gap-4">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+          <div className="max-w-2xl mx-auto flex gap-3">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                type="button"
+                size="sm"
+                className="bg-transparent text-gray hover:bg-zinc-100 border-1 p-3 rounded-xl"
+                onClick={addQuestion}
+                title={t('add_question')}
               >
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={addQuestion}
-                >
-                  <PlusIcon className="w-5 h-5 mr-2" />
-                  {t('add_question')}
-                </Button>
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                <PlusIcon className="w-5 h-5" />
+              </Button>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                type="button"
+                size="sm"
+                className="bg-transparent text-gray hover:bg-red-300 border-1 p-3 rounded-xl hover:border-red-300 "
+                onClick={() => {
+                  if (confirm('Are you sure you want to delete this quiz?')) {
+                    window.location.href = `/quizzes/${quiz.id}/delete`;
+                  }
+                }}
+                title={t('delete')}
               >
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={() => {
-                    if (confirm('Are you sure you want to delete this quiz?')) {
-                      // Add delete functionality here
-                      window.location.href = `/quizzes/${quiz.id}/delete`;
-                    }
-                  }}
-                >
-                  <TrashIcon className="w-5 h-5 mr-2" />
-                  {t('delete')}
-                </Button>
-              </motion.div>
-            </div>
-            <div className="flex gap-4">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                <TrashIcon className="w-5 h-5" />
+              </Button>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                type="button"
+                size="sm"
+                className="bg-transparent text-gray hover:bg-zinc-100 border-1 p-3 rounded-xl"
+                onClick={() => setIsShareModalOpen(true)}
+                title="Share Quiz"
               >
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => {
-                    window.location.href = `/quizzes/${quiz.id}`;
-                  }}
-                >
-                  {t('Take Quiz')}
-                </Button>
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                <Share className="w-5 h-5" />
+              </Button>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                type="button"
+                size="sm"
+                className="bg-transparent text-gray hover:bg-zinc-100 border-1 p-3 rounded-xl"
+                onClick={() => {
+                  window.location.href = `/quizzes/${quiz.id}`;
+                }}
+                title={t('Take Quiz')}
               >
-                <Button
-                  type="submit"
-                  disabled={processing}
-                >
-                  {t('save')}
-                </Button>
-              </motion.div>
-            </div>
+                <Play className="w-5 h-5" />
+              </Button>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                type="submit"
+                size="sm"
+                className="bg-transparent text-gray hover:bg-zinc-100 border-1 p-3 rounded-xl"
+                disabled={processing}
+                title={t('save')}
+              >
+                <Save className="w-5 h-5" />
+              </Button>
+            </motion.div>
           </div>
         </motion.div>
         
         {/* Add bottom padding to prevent content from being hidden behind fixed bar */}
         <div className="h-24"></div>
       </form>
+
+      {/* Share Modal */}
+      <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Share Quiz</DialogTitle>
+            <DialogDescription>
+              Share this quiz with others using the link below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center space-x-2">
+            <div className="grid flex-1 gap-2">
+              <Label htmlFor="link" className="sr-only">
+                Link
+              </Label>
+              <Input
+                 id="link"
+                 defaultValue={`${window.location.origin}/quizzes/${quiz.uuid || quiz.id}/public`}
+                 readOnly
+                 className="h-9"
+               />
+             </div>
+             <Button
+               type="button"
+               size="sm"
+               className="px-3"
+               onClick={() => {
+                 navigator.clipboard.writeText(`${window.location.origin}/quizzes/${quiz.uuid || quiz.id}/public`);
+                 toastConfig.success('Link copied to clipboard!');
+               }}
+            >
+              <span className="sr-only">Copy</span>
+              Copy
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

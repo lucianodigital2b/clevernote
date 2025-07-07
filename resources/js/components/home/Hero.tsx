@@ -1,12 +1,17 @@
 
-import React, { useEffect, useRef } from "react";
-import { CheckCircle, ArrowRight, BookOpen, Edit3, StickyNote, Brain, Zap } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { CheckCircle, ArrowRight, BookOpen, Edit3, StickyNote, Brain, Zap, Users, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 
 const Hero = () => {
   const notesRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
+  const [currentWord, setCurrentWord] = useState(0);
+  const [displayText, setDisplayText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  
+  const words = ['fun', 'easier', 'engaging', 'effective', 'interactive'];
 
   useEffect(() => {
     const floatingElements = notesRef.current?.querySelectorAll('.floating-note, .floating-artifact');
@@ -30,6 +35,29 @@ const Hero = () => {
     });
   }, []);
 
+  // Typewriter effect
+  useEffect(() => {
+    const currentWordText = words[currentWord];
+    const timeout = setTimeout(() => {
+      if (!isDeleting) {
+        if (displayText.length < currentWordText.length) {
+          setDisplayText(currentWordText.slice(0, displayText.length + 1));
+        } else {
+          setTimeout(() => setIsDeleting(true), 2000);
+        }
+      } else {
+        if (displayText.length > 0) {
+          setDisplayText(displayText.slice(0, -1));
+        } else {
+          setIsDeleting(false);
+          setCurrentWord((prev) => (prev + 1) % words.length);
+        }
+      }
+    }, isDeleting ? 100 : 150);
+
+    return () => clearTimeout(timeout);
+  }, [displayText, isDeleting, currentWord, words]);
+
   return (
     <div 
       className="pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden relative"
@@ -48,12 +76,25 @@ const Hero = () => {
               <CheckCircle className="w-4 h-4 mr-1" />
               {t('ai_homework_badge')}
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight text-gray-900 mb-6">
-              {t('hero_title')} <span className="bg-indigo-100 text-gray-900 px-5">{t('hero_highlight')}</span>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight text-gray-900 mb-4">
+              Make learning more{' '}
+              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent relative">
+                {displayText}
+                <span className="animate-pulse">|</span>
+              </span>
             </h1>
-            {/* <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight text-gray-900 mb-6">
-              {t('hero_title_suffix')}
-            </h1> */}
+            <div className="flex items-center justify-center gap-6 mb-6">
+              <div className="flex items-center gap-2 text-gray-600">
+                <Users className="w-5 h-5 text-indigo-600" />
+                <span className="font-medium">Trusted by 10,000+ students</span>
+              </div>
+              <div className="flex items-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                ))}
+                <span className="ml-1 text-sm text-gray-600 font-medium">4.9/5</span>
+              </div>
+            </div>
             <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed max-w-lg mx-auto">
               {t('hero_description')}
             </p>

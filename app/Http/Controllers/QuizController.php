@@ -307,6 +307,77 @@ class QuizController extends Controller
         }
     }
 
+    public function submitPublicAttempt(Request $request, $uuid)
+    {
+        $quiz = Quiz::where('uuid', $uuid)->firstOrFail();
+        
+        if (!$quiz->is_published) {
+            abort(404, 'Quiz not found or not published');
+        }
+
+        $validated = $request->validate([
+            'answers' => 'required|array',
+            'answers.*.question_id' => 'required|exists:quiz_questions,id',
+            'answers.*.option_id' => 'required|exists:quiz_options,id',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $score = 0;
+            $totalQuestions = count($validated['answers']);
+
+            $attempt = QuizAttempt::create([
+                'quiz_id' => $quiz->id,
+                'user_id' => Auth::id(), // Can be null for anonymous users
+                'total_questions' => $totalQuestions,
+                'completed_at' => now(),
+                'score' => 0,
+            ]);
+
+            foreach ($validated['answers'] as $answer) {
+                $option = QuizOption::find($answer['option_id']);
+                $isCorrect = $option->is_correct;
+
+                if ($isCorrect) {
+                    $score++;
+                }
+
+                QuizAnswer::create([
+                    'quiz_attempt_id' => $attempt->id,
+                    'quiz_question_id' => $answer['question_id'],
+                    'quiz_option_id' => $answer['option_id'],
+                    'is_correct' => $isCorrect,
+                ]);
+            }
+
+            $attempt->update(['score' => $score]);
+
+            // Only update user statistics if user is authenticated
+            if (Auth::check()) {
+                UpdateUserStatistics::dispatch(Auth::user()->id, Carbon::today());
+            }
+    
+            DB::commit();
+            return response()->json([
+                'score' => $score,
+                'total' => $totalQuestions,
+                'percentage' => ($score / $totalQuestions) * 100,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Failed to submit quiz attempt'], 500);
+            }
+            
+            return back()->withErrors([
+                'general' => 'Failed to submit quiz attempt'
+            ]);
+        }
+    }
+
     public function generateFromNote(Request $request, Note $note)
     {
         try {

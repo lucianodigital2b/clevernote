@@ -7,10 +7,22 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Illuminate\Support\Str;
 
 class Quiz extends Model implements HasMedia
 {
     use InteractsWithMedia;
+
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::creating(function ($quiz) {
+            if (empty($quiz->uuid)) {
+                $quiz->uuid = (string) Str::uuid();
+            }
+        });
+    }
 
     public function registerMediaCollections(): void
     {
@@ -24,7 +36,8 @@ class Quiz extends Model implements HasMedia
         'user_id',
         'is_published',
         'note_id',
-        'status'
+        'status',
+        'uuid'
     ];
 
     protected $casts = [

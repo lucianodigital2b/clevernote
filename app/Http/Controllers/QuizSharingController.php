@@ -52,6 +52,32 @@ class QuizSharingController extends Controller
         ]);
     }
 
+    public function showByUuid($uuid)
+    {
+        $quiz = Quiz::where('uuid', $uuid)->firstOrFail();
+        
+        if (!$quiz->is_published) {
+            abort(404, 'Quiz not found or not published');
+        }
+
+        $userId = Auth::id();
+        $canAttempt = $userId ? $this->spacedRepetition->shouldAllowAttempt($quiz, $userId) : true;
+        
+        $leaderboard = QuizLeaderboard::with('user')
+            ->where('quiz_id', $quiz->id)
+            ->orderByDesc('best_score')
+            ->orderBy('attempts_count')
+            ->take(10)
+            ->get();
+
+        return Inertia::render('Quizzes/Public', [
+            'quiz' => $quiz->load(['questions.options']),
+            'canAttempt' => $canAttempt,
+            'leaderboard' => $leaderboard,
+            'nextAttemptAt' => $quiz->next_attempt_available_at ?? null
+        ]);
+    }
+
     public function toggleSharing(Quiz $quiz)
     {
         $this->authorize('update', $quiz);

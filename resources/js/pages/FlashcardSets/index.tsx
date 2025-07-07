@@ -43,9 +43,6 @@ export default function Index({ flashcardSets, isLoading = false }: Props) {
     return (
         <AppLayout>
             <Head title="Flashcards" />
-
-
-
             <div className="container mx-auto py-6 px-4">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-semibold">{t('flashcard_sets_title')}</h1>

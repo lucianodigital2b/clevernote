@@ -21,6 +21,10 @@ use Laravel\Horizon\Horizon;
 
 Route::get('/', [App\Http\Controllers\WelcomeController::class, 'index'])->name('home');
 
+// Public quiz routes (UUID-based)
+Route::get('/quizzes/{uuid}/public', [QuizSharingController::class, 'showByUuid'])->name('quizzes.public.show');
+Route::post('/quizzes/{uuid}/public/attempt', [QuizController::class, 'submitPublicAttempt'])->name('quizzes.public.attempt');
+
 
 Route::middleware(['auth'])->group(function () {
     // Folder routes
