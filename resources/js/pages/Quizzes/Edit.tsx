@@ -84,7 +84,7 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
                 type="button"
                 onClick={() => optionEditorsRefs.current[questionIndex]?.[optionIndex]?.chain().focus().toggleBold().run()}
                 className={`p-2 rounded text-sm cursor-pointer ${
-                  optionEditorsRefs.current[questionIndex]?.[optionIndex]?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'
+                  optionEditorsRefs.current[questionIndex]?.[optionIndex]?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-transparent dark:hover:bg-gray-600 dark:text-gray-200'
                 }`}
                 title="Bold"
               >
@@ -94,7 +94,7 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
                 type="button"
                 onClick={() => optionEditorsRefs.current[questionIndex]?.[optionIndex]?.chain().focus().toggleItalic().run()}
                 className={`p-2 rounded text-sm cursor-pointer ${
-                  optionEditorsRefs.current[questionIndex]?.[optionIndex]?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'
+                  optionEditorsRefs.current[questionIndex]?.[optionIndex]?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-transparent dark:hover:bg-gray-600 dark:text-gray-200'
                 }`}
                 title="Italic"
               >
@@ -104,7 +104,7 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
                 type="button"
                 onClick={() => optionEditorsRefs.current[questionIndex]?.[optionIndex]?.chain().focus().toggleHighlight().run()}
                 className={`p-2 rounded text-sm cursor-pointer ${
-                  optionEditorsRefs.current[questionIndex]?.[optionIndex]?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'
+                  optionEditorsRefs.current[questionIndex]?.[optionIndex]?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-transparent dark:hover:bg-gray-600 dark:text-gray-200'
                 }`}
                 title="Highlight"
               >
@@ -125,7 +125,7 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
               />
               <label
                 htmlFor={`option-${questionIndex}-${optionIndex}-image-upload`}
-                className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 flex items-center justify-center"
+                className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 dark:bg-transparent dark:hover:bg-gray-600 dark:text-gray-200 flex items-center justify-center"
                 title={isUploadingImage && uploadingEditor === 'quiz-option-images' ? 'Uploading...' : 'Insert Image'}
               >
                 {isUploadingImage && uploadingEditor === 'quiz-option-images' ? (
@@ -618,7 +618,7 @@ export default function Edit({ quiz }: Props) {
                     type="button"
                     onClick={() => descriptionEditor?.chain().focus().toggleBold().run()}
                     className={`p-2 rounded text-sm ${
-                      descriptionEditor?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'
+                      descriptionEditor?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-transparent dark:hover:bg-gray-600 dark:text-gray-200'
                     }`}
                     title="Bold"
                   >
@@ -628,7 +628,7 @@ export default function Edit({ quiz }: Props) {
                     type="button"
                     onClick={() => descriptionEditor?.chain().focus().toggleItalic().run()}
                     className={`p-2 rounded text-sm ${
-                      descriptionEditor?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'
+                      descriptionEditor?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-transparent dark:hover:bg-gray-600 dark:text-gray-200'
                     }`}
                     title="Italic"
                   >
@@ -638,7 +638,7 @@ export default function Edit({ quiz }: Props) {
                     type="button"
                     onClick={() => descriptionEditor?.chain().focus().toggleHighlight().run()}
                     className={`p-2 rounded text-sm ${
-                      descriptionEditor?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'
+                      descriptionEditor?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-transparent dark:hover:bg-gray-600 dark:text-gray-200'
                     }`}
                     title="Highlight"
                   >
@@ -658,7 +658,7 @@ export default function Edit({ quiz }: Props) {
                   />
                   <label
                     htmlFor="description-image-upload"
-                    className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 flex items-center justify-center"
+                    className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 dark:bg-transparent dark:hover:bg-gray-600 dark:text-gray-200 flex items-center justify-center"
                     title={isUploadingImage && uploadingEditor === 'quiz-description-images' ? 'Uploading...' : 'Insert Image'}
                   >
                     {isUploadingImage && uploadingEditor === 'quiz-description-images' ? (
@@ -815,7 +815,7 @@ export default function Edit({ quiz }: Props) {
                           type="button"
                           onClick={() => questionEditorsRefs.current[questionIndex]?.chain().focus().toggleBold().run()}
                           className={`p-2 rounded text-sm ${
-                            questionEditorsRefs.current[questionIndex]?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'
+                            questionEditorsRefs.current[questionIndex]?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-transparent dark:hover:bg-gray-600 dark:text-gray-200'
                           }`}
                           title="Bold"
                         >
@@ -825,7 +825,7 @@ export default function Edit({ quiz }: Props) {
                           type="button"
                           onClick={() => questionEditorsRefs.current[questionIndex]?.chain().focus().toggleItalic().run()}
                           className={`p-2 rounded text-sm ${
-                            questionEditorsRefs.current[questionIndex]?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'
+                            questionEditorsRefs.current[questionIndex]?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-transparent dark:hover:bg-gray-600 dark:text-gray-200'
                           }`}
                           title="Italic"
                         >
@@ -835,7 +835,7 @@ export default function Edit({ quiz }: Props) {
                           type="button"
                           onClick={() => questionEditorsRefs.current[questionIndex]?.chain().focus().toggleHighlight().run()}
                           className={`p-2 rounded text-sm ${
-                            questionEditorsRefs.current[questionIndex]?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'
+                            questionEditorsRefs.current[questionIndex]?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-transparent dark:hover:bg-gray-600 dark:text-gray-200'
                           }`}
                           title="Highlight"
                         >
@@ -855,7 +855,7 @@ export default function Edit({ quiz }: Props) {
                         />
                         <label
                           htmlFor={`question-${questionIndex}-image-upload`}
-                          className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 flex items-center justify-center"
+                          className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 dark:bg-transparent dark:hover:bg-gray-600 dark:text-gray-200 flex items-center justify-center"
                           title={isUploadingImage && uploadingEditor === 'quiz-question-images' ? 'Uploading...' : 'Insert Image'}
                         >
                           {isUploadingImage && uploadingEditor === 'quiz-question-images' ? (
