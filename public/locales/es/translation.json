@@ -522,6 +522,19 @@
   "modal_failed_validate_video": "Error al validar el video. Por favor verifica la URL e inténtalo de nuevo.",
   "modal_video_not_found": "Video no encontrado",
   "modal_failed_fetch_video_info": "Error al obtener información del video",
-  "modal_youtube_api_not_configured": "Clave de API de YouTube no configurada"
+  "modal_youtube_api_not_configured": "Clave de API de YouTube no configurada",
+
+  "upload_pdf_modal_title": "Subir Documento",
+  "upload_pdf_modal_description": "Crea una nueva nota a partir de un archivo PDF, documento de Word, presentación de PowerPoint o archivo de texto",
+  "upload_pdf_modal_file": "Archivo",
+  "upload_pdf_modal_title_optional": "Título (opcional)",
+  "modal_title_placeholder": "Escribe el título de la nota",
+  "upload_pdf_modal_folder_optional": "Carpeta (opcional)",
+  "upload_pdf_modal_select_folder": "Seleccionar una carpeta",
+  "upload_pdf_modal_language": "Idioma",
+  "upload_pdf_modal_select_language": "Seleccionar idioma",
+  "upload_pdf_modal_creating": "Creando...",
+  "upload_pdf_modal_create_note": "Crear Nota"
+
 
 }

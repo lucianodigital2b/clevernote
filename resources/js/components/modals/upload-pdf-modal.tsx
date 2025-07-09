@@ -34,11 +34,6 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
             language: selectedLanguage
         });
 
-        // if (success) {
-        //     setNoteTitle('');
-        //     setSelectedFolder('');
-        //     setPdfFile(null);
-        //     onOpenChange(false);
         if (success && success.id) {
             setNoteTitle('');
             setSelectedFolder('');
@@ -81,7 +76,7 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
                             id="note-title"
                             value={noteTitle}
                             onChange={(e) => setNoteTitle(e.target.value)}
-                            placeholder={t('upload_pdf_modal_title_placeholder')}
+                            placeholder={t('modal_title_placeholder')}
                         />
                     </div>
                     
@@ -89,7 +84,7 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
                         <Label htmlFor="folder">{t('upload_pdf_modal_folder_optional')}</Label>
                         <Select value={selectedFolder} onValueChange={setSelectedFolder}>
                             <SelectTrigger>
-                                <SelectValue placeholder={t('upload_pdf_modal_select_folder')} />
+                                <SelectValue placeholder={t('modal_select_folder')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {folders.map((folder) => (
@@ -101,14 +96,14 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
                         </Select>
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="language">{t('upload_pdf_modal_language')}</Label>
+                        <Label htmlFor="language">{t('modal_language')}</Label>
                         <Select
                             value={selectedLanguage}
                             onValueChange={setSelectedLanguage}
                             disabled={isUploading}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder={t('upload_pdf_modal_select_language')} />
+                                <SelectValue placeholder={t('modal_select_language')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {languages.map(lang => (
@@ -124,7 +119,7 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
                         onClick={handleSubmit}
                         disabled={!pdfFile || isUploading}
                     >
-                        {isUploading ? t('upload_pdf_modal_creating') : t('upload_pdf_modal_create_note')}
+                        {isUploading ? t('modal_creating') : t('modal_create_note')}
                     </Button>
                 </DialogFooter>
             </DialogContent>
