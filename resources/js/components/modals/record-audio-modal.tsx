@@ -96,19 +96,19 @@ export function RecordAudioModal({ open, onOpenChange, folders }: RecordAudioMod
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="note-title">{t('record_audio_modal_title_optional')}</Label>
+                        <Label htmlFor="note-title">{t('modal_title_optional')}</Label>
                         <Input
                             id="note-title"
                             value={noteTitle}
                             onChange={(e) => setNoteTitle(e.target.value)}
-                            placeholder={t('record_audio_modal_title_placeholder')}
+                            placeholder={t('modal_title_placeholder')}
                         />
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="folder">{t('record_audio_modal_folder_optional')}</Label>
+                        <Label htmlFor="folder">{t('modal_folder_optional')}</Label>
                         <Select value={selectedFolder} onValueChange={setSelectedFolder}>
                             <SelectTrigger>
-                                <SelectValue placeholder={t('record_audio_modal_select_folder')} />
+                                <SelectValue placeholder={t('modal_select_folder')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {folders.map((folder) => (
@@ -130,7 +130,7 @@ export function RecordAudioModal({ open, onOpenChange, folders }: RecordAudioMod
                             </Button>
                         </div>
                         <div className="text-center text-sm text-neutral-500">
-                            {isRecording ? t('record_audio_modal_recording') : audioBlob ? 'Recording complete' : 'Click to start recording'}
+                            {isRecording ? t('record_audio_modal_recording') : audioBlob ? t('modal_recording_complete') : t('modal_click_to_start_recording')}
                         </div>
                         {audioBlob && (
                             <div className="mt-4">
@@ -141,7 +141,7 @@ export function RecordAudioModal({ open, onOpenChange, folders }: RecordAudioMod
                                         className="w-full"
                                     />
                                     <div className="flex items-center justify-between mt-2 text-xs text-neutral-500">
-                                        <span>Preview your recording</span>
+                                        <span>{t('modal_preview_recording')}</span>
                                         <Button
                                             variant="ghost"
                                             size="sm"
@@ -151,7 +151,7 @@ export function RecordAudioModal({ open, onOpenChange, folders }: RecordAudioMod
                                             }}
                                             className="text-red-500 hover:text-red-600 hover:bg-red-50"
                                         >
-                                            Delete recording
+                                            {t('delete')}
                                         </Button>
                                     </div>
                                 </div>
@@ -165,7 +165,7 @@ export function RecordAudioModal({ open, onOpenChange, folders }: RecordAudioMod
                         onClick={handleSubmit}
                         disabled={!audioBlob || isUploading}
                     >
-                        {isUploading ? t('record_audio_modal_processing') : t('record_audio_modal_create_note')}
+                        {isUploading ? t('record_audio_modal_processing') : t('modal_create_note')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

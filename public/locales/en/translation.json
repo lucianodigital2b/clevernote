@@ -517,8 +517,9 @@
   "fast_review_keyboard_shortcuts": "Space/Enter to flip/next, ← → to navigate, 1/2 for recall",
   "fast_review_recall_remember": "Remember",
   "fast_review_recall_forgot": "Forgot",
-  "modal_record_audio_title": "Record Audio",
-  "modal_record_audio_description": "Create a new note with recorded audio",
+  "record_audio_modal_title": "Record Audio",
+  "record_audio_modal_recording": "Recording...",
+  "record_audio_modal_description": "Create a new note with recorded audio",
   "modal_upload_audio_title": "Upload Audio",
   "modal_upload_audio_description": "Create a new note from an audio file. The audio will be transcribed automatically.",
   "modal_upload_pdf_title": "Upload Document",
@@ -584,6 +585,13 @@
   "web_link_modal_failed_validate_video": "Failed to validate video. Please check the URL and try again.",
   "web_link_modal_video_not_found": "Video not found",
   "web_link_modal_failed_fetch_video_info": "Failed to fetch video information",
-  "web_link_modal_youtube_api_not_configured": "YouTube API key not configured"
+  "web_link_modal_youtube_api_not_configured": "YouTube API key not configured",
+
+  "upload_audio_modal_title": "Upload Audio",
+  "upload_audio_modal_description": "Create a new note from an audio file. The audio will be transcribed automatically.",
+  "upload_audio_modal_audio": "Audio",
+  "upload_audio_modal_select_language": "Select audio language",
+  "upload_audio_modal_uploading": "Uploading audio...",
+  "upload_audio_modal_transcribing": "Transcribing audio..."
 
 }

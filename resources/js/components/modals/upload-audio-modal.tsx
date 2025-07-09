@@ -135,7 +135,7 @@ export function UploadAudioModal({ open, onOpenChange, folders }: UploadAudioMod
                         <div>
                             <div className="space-y-2">
                                 <div className="text-sm text-neutral-500 text-center">
-                                    {uploadProgress < 100 ? 'Uploading audio...' : 'Transcribing audio...'}
+                                    {uploadProgress < 100 ? t('upload_audio_modal_uploading') : t('upload_audio_modal_transcribing')}
                                 </div>
                                 <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
                                     <div 
