@@ -104,7 +104,12 @@ class NoteController extends Controller
             if (isset($validated['pdf_file'])) {
                 $file = $validated['pdf_file'];
                 $extension = $file->getClientOriginalExtension();
-                $storageDir = $extension === 'pdf' ? 'pdfs' : 'docs';
+                $storageDir = match($extension) {
+                    'pdf' => 'pdfs',
+                    'txt' => 'texts',
+                    'ppt', 'pptx' => 'presentations',
+                    default => 'docs'
+                };
                 $path = $file->store($storageDir, 'public');
 
                 // Remove file instance from validated data
@@ -161,7 +166,7 @@ class NoteController extends Controller
         $this->authorize('view', $note);
 
         if($request->wantsJson()){
-            return $note->load(['tags', 'folder']);
+            return $note->load(['tags', 'folder', 'flashcardSets', 'quizzes', 'mindmaps', 'media']);
         }
 
         return Inertia::render('Notes/Show', [
@@ -200,6 +205,10 @@ class NoteController extends Controller
         // ];
 
         $note = $this->noteService->updateNote($note, $request->validated());
+
+        if($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return redirect()
             ->back()

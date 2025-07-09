@@ -39,11 +39,11 @@ const mainNavItems: NavItem[] = [
         icon: GraduationCap,
         tooltip: t('Coming soon'),
     },
-    {
-        title: t('Statistics'),
-        url: '/statistics',
-        icon: ChartAreaIcon,
-    },
+    // {
+    //     title: t('Statistics'),
+    //     url: '/statistics',
+    //     icon: ChartAreaIcon,
+    // },
     {
         title: t('Podcast') + ' (' + t('Coming soon') + ')',
         url: '#',

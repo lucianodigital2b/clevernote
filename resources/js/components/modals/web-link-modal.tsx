@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import { useCreateNote } from "@/hooks/use-create-note";
+import { useTranslation } from 'react-i18next';
 import type { Folder } from "@/types";
 import languages from "@/utils/languages.json";
 import { AlertCircle, Clock } from "lucide-react";
@@ -22,6 +23,7 @@ interface VideoInfo {
 }
 
 export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps) {
+    const { t } = useTranslation();
     const [webLink, setWebLink] = useState('');
     const [selectedFolder, setSelectedFolder] = useState('');
     const [selectedLanguage, setSelectedLanguage] = useState<string | null>("autodetect");
@@ -52,7 +54,7 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
     const validateVideoDuration = async (url: string) => {
         const videoId = extractVideoId(url);
         if (!videoId) {
-            setValidationError('Invalid YouTube URL');
+            setValidationError(t('web_link_modal_invalid_youtube_url'));
             setVideoInfo(null);
             return;
         }
@@ -65,7 +67,7 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
             // You'll need to add your YouTube API key to your .env file
             const apiKey = import.meta.env.VITE_YOUTUBE_API_KEY;
             if (!apiKey) {
-                throw new Error('YouTube API key not configured');
+                throw new Error(t('web_link_modal_youtube_api_not_configured'));
             }
 
             const response = await fetch(
@@ -95,11 +97,11 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
             });
             
             if (!isValid) {
-                setValidationError(`Video duration (${formatDuration(duration)}) exceeds the maximum limit of ${MAX_DURATION_HOURS} hour`);
+                setValidationError(t('web_link_modal_video_duration_exceeds', { duration: formatDuration(duration), MAX_DURATION_HOURS }));
             }
         } catch (error) {
             console.error('Video validation error:', error);
-            setValidationError('Failed to validate video. Please check the URL and try again.');
+            setValidationError(t('web_link_modal_failed_to_validate'));
             setVideoInfo(null);
         } finally {
             setIsValidating(false);
@@ -174,14 +176,14 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Add from Youtube</DialogTitle>
+                    <DialogTitle>{t('web_link_modal_title')}</DialogTitle>
                     <DialogDescription>
-                        Create a new note from a youtube video (max {MAX_DURATION_HOURS} hour)
+                        {t('web_link_modal_description', { MAX_DURATION_HOURS })}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4 overflow-y-auto flex-1">
                     <div className="grid gap-2">
-                        <Label htmlFor="web-link">URL</Label>
+                        <Label htmlFor="web-link">{t('web_link_modal_url')}</Label>
                         <Input
                             id="web-link"
                             value={webLink}
@@ -194,7 +196,7 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
                         {isValidating && (
                             <div className="flex items-center gap-2 text-sm text-blue-600">
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                                Validating video...
+                                {t('web_link_modal_validating_video')}
                             </div>
                         )}
                         
@@ -204,7 +206,7 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
                                 <div className="flex items-center gap-2 text-sm">
                                     <Clock className="h-4 w-4 text-green-600 flex-shrink-0" />
                                     <span className="font-medium text-green-800 dark:text-green-200">
-                                        Duration: {formatDuration(videoInfo.duration)}
+                                        {t('web_link_modal_duration', { duration: formatDuration(videoInfo.duration) })}
                                     </span>
                                 </div>
                                 <p className="text-sm text-green-700 dark:text-green-300 mt-1 break-words line-clamp-2" title={videoInfo.title}>
@@ -225,10 +227,10 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
                     </div>
                     
                     <div className="grid gap-2">
-                        <Label htmlFor="folder">Folder (optional)</Label>
+                        <Label htmlFor="folder">{t('web_link_modal_folder_optional')}</Label>
                         <Select value={selectedFolder} onValueChange={setSelectedFolder}>
                             <SelectTrigger>
-                                <SelectValue placeholder="Select a folder" />
+                                <SelectValue placeholder={t('web_link_modal_select_folder')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {folders.map((folder) => (
@@ -241,10 +243,10 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
                     </div>
                     
                     <div className="grid gap-2">
-                        <Label htmlFor="language">Language</Label>
+                        <Label htmlFor="language">{t('web_link_modal_language')}</Label>
                         <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
                             <SelectTrigger>
-                                <SelectValue placeholder="Select a language" />
+                                <SelectValue placeholder={t('web_link_modal_select_language')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {languages.map(lang => (
@@ -260,7 +262,7 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
                         onClick={handleSubmit}
                         disabled={isSubmitDisabled}
                     >
-                        {isUploading ? 'Creating...' : isValidating ? 'Validating...' : 'Create Note'}
+                        {isUploading ? t('web_link_modal_creating') : isValidating ? t('web_link_modal_validating') : t('web_link_modal_create_note')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

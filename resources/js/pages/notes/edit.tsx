@@ -260,7 +260,6 @@ export default function Edit({ note }: { note: Note }) {
                         const quizResponse = await axios.get(`/quizzes/${quizId}`);
                         const quizData = quizResponse.data.quiz;
                         
-                        
                         if (quizData.status === 'completed') {
                             clearInterval(intervalId);
                             setIsQuizModalOpen(false);
@@ -273,6 +272,8 @@ export default function Edit({ note }: { note: Note }) {
                         }
                         // Continue polling if status is 'generating'
                     } catch (error) {
+                        console.log(error);
+                        
                         clearInterval(intervalId);
                         setIsQuizModalOpen(false);
                         toastConfig.error("Failed to check quiz generation status");

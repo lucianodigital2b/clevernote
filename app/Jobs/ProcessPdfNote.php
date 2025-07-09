@@ -13,6 +13,7 @@ use App\Services\DeepSeekService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
+use PhpOffice\PhpPresentation\IOFactory as PresentationIOFactory;
 
 class ProcessPdfNote implements ShouldQueue
 {
@@ -61,7 +62,25 @@ class ProcessPdfNote implements ShouldQueue
 
             if ($this->extension === 'pdf') {
                 $text = $noteService->extractTextFromPdf($this->filePath);
+            } elseif ($this->extension === 'txt') {
+                $text = Storage::disk('public')->get($this->filePath);
+            } elseif (in_array($this->extension, ['ppt', 'pptx'])) {
+                $phpPresentation = PresentationIOFactory::load($fullPath);
+                foreach ($phpPresentation->getAllSlides() as $slide) {
+                    foreach ($slide->getShapeCollection() as $shape) {
+                        if ($shape instanceof \PhpOffice\PhpPresentation\Shape\RichText) {
+                            foreach ($shape->getParagraphs() as $paragraph) {
+                                foreach ($paragraph->getRichTextElements() as $element) {
+                                    if ($element instanceof \PhpOffice\PhpPresentation\Shape\RichText\TextElement) {
+                                        $text .= $element->getText() . "\n";
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             } else {
+                // Handle DOC and DOCX files
                 $phpWord = \PhpOffice\PhpWord\IOFactory::load($fullPath);
                 foreach ($phpWord->getSections() as $section) {
                     foreach ($section->getElements() as $element) {

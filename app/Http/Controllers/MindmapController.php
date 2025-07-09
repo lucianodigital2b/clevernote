@@ -18,8 +18,12 @@ class MindmapController extends Controller
         $this->deepseekService = $deepseekService;
     }
 
-    public function show(Mindmap $mindmap)
+    public function show(Mindmap $mindmap, Request $request)
     {
+        if ($request->wantsJson()) {
+            return response()->json($mindmap->load('note'));
+        }
+
         return Inertia::render('mindmaps/show', [
             'mindmap' => $mindmap->load('note'),
         ]);

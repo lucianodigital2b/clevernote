@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useCreateNote } from "@/hooks/use-create-note";
+import { useTranslation } from 'react-i18next';
 import type { Folder } from "@/types";
 import { Dropzone } from "../ui/dropzone";
 import languages from "@/utils/languages.json";
@@ -16,6 +17,7 @@ interface UploadPdfModalProps {
 }
 
 export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalProps) {
+    const { t } = useTranslation();
     const [noteTitle, setNoteTitle] = useState('');
     const [selectedFolder, setSelectedFolder] = useState('');
     const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -52,40 +54,42 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="">
                 <DialogHeader>
-                    <DialogTitle>Upload PDF/Text</DialogTitle>
+                    <DialogTitle>{t('upload_pdf_modal_title')}</DialogTitle>
                     <DialogDescription>
-                        Create a new note from a PDF or text file
+                        {t('upload_pdf_modal_description')}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label>File</Label>
+                        <Label>{t('upload_pdf_modal_file')}</Label>
                         <Dropzone
                             onDrop={(files) => setPdfFile(files[0])}
                             accept={{
                                 'application/pdf': ['.pdf'],
                                 'text/plain': ['.txt'],
                                 'application/msword': ['.doc'],
-                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
+                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+                                'application/vnd.ms-powerpoint': ['.ppt'],
+                                'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx']
                             }}
                         />
                         
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="note-title">Title (optional)</Label>
+                        <Label htmlFor="note-title">{t('upload_pdf_modal_title_optional')}</Label>
                         <Input
                             id="note-title"
                             value={noteTitle}
                             onChange={(e) => setNoteTitle(e.target.value)}
-                            placeholder="Enter note title"
+                            placeholder={t('upload_pdf_modal_title_placeholder')}
                         />
                     </div>
                     
                     <div className="grid gap-2">
-                        <Label htmlFor="folder">Folder (optional)</Label>
+                        <Label htmlFor="folder">{t('upload_pdf_modal_folder_optional')}</Label>
                         <Select value={selectedFolder} onValueChange={setSelectedFolder}>
                             <SelectTrigger>
-                                <SelectValue placeholder="Select a folder" />
+                                <SelectValue placeholder={t('upload_pdf_modal_select_folder')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {folders.map((folder) => (
@@ -97,14 +101,14 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
                         </Select>
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="language">Language</Label>
+                        <Label htmlFor="language">{t('upload_pdf_modal_language')}</Label>
                         <Select
                             value={selectedLanguage}
                             onValueChange={setSelectedLanguage}
                             disabled={isUploading}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Select language" />
+                                <SelectValue placeholder={t('upload_pdf_modal_select_language')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {languages.map(lang => (
@@ -120,7 +124,7 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
                         onClick={handleSubmit}
                         disabled={!pdfFile || isUploading}
                     >
-                        {isUploading ? 'Creating...' : 'Create Note'}
+                        {isUploading ? t('upload_pdf_modal_creating') : t('upload_pdf_modal_create_note')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

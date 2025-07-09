@@ -83,8 +83,8 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
               <button
                 type="button"
                 onClick={() => optionEditorsRefs.current[questionIndex]?.[optionIndex]?.chain().focus().toggleBold().run()}
-                className={`p-2 rounded text-sm dark:bg-transparent cursor-pointer ${
-                  optionEditorsRefs.current[questionIndex]?.[optionIndex]?.isActive('bold') ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100'
+                className={`p-2 rounded text-sm cursor-pointer ${
+                  optionEditorsRefs.current[questionIndex]?.[optionIndex]?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'
                 }`}
                 title="Bold"
               >
@@ -93,8 +93,8 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
               <button
                 type="button"
                 onClick={() => optionEditorsRefs.current[questionIndex]?.[optionIndex]?.chain().focus().toggleItalic().run()}
-                className={`p-2 rounded text-sm dark:bg-transparent cursor-pointer ${
-                  optionEditorsRefs.current[questionIndex]?.[optionIndex]?.isActive('italic') ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100'
+                className={`p-2 rounded text-sm cursor-pointer ${
+                  optionEditorsRefs.current[questionIndex]?.[optionIndex]?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'
                 }`}
                 title="Italic"
               >
@@ -103,12 +103,12 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
               <button
                 type="button"
                 onClick={() => optionEditorsRefs.current[questionIndex]?.[optionIndex]?.chain().focus().toggleHighlight().run()}
-                className={`p-2 rounded text-sm dark:bg-transparent cursor-pointer ${
-                  optionEditorsRefs.current[questionIndex]?.[optionIndex]?.isActive('highlight') ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100'
+                className={`p-2 rounded text-sm cursor-pointer ${
+                  optionEditorsRefs.current[questionIndex]?.[optionIndex]?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'
                 }`}
                 title="Highlight"
               >
-                <span className="w-4 h-4 bg-purple-200 rounded px-1">H</span>
+                <span className="w-4 h-4 bg-purple-200 dark:bg-purple-600 dark:text-white rounded px-1">H</span>
               </button>
               
               <input
@@ -125,7 +125,7 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
               />
               <label
                 htmlFor={`option-${questionIndex}-${optionIndex}-image-upload`}
-                className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 flex items-center justify-center"
+                className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 flex items-center justify-center"
                 title={isUploadingImage && uploadingEditor === 'quiz-option-images' ? 'Uploading...' : 'Insert Image'}
               >
                 {isUploadingImage && uploadingEditor === 'quiz-option-images' ? (
@@ -150,10 +150,10 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
                   question.setData('questions', newQuestions);
                 }}
                 className={`cursor-pointer p-2 rounded-full transition-colors ${
-                  option.is_correct
-                    ? 'bg-green-200 text-green-700 hover:bg-green-300'
-                    : 'text-primary hover:bg-green-300'
-                }`}
+                    option.is_correct
+                      ? 'bg-green-200 text-green-700 hover:bg-green-300 dark:bg-green-800 dark:text-green-200 dark:hover:bg-green-700'
+                      : 'text-primary hover:bg-green-300 dark:hover:bg-green-800'
+                  }`}
               >
                 <CheckIcon className="w-5 h-5" />
               </button>
@@ -161,7 +161,7 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
                 <button
                   type="button"
                   onClick={() => removeOption(questionIndex, option.id)}
-                  className="cursor-pointer text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50"
+                  className="cursor-pointer text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20"
                 >
                   <TrashIcon className="w-5 h-5" />
                 </button>
@@ -183,7 +183,7 @@ function SortableOption({ option, questionIndex, optionIndex, question, optionEd
         <div
           {...attributes}
           {...listeners}
-          className=" transition-opacity cursor-grab active:cursor-grabbing p-2 text-gray-400 hover:text-gray-600"
+          className="transition-opacity cursor-grab active:cursor-grabbing p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400"
           title="Drag to reorder"
         >
           <GripVertical className="w-4 h-4" />
@@ -618,7 +618,7 @@ export default function Edit({ quiz }: Props) {
                     type="button"
                     onClick={() => descriptionEditor?.chain().focus().toggleBold().run()}
                     className={`p-2 rounded text-sm ${
-                      descriptionEditor?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
+                      descriptionEditor?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'
                     }`}
                     title="Bold"
                   >
@@ -628,7 +628,7 @@ export default function Edit({ quiz }: Props) {
                     type="button"
                     onClick={() => descriptionEditor?.chain().focus().toggleItalic().run()}
                     className={`p-2 rounded text-sm ${
-                      descriptionEditor?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
+                      descriptionEditor?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'
                     }`}
                     title="Italic"
                   >
@@ -638,7 +638,7 @@ export default function Edit({ quiz }: Props) {
                     type="button"
                     onClick={() => descriptionEditor?.chain().focus().toggleHighlight().run()}
                     className={`p-2 rounded text-sm ${
-                      descriptionEditor?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
+                      descriptionEditor?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'
                     }`}
                     title="Highlight"
                   >
@@ -658,7 +658,7 @@ export default function Edit({ quiz }: Props) {
                   />
                   <label
                     htmlFor="description-image-upload"
-                    className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 flex items-center justify-center"
+                    className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 flex items-center justify-center"
                     title={isUploadingImage && uploadingEditor === 'quiz-description-images' ? 'Uploading...' : 'Insert Image'}
                   >
                     {isUploadingImage && uploadingEditor === 'quiz-description-images' ? (
@@ -690,22 +690,22 @@ export default function Edit({ quiz }: Props) {
         {/* Questions Section */}
         {data.questions.length === 0 ? (
           <motion.div 
-            className="rounded-lg p-8 mb-6 border-2 border-dashed border-indigo-300 text-center bg-indigo-50"
+            className="rounded-lg p-8 mb-6 border-2 border-dashed border-indigo-300 dark:border-indigo-600 text-center bg-indigo-50 dark:bg-indigo-900/20"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
           >
             <div className="max-w-md mx-auto">
               <motion.div 
-                className="w-16 h-16 mx-auto mb-4 bg-indigo-200 rounded-full flex items-center justify-center"
+                className="w-16 h-16 mx-auto mb-4 bg-indigo-200 dark:bg-indigo-700 rounded-full flex items-center justify-center"
               initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, duration: 0.5, type: "spring", stiffness: 200 }}
               >
-                <PlusIcon className="w-8 h-8 text-indigo-400" />
+                <PlusIcon className="w-8 h-8 text-indigo-400 dark:text-indigo-300" />
               </motion.div>
               <motion.h3 
-                className="text-lg font-medium text-indigo-900 mb-2"
+                className="text-lg font-medium text-indigo-900 dark:text-indigo-200 mb-2"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.3 }}
@@ -713,7 +713,7 @@ export default function Edit({ quiz }: Props) {
                 {t('no_questions_yet')}
               </motion.h3>
               <motion.p 
-                className="text-indigo-500 mb-4"
+                className="text-indigo-500 dark:text-indigo-400 mb-4"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.3 }}
@@ -776,7 +776,7 @@ export default function Edit({ quiz }: Props) {
                   transformPerspective: 1000
                 }}
               >
-              <div className="rounded-lg p-6 mb-6 border border-gray-200/50 backdrop-blur-sm bg-white/5">
+              <div className="rounded-lg p-6 mb-6 border border-gray-200/50 dark:border-zinc-100/5 backdrop-blur-sm bg-white/5">
                 <div className="flex justify-between items-center mb-4">
                   <motion.h2 
                     className="text-xl font-semibold"
@@ -789,7 +789,7 @@ export default function Edit({ quiz }: Props) {
                   <motion.button
                     type="button"
                     onClick={() => removeQuestion(question.id)}
-                    className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50"
+                    className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20"
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.3 + questionIndex * 0.1, duration: 0.3, type: "spring" }}
@@ -815,7 +815,7 @@ export default function Edit({ quiz }: Props) {
                           type="button"
                           onClick={() => questionEditorsRefs.current[questionIndex]?.chain().focus().toggleBold().run()}
                           className={`p-2 rounded text-sm ${
-                            questionEditorsRefs.current[questionIndex]?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
+                            questionEditorsRefs.current[questionIndex]?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'
                           }`}
                           title="Bold"
                         >
@@ -825,7 +825,7 @@ export default function Edit({ quiz }: Props) {
                           type="button"
                           onClick={() => questionEditorsRefs.current[questionIndex]?.chain().focus().toggleItalic().run()}
                           className={`p-2 rounded text-sm ${
-                            questionEditorsRefs.current[questionIndex]?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
+                            questionEditorsRefs.current[questionIndex]?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'
                           }`}
                           title="Italic"
                         >
@@ -835,11 +835,11 @@ export default function Edit({ quiz }: Props) {
                           type="button"
                           onClick={() => questionEditorsRefs.current[questionIndex]?.chain().focus().toggleHighlight().run()}
                           className={`p-2 rounded text-sm ${
-                            questionEditorsRefs.current[questionIndex]?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100'
+                            questionEditorsRefs.current[questionIndex]?.isActive('highlight') ? 'bg-blue-500 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200'
                           }`}
                           title="Highlight"
                         >
-                          <span className="w-4 h-4 bg-purple-200 rounded px-1">H</span>
+                          <span className="w-4 h-4 bg-purple-200 dark:bg-purple-600 dark:text-white rounded px-1">H</span>
                         </button>
                         <input
                           type="file"
@@ -855,7 +855,7 @@ export default function Edit({ quiz }: Props) {
                         />
                         <label
                           htmlFor={`question-${questionIndex}-image-upload`}
-                          className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 flex items-center justify-center"
+                          className="p-2 rounded text-sm bg-gray-50 cursor-pointer hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 flex items-center justify-center"
                           title={isUploadingImage && uploadingEditor === 'quiz-question-images' ? 'Uploading...' : 'Insert Image'}
                         >
                           {isUploadingImage && uploadingEditor === 'quiz-question-images' ? (
@@ -974,7 +974,7 @@ export default function Edit({ quiz }: Props) {
 
         {/* Fixed floating bottom bar */}
         <motion.div 
-          className="fixed bottom-5 left-0 right-0 bg-white border shadow-lg p-4 z-50 w-fit mx-auto rounded-3xl"
+          className="fixed bottom-5 left-0 right-0 bg-white dark:bg-[#161616] border dark:border-zinc-100-5 shadow-lg p-4 z-50 w-fit mx-auto rounded-3xl"
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.4, type: "spring", stiffness: 100 }}
@@ -987,7 +987,7 @@ export default function Edit({ quiz }: Props) {
               <Button
                 type="button"
                 size="sm"
-                className="bg-transparent text-gray hover:bg-zinc-100 border-1 p-3 rounded-xl"
+                className="bg-transparent text-gray dark:text-gray-300 hover:bg-zinc-100 dark:hover:bg-gray-50/5 border-1 p-3 rounded-xl"
                 onClick={addQuestion}
                 title={t('add_question')}
               >
@@ -1001,7 +1001,7 @@ export default function Edit({ quiz }: Props) {
               <Button
                 type="button"
                 size="sm"
-                className="bg-transparent text-gray hover:bg-red-300 border-1 p-3 rounded-xl hover:border-red-300 "
+                className="bg-transparent text-gray dark:text-gray-300 hover:bg-red-300 dark:hover:bg-red-800 border-1 p-3 rounded-xl hover:border-red-300 dark:hover:border-red-600"
                 onClick={() => {
                   if (confirm('Are you sure you want to delete this quiz?')) {
                     window.location.href = `/quizzes/${quiz.id}/delete`;
@@ -1019,7 +1019,7 @@ export default function Edit({ quiz }: Props) {
               <Button
                 type="button"
                 size="sm"
-                className="bg-transparent text-gray hover:bg-zinc-100 border-1 p-3 rounded-xl"
+                className="bg-transparent text-gray dark:text-gray-300 hover:bg-zinc-100  border-1 p-3 rounded-xl dark:hover:bg-gray-50/5"
                 onClick={() => setIsShareModalOpen(true)}
                 title="Share Quiz"
               >
@@ -1033,7 +1033,7 @@ export default function Edit({ quiz }: Props) {
               <Button
                 type="button"
                 size="sm"
-                className="bg-transparent text-gray hover:bg-zinc-100 border-1 p-3 rounded-xl"
+                className="bg-transparent text-gray hover:bg-zinc-100 border-1 p-3 rounded-xl dark:hover:bg-gray-50/5"
                 onClick={() => {
                   window.location.href = `/quizzes/${quiz.id}`;
                 }}
@@ -1049,7 +1049,7 @@ export default function Edit({ quiz }: Props) {
               <Button
                 type="submit"
                 size="sm"
-                className="bg-transparent text-gray hover:bg-zinc-100 border-1 p-3 rounded-xl"
+                className="bg-transparent text-gray hover:bg-zinc-100 border-1 p-3 rounded-xl dark:hover:bg-gray-50/5"
                 disabled={processing}
                 title={t('save')}
               >

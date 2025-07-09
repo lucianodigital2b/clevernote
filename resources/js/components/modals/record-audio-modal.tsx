@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useCreateNote } from "@/hooks/use-create-note";
 import { Mic } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 import type { Folder } from "@/types";
 
 interface RecordAudioModalProps {
@@ -15,6 +16,7 @@ interface RecordAudioModalProps {
 }
 
 export function RecordAudioModal({ open, onOpenChange, folders }: RecordAudioModalProps) {
+    const { t } = useTranslation();
     const [noteTitle, setNoteTitle] = useState('');
     const [selectedFolder, setSelectedFolder] = useState('');
     const [selectedLanguage, setSelectedLanguage] = useState('autodetect');
@@ -87,26 +89,26 @@ export function RecordAudioModal({ open, onOpenChange, folders }: RecordAudioMod
         }}>
             <DialogContent className="">
                 <DialogHeader>
-                    <DialogTitle>Record Audio</DialogTitle>
+                    <DialogTitle>{t('record_audio_modal_title')}</DialogTitle>
                     <DialogDescription>
-                        Create a new note with recorded audio
+                        {t('record_audio_modal_description')}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="note-title">Title (optional)</Label>
+                        <Label htmlFor="note-title">{t('record_audio_modal_title_optional')}</Label>
                         <Input
                             id="note-title"
                             value={noteTitle}
                             onChange={(e) => setNoteTitle(e.target.value)}
-                            placeholder="Enter note title"
+                            placeholder={t('record_audio_modal_title_placeholder')}
                         />
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="folder">Folder (optional)</Label>
+                        <Label htmlFor="folder">{t('record_audio_modal_folder_optional')}</Label>
                         <Select value={selectedFolder} onValueChange={setSelectedFolder}>
                             <SelectTrigger>
-                                <SelectValue placeholder="Select a folder" />
+                                <SelectValue placeholder={t('record_audio_modal_select_folder')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {folders.map((folder) => (
@@ -128,7 +130,7 @@ export function RecordAudioModal({ open, onOpenChange, folders }: RecordAudioMod
                             </Button>
                         </div>
                         <div className="text-center text-sm text-neutral-500">
-                            {isRecording ? 'Recording... Click to stop' : audioBlob ? 'Recording complete' : 'Click to start recording'}
+                            {isRecording ? t('record_audio_modal_recording') : audioBlob ? 'Recording complete' : 'Click to start recording'}
                         </div>
                         {audioBlob && (
                             <div className="mt-4">
@@ -163,7 +165,7 @@ export function RecordAudioModal({ open, onOpenChange, folders }: RecordAudioMod
                         onClick={handleSubmit}
                         disabled={!audioBlob || isUploading}
                     >
-                        {isUploading ? 'Creating...' : 'Create Note'}
+                        {isUploading ? t('record_audio_modal_processing') : t('record_audio_modal_create_note')}
                     </Button>
                 </DialogFooter>
             </DialogContent>
