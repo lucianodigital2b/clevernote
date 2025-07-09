@@ -13,7 +13,6 @@ use App\Services\DeepSeekService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
-use PhpOffice\PhpPresentation\IOFactory as PresentationIOFactory;
 
 class ProcessPdfNote implements ShouldQueue
 {
@@ -63,65 +62,16 @@ class ProcessPdfNote implements ShouldQueue
             if ($this->extension === 'pdf') {
                 $text = $noteService->extractTextFromPdf($this->filePath);
             } elseif ($this->extension === 'txt') {
-                $text = Storage::disk('public')->get($this->filePath);
+                $text = $noteService->extractTextFromTextFile($this->filePath);
             } elseif (in_array($this->extension, ['ppt', 'pptx'])) {
-                try {
-                    $phpPresentation = PresentationIOFactory::load($fullPath);
-                    foreach ($phpPresentation->getAllSlides() as $slide) {
-                        foreach ($slide->getShapeCollection() as $shape) {
-                            if ($shape instanceof \PhpOffice\PhpPresentation\Shape\RichText) {
-                                foreach ($shape->getParagraphs() as $paragraph) {
-                                    foreach ($paragraph->getRichTextElements() as $element) {
-                                        if ($element instanceof \PhpOffice\PhpPresentation\Shape\RichText\TextElement) {
-                                            $text .= $element->getText() . "\n";
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } catch (\TypeError $e) {
-                    // Handle PhpOffice type errors by falling back to basic text extraction
-                    Log::warning("PowerPoint processing failed with type error, attempting alternative extraction: " . $e->getMessage());
-                    
-                    // Try to extract text using a more robust approach
-                    try {
-                        $zip = new \ZipArchive();
-                        if ($zip->open($fullPath) === TRUE) {
-                            for ($i = 0; $i < $zip->numFiles; $i++) {
-                                $filename = $zip->getNameIndex($i);
-                                if (strpos($filename, 'ppt/slides/slide') !== false && strpos($filename, '.xml') !== false) {
-                                    $slideContent = $zip->getFromIndex($i);
-                                    if ($slideContent) {
-                                        $xml = simplexml_load_string($slideContent);
-                                        if ($xml) {
-                                            $xml->registerXPathNamespace('a', 'http://schemas.openxmlformats.org/drawingml/2006/main');
-                                            $textElements = $xml->xpath('//a:t');
-                                            foreach ($textElements as $textElement) {
-                                                $text .= (string)$textElement . "\n";
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            $zip->close();
-                        }
-                    } catch (\Exception $fallbackException) {
-                        Log::error("PowerPoint fallback extraction also failed: " . $fallbackException->getMessage());
-                        throw new \Exception("Unable to process PowerPoint file: " . $e->getMessage());
-                    }
-                }
+                $text = $noteService->extractTextFromPowerPoint($fullPath);
             } else {
                 // Handle DOC and DOCX files
-                $phpWord = \PhpOffice\PhpWord\IOFactory::load($fullPath);
-                foreach ($phpWord->getSections() as $section) {
-                    foreach ($section->getElements() as $element) {
-                        if (method_exists($element, 'getText')) {
-                            $text .= $element->getText() . "\n";
-                        }
-                    }
-                }
+                $text = $noteService->extractTextFromWord($fullPath);
             }
+
+
+            Log::error(print_r($text, true));
 
             $language = $this->validatedData['language'] ?? null;
             $studyNote = $deepseekService->createStudyNote($text, $language);
@@ -131,7 +81,7 @@ class ProcessPdfNote implements ShouldQueue
             $media = $note->addMediaFromDisk($this->filePath, 'public')
                 ->toMediaCollection($mediaCollection);
 
-            Log::error(print_r($studyNote, true));
+            Log::info("Extracted text length: " . strlen($text) . " characters");
 
             $noteData = array_merge($this->validatedData, [
                 'content' => $studyNote['study_note']['content'],

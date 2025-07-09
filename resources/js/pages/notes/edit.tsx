@@ -569,7 +569,7 @@ export default function Edit({ note }: { note: Note }) {
         <AppLayout>
             {/* Feedback Modal - Bottom Right Corner */}
             {feedbackModalOpen && (
-                <div className="fixed bottom-4 right-4 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 max-w-sm">
+                <div className="fixed bottom-4 right-4 z-50 bg-white dark:bg-black/5 border border-gray-200 dark:border-zinc-700 rounded-lg shadow-lg p-4 max-w-sm">
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
                             <h3 className="text-sm font-medium text-gray-900 dark:text-white">{t('feedback_modal_title')}</h3>
@@ -588,7 +588,7 @@ export default function Edit({ note }: { note: Note }) {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleSubmitFeedback(true)}
-                                className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-600/5"
                             >
                                 <ThumbsUp className="h-4 w-4" />
                                 {t('yes')}
@@ -602,7 +602,7 @@ export default function Edit({ note }: { note: Note }) {
                                     // You can add a separate modal for detailed feedback if needed
                                     handleSubmitFeedback(false);
                                 }}
-                                className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-600/5"
                             >
                                 <ThumbsDown className="h-4 w-4" />
                                 {t('no')}
@@ -793,7 +793,7 @@ export default function Edit({ note }: { note: Note }) {
                                         {actions.map((action, index) => {
                                             const IconComponent = action.icon;
                                             return (
-                                                <Card key={index} className={` py-2 transition-all duration-200 cursor-pointer hover:shadow-md word-break ${action.color}`}>
+                                                <Card key={index} className={` py-2 transition-all duration-300 cursor-pointer hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1 word-break ${action.color}`}>
                                                     <CardContent className="p-2 sm:p-3 md:p-1">
                                                         <Button
                                                             variant="ghost"

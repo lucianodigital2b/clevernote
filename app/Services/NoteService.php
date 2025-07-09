@@ -31,6 +31,189 @@ class NoteService
             throw new \RuntimeException('Failed to process PDF file: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Extract text from PowerPoint files (PPT/PPTX)
+     */
+    public function extractTextFromPowerPoint($fullPath)
+    {
+        if (empty($fullPath)) {
+            throw new \InvalidArgumentException('PowerPoint file path is required');
+        }
+
+        try {
+            // Try PhpOffice first
+            $phpPresentation = \PhpOffice\PhpPresentation\IOFactory::load($fullPath);
+            $text = '';
+            
+            foreach ($phpPresentation->getAllSlides() as $slide) {
+                foreach ($slide->getShapeCollection() as $shape) {
+                    if ($shape instanceof \PhpOffice\PhpPresentation\Shape\RichText) {
+                        foreach ($shape->getParagraphs() as $paragraph) {
+                            foreach ($paragraph->getRichTextElements() as $element) {
+                                if ($element instanceof \PhpOffice\PhpPresentation\Shape\RichText\TextElement) {
+                                    $text .= $element->getText() . "\n";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return $text;
+        } catch (\TypeError $e) {
+            \Log::warning("PowerPoint processing failed with type error, attempting alternative extraction: " . $e->getMessage());
+            return $this->extractTextFromPowerPointFallback($fullPath);
+        } catch (\Exception $e) {
+            \Log::warning("PowerPoint processing failed, attempting fallback extraction: " . $e->getMessage());
+            return $this->extractTextFromPowerPointFallback($fullPath);
+        }
+    }
+
+    /**
+     * Fallback method to extract text from PowerPoint using ZipArchive
+     */
+    private function extractTextFromPowerPointFallback($fullPath)
+    {
+        try {
+            $zip = new \ZipArchive();
+            $text = '';
+            
+            if ($zip->open($fullPath) === TRUE) {
+                // Extract from slides
+                for ($i = 0; $i < $zip->numFiles; $i++) {
+                    $filename = $zip->getNameIndex($i);
+                    
+                    // Process slide files
+                    if (preg_match('/ppt\/slides\/slide\d+\.xml$/', $filename)) {
+                        $slideContent = $zip->getFromIndex($i);
+                        if ($slideContent) {
+                            $text .= $this->extractTextFromSlideXml($slideContent);
+                        }
+                    }
+                    
+                    // Also check slide layouts and masters for additional text
+                    if (preg_match('/ppt\/(slideLayouts|slideMasters)\/.*\.xml$/', $filename)) {
+                        $slideContent = $zip->getFromIndex($i);
+                        if ($slideContent) {
+                            $text .= $this->extractTextFromSlideXml($slideContent);
+                        }
+                    }
+                }
+                $zip->close();
+            }
+            
+            if (empty(trim($text))) {
+                throw new \RuntimeException('Could not extract text from PowerPoint file');
+            }
+            
+            return $text;
+        } catch (\Exception $e) {
+            throw new \RuntimeException('Failed to process PowerPoint file: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Extract text from slide XML content
+     */
+    private function extractTextFromSlideXml($xmlContent)
+    {
+        $text = '';
+        
+        try {
+            // Suppress XML errors and use internal error handling
+            libxml_use_internal_errors(true);
+            
+            $xml = simplexml_load_string($xmlContent);
+            if ($xml === false) {
+                return '';
+            }
+            
+            // Register namespaces
+            $xml->registerXPathNamespace('a', 'http://schemas.openxmlformats.org/drawingml/2006/main');
+            $xml->registerXPathNamespace('p', 'http://schemas.openxmlformats.org/presentationml/2006/main');
+            
+            // Extract text from various elements
+            $textElements = $xml->xpath('//a:t');
+            if ($textElements) {
+                foreach ($textElements as $textElement) {
+                    $elementText = trim((string)$textElement);
+                    if (!empty($elementText)) {
+                        $text .= $elementText . " ";
+                    }
+                }
+            }
+            
+            // Also try to get text from paragraph elements
+            $paragraphs = $xml->xpath('//a:p');
+            if ($paragraphs) {
+                foreach ($paragraphs as $paragraph) {
+                    $pText = trim((string)$paragraph);
+                    if (!empty($pText)) {
+                        $text .= $pText . "\n";
+                    }
+                }
+            }
+            
+        } catch (\Exception $e) {
+            \Log::debug("Error parsing slide XML: " . $e->getMessage());
+        }
+        
+        return $text;
+    }
+
+    /**
+     * Extract text from Word documents (DOC/DOCX)
+     */
+    public function extractTextFromWord($fullPath)
+    {
+        if (empty($fullPath)) {
+            throw new \InvalidArgumentException('Word document path is required');
+        }
+
+        try {
+            $phpWord = \PhpOffice\PhpWord\IOFactory::load($fullPath);
+            $text = '';
+            
+            foreach ($phpWord->getSections() as $section) {
+                foreach ($section->getElements() as $element) {
+                    if (method_exists($element, 'getText')) {
+                        $text .= $element->getText() . "\n";
+                    }
+                }
+            }
+            
+            if (empty(trim($text))) {
+                throw new \RuntimeException('Could not extract text from Word document');
+            }
+            
+            return $text;
+        } catch (\Exception $e) {
+            throw new \RuntimeException('Failed to process Word document: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Extract text from text files
+     */
+    public function extractTextFromTextFile($path)
+    {
+        if (empty($path)) {
+            throw new \InvalidArgumentException('Text file path is required');
+        }
+
+        try {
+            $text = \Storage::disk('public')->get($path);
+            
+            if (empty(trim($text))) {
+                throw new \RuntimeException('Text file is empty or could not be read');
+            }
+            
+            return $text;
+        } catch (\Exception $e) {
+            throw new \RuntimeException('Failed to read text file: ' . $e->getMessage());
+        }
+    }
     
     /**
      * Get paginated notes for a user
