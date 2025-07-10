@@ -73,6 +73,8 @@
   "quiz_questions_count": "{{count}} perguntas",
   "quiz_test_knowledge": "Teste seus conhecimentos e acompanhe seu progresso",
   "quiz_based_on_note": "Este questionário é baseado em sua nota",
+  "public_sharing": "Compartilhar",
+  "copy_link": "Copiar link",
   "quiz_completed": "Questionário concluído! Pontuação: {{score}}/{{total}}",
   "quiz_save_error": "Falha ao salvar a tentativa do questionário",
   "quiz_start": "Iniciar Questionário",

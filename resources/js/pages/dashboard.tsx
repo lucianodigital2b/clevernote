@@ -169,7 +169,7 @@ export default function Dashboard() {
                     
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         <div 
-                            className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 hover:shadow-md transition-shadow cursor-pointer"
+                            className="bg-white dark:bg-neutral-800 rounded-2xl p-4 shadow-sm border border-neutral-200 dark:border-transparent hover:shadow-md transition-shadow cursor-pointer"
                             onClick={() => handleNewNote(() => setIsUploadAudioModalOpen(true))}
                         >
                             <div className="flex items-center gap-3">
@@ -181,7 +181,7 @@ export default function Dashboard() {
                         </div>
 
                         <div 
-                            className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 hover:shadow-md transition-shadow cursor-pointer"
+                            className="bg-white dark:bg-neutral-800 rounded-2xl p-4 shadow-sm border border-neutral-200 dark:border-transparent hover:shadow-md transition-shadow cursor-pointer"
                             onClick={() => handleNewNote(() => setIsRecordModalOpen(true))}
                         >
                             <div className="flex items-center gap-3">
@@ -193,7 +193,7 @@ export default function Dashboard() {
                         </div>
                         
                         <div 
-                            className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 hover:shadow-md transition-shadow cursor-pointer"
+                            className="bg-white dark:bg-neutral-800 rounded-2xl p-4 shadow-sm border border-neutral-200 dark:border-transparent hover:shadow-md transition-shadow cursor-pointer"
                             onClick={() => handleNewNote(() => setIsWebLinkModalOpen(true))}
                         >
                             <div className="flex items-center gap-3">
@@ -207,7 +207,7 @@ export default function Dashboard() {
                         </div>
                         
                         <div 
-                            className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 hover:shadow-md transition-shadow cursor-pointer"
+                            className="bg-white dark:bg-neutral-800 rounded-2xl p-4 shadow-sm border border-neutral-200 dark:border-transparent hover:shadow-md transition-shadow cursor-pointer"
                             onClick={() => handleNewNote(() => setIsPdfModalOpen(true))}
                         >
                             <div className="flex items-center gap-3">
@@ -242,7 +242,7 @@ export default function Dashboard() {
                                 <h2 className="text-xl font-semibold mb-4">{t('New note')}</h2>
                                 <div className="space-y-4">
                                     <div 
-                                        className="flex items-center gap-3 p-4 bg-neutral-100 dark:bg-neutral-700 rounded-xl cursor-pointer"
+                                        className="flex items-center gap-3 p-4 bg-neutral-100 dark:bg-neutral-700 rounded-2xl cursor-pointer"
                                         onClick={() => {
                                             setIsBottomSheetOpen(false);
                                             handleNewNote(() => setIsUploadAudioModalOpen(true));
@@ -254,7 +254,7 @@ export default function Dashboard() {
                                         <span className="font-medium">{t('Upload audio')}</span>
                                     </div>
                                     <div 
-                                        className="flex items-center gap-3 p-4 bg-neutral-100 dark:bg-neutral-700 rounded-xl cursor-pointer"
+                                        className="flex items-center gap-3 p-4 bg-neutral-100 dark:bg-neutral-700 rounded-2xl cursor-pointer"
                                         onClick={() => {
                                             setIsBottomSheetOpen(false);
                                             handleNewNote(() => setIsRecordModalOpen(true));
@@ -266,7 +266,7 @@ export default function Dashboard() {
                                         <span className="font-medium">{t('Record audio')}</span>
                                     </div>
                                     <div 
-                                        className="flex items-center gap-3 p-4 bg-neutral-100 dark:bg-neutral-700 rounded-xl cursor-pointer"
+                                        className="flex items-center gap-3 p-4 bg-neutral-100 dark:bg-neutral-700 rounded-2xl cursor-pointer"
                                         onClick={() => {
                                             setIsBottomSheetOpen(false);
                                             handleNewNote(() => setIsWebLinkModalOpen(true));
@@ -278,7 +278,7 @@ export default function Dashboard() {
                                         <span className="font-medium">{t('Youtube')}</span>
                                     </div>
                                     <div 
-                                        className="flex items-center gap-3 p-4 bg-neutral-100 dark:bg-neutral-700 rounded-xl cursor-pointer"
+                                        className="flex items-center gap-3 p-4 bg-neutral-100 dark:bg-neutral-700 rounded-2xl cursor-pointer"
                                         onClick={() => {
                                             setIsBottomSheetOpen(false);
                                             handleNewNote(() => setIsPdfModalOpen(true));
@@ -322,7 +322,7 @@ export default function Dashboard() {
                     {isLoadingNotes ? (
                         <div className="space-y-3">
                             {Array.from({ length: 5 }).map((_, index) => (
-                                <div key={index} className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700">
+                                <div key={index} className="bg-white dark:bg-neutral-800 rounded-2xl p-4 shadow-sm border border-neutral-200 dark:border-transparent">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <Skeleton className="h-9 w-9 rounded-full" />
@@ -353,7 +353,7 @@ export default function Dashboard() {
                         <>
                             <div className="space-y-3">
                                 {notes.map((note : Note) => (
-                                    <div key={note.id} className="bg-white dark:bg-neutral-800 rounded-xl p-4 shadow-sm border border-neutral-200 dark:border-neutral-700 hover:shadow-md transition-shadow">
+                                    <div key={note.id} className="bg-white dark:bg-neutral-800 rounded-2xl p-4 shadow-sm border border-neutral-200 dark:border-transparent hover:shadow-md transition-shadow">
                                         <Link href={`/notes/${note.id}/edit`} className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
                                                 {getIconComponent(note.icon)}
@@ -466,7 +466,7 @@ export default function Dashboard() {
             />
 
             {/* Study Plan Modal */}
-            {showStudyPlan && (
+            {/* {showStudyPlan && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
                     <div className="bg-white dark:bg-gray-900 rounded-lg w-full max-w-7xl max-h-[90vh] overflow-y-auto">
                         <div className="p-6">
@@ -478,7 +478,7 @@ export default function Dashboard() {
                         </div>
                     </div>
                 </div>
-            )}
+            )} */}
 
 
         </AppLayout>

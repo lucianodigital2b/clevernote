@@ -12,13 +12,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
-import { Share, MoreHorizontal, Maximize2, X, ArrowLeft, Save, Clock, CheckCircle2, Folder, Trash2, Sparkles, Brain, Map, FileText, Loader2, ChevronRight, Layers } from 'lucide-react';
+import { Share, MoreHorizontal, Maximize2, X, ArrowLeft, Save, Clock, CheckCircle2, Folder, Trash2, Sparkles, Brain, Map, FileText, Loader2, ChevronRight, Layers, Copy } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -110,6 +111,7 @@ export default function Edit({ note }: { note: Note }) {
         router.patch(`/notes/${note.id}`, {
             content,
             folder_id: selectedFolder,
+            is_public: isPublic,
             _method: 'PUT'
         }, {
             preserveScroll: true,
@@ -129,6 +131,23 @@ export default function Edit({ note }: { note: Note }) {
         setIsFolderModalOpen(false);
         handleUpdate();
     };
+
+    const handleCopyPublicLink = async () => {
+        if (!note.uuid) {
+            toastConfig.error('Note UUID not available');
+            return;
+        }
+        
+        const publicUrl = `${window.location.origin}/notes/${note.uuid}/public`;
+        
+        try {
+            await navigator.clipboard.writeText(publicUrl);
+            toastConfig.success('Public link copied to clipboard');
+        } catch (error) {
+            console.error('Failed to copy to clipboard:', error);
+            toastConfig.error('Failed to copy link to clipboard');
+        }
+     };
 
     // Add this function near your other handlers
     const handleRetryProcessing = async () => {
@@ -221,6 +240,7 @@ export default function Edit({ note }: { note: Note }) {
     const [selectedFolder, setSelectedFolder] = useState(note.folder_id || null);
     const [folders, setFolders] = useState<Array<{id: number; name: string}>>([]);
     const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
+    const [isPublic, setIsPublic] = useState(note.is_public || false);
     
     useEffect(() => {
         if (isFolderModalOpen) {
@@ -692,6 +712,27 @@ export default function Edit({ note }: { note: Note }) {
                                     <Folder className="h-4 w-4" />
                                     <span className="hidden sm:inline">{t('folder')}</span>
                                 </Button>
+                                
+                                <div className="flex items-center gap-2">
+                                    <label className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                                        <Switch
+                                            checked={isPublic}
+                                            onCheckedChange={setIsPublic}
+                                        />
+                                        {t('public_sharing')}
+                                    </label>
+                                    {isPublic && (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handleCopyPublicLink}
+                                            className="flex items-center gap-1 text-xs"
+                                        >
+                                            <Copy className="w-3 h-3" />
+                                            {t('copy_link')}
+                                        </Button>
+                                    )}
+                                </div>
                                 
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>

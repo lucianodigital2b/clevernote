@@ -198,6 +198,8 @@
   "quiz_completed": "Quiz completed! Score: {{score}}/{{total}}",
   "quiz_save_error": "Failed to save quiz attempt",
   "quiz_based_on_note": "This quiz is based on your note",
+  "public_sharing": "Public sharing",
+  "copy_link": "Copy link",
   "quiz_questions_count": "{{count}} questions",
   "quiz_test_knowledge": "Test your knowledge and track your progress",
   "quiz_start": "Start Quiz",

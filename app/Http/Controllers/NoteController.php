@@ -175,6 +175,27 @@ class NoteController extends Controller
     }
 
     /**
+     * Display a note by UUID for public sharing.
+     */
+    public function showByUuid(string $uuid, Request $request)
+    {
+        $note = Note::where('uuid', $uuid)->firstOrFail();
+
+        // Only show processed and public notes
+        if ($note->status !== 'processed' || !$note->is_public) {
+            abort(404, 'Note not found or not available for sharing.');
+        }
+
+        if($request->wantsJson()){
+            return $note->load(['tags', 'folder', 'media']);
+        }
+
+        return Inertia::render('notes/show', [
+            'note' => $note->load(['tags', 'folder'])
+        ]);
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Note $note)

@@ -25,6 +25,9 @@ Route::get('/', [App\Http\Controllers\WelcomeController::class, 'index'])->name(
 Route::get('/quizzes/{uuid}/public', [QuizSharingController::class, 'showByUuid'])->name('quizzes.public.show');
 Route::post('/quizzes/{uuid}/public/attempt', [QuizController::class, 'submitPublicAttempt'])->name('quizzes.public.attempt');
 
+// Public note routes (UUID-based)
+Route::get('/notes/{uuid}/public', [NoteController::class, 'showByUuid'])->name('notes.public.show');
+
 
 Route::middleware(['auth'])->group(function () {
     // Folder routes
