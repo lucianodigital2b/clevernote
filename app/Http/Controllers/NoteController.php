@@ -180,7 +180,6 @@ class NoteController extends Controller
     public function showByUuid(string $uuid, Request $request)
     {
         $note = Note::where('uuid', $uuid)->firstOrFail();
-
         // Only show processed and public notes
         if ($note->status !== 'processed' || !$note->is_public) {
             abort(404, 'Note not found or not available for sharing.');

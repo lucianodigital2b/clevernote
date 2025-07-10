@@ -31,6 +31,7 @@ class UpdateNoteRequest extends FormRequest
             'summary' => 'nullable|string', 
             'is_pinned' => 'nullable|integer', 
             'language' => 'nullable|string',
+            'is_public' => 'nullable|boolean',
 
         ];
     }

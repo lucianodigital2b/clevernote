@@ -718,7 +718,22 @@ export default function Edit({ note }: { note: Note }) {
                                     <label className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
                                         <Switch
                                             checked={isPublic}
-                                            onCheckedChange={setIsPublic}
+                                            onCheckedChange={(checked) => {
+                                                setIsPublic(checked);
+                                                // Update the note immediately when share is toggled
+                                                axios.patch(`/notes/${note.id}`, {
+                                                    content,
+                                                    folder_id: selectedFolder,
+                                                    is_public: checked,
+                                                    _method: 'PUT'
+                                                })
+                                                .then(() => {
+                                                })
+                                                .catch((error) => {
+                                                    console.log(error);
+                                                    setIsPublic(!checked); // Revert the state on error
+                                                });
+                                            }}
                                         />
                                         {t('public_sharing')}
                                     </label>
