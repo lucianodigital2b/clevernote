@@ -7,14 +7,14 @@ type LoadingType = 'flashcard' | 'quiz' | 'mindmap';
 interface LoadingModalProps {
   open: boolean;
   type: LoadingType;
+  title?: string;
+  description?: string;
   onOpenChange?: (open: boolean) => void;
 }
 
 const loadingConfig = {
   flashcard: {
     icon: FileText,
-    title: 'Creating Flashcards',
-    description: 'AI is analyzing your note to create study cards',
     colors: {
       border: 'border-blue-200',
       borderTop: 'border-t-blue-600',
@@ -23,8 +23,6 @@ const loadingConfig = {
   },
   quiz: {
     icon: Brain,
-    title: 'Generating Quiz',
-    description: 'Creating intelligent questions from your content',
     colors: {
       border: 'border-green-200',
       borderTop: 'border-t-green-600',
@@ -33,8 +31,6 @@ const loadingConfig = {
   },
   mindmap: {
     icon: Map,
-    title: 'Building Mindmap',
-    description: 'Mapping concepts and connections visually',
     colors: {
       border: 'border-purple-200',
       borderTop: 'border-t-purple-600',
@@ -43,7 +39,7 @@ const loadingConfig = {
   }
 };
 
-export function LoadingModal({ open, type, onOpenChange }: LoadingModalProps) {
+export function LoadingModal({ open, type, title, description, onOpenChange }: LoadingModalProps) {
   const config = loadingConfig[type];
   const Icon = config.icon;
 
@@ -59,10 +55,10 @@ export function LoadingModal({ open, type, onOpenChange }: LoadingModalProps) {
           </div>
           <div className="text-center">
             <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-              {config.title}
+              {title}
             </h3>
             <p className="text-neutral-600 dark:text-neutral-400">
-              {config.description}
+              {description}
             </p>
           </div>
         </div>

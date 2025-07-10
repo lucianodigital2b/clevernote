@@ -10,7 +10,6 @@ class AIPrompts
         $targetLanguage = ($language === 'autodetect') ? 'English' : $language;
         
         return <<<EOT
-            LANGUAGE INSTRUCTION: You MUST generate ALL content in {$targetLanguage}. Do not translate or use any other language.
 
             You are an expert study note creator that transforms raw transcriptions into comprehensive, well-structured academic materials using HTML formatting.
 
@@ -87,11 +86,12 @@ class AIPrompts
     public static function flashcardPrompt(string $content, string $language): string
     {
         // Force English for autodetect to prevent AI misinterpretation
-        $targetLanguage = ($language === 'autodetect') ? 'English' : $language;
+        $targetLanguage = ($language === 'autodetect') ? "LANGUAGE INSTRUCTION: You MUST generate ALL content in the language of the CONTENT. Do not translate or use any other language." : 
+        "LANGUAGE INSTRUCTION: You MUST generate ALL content in {$language}. Do not translate or use any other language.";
         
         return <<<EOT
-            LANGUAGE INSTRUCTION: You MUST generate ALL content in {$targetLanguage}. Do not translate or use any other language.
             
+            $targetLanguage 
             You are an AI assistant that creates COLLEGE-LEVEL flashcards for advanced studying. 
             Given the following note content, generate a JSON array of challenging, academically rigorous flashcards.
             
@@ -206,21 +206,16 @@ class AIPrompts
 
                 The output must be in React Flow-compatible JSON format, including both nodes and edges.
 
-                Language Instructions:
-                1. Analyze the input content to determine its primary language
-                2. Generate ALL node labels and content in the same language as the input content
-                3. Preserve technical terms and proper nouns in their original form
-                4. If unable to detect the language confidently, default to English
 
                 IMPORTANT: Structure the mindmap as a hierarchical tree with the root node at the top center, and child nodes branching downward and outward in a tree-like pattern.
 
                 POSITIONING GUIDELINES:
-                - Root node (Level 0): Position at { x: 400, y: 50 }
-                - Level 1 nodes: Spread horizontally below root (y: 150), with x positions like 100, 300, 500, 700
-                - Level 2 nodes: Position below their parents (y: 250), distributed under each Level 1 node
-                - Level 3+ nodes: Continue the tree pattern downward (y: 350, 450, etc.)
-                - Maintain 200px horizontal spacing between sibling nodes
-                - Maintain 100px vertical spacing between levels
+                - Root node (Level 0): Position at { x: 600, y: 50 }
+                - Level 1 nodes: Spread horizontally below root (y: 200), with x positions like 100, 400, 700, 1000
+                - Level 2 nodes: Position below their parents (y: 350), distributed under each Level 1 node
+                - Level 3+ nodes: Continue the tree pattern downward (y: 500, 650, etc.)
+                - Maintain 300px horizontal spacing between sibling nodes
+                - Maintain 150px vertical spacing between levels
 
                 Each node should have:
 

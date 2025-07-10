@@ -119,7 +119,7 @@ export function UploadPdfModal({ open, onOpenChange, folders }: UploadPdfModalPr
                         onClick={handleSubmit}
                         disabled={!pdfFile || isUploading}
                     >
-                        {isUploading ? t('modal_creating') : t('modal_create_note')}
+                        {isUploading ? t('Creating...') : t('modal_create_note')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

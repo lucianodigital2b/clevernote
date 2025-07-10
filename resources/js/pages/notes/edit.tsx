@@ -333,7 +333,7 @@ export default function Edit({ note }: { note: Note }) {
                 const intervalId = setInterval(async () => {
                     try {
                         const mindmapResponse = await axios.get(`/api/mindmaps/${mindmapId}/status`);
-                        const mindmapData = mindmapResponse.data.mindmap;
+                        const mindmapData = mindmapResponse.data;
                         
                         if (mindmapData.status === 'completed') {
                             clearInterval(intervalId);
@@ -347,6 +347,7 @@ export default function Edit({ note }: { note: Note }) {
                         }
                         // Continue polling if status is 'generating' or 'pending'
                     } catch (error) {
+                        console.log(error)
                         clearInterval(intervalId);
                         setIsMindmapLoading(false);
                         toastConfig.error("Failed to check mindmap generation status");
@@ -1013,9 +1014,25 @@ export default function Edit({ note }: { note: Note }) {
             </AlertDialog>
             
             {/* Loading Modals */}
-            <LoadingModal open={isFlashcardModalOpen} type="flashcard" />
-            <LoadingModal open={isQuizModalOpen} type="quiz" />
-            <LoadingModal open={isMindmapLoading} type="mindmap" onOpenChange={setIsMindmapLoading} />
+            <LoadingModal 
+                open={isFlashcardModalOpen} 
+                type="flashcard" 
+                title={t('loading_modal_creating_flashcards')}
+                description={t('loading_modal_flashcard_description')}
+            />
+            <LoadingModal 
+                open={isQuizModalOpen} 
+                type="quiz" 
+                title={t('loading_modal_generating_quiz')}
+                description={t('loading_modal_quiz_description')}
+            />
+            <LoadingModal 
+                open={isMindmapLoading} 
+                type="mindmap" 
+                title={t('loading_modal_building_mindmap')}
+                description={t('loading_modal_mindmap_description')}
+                onOpenChange={setIsMindmapLoading} 
+            />
 
                   
         </AppLayout>

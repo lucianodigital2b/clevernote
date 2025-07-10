@@ -99,6 +99,7 @@ class ProcessPdfNote implements ShouldQueue
             Log::error("Failed to process PDF/Doc note: " . $e->getMessage());
             $note->update([
                 'status' => 'failed',
+                'failure_reeason' => $e->getMessage()
             ]);
             
             // Clean up the temporary file on failure as well

@@ -544,6 +544,12 @@
   "upload_audio_modal_audio": "Audio",
   "upload_audio_modal_select_language": "Seleccionar idioma del audio",
   "upload_audio_modal_uploading": "Subiendo audio...",
-  "upload_audio_modal_transcribing": "Transcribiendo audio..."
+  "upload_audio_modal_transcribing": "Transcribiendo audio...",
+  "loading_modal_creating_flashcards": "Creando Tarjetas de Memoria",
+  "loading_modal_flashcard_description": "La IA está analizando tu nota para crear tarjetas de estudio",
+  "loading_modal_generating_quiz": "Generando Cuestionario",
+  "loading_modal_quiz_description": "Creando preguntas inteligentes a partir de tu contenido",
+  "loading_modal_building_mindmap": "Construyendo Mapa Mental",
+  "loading_modal_mindmap_description": "Mapeando conceptos y conexiones visualmente"
 
 }

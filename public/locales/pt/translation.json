@@ -518,6 +518,12 @@
   "web_link_modal_create_note": "Criar Nota",
   "web_link_modal_video_not_found": "Vídeo não encontrado",
   "web_link_modal_failed_fetch_video_info": "Falha ao buscar informações do vídeo",
-  "web_link_modal_failed_validate_video": "Falha ao validar vídeo. Por favor, verifique a URL e tente novamente."
+  "web_link_modal_failed_validate_video": "Falha ao validar vídeo. Por favor, verifique a URL e tente novamente.",
+  "loading_modal_creating_flashcards": "Criando Cartões de Memória",
+  "loading_modal_flashcard_description": "A IA está analisando sua nota para criar cartões de estudo",
+  "loading_modal_generating_quiz": "Gerando Questionário",
+  "loading_modal_quiz_description": "Criando perguntas inteligentes a partir do seu conteúdo",
+  "loading_modal_building_mindmap": "Construindo Mapa Mental",
+  "loading_modal_mindmap_description": "Mapeando conceitos e conexões visualmente"
 
 }
