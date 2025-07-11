@@ -94,7 +94,7 @@ export default function Show({ note }: ShowProps) {
                 <>
                     <button
                         onClick={() => setTocOpen(!tocOpen)}
-                        className="fixed top-20 right-6 z-40 p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg border-0 border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-200"
+                        className="fixed top-20 right-6 z-40 p-3 bg-white dark:bg-gray-950 rounded-full shadow-lg border-0 border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-200"
                         aria-label="Toggle Table of Contents"
                     >
                         {tocOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -127,14 +127,9 @@ export default function Show({ note }: ShowProps) {
             <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-black dark:to-gray-800">
                 <div className="max-w-4xl mx-auto px-4 py-8">
                     {/* Enhanced Header with Gradient */}
-                    <div className="relative mb-12 p-8 rounded-2xl bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-indigo-500/5 to-purple-500/5 rounded-2xl"></div>
+                    <div className="relative mb-12 p-8 rounded-2xl bg-black/50 border border-gray-200 dark:border-gray-700 shadow-lg">
+                        <div className="absolute inset-0 rounded-2xl"></div>
                         <div className="relative">
-                            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
-                                <span className="font-medium">CleverNote</span>
-                                <span>•</span>
-                                <span>{t('public_note')}</span>
-                            </div>
                             
                             <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-100 dark:to-white bg-clip-text text-transparent mb-6 leading-tight">
                                 {note.title}
@@ -183,7 +178,7 @@ export default function Show({ note }: ShowProps) {
                     
                     {/* Enhanced Audio Player */}
                     {audioFiles.length > 0 && (
-                        <Card className="mb-10 shadow-xl border-0 bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
+                        <Card className="mb-10 shadow-xl border-0 bg-gradient-to-r from-white to-gray-50 ">
                             <CardContent className="p-8">
                                 <h3 className="text-xl font-bold mb-6 text-gray-900 dark:text-white">{t('audio_recording')}</h3>
                                 {audioFiles.map((audio, index) => (
@@ -203,10 +198,10 @@ export default function Show({ note }: ShowProps) {
                     )}
                     
                     {/* Enhanced Note Content */}
-                    <Card className="shadow-2xl border-0 bg-white dark:bg-gray-900 overflow-hidden">
+                    <Card className="shadow-2xl border-0 bg-white  overflow-hidden">
                         <CardContent className="p-10 md:p-12" ref={contentRef}>
                             <div 
-                                className="prose prose-xl max-w-none dark:prose-invert prose-headings:font-bold prose-h1:text-4xl prose-h1:mb-8 prose-h1:mt-12 prose-h2:text-3xl prose-h2:mb-6 prose-h2:mt-10 prose-h3:text-2xl prose-h3:mb-4 prose-h3:mt-8 prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:text-lg prose-p:leading-relaxed prose-p:mb-6 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:font-medium prose-strong:text-gray-900 dark:prose-strong:text-white prose-strong:font-bold prose-code:text-gray-800 dark:prose-code:text-gray-200 prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800 prose-pre:p-6 prose-pre:rounded-xl prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 dark:prose-blockquote:bg-blue-900/20 prose-blockquote:p-6 prose-blockquote:rounded-r-xl prose-ul:space-y-2 prose-ol:space-y-2 prose-li:text-gray-700 dark:prose-li:text-gray-300"
+                                className="tiptap prose prose-xl max-w-none dark:prose-invert prose-headings:font-bold prose-h1:text-4xl prose-h1:mb-8 prose-h1:mt-12 prose-h2:text-3xl prose-h2:mb-6 prose-h2:mt-10 prose-h3:text-2xl prose-h3:mb-4 prose-h3:mt-8 prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:text-lg prose-p:leading-relaxed prose-p:mb-6 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:font-medium prose-strong:text-gray-900 dark:prose-strong:text-white prose-strong:font-bold prose-code:text-gray-800 dark:prose-code:text-gray-200 prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800 prose-pre:p-6 prose-pre:rounded-xl prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 dark:prose-blockquote:bg-blue-900/20 prose-blockquote:p-6 prose-blockquote:rounded-r-xl prose-ul:space-y-2 prose-ol:space-y-2 prose-li:text-gray-700 dark:prose-li:text-gray-300 "
                                 dangerouslySetInnerHTML={{ 
                                     __html: (note.content || '').replace(
                                         /<(h[1-6])([^>]*)>/g, 
@@ -219,19 +214,6 @@ export default function Show({ note }: ShowProps) {
                             />
                         </CardContent>
                     </Card>
-                    
-
-                    
-                    {/* Enhanced Footer */}
-                    <div className="mt-16 pt-12 border-t border-gray-200 dark:border-gray-700">
-                        <div className="text-center">
-                            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 rounded-full border border-gray-200 dark:border-gray-600 mb-4">
-                                <span className="text-sm text-gray-600 dark:text-gray-300">{t('powered_by')}</span>
-                                <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Clevernote</span>
-                            </div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{t('create_your_own_notes')}</p>
-                        </div>
-                    </div>
                 </div>
             </div>
         </>
