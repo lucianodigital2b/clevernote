@@ -155,12 +155,12 @@ export default function Dashboard() {
             <Head title={t('Dashboard')} />
             <div className="flex sm:flex-start h-full flex-1 flex-col gap-6 p-6 max-w-7xl mx-auto w-full relative">
                 {/* Study Plan Section */}
-                {user.study_plan && (
+                {/* {user.study_plan && (
                     <StudyPlanPreview 
                         user={user} 
                         onViewStudyPlan={() => setShowStudyPlan(true)} 
                     />
-                )}
+                )} */}
 
                 {/* New Note Section - Desktop */}
                 <section className="hidden md:block">

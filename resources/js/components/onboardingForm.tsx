@@ -17,6 +17,7 @@ export default function OnboardingForm({ onClose, onComplete }: { onClose?: () =
     const { data, setData, post, processing, errors } = useForm({
         preferred_language: 'en',
         discovery_source: '',
+        discovery_source_other: '',
         primary_subject_interest: '',
         study_experience: '',
         study_methods: [],
@@ -90,10 +91,43 @@ export default function OnboardingForm({ onClose, onComplete }: { onClose?: () =
         }));
     };
 
+    const isStepValid = (currentStep: number): boolean => {
+        switch (currentStep) {
+            case 1:
+                return !!data.preferred_language;
+            case 2:
+                const hasDiscoverySource = !!data.discovery_source;
+                const hasSubjectInterest = !!data.primary_subject_interest;
+                // If 'other' is selected, ensure the text input is not empty
+                const isOtherValid = data.discovery_source === 'other' ? (data.discovery_source_other?.trim()?.length > 0) : true;
+                return hasDiscoverySource && hasSubjectInterest && isOtherValid;
+            case 3:
+                return !!surveyAnswers['study-experience'];
+            case 4:
+                return surveyAnswers['study-methods']?.length > 0;
+            case 5:
+                return !!surveyAnswers['goals'];
+            case 6:
+                return !!surveyAnswers['study-frequency'];
+            default:
+                return true;
+        }
+    };
+
     const handleSubmit = (e: any) => {
         e.preventDefault();
+        
         if (step !== 6) {
+            if (!isStepValid(step)) {
+                toast.error(t('please_answer_required_questions'));
+                return;
+            }
             nextStep();
+            return;
+        }
+
+        if (!isStepValid(step)) {
+            toast.error(t('please_answer_required_questions'));
             return;
         }
 
@@ -145,7 +179,7 @@ export default function OnboardingForm({ onClose, onComplete }: { onClose?: () =
                         <div className="space-y-6 sm:space-y-8 py-4">
                             <h2 className="text-xl sm:text-2xl font-bold text-center" translate="yes">{t('onboarding_language_title')}</h2>
                             <div className="space-y-4">
-                                <Label htmlFor="preferred_language" translate="yes" className="text-base sm:text-lg font-medium">{t('onboarding_language_select')}</Label>
+                                <Label htmlFor="preferred_language" translate="yes" className="text-base sm:text-lg font-medium">{t('onboarding_language_select')} <span className="text-red-500">*</span></Label>
                                 <Select 
                                     value={data.preferred_language}
                                     onValueChange={(value) => setData('preferred_language', value)}
@@ -169,7 +203,7 @@ export default function OnboardingForm({ onClose, onComplete }: { onClose?: () =
                         <div className="space-y-6 sm:space-y-8 py-4">
                             <h2 className="text-xl sm:text-2xl font-bold text-center" translate="yes">{t('onboarding_about_title')}</h2>
                             <div className="space-y-6">
-                                <Label className='mb-4 sm:mb-6 text-base sm:text-lg font-medium' translate="yes">{t('onboarding_discovery_question')}</Label>
+                                <Label className='mb-4 sm:mb-6 text-base sm:text-lg font-medium' translate="yes">{t('onboarding_discovery_question')} <span className="text-red-500">*</span></Label>
                                 <div className="space-y-4">
                                     {[
                                         { id: 'tiktok', text: t('onboarding_source_tiktok'), icon: '📱' },
@@ -198,14 +232,14 @@ export default function OnboardingForm({ onClose, onComplete }: { onClose?: () =
                                     <Input
                                         className="mt-4 h-12 text-base"
                                         placeholder={t('onboarding_source_other_placeholder')}
-                                        value={data.discovery_source === 'other' ? data.discovery_source : ''}
-                                        onChange={(e) => setData('discovery_source', e.target.value)}
+                                        value={data.discovery_source_other}
+                                        onChange={(e) => setData('discovery_source_other', e.target.value)}
                                         translate="yes"
                                     />
                                 )}
                             </div>
                             <div className="space-y-4">
-                                <Label htmlFor="primary_subject_interest" translate="yes" className="text-base sm:text-lg font-medium">{t('onboarding_subject_interest')}</Label>
+                                <Label htmlFor="primary_subject_interest" translate="yes" className="text-base sm:text-lg font-medium">{t('onboarding_subject_interest')} <span className="text-red-500">*</span></Label>
                                 <Input
                                     id="primary_subject_interest"
                                     value={data.primary_subject_interest}
@@ -222,7 +256,7 @@ export default function OnboardingForm({ onClose, onComplete }: { onClose?: () =
 
                     {step === 3 && (
                         <div className="space-y-6 sm:space-y-8 py-4">
-                            <h2 className="text-xl sm:text-2xl font-bold text-center" translate="yes">{surveyData[0].question}</h2>
+                            <h2 className="text-xl sm:text-2xl font-bold text-center" translate="yes">{surveyData[0].question} <span className="text-red-500">*</span></h2>
                             <div className="space-y-4">
                                 {surveyData[0].options.map((option) => (
                                     <div
@@ -246,7 +280,7 @@ export default function OnboardingForm({ onClose, onComplete }: { onClose?: () =
 
                     {step === 4 && (
                         <div className="space-y-6 sm:space-y-8 py-4">
-                            <h2 className="text-xl sm:text-2xl font-bold text-center" translate="yes">{surveyData[1].question}</h2>
+                            <h2 className="text-xl sm:text-2xl font-bold text-center" translate="yes">{surveyData[1].question} <span className="text-red-500">*</span></h2>
                             {surveyData[1].description && (
                                 <p className="text-center text-gray-600 dark:text-gray-400">{surveyData[1].description}</p>
                             )}
@@ -289,7 +323,7 @@ export default function OnboardingForm({ onClose, onComplete }: { onClose?: () =
 
                     {step === 5 && (
                         <div className="space-y-6 sm:space-y-8 py-4">
-                            <h2 className="text-xl sm:text-2xl font-bold text-center" translate="yes">{surveyData[2].question}</h2>
+                            <h2 className="text-xl sm:text-2xl font-bold text-center" translate="yes">{surveyData[2].question} <span className="text-red-500">*</span></h2>
                             <div className="space-y-4">
                                 {surveyData[2].options.map((option) => (
                                     <div
@@ -313,7 +347,7 @@ export default function OnboardingForm({ onClose, onComplete }: { onClose?: () =
 
                     {step === 6 && (
                         <div className="space-y-6 sm:space-y-8 py-4">
-                            <h2 className="text-xl sm:text-2xl font-bold text-center" translate="yes">{surveyData[3].question}</h2>
+                            <h2 className="text-xl sm:text-2xl font-bold text-center" translate="yes">{surveyData[3].question} <span className="text-red-500">*</span></h2>
                             <div className="space-y-4">
                                 {surveyData[3].options.map((option) => (
                                     <div
@@ -345,8 +379,8 @@ export default function OnboardingForm({ onClose, onComplete }: { onClose?: () =
                     )}
                     <Button 
                         type="submit" 
-                        className="ml-auto text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 bg-indigo-600 hover:bg-indigo-700" 
-                        disabled={processing}
+                        className="ml-auto text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed" 
+                        disabled={processing || !isStepValid(step)}
                         translate="yes"
                     >
                         {processing && step === 6 ? (
