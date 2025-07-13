@@ -550,6 +550,9 @@
   "loading_modal_generating_quiz": "Generando Cuestionario",
   "loading_modal_quiz_description": "Creando preguntas inteligentes a partir de tu contenido",
   "loading_modal_building_mindmap": "Construyendo Mapa Mental",
-  "loading_modal_mindmap_description": "Mapeando conceptos y conexiones visualmente"
+  "loading_modal_mindmap_description": "Mapeando conceptos y conexiones visualmente",
+  "study_streak_title": "Comece uma ofensiva",
+  "study_streak_subtitle": "Responda um bloco de questões por dia para começar sua ofensiva.",
+  "time_left_to_study": "Tempo restante para completar ofensiva"
 
 }

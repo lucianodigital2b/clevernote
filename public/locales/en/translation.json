@@ -600,6 +600,10 @@
   "upload_audio_modal_audio": "Audio",
   "upload_audio_modal_select_language": "Select audio language",
   "upload_audio_modal_uploading": "Uploading audio...",
-  "upload_audio_modal_transcribing": "Transcribing audio..."
+  "upload_audio_modal_transcribing": "Transcribing audio...",
+  "study_streak_title": "Study Streak",
+  "study_streak_subtitle": "Take a quiz or a set of flashcards a day to start your streak.",
+  "time_left_to_study": "Time left to study today"
+
 
 }

@@ -165,7 +165,7 @@ export default function Index({ quizzes, isLoading = false }: Props) {
 
                   <div className="flex justify-between items-center text-sm text-neutral-500">
                     <Button variant="outline" size="default" asChild className='dark:text-white w-full dark:border-1 dark:hover:border-gray-300'>
-                      <Link href={`/quizzes/${quiz.id}`} className="flex items-center gap-2">
+                      <Link href={`/quizzes/${quiz.id}/study`} className="flex items-center gap-2">
                         {t('Take Quiz')}
                         <PencilIcon className="h-4 w-4" />
                       </Link>

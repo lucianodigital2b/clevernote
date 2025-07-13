@@ -70,6 +70,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('quizzes')->group(function () {
         Route::post('/{quiz}/attempt', [QuizController::class, 'submitAttempt'])->name('quizzes.submit-attempt');
         Route::post('/generate-from-note/{note}', [QuizController::class, 'generateFromNote'])->name('quizzes.generate-from-note');
+        Route::get('/{quiz}/study', [QuizController::class, 'show']);
         
         // Quiz Sharing and Leaderboard routes
         Route::get('/shared', [QuizSharingController::class, 'index'])->name('quizzes.shared');
@@ -77,6 +78,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{quiz}/toggle-sharing', [QuizSharingController::class, 'toggleSharing'])->name('quizzes.toggle-sharing');
         Route::get('/{quiz}/leaderboard', [QuizSharingController::class, 'leaderboard'])->name('quizzes.leaderboard');
     });
+
 
     Route::post('/subscribe', [SubscriptionController::class, 'subscribe'])->name('billing.subscribe');
     Route::get('/setup-intent', [SubscriptionController::class, 'createSetupIntent'])->name('billing.setup-intent');

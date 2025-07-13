@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 import StudyPlanCalendar from '@/components/StudyPlanCalendar';
 import StudyPlanPreview from '@/components/StudyPlanPreview';
+import StudyStreakWidget from '@/components/StudyStreakWidget';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -86,11 +87,21 @@ export default function Dashboard() {
     
     const folders = data || [];
     
-    // Query for user statistics
+    // Query for user statistics (current week)
     const { data: userStatistics } = useQuery({
         queryKey: ['userStatistics'],
         queryFn: async () => {
-            const response = await axios.get('/api/statistics/daily');
+            const today = new Date();
+            const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            
+            const response = await axios.get('/api/statistics/daily', {
+                params: {
+                    start_date: startOfWeek.toISOString().split('T')[0],
+                    end_date: endOfWeek.toISOString().split('T')[0]
+                }
+            });
             return response.data.data;
         },
         staleTime: 30000, // Data remains fresh for 30 seconds
@@ -154,13 +165,8 @@ export default function Dashboard() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={t('Dashboard')} />
             <div className="flex sm:flex-start h-full flex-1 flex-col gap-6 p-6 max-w-7xl mx-auto w-full relative">
-                {/* Study Plan Section */}
-                {/* {user.study_plan && (
-                    <StudyPlanPreview 
-                        user={user} 
-                        onViewStudyPlan={() => setShowStudyPlan(true)} 
-                    />
-                )} */}
+                {/* Study Streak Section */}
+                <StudyStreakWidget userStatistics={userStatistics} />
 
                 {/* New Note Section - Desktop */}
                 <section className="hidden md:block">
