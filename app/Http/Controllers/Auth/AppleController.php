@@ -38,6 +38,7 @@ class AppleController extends Controller
                     'email' => $appleUser->email,
                     'password' => bcrypt(Str::random(16)),
                     'apple_id' => $appleUser->id,
+                    'timezone' => 'UTC', // Default timezone for OAuth users
                 ]);
             } else if (!$user->apple_id) {
                 $user->apple_id = $appleUser->id;

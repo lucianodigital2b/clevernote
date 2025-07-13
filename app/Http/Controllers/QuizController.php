@@ -284,7 +284,7 @@ class QuizController extends Controller
 
             $attempt->update(['score' => $score]);
 
-            UpdateUserStatistics::dispatch(Auth::user()->id, Carbon::today());
+            UpdateUserStatistics::dispatch(Auth::user()->id);
     
             
             DB::commit();
@@ -355,7 +355,7 @@ class QuizController extends Controller
 
             // Only update user statistics if user is authenticated
             if (Auth::check()) {
-                UpdateUserStatistics::dispatch(Auth::user()->id, Carbon::today());
+                UpdateUserStatistics::dispatch(Auth::user()->id);
             }
     
             DB::commit();

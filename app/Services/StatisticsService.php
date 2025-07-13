@@ -11,9 +11,14 @@ use Illuminate\Support\Facades\DB;
 
 class StatisticsService
 {
-    public function updateDailyStats(User $user, ?Carbon $date = null): UserStatistics
+    public function updateDailyStats(User $user, $date = null): UserStatistics
     {
-        $date = $date ?? Carbon::today();
+        // Handle both string and Carbon date inputs
+        if (is_string($date)) {
+            $date = Carbon::parse($date);
+        } else {
+            $date = $date ?? Carbon::today();
+        }
         
         $stats = UserStatistics::firstOrCreate(
             ['user_id' => $user->id, 'date' => $date],

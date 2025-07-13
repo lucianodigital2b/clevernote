@@ -29,6 +29,7 @@ class GoogleController extends Controller
                     'email' => $googleUser->email,
                     'password' => bcrypt(Str::random(16)),
                     'google_id' => $googleUser->id,
+                    'timezone' => 'UTC', // Default timezone for OAuth users
                 ]);
             } else if (!$user->google_id) {
                 $user->google_id = $googleUser->id;
@@ -74,6 +75,7 @@ class GoogleController extends Controller
                     'email' => $googleUser->email,
                     'password' => bcrypt(Str::random(16)),
                     'google_id' => $googleUser->id,
+                    'timezone' => 'UTC', // Default timezone for OAuth users
                 ]);
             } else if (!$user->google_id) {
                 $user->google_id = $googleUser->id;

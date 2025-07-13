@@ -197,7 +197,7 @@ class FlashcardSetController extends Controller
                 $validated
             );
 
-        UpdateUserStatistics::dispatch(Auth::id(), Carbon::today());
+        UpdateUserStatistics::dispatch(Auth::id());
 
         return response()->json(['success' => true]);
     }

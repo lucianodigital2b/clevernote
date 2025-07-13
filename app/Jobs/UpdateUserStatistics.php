@@ -39,7 +39,7 @@ class UpdateUserStatistics implements ShouldQueue
     public function __construct(int $userId, Carbon $date = null)
     {
         $this->userId = $userId;
-        $this->date = $date ?? Carbon::today();
+        $this->date = $date;
     }
 
     /**
@@ -55,7 +55,15 @@ class UpdateUserStatistics implements ShouldQueue
                 return;
             }
 
-            $statisticsService->updateDailyStats($user, $this->date);
+            // If no date provided, calculate current date in user's timezone
+            if ($this->date === null) {
+                $userTimezone = $user->timezone ?? 'UTC';
+                $date = Carbon::now($userTimezone)->toDateString();
+            } else {
+                $date = $this->date;
+            }
+            
+            $statisticsService->updateDailyStats($user, $date);
             
             Log::info('User statistics updated successfully', [
                 'user_id' => $this->userId,

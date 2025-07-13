@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Clock } from 'lucide-react';
 
 interface UserStatistic {
     date: string;
@@ -41,6 +42,10 @@ const StudyStreakWidget: React.FC<StudyStreakWidgetProps> = ({ userStatistics })
 
     const [countdown, setCountdown] = React.useState(getCountdownToMidnight());
 
+
+
+
+
     React.useEffect(() => {
         if (!hasStudiedToday) {
             const interval = setInterval(() => {
@@ -74,7 +79,6 @@ const StudyStreakWidget: React.FC<StudyStreakWidgetProps> = ({ userStatistics })
                                     const dateString = currentDay.toISOString().split('T')[0];
                                     const dayStats = userStatistics?.find(stat => stat.date === dateString);
                                     const studyTime = dayStats?.study_time_minutes || 0;
-                                    const isSunday = index === 0;
                                     const isToday = dateString === today;
                                     const hasStudied = studyTime > 0;
                                     
@@ -103,14 +107,14 @@ const StudyStreakWidget: React.FC<StudyStreakWidgetProps> = ({ userStatistics })
                                             </div>
                                             <div
                                                 className={`w-8 h-8 rounded-lg ${intensityColors[intensity]} hover:ring-2 hover:ring-purple-300 transition-all cursor-pointer flex items-center justify-center relative ${
-                                                    !hasStudied && !isSunday && !isToday ? 'opacity-50' : ''
+                                                    !hasStudied && !isToday ? 'opacity-50' : ''
                                                 }`}
                                                 title={`${currentDay.toLocaleDateString()}: ${studyTime} minutes studied`}
                                             >
                                                 <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300">
                                                     {currentDay.getDate()}
                                                 </span>
-                                                {!hasStudied && !isSunday && !isToday && (
+                                                {!hasStudied && !isToday && (
                                                     <div className="absolute inset-0 flex items-center justify-center">
                                                         <div className="w-6 h-0.5 bg-red-500 rotate-45 absolute"></div>
                                                         <div className="w-6 h-0.5 bg-red-500 -rotate-45 absolute"></div>
@@ -124,13 +128,18 @@ const StudyStreakWidget: React.FC<StudyStreakWidgetProps> = ({ userStatistics })
                         </div>
                         
                         {!hasStudiedToday && (
-                            <div className="mt-4">
-                                <div className="text-lg font-bold text-red-600">
+                            <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg border border-purple-100 dark:border-purple-800">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Clock className="w-4 h-4 text-purple-600" />
+                                    <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                                        {t('study_streak_countdown_text')}
+                                    </span>
+                                </div>
+                                <div className="text-lg font-mono text-purple-800 dark:text-purple-200">
                                     {String(countdown.hours).padStart(2, '0')}:
                                     {String(countdown.minutes).padStart(2, '0')}:
                                     {String(countdown.seconds).padStart(2, '0')}
                                 </div>
-                                <div className="text-sm text-neutral-500">{t('time_left_to_study')}</div>
                             </div>
                         )}
                     </div>
