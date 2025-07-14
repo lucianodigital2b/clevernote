@@ -15,7 +15,6 @@ type RegisterForm = {
     email: string;
     password: string;
     password_confirmation: string;
-    timezone: string;
 };
 
 export default function Register() {
@@ -25,7 +24,6 @@ export default function Register() {
         email: '',
         password: '',
         password_confirmation: '',
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     });
 
     const submit: FormEventHandler = (e) => {

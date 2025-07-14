@@ -55,10 +55,9 @@ class UpdateUserStatistics implements ShouldQueue
                 return;
             }
 
-            // If no date provided, calculate current date in user's timezone
+            // If no date provided, use current UTC date
             if ($this->date === null) {
-                $userTimezone = $user->timezone ?? 'UTC';
-                $date = Carbon::now($userTimezone)->toDateString();
+                $date = Carbon::now('UTC')->toDateString();
             } else {
                 $date = $this->date;
             }

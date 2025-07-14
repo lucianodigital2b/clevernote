@@ -36,9 +36,8 @@ class AppleController extends Controller
                 $user = User::create([
                     'name' => $appleUser->name ?? 'Apple User',
                     'email' => $appleUser->email,
-                    'password' => bcrypt(Str::random(16)),
                     'apple_id' => $appleUser->id,
-                    'timezone' => 'UTC', // Default timezone for OAuth users
+                    'password' => bcrypt(Str::random(16)),
                 ]);
             } else if (!$user->apple_id) {
                 $user->apple_id = $appleUser->id;
