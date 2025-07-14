@@ -39,36 +39,39 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
 
-    <!-- Structured Data -->
-    <script type="application/ld+json">
-        {!! json_encode([
-            "@context" => "https://schema.org",
-            "@type" => "WebApplication",
-            "name" => config('app.name', 'Clevernote'),
-            "description" => "AI-powered study platform for creating flashcards, generating quizzes, and enhancing learning",
+    @php
+    $structuredData = [
+        "@context" => "https://schema.org",
+        "@type" => "WebApplication",
+        "name" => config('app.name', 'Clevernote'),
+        "description" => "AI-powered study platform for creating flashcards, generating quizzes, and enhancing learning",
+        "url" => config('app.url'),
+        "applicationCategory" => "EducationalApplication",
+        "operatingSystem" => "Web Browser",
+        "offers" => [
+            "@type" => "Offer",
+            "price" => "0",
+            "priceCurrency" => "USD",
+            "availability" => "https://schema.org/InStock"
+        ],
+        "creator" => [
+            "@type" => "Organization",
+            "name" => "Clevernote",
             "url" => config('app.url'),
-            "applicationCategory" => "EducationalApplication",
-            "operatingSystem" => "Web Browser",
-            "offers" => [
-                "@type" => "Offer",
-                "price" => "0",
-                "priceCurrency" => "USD",
-                "availability" => "https://schema.org/InStock",
-            ],
-            "creator" => [
-                "@type" => "Organization",
-                "name" => "Clevernote",
-                "url" => config('app.url'),
-            ],
-            "featureList" => [
-                "AI-powered flashcard generation",
-                "Automated quiz creation",
-                "Smart note-taking",
-                "Progress tracking",
-                "Multi-language support",
-            ],
-        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
-    </script>
+        ],
+        "featureList" => [
+            "AI-powered flashcard generation",
+            "Automated quiz creation",
+            "Smart note-taking",
+            "Progress tracking",
+            "Multi-language support"
+        ],
+    ];
+@endphp
+
+<script type="application/ld+json">
+{!! json_encode($structuredData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+</script>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
