@@ -109,7 +109,7 @@ const StudyStreakWidget: React.FC<StudyStreakWidgetProps> = ({ userStatistics })
                                             <div
                                                 className={`w-8 h-8 rounded-lg ${
                                                     isToday 
-                                                        ? 'bg-green-50 text-white border-2 border-green-200' 
+                                                        ? 'bg-green-50 dark:bg-transparent dark:border-green-900 text-white border-2 border-green-200' 
                                                         : intensityColors[intensity]
                                                 } hover:ring-2 hover:ring-purple-300 transition-all cursor-pointer flex items-center justify-center relative ${
                                                     isPastDay && !hasStudied ? 'opacity-50' : ''
