@@ -603,7 +603,14 @@
   "upload_audio_modal_transcribing": "Transcribing audio...",
   "study_streak_title": "Study Streak",
   "study_streak_subtitle": "Take a quiz or a set of flashcards a day to start your streak.",
-  "time_left_to_study": "Time left to study today"
+  "time_left_to_study": "Time left to study today",
+  "day_sun": "Sun",
+  "day_mon": "Mon",
+  "day_tue": "Tue",
+  "day_wed": "Wed",
+  "day_thu": "Thu",
+  "day_fri": "Fri",
+  "day_sat": "Sat"
 
 
 }

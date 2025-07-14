@@ -166,7 +166,7 @@ export default function Dashboard() {
             <Head title={t('Dashboard')} />
             <div className="flex sm:flex-start h-full flex-1 flex-col gap-6 p-6 max-w-7xl mx-auto w-full relative">
                 {/* Study Streak Section */}
-                {/* <StudyStreakWidget userStatistics={userStatistics} /> */}
+                <StudyStreakWidget userStatistics={userStatistics} />
 
                 {/* New Note Section - Desktop */}
                 <section className="hidden md:block">

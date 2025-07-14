@@ -42,10 +42,6 @@ const StudyStreakWidget: React.FC<StudyStreakWidgetProps> = ({ userStatistics })
 
     const [countdown, setCountdown] = React.useState(getCountdownToMidnight());
 
-
-
-
-
     React.useEffect(() => {
         if (!hasStudiedToday) {
             const interval = setInterval(() => {
@@ -67,20 +63,25 @@ const StudyStreakWidget: React.FC<StudyStreakWidgetProps> = ({ userStatistics })
                 {/* Study Activity Grid - Current Week */}
                 <div className="overflow-x-auto">
                     <div className="min-w-full">
-
-                        
                         <div className="flex justify-start">
                             <div className="grid grid-cols-7 gap-2">
                                 {Array.from({ length: 7 }, (_, index) => {
-                                    const date = new Date();
-                                    const startOfWeek = new Date(date.setDate(date.getDate() - date.getDay()));
+                                    // Start week on Sunday (index 0 = Sunday)
+                                    const today = new Date();
+                                    const currentDayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+                                    const startOfWeek = new Date(today);
+                                    startOfWeek.setDate(today.getDate() - currentDayOfWeek);
+                                    
                                     const currentDay = new Date(startOfWeek);
                                     currentDay.setDate(startOfWeek.getDate() + index);
                                     const dateString = currentDay.toISOString().split('T')[0];
                                     const dayStats = userStatistics?.find(stat => stat.date === dateString);
                                     const studyTime = dayStats?.study_time_minutes || 0;
-                                    const isToday = dateString === today;
+                                    const isToday = dateString === today.toISOString().split('T')[0];
                                     const hasStudied = studyTime > 0;
+                                    
+                                    // Check if this day is in the past (before today)
+                                    const isPastDay = currentDay < new Date(today.toISOString().split('T')[0]);
                                     
                                     let intensity = 0;
                                     if (studyTime > 0) {
@@ -92,29 +93,34 @@ const StudyStreakWidget: React.FC<StudyStreakWidgetProps> = ({ userStatistics })
                                     
                                     const intensityColors = {
                                         0: 'bg-neutral-100 dark:bg-neutral-700',
-                                        1: 'bg-purple-200 dark:bg-purple-800',
-                                        2: 'bg-purple-400 dark:bg-purple-600',
-                                        3: 'bg-purple-600 dark:bg-purple-500',
-                                        4: 'bg-purple-800 dark:bg-purple-400'
+                                        1: 'bg-purple-200/50 dark:bg-purple-800',
+                                        2: 'bg-purple-400/50 dark:bg-purple-600',
+                                        3: 'bg-purple-600/50 dark:bg-purple-500',
+                                        4: 'bg-purple-800/50 dark:bg-purple-400'
                                     };
                                     
-                                    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                                    const dayNames = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat'];
                                     
                                     return (
                                         <div key={index} className="flex flex-col items-center gap-2">
                                             <div className="text-xs text-neutral-500 font-medium">
-                                                {dayNames[index]}
+                                                {t(dayNames[index])}
                                             </div>
                                             <div
-                                                className={`w-8 h-8 rounded-lg ${intensityColors[intensity]} hover:ring-2 hover:ring-purple-300 transition-all cursor-pointer flex items-center justify-center relative ${
-                                                    !hasStudied && !isToday ? 'opacity-50' : ''
+                                                className={`w-8 h-8 rounded-lg ${
+                                                    isToday 
+                                                        ? 'bg-green-50 text-white border-2 border-green-200' 
+                                                        : intensityColors[intensity]
+                                                } hover:ring-2 hover:ring-purple-300 transition-all cursor-pointer flex items-center justify-center relative ${
+                                                    isPastDay && !hasStudied ? 'opacity-50' : ''
                                                 }`}
                                                 title={`${currentDay.toLocaleDateString()}: ${studyTime} minutes studied`}
                                             >
                                                 <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300">
                                                     {currentDay.getDate()}
                                                 </span>
-                                                {!hasStudied && !isToday && (
+                                                {/* Only show crossed out X for past days where user didn't study */}
+                                                {isPastDay && !hasStudied && (
                                                     <div className="absolute inset-0 flex items-center justify-center">
                                                         <div className="w-6 h-0.5 bg-red-500 rotate-45 absolute"></div>
                                                         <div className="w-6 h-0.5 bg-red-500 -rotate-45 absolute"></div>
@@ -132,7 +138,7 @@ const StudyStreakWidget: React.FC<StudyStreakWidgetProps> = ({ userStatistics })
                                 <div className="flex items-center gap-2 mb-2">
                                     <Clock className="w-4 h-4 text-purple-600" />
                                     <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
-                                        {t('study_streak_countdown_text')}
+                                        {t('time_left_to_study')}
                                     </span>
                                 </div>
                                 <div className="text-lg font-mono text-purple-800 dark:text-purple-200">
