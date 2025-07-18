@@ -61,9 +61,9 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
         calendarDays.push({ day, hasActivity, dateStr });
     }
     
-    // Calculate statistics
-    const totalDaysWithActivity = Object.values(yearlyHeatmap).filter((day: any) => 
-        day.quiz_total_questions > 0 || day.flashcard_reviews > 0
+    // Calculate statistics for current month only
+    const totalDaysWithActivity = calendarDays.filter(dayData => 
+        dayData && dayData.hasActivity
     ).length;
     
     const totalQuizQuestions = Object.values(yearlyHeatmap).reduce((sum: number, day: any) => 
