@@ -526,7 +526,8 @@
   "loading_modal_building_mindmap": "Construindo Mapa Mental",
   "loading_modal_mindmap_description": "Mapeando conceitos e conexões visualmente",
   "study_streak_title": "Comece uma ofensiva",
-  "study_streak_subtitle": "Responda um bloco de questões por dia para começar sua ofensiva.",
+  "study_streak_subtitle": "Faça um questionário ou estude um conjunto de cartões por dia para começar sua ofensiva.",
+
   "time_left_to_study": "Tempo restante para completar ofensiva",
   "day_sun": "Dom",
   "day_mon": "Seg",

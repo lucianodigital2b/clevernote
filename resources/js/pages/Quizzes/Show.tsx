@@ -11,8 +11,6 @@ import { Quiz } from '@/types';
 
 
 
-
-
 interface Props {
     quiz: Quiz;
 }
@@ -27,7 +25,6 @@ export default function Show({ quiz }: Props) {
                 answers: selectedAnswers
             });
 
-            toast.success(t('quiz_completed', { score, total: quiz.questions.length }));
         } catch (error) {
             console.error('Error saving quiz attempt:', error);
             toast.error(t('quiz_save_error'));

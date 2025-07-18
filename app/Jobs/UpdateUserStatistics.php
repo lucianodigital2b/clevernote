@@ -59,19 +59,19 @@ class UpdateUserStatistics implements ShouldQueue
             if ($this->date === null) {
                 $date = Carbon::now('UTC')->toDateString();
             } else {
-                $date = $this->date;
+                $date = $this->date->toDateString();
             }
             
             $statisticsService->updateDailyStats($user, $date);
             
             Log::info('User statistics updated successfully', [
                 'user_id' => $this->userId,
-                'date' => $this->date->toDateString()
+                'date' => $date
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to update user statistics', [
                 'user_id' => $this->userId,
-                'date' => $this->date->toDateString(),
+                'date' => $this->date ? $this->date->toDateString() : 'null',
                 'error' => $e->getMessage()
             ]);
             
@@ -86,7 +86,7 @@ class UpdateUserStatistics implements ShouldQueue
     {
         Log::error('UpdateUserStatistics job failed permanently', [
             'user_id' => $this->userId,
-            'date' => $this->date->toDateString(),
+            'date' => $this->date ? $this->date->toDateString() : 'null',
             'error' => $exception->getMessage()
         ]);
     }

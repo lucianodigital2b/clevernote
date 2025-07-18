@@ -7,23 +7,10 @@ import { jsPDF } from 'jspdf';
 import { toastConfig } from '@/lib/toast';
 import { useTranslation } from 'react-i18next';
 import { Link } from '@inertiajs/react';
+import { QuizQuestion } from '@/types';
+import DOMPurify from 'dompurify';
 
-type QuizOption = {
-    id: string;
-    text: string;
-    is_correct: boolean;
-};
 
-type QuizQuestion = {
-    id: string;
-    question: string;
-    options: QuizOption[];
-    explanation?: string;
-};
-
-type QuizOptionWithCorrect = QuizOption & {
-    is_correct: boolean;
-};
 
 type QuizContentProps = {
     title: string;
@@ -40,6 +27,8 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
         setIsAnswered(false);
         setShowExplanation(false);
         setScore(0);
+        setIsFinished(false);
+        setAnswers([]);
     };
 
     const handleExportPDF = () => {
@@ -48,6 +37,13 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
         const pageWidth = doc.internal.pageSize.getWidth();
         const margin = 20;
         const maxWidth = pageWidth - (margin * 2); // Available width for text
+
+        // Helper function to strip HTML tags
+        const stripHtml = (html: string) => {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || '';
+        };
 
         // Add title
         doc.setFontSize(20);
@@ -63,40 +59,40 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
 
         // Add each question and its details
         questions.forEach((question, index) => {
-            // Add question with text wrapping
+            // Add question with text wrapping (strip HTML)
             doc.setFontSize(14);
             doc.setTextColor(0, 0, 0); // Black color for questions
-            const questionText = `Question ${index + 1}: ${question.question}`;
+            const questionText = `Question ${index + 1}: ${stripHtml(question.question)}`;
             const wrappedQuestion = doc.splitTextToSize(questionText, maxWidth);
             doc.text(wrappedQuestion, margin, yOffset);
             yOffset += wrappedQuestion.length * 7; // Adjust spacing based on number of lines
             yOffset += 5; // Extra spacing after question
 
-            // Add options with text wrapping
+            // Add options with text wrapping (strip HTML)
             doc.setFontSize(12);
             question.options.forEach((option) => {
                 if (option.is_correct) {
                     // Set red color for correct answers
                     doc.setTextColor(255, 0, 0); // Red color (RGB: 255, 0, 0)
-                    const optionText = `✓ ${option.text} (CORRECT)`;
+                    const optionText = `✓ ${stripHtml(option.text)} (CORRECT)`;
                     const wrappedOption = doc.splitTextToSize(optionText, maxWidth - 10); // Slightly less width for indentation
                     doc.text(wrappedOption, margin + 10, yOffset);
                     yOffset += wrappedOption.length * 6; // Adjust spacing based on number of lines
                 } else {
                     // Set black color for incorrect answers
                     doc.setTextColor(0, 0, 0); // Black color
-                    const optionText = `  ${option.text}`;
+                    const optionText = `  ${stripHtml(option.text)}`;
                     const wrappedOption = doc.splitTextToSize(optionText, maxWidth - 10); // Slightly less width for indentation
                     doc.text(wrappedOption, margin + 10, yOffset);
                     yOffset += wrappedOption.length * 6; // Adjust spacing based on number of lines
                 }
             });
 
-            // Add explanation if available with text wrapping
+            // Add explanation if available with text wrapping (strip HTML)
             if (question.explanation) {
                 doc.setFontSize(10);
                 doc.setTextColor(0, 0, 0); // Black color for explanations
-                const explanationText = `Explanation: ${question.explanation}`;
+                const explanationText = `Explanation: ${stripHtml(question.explanation)}`;
                 const wrappedExplanation = doc.splitTextToSize(explanationText, maxWidth - 10);
                 doc.text(wrappedExplanation, margin + 10, yOffset);
                 yOffset += wrappedExplanation.length * 5; // Adjust spacing based on number of lines
@@ -341,9 +337,9 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
                     <span className="text-sm sm:text-base font-medium">
                         {t('quiz_question_of', { current: currentQuestionIndex + 1, total: questions.length })}
                     </span>
-                    <span className="text-sm sm:text-base text-indigo-600 dark:text-indigo-400 font-medium">
+                    {/* <span className="text-sm sm:text-base text-indigo-600 dark:text-indigo-400 font-medium">
                         {t('quiz_score_of', { current: score, total: currentQuestionIndex + 1 })}
-                    </span>
+                    </span> */}
                 </div>
                 
                 {/* Action Buttons */}
@@ -389,7 +385,12 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
 
             {/* Quiz Content */}
             <div className="space-y-4 sm:space-y-6">
-                <h2 className="text-lg sm:text-xl font-semibold leading-relaxed">{currentQuestion.question}</h2>
+                <h2 
+                    className="text-lg sm:text-xl font-semibold leading-relaxed"
+                    dangerouslySetInnerHTML={{ 
+                        __html: DOMPurify.sanitize(currentQuestion.question) 
+                    }}
+                />
 
                 <div className="space-y-2 sm:space-y-3">
                     <AnimatePresence>
@@ -404,7 +405,12 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
                                 onClick={() => handleOptionSelect(option.id)}
                             >
                                 <div className="flex items-center justify-between gap-3">
-                                    <span className="text-sm sm:text-base leading-relaxed flex-1">{option.text}</span>
+                                    <span 
+                                        className="text-sm sm:text-base leading-relaxed flex-1"
+                                        dangerouslySetInnerHTML={{ 
+                                            __html: DOMPurify.sanitize(option.text) 
+                                        }}
+                                    />
                                     {isAnswered && (
                                         <motion.div
                                             initial={{ scale: 0 }}
@@ -434,9 +440,12 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
                         <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-2 text-sm sm:text-base">
                             {t('quiz_explanation')}:
                         </h3>
-                        <p className="text-blue-700 dark:text-blue-200 text-sm sm:text-base leading-relaxed">
-                            {currentQuestion.explanation}
-                        </p>
+                        <div 
+                            className="text-blue-700 dark:text-blue-200 text-sm sm:text-base leading-relaxed"
+                            dangerouslySetInnerHTML={{ 
+                                __html: DOMPurify.sanitize(currentQuestion.explanation) 
+                            }}
+                        />
                     </motion.div>
                 )}
 
