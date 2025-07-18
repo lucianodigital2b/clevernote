@@ -1,11 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useTranslation } from 'react-i18next';
-import CalHeatmap from 'cal-heatmap';
-import Legend from 'cal-heatmap/plugins/Legend';
-import Tooltip from 'cal-heatmap/plugins/Tooltip';
-import 'cal-heatmap/cal-heatmap.css';
+import { ChevronLeft, ChevronRight, Clock, Target, Flame, Trophy, Calendar, BarChart3 } from 'lucide-react';
 
 interface StatisticsProps {
     weeklyStats: any[];
@@ -17,312 +13,256 @@ interface StatisticsProps {
         maxStreak: number;
         dailyAverage: number;
         daysLearnedPercentage: number;
+        totalFlashcardReviews: number;
+        totalSessions: number;
     };
 }
 
 export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }: StatisticsProps) {
-    const { t, i18n } = useTranslation();
-    const weekDays = {
-        en: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        es: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-        pt: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
-    };
-    const calendarRef = useRef<HTMLDivElement>(null);
-    const calInstanceRef = useRef<CalHeatmap | null>(null); // Added ref for CalHeatmap instance
+    const { t } = useTranslation();
+    const [currentDate, setCurrentDate] = useState(new Date());
     
-    // Prepare weekly chart data
-    const currentLang = i18n.language.split('-')[0];
-    const localizedWeekDays = weekDays[currentLang as keyof typeof weekDays] || weekDays.en;
-    const weeklyChartData = localizedWeekDays.map((day, index) => {
-        const dayStats = weeklyStats.find(stat => new Date(stat.date).getDay() === (index + 1) % 7);
-        return {
-            day,
-            questions: dayStats ? (dayStats.quiz_total_questions + dayStats.flashcard_reviews) : 0,
-            accuracy: dayStats && dayStats.quiz_total_questions > 0 
-                ? Math.round((dayStats.quiz_correct_answers / dayStats.quiz_total_questions) * 100) 
-                : 0
-        };
-    });
+    // Get current month and year
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+    const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
     
-    // Format data for Cal-Heatmap
-    const formatCalHeatmapData = () => {
-        const data = [];
-        const startDate = new Date(new Date().getFullYear(), 0, 1);
-        const endDate = new Date();
-        
-        let currentDate = new Date(startDate);
-        
-        while (currentDate <= endDate) {
-            const dateStr = currentDate.toISOString().split('T')[0];
-            const dayStats = yearlyHeatmap[dateStr];
-            const activity = dayStats ? (dayStats.quiz_total_questions + dayStats.flashcard_reviews) : 0;
-            
-            if (activity > 0) {
-                data.push({
-                    date: dateStr,
-                    value: activity
-                });
+    // Calculate today's stats
+    const today = new Date().toISOString().split('T')[0];
+    const todayStats = yearlyHeatmap[today] || { quiz_total_questions: 0, flashcard_reviews: 0, study_time_minutes: 0 };
+    const todayQuizzes = todayStats.quiz_total_questions || 0;
+    const todayFlashcards = todayStats.flashcard_reviews || 0;
+    
+    // Calculate calendar data
+    const getDaysInMonth = (month: number, year: number) => new Date(year, month + 1, 0).getDate();
+    const getFirstDayOfMonth = (month: number, year: number) => new Date(year, month, 1).getDay();
+    
+    const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+    const firstDay = getFirstDayOfMonth(currentMonth, currentYear);
+    const adjustedFirstDay = firstDay === 0 ? 6 : firstDay - 1; // Adjust for Monday start
+    
+    // Generate calendar days
+    const calendarDays = [];
+    
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < adjustedFirstDay; i++) {
+        calendarDays.push(null);
+    }
+    
+    // Add days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dayStats = yearlyHeatmap[dateStr];
+        const hasActivity = dayStats && (dayStats.quiz_total_questions > 0 || dayStats.flashcard_reviews > 0);
+        calendarDays.push({ day, hasActivity, dateStr });
+    }
+    
+    // Calculate statistics
+    const totalDaysWithActivity = Object.values(yearlyHeatmap).filter((day: any) => 
+        day.quiz_total_questions > 0 || day.flashcard_reviews > 0
+    ).length;
+    
+    const totalQuizQuestions = Object.values(yearlyHeatmap).reduce((sum: number, day: any) => 
+        sum + (day.quiz_total_questions || 0), 0
+    );
+    
+    const totalFlashcardReviews = Object.values(yearlyHeatmap).reduce((sum: number, day: any) => 
+        sum + (day.flashcard_reviews || 0), 0
+    );
+    
+    const avgQuizQuestionsPerDay = totalDaysWithActivity > 0 ? Math.floor(totalQuizQuestions / totalDaysWithActivity) : 0;
+    const avgFlashcardsPerDay = totalDaysWithActivity > 0 ? Math.floor(totalFlashcardReviews / totalDaysWithActivity) : 0;
+    
+    const navigateMonth = (direction: 'prev' | 'next') => {
+        setCurrentDate(prev => {
+            const newDate = new Date(prev);
+            if (direction === 'prev') {
+                newDate.setMonth(prev.getMonth() - 1);
+            } else {
+                newDate.setMonth(prev.getMonth() + 1);
             }
-            
-            currentDate.setDate(currentDate.getDate() + 1);
-        }
-        
-        return data;
-    };
-    
-    useEffect(() => {
-        if (calendarRef.current) {
-            // Clear any existing calendar
-            calendarRef.current.innerHTML = '';
-            
-            const cal = new CalHeatmap();
-            calInstanceRef.current = cal; // Store instance in ref
-            
-            cal.paint({
-                itemSelector: calendarRef.current,
-                range: 1,
-                domain: {
-                    type: 'month',
-                    label: {
-                        text: null
-                    }
-                },
-                subDomain: { 
-                    type: 'day',
-                    radius: 8,
-                    width: 30,
-                    height: 30,
-                    gutter: 4,
-                    sort: 'asc',
-                    verticalOrientation: false,
-                    colLimit: 7,
-                    rowLimit: 7,
-                    label: {
-                        position: 'top',
-                        offset: {
-                            x: 0,
-                            y: -25
-                        },
-                        text: (timestamp) => {
-                            const currentLang = i18n.language.split('-')[0];
-                            const localizedDays = weekDays[currentLang as keyof typeof weekDays] || weekDays.en;
-                            return localizedDays[new Date(timestamp).getDay()]?.charAt(0);
-                        },
-                        style: {
-                            fontSize: '14px',
-                            fill: '#374151',
-                            fontWeight: 'bold'
-                        }
-                    }
-                },
-                date: { 
-                    start: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-                    highlight: [new Date()]
-                },
-                data: {
-                    source: formatCalHeatmapData(),
-                    type: 'json',
-                    x: 'date',
-                    y: 'value'
-                },
-                scale: {
-                    color: {
-                        range: ['#e5f5e0', '#c7e9c0', '#a1d99b', '#74c476', '#31a354'],
-                        domain: [1, 10, 25, 50, 100],
-                        type: 'threshold'
-                    }
-                },
-                theme: 'light',
-                highlight: {
-                    radius: 2,
-                    borderWidth: 2,
-                    borderColor: '#3b82f6'
-                }
-            }, [
-                [Legend, {
-                    itemSelector: '#cal-heatmap-legend-container',
-                    label: null
-                }],
-                [Tooltip, {
-                    text: function(date, value, dayjsDate) {
-                        return value ? `${dayjsDate.format('LL')}: ${value} ${t('activities')}` : `${dayjsDate.format('LL')}: 0 ${t('activities')}`;
-                    }
-                }]
-            ]);
-        }
-    }, [yearlyHeatmap, t]);
-
-    const handlePrevious = () => {
-        if (calInstanceRef.current) {
-            calInstanceRef.current.previous();
-        }
-    };
-
-    const handleNext = () => {
-        if (calInstanceRef.current) {
-            calInstanceRef.current.next();
-        }
+            return newDate;
+        });
     };
     
     return (
-        <div className="space-y-6">
-            {/* Weekly Performance Chart */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                        <span>{t('performance_over_weeks')}</span>
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="mb-4 flex flex-wrap gap-2">
-                        <button className="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded min-w-[40px] text-center">{t('one_month')}</button>
-                        <button className="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded min-w-[40px] text-center">3</button>
-                        <button className="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded min-w-[40px] text-center">6</button>
-                        <button className="px-3 py-2 text-sm bg-blue-500 text-white rounded min-w-[40px] text-center">2025</button>
-                    </div>
+        <div className="space-y-6 py-6 min-h-screen">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Left Column - Today's Activity and Streaks */}
+                <div className="space-y-6">
+                    {/* Today's Activity */}
+                    <Card className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                                <Target className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                                Today's Activity
+                            </CardTitle>
+                            <p className="text-gray-600 dark:text-slate-400 text-sm">Thursday, June 19</p>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="text-center">
+                                    <div className="flex items-center justify-center w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-full mb-2 mx-auto">
+                                        <BarChart3 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                    <p className="text-gray-600 dark:text-slate-400 text-sm">Quizzes Taken</p>
+                                    <p className="text-gray-900 dark:text-white text-2xl font-bold">{todayQuizzes}</p>
+                                </div>
+                                <div className="text-center">
+                                    <div className="flex items-center justify-center w-12 h-12 bg-purple-100 dark:bg-purple-500/20 rounded-full mb-2 mx-auto">
+                                        <Clock className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                                    </div>
+                                    <p className="text-gray-600 dark:text-slate-400 text-sm">Flashcards Studied</p>
+                                    <p className="text-gray-900 dark:text-white text-2xl font-bold">{todayFlashcards}</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
                     
-                    <div className="h-64 mb-4">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={weeklyChartData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-600" />
-                                <XAxis dataKey="day" tick={{ fill: '#6b7280' }} className="dark:fill-gray-300" />
-                                <YAxis tick={{ fill: '#6b7280' }} className="dark:fill-gray-300" />
-                                <RechartsTooltip 
-                                    contentStyle={{
-                                        backgroundColor: 'var(--background)',
-                                        border: '1px solid var(--border)',
-                                        borderRadius: '12px',
-                                        color: 'var(--foreground)',
-                                        padding: '8px 12px'
-                                    }}
-                                />
-                                <Bar dataKey="questions" fill="#3b82f6" radius={[8, 8, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                    
-
-                </CardContent>
-            </Card>
-            
-            {/* Question Statistics */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('question_statistics')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                        <div className="w-full md:w-1/2 max-w-[300px] mx-auto md:mx-0">
-                            <div className="h-64">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie
-                                            data={[
-                                                {
-                                                    name: t('correct'),
-                                                    value: Math.round(overallStats.totalQuestions * overallStats.accuracy / 100),
-                                                    color: '#3b82f6'
-                                                },
-                                                {
-                                                    name: t('incorrect'),
-                                                    value: Math.round(overallStats.totalQuestions * (100 - overallStats.accuracy) / 100),
-                                                    color: '#ef4444'
+                    {/* Streaks */}
+                    <Card className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                                <Flame className="w-5 h-5 text-orange-500 dark:text-orange-400" />
+                                Streaks
+                            </CardTitle>
+                            <p className="text-green-600 dark:text-green-400 text-sm flex items-center gap-1">
+                                <span className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full"></span>
+                                Today's activity goal complete! Streak is secure.
+                            </p>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-orange-50 dark:bg-orange-500/10 rounded-lg p-4 text-center">
+                                    <div className="flex items-center justify-center w-8 h-8 bg-orange-100 dark:bg-orange-500/20 rounded-full mb-2 mx-auto">
+                                        <Flame className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                                    </div>
+                                    <p className="text-gray-600 dark:text-slate-400 text-sm">Current Streak</p>
+                                    <p className="text-gray-900 dark:text-white text-xl font-bold">{overallStats.currentStreak} days</p>
+                                </div>
+                                <div className="bg-yellow-50 dark:bg-yellow-500/10 rounded-lg p-4 text-center">
+                                    <div className="flex items-center justify-center w-8 h-8 bg-yellow-100 dark:bg-yellow-500/20 rounded-full mb-2 mx-auto">
+                                        <Trophy className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                                    </div>
+                                    <p className="text-gray-600 dark:text-slate-400 text-sm">Best Streak</p>
+                                    <p className="text-gray-900 dark:text-white text-xl font-bold">{overallStats.maxStreak} days</p>
+                                </div>
+                            </div>
+                    </CardContent>
+                </Card>
+                </div>
+                
+                {/* Right Column - Calendar */}
+                <div className="lg:col-span-2">
+                    <Card className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
+                        <CardHeader className="pb-3">
+                            <div className="flex items-center justify-between">
+                                <button 
+                                    onClick={() => navigateMonth('prev')}
+                                    className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                                >
+                                    <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-slate-400" />
+                                </button>
+                                <h3 className="text-gray-900 dark:text-white text-lg font-semibold">
+                                    {monthNames[currentMonth]} {currentYear}
+                                </h3>
+                                <button 
+                                    onClick={() => navigateMonth('next')}
+                                    className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                                >
+                                    <ChevronRight className="w-5 h-5 text-gray-600 dark:text-slate-400" />
+                                </button>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            {/* Calendar Header */}
+                            <div className="grid grid-cols-7 gap-1 mb-2">
+                                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                                    <div key={day} className="text-center text-gray-600 dark:text-slate-400 text-sm font-medium py-2">
+                                        {day}
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            {/* Calendar Grid */}
+                            <div className="grid grid-cols-7 gap-1">
+                                {calendarDays.map((dayData, index) => (
+                                    <div key={index} className="h-12">
+                                        {dayData ? (
+                                            <div className={`
+                                                w-full h-full flex items-center justify-center rounded-lg text-sm font-medium transition-colors
+                                                ${dayData.hasActivity 
+                                                    ? 'bg-green-500 dark:bg-green-600 text-white' 
+                                                    : 'bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600'
                                                 }
-                                            ]}
-                                            cx="50%"
-                                            cy="50%"
-                                            innerRadius={60}
-                                            outerRadius={100}
-                                            paddingAngle={5}
-                                            dataKey="value"
-                                            stroke="none"
-                                            cornerRadius={10}
-                                        >
-                                            <Cell fill="#3b82f6" />
-                                            <Cell fill="#ef4444" />
-                                        </Pie>
-                                        <RechartsTooltip 
-                                            contentStyle={{
-                                                backgroundColor: 'var(--background)',
-                                                border: '1px solid var(--border)',
-                                                borderRadius: '6px',
-                                                color: 'var(--foreground)'
-                                            }}
-                                        />
-                                    </PieChart>
-                                </ResponsiveContainer>
+                                            `}>
+                                                {dayData.day}
+                                            </div>
+                                        ) : (
+                                            <div className="w-full h-full"></div>
+                                        )}
+                                    </div>
+                                ))}
                             </div>
-                        </div>
-                        <div className="w-full md:w-1/2">
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                                        <span className="text-sm">{t('correct')}</span>
-                                    </div>
-                                    <span className="font-bold text-lg">{Math.round(overallStats.totalQuestions * overallStats.accuracy / 100).toLocaleString()}</span>
+                            
+                            {/* Calendar Stats */}
+                            <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-slate-700">
+                                <div className="text-center">
+                                    <p className="text-gray-600 dark:text-slate-400 text-sm">Days Active</p>
+                                    <p className="text-gray-900 dark:text-white text-lg font-bold">{totalDaysWithActivity} of {daysInMonth}</p>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-4 h-4 bg-red-500 rounded"></div>
-                                        <span className="text-sm">{t('incorrect')}</span>
-                                    </div>
-                                    <span className="font-bold text-lg">{Math.round(overallStats.totalQuestions * (100 - overallStats.accuracy) / 100).toLocaleString()}</span>
+                                <div className="text-center">
+                                    <p className="text-gray-600 dark:text-slate-400 text-sm">Avg Quizzes/Day</p>
+                                    <p className="text-gray-900 dark:text-white text-lg font-bold">{avgQuizQuestionsPerDay}</p>
                                 </div>
-                                <div className="border-t pt-4">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm text-gray-600 dark:text-gray-400">{t('total_questions')}</span>
-                                        <span className="font-bold text-lg">{overallStats.totalQuestions.toLocaleString()}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between mt-2">
-                                        <span className="text-sm text-gray-600 dark:text-gray-400">{t('accuracy')}</span>
-                                        <span className="font-bold text-lg">{overallStats.accuracy}%</span>
-                                    </div>
+                                <div className="text-center">
+                                    <p className="text-gray-600 dark:text-slate-400 text-sm">Avg Flashcards/Day</p>
+                                    <p className="text-gray-900 dark:text-white text-lg font-bold">{avgFlashcardsPerDay}</p>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
             
-            {/* Activity Heatmap */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('study_activity')}</CardTitle>
+            {/* Lifetime Statistics */}
+            <Card className="bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700">
+                <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                        <Trophy className="w-5 h-5 text-purple-500 dark:text-purple-400" />
+                        Lifetime Statistics
+                    </CardTitle>
+                    <p className="text-gray-600 dark:text-slate-400 text-sm">Your total learning achievements since you started using CleverNote</p>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex justify-between items-center mb-4">
-                        <button onClick={handlePrevious} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">{t('previous')}</button>
-                        <button onClick={handleNext} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">{t('next')}</button>
-                    </div>
-                    {/* Cal-Heatmap Container */}
-                    <div ref={calendarRef} id="cal-heatmap-container" className="cal-heatmap-container w-full h-[250px] flex items-center justify-center rounded-xl bg-gray-50 dark:bg-transparent"></div>
-                    {/* Dedicated container for the legend */}
-                    <div id="cal-heatmap-legend-container" className="mt-2 flex justify-center rounded-lg"></div>
-                    
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mt-4">
-                        <div>
-                            <p className="font-semibold text-green-600">{overallStats.dailyAverage} {t('cards')}</p>
-                            <p className="text-gray-600 dark:text-gray-400">{t('daily_average')}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="bg-purple-50 dark:bg-purple-500/10 rounded-lg p-6 text-center">
+                            <div className="flex items-center justify-center w-12 h-12 bg-purple-100 dark:bg-purple-500/20 rounded-full mb-3 mx-auto">
+                                <BarChart3 className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                            </div>
+                            <p className="text-gray-600 dark:text-slate-400 text-sm mb-1">Total Quiz Questions</p>
+                            <p className="text-gray-900 dark:text-white text-2xl font-bold">{overallStats.totalQuestions}</p>
                         </div>
-                        <div>
-                            <p className="font-semibold text-green-600">{overallStats.daysLearnedPercentage}%</p>
-                            <p className="text-gray-600 dark:text-gray-400">{t('days_learned')}</p>
+                        <div className="bg-blue-50 dark:bg-blue-500/10 rounded-lg p-6 text-center">
+                            <div className="flex items-center justify-center w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-full mb-3 mx-auto">
+                                <Clock className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <p className="text-gray-600 dark:text-slate-400 text-sm mb-1">Total Flashcard Reviews</p>
+                            <p className="text-gray-900 dark:text-white text-2xl font-bold">{overallStats.totalFlashcardReviews || totalFlashcardReviews}</p>
                         </div>
-                        <div>
-                            <p className="font-semibold text-green-600">{overallStats.maxStreak} {t('days')}</p>
-                            <p className="text-gray-600 dark:text-gray-400">{t('longest_streak')}</p>
-                        </div>
-                        <div>
-                            <p className="font-semibold text-green-600">{overallStats.currentStreak} {t('days')}</p>
-                            <p className="text-gray-600 dark:text-gray-400">{t('current_streak')}</p>
+                        <div className="bg-orange-50 dark:bg-orange-500/10 rounded-lg p-6 text-center">
+                            <div className="flex items-center justify-center w-12 h-12 bg-orange-100 dark:bg-orange-500/20 rounded-full mb-3 mx-auto">
+                                <Calendar className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+                            </div>
+                            <p className="text-gray-600 dark:text-slate-400 text-sm mb-1">Active Days</p>
+                            <p className="text-gray-900 dark:text-white text-2xl font-bold">{totalDaysWithActivity}</p>
                         </div>
                     </div>
                 </CardContent>
             </Card>
-
-            {/* Overall Statistics - This was duplicated and is now removed by ensuring the structure above is correct and not adding it again. */}
-            {/* The original Overall Statistics card is above the Activity Heatmap card and should remain as is. */}
         </div>
     );
 }

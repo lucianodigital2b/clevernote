@@ -23,13 +23,10 @@ const StudyStreakWidget: React.FC<StudyStreakWidgetProps> = ({ userStatistics })
 
     // Get current date and check if user studied today
     const today = new Date().toISOString().split('T')[0];
-    console.log(userStatistics);
     
     const todayStats = userStatistics?.find(stat => stat.date === today);
     const hasStudiedToday = (todayStats?.flashcard_reviews || 0) > 0 || (todayStats?.quiz_attempts || 0) > 0;
 
-    console.log(hasStudiedToday);
-    
     // Calculate countdown to midnight
     const getCountdownToMidnight = () => {
         const now = new Date();
@@ -70,7 +67,7 @@ const StudyStreakWidget: React.FC<StudyStreakWidgetProps> = ({ userStatistics })
                 <div className="overflow-x-auto">
                     <div className="min-w-full">
                         <div className="flex justify-start">
-                            <div className="grid grid-cols-7 gap-2">
+                            <div className="grid grid-cols-7 gap-2 mb-3">
                                 {Array.from({ length: 7 }, (_, index) => {
                                     // Start week on Sunday (index 0 = Sunday)
                                     const today = new Date();
