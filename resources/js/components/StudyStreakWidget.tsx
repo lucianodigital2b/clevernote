@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Clock } from 'lucide-react';
+import { Clock, Check } from 'lucide-react';
 
 interface UserStatistic {
     date: string;
@@ -23,9 +23,13 @@ const StudyStreakWidget: React.FC<StudyStreakWidgetProps> = ({ userStatistics })
 
     // Get current date and check if user studied today
     const today = new Date().toISOString().split('T')[0];
+    console.log(userStatistics);
+    
     const todayStats = userStatistics?.find(stat => stat.date === today);
-    const hasStudiedToday = (todayStats?.study_time_minutes || 0) > 0;
+    const hasStudiedToday = (todayStats?.flashcard_reviews || 0) > 0 || (todayStats?.quiz_attempts || 0) > 0;
 
+    console.log(hasStudiedToday);
+    
     // Calculate countdown to midnight
     const getCountdownToMidnight = () => {
         const now = new Date();
@@ -44,6 +48,8 @@ const StudyStreakWidget: React.FC<StudyStreakWidgetProps> = ({ userStatistics })
 
     React.useEffect(() => {
         if (!hasStudiedToday) {
+            console.log('entrou');
+            
             const interval = setInterval(() => {
                 setCountdown(getCountdownToMidnight());
             }, 1000);
@@ -76,19 +82,21 @@ const StudyStreakWidget: React.FC<StudyStreakWidgetProps> = ({ userStatistics })
                                     currentDay.setDate(startOfWeek.getDate() + index);
                                     const dateString = currentDay.toISOString().split('T')[0];
                                     const dayStats = userStatistics?.find(stat => stat.date === dateString);
-                                    const studyTime = dayStats?.study_time_minutes || 0;
+                                    const flashcardReviews = dayStats?.flashcard_reviews || 0;
+                                    const quizAttempts = dayStats?.quiz_attempts || 0;
+                                    const totalActivities = flashcardReviews + quizAttempts;
                                     const isToday = dateString === today.toISOString().split('T')[0];
-                                    const hasStudied = studyTime > 0;
+                                    const hasStudied = totalActivities > 0;
                                     
                                     // Check if this day is in the past (before today)
                                     const isPastDay = currentDay < new Date(today.toISOString().split('T')[0]);
                                     
                                     let intensity = 0;
-                                    if (studyTime > 0) {
-                                        if (studyTime >= 120) intensity = 4; // 2+ hours
-                                        else if (studyTime >= 60) intensity = 3; // 1+ hour
-                                        else if (studyTime >= 30) intensity = 2; // 30+ minutes
-                                        else intensity = 1; // any study time
+                                    if (totalActivities > 0) {
+                                        if (totalActivities >= 50) intensity = 4; // 50+ activities
+                                        else if (totalActivities >= 25) intensity = 3; // 25+ activities
+                                        else if (totalActivities >= 10) intensity = 2; // 10+ activities
+                                        else intensity = 1; // any activity
                                     }
                                     
                                     const intensityColors = {
@@ -109,16 +117,22 @@ const StudyStreakWidget: React.FC<StudyStreakWidgetProps> = ({ userStatistics })
                                             <div
                                                 className={`w-8 h-8 rounded-lg ${
                                                     isToday 
-                                                        ? 'bg-green-50 dark:bg-transparent dark:border-green-900 text-white border-2 border-green-200' 
+                                                        ? hasStudied
+                                                            ? 'bg-green-500 dark:bg-green-600 text-white border-2 border-green-400 dark:border-green-500'
+                                                            : 'bg-green-50 dark:bg-transparent dark:border-green-900 text-white border-2 border-green-200'
                                                         : intensityColors[intensity]
                                                 } hover:ring-2 hover:ring-purple-300 transition-all cursor-pointer flex items-center justify-center relative ${
                                                     isPastDay && !hasStudied ? 'opacity-50' : ''
                                                 }`}
-                                                title={`${currentDay.toLocaleDateString()}: ${studyTime} minutes studied`}
+                                                title={`${currentDay.toLocaleDateString()}: ${flashcardReviews} flashcards, ${quizAttempts} quizzes`}
                                             >
-                                                <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300">
-                                                    {currentDay.getDate()}
-                                                </span>
+                                                {isToday && hasStudied ? (
+                                                    <Check className="w-4 h-4 text-white" />
+                                                ) : (
+                                                    <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300">
+                                                        {currentDay.getDate()}
+                                                    </span>
+                                                )}
                                                 {/* Only show crossed out X for past days where user didn't study */}
                                                 {isPastDay && !hasStudied && (
                                                     <div className="absolute inset-0 flex items-center justify-center">
