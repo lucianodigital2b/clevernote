@@ -60,6 +60,11 @@ class Note extends Model implements HasMedia
     {
         return $this->hasMany(Mindmap::class);
     }
+
+    public function crosswords()
+    {
+        return $this->hasMany(Crossword::class);
+    }
     
     public function feedback()
     {

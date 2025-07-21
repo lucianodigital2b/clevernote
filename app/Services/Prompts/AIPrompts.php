@@ -239,6 +239,98 @@ class AIPrompts
                 Return only the JSON object with nodes and edges in a format ready to be used in React Flow.\n\nContent:\n" . $content;
     }
 
+    public static function crosswordPrompt(string $content, string $language): string
+    {
+        // Force English for autodetect to prevent AI misinterpretation
+        $targetLanguage = ($language === 'autodetect') ? "LANGUAGE INSTRUCTION: You MUST generate ALL content in the language of the CONTENT. Do not translate or use any other language." : 
+        "LANGUAGE INSTRUCTION: You MUST generate ALL content in {$language}. Do not translate or use any other language.";
+        
+        return <<<EOT
+
+            $targetLanguage
+            You are an AI assistant that creates educational crossword puzzles from study content.
+            Given the following note content, generate a crossword puzzle with clues and answers.
+
+            TASK: Generate a valid educational crossword puzzle in **strict** JSON format based on the content below.
+
+            STEP 1: KEY TERM EXTRACTION
+            - Extract 8 to 15 **important concepts**, definitions, names, or short phrases (max 2–4 words).
+            - Focus on educational value: use terms relevant to learning and memory.
+            - Remove **spaces and special characters** from answers (e.g., "WORLD WAR" → "WORLDWAR").
+            - Answers MUST vary in length between 3 and 12 characters.
+
+            STEP 2: CLUE CREATION
+            - Create one educational clue per term.
+            - Clues MUST:
+            - Be 5–15 words long.
+            - Be definitions, descriptions, or “fill in the blank” style.
+            - Be clear, factual, and refer directly to the original content.
+            - Avoid riddles, puns, or vague descriptions.
+
+            STEP 3: GRID CONSTRUCTION
+            - Grid size: Max 15x15. Top-left is (0,0).
+            - Begin with the **longest word placed horizontally in the center**.
+            - Then, place each additional word one by one following these rules:
+            - It MUST intersect with an already-placed word by **sharing a letter**.
+            - Intersection must happen at the **correct grid coordinates** (row/col) with **matching letters**.
+            - Placement MUST be at a right angle (across intersects down).
+            - There MUST be **no overlapping with incorrect letters**, and **no words without at least one intersection**.
+            - Leave **at least one empty cell between parallel words** that don’t intersect.
+            - Every word MUST be connected to the grid — no isolated placements.
+            - Aim for 2–3 intersections per word if possible.
+
+            ❗️STRICT VALIDATION:
+            - Reject any word that cannot intersect with existing ones.
+            - Do NOT allow placement unless a valid, accurate intersection exists.
+            - Words that are disconnected or floating are strictly forbidden.
+            - All words must build a **fully connected crossword** with proper layout and letter accuracy.
+
+            EXAMPLE:
+            - "SCIENCE" is placed horizontally at row 5, col 2 → spans cols 2–8.
+            - "CHEMISTRY" shares a "C" at index 2.
+            - It is placed vertically (down) starting at row 3, col 4 so that the “C” aligns with the one in “SCIENCE”.
+
+            STEP 4: OUTPUT FORMAT
+            Return **only a valid JSON object**, compatible with PHP’s `json_decode`. No extra text.
+
+            ```json
+            {
+            "title": "Crossword title based on content (in target language)",
+            "across": {
+                "1": {
+                "clue": "Clue for across word (in target language)",
+                "answer": "ANSWER",
+                "row": 5,
+                "col": 2
+                }
+            },
+            "down": {
+                "2": {
+                "clue": "Clue for down word (in target language)",
+                "answer": "ANSWER",
+                "row": 3,
+                "col": 4
+                }
+            }
+            }
+
+
+        RULES FOR JSON:
+
+        Number clues sequentially (1, 2, 3…).
+
+        Each entry must include row, col, clue, and answer.
+
+        Answers must be uppercase, alphanumeric, no spaces or symbols.
+
+        Do not return explanations or context — ONLY the JSON.
+
+        CONTENT TO PROCESS:
+        {$content}
+
+        EOT;
+    }
+
     public static function studyPlanPrompt(array $surveyData, string $language): string
     {
         $surveyJson = json_encode($surveyData, JSON_PRETTY_PRINT);

@@ -356,36 +356,40 @@ const Study = ({ flashcardSet }: Props) => {
                     >
                         <div className={`absolute w-full h-full transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
                             {/* Front Side */}
-                            <Card className={`absolute w-full h-full backface-hidden ${isFlipped ? 'opacity-0' : 'opacity-100'}`}>
+                            <Card className={`absolute w-full h-full backface-hidden ${isFlipped ? 'opacity-0' : 'opacity-100'} flex flex-col`}>
                                 <CardHeader className="flex-none">
                                     <CardTitle className="text-center">
                                         {t('study_flashcard_of', { current: currentIndex + 1, total: flashcardSet.flashcards.length })}
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6">
-                                    <div 
-                                        className="text-center text-base sm:text-xl leading-relaxed"
-                                        dangerouslySetInnerHTML={{
-                                            __html: DOMPurify.sanitize(currentFlashcard.question)
-                                        }}
-                                    />
+                                <CardContent className="flex-1 overflow-y-auto p-4 sm:p-6">
+                                    <div className="flex items-center justify-center min-h-full">
+                                        <div 
+                                            className="text-center text-base sm:text-xl leading-relaxed max-w-full"
+                                            dangerouslySetInnerHTML={{
+                                                __html: DOMPurify.sanitize(currentFlashcard.question)
+                                            }}
+                                        />
+                                    </div>
                                 </CardContent>
                             </Card>
                             
                             {/* Back Side */}
-                            <Card className={`absolute w-full h-full backface-hidden rotate-y-180 ${isFlipped ? 'opacity-100' : 'opacity-0'}`}>
+                            <Card className={`absolute w-full h-full backface-hidden rotate-y-180 ${isFlipped ? 'opacity-100' : 'opacity-0'} flex flex-col`}>
                                 <CardHeader className="flex-none">
                                     <CardTitle className="text-center">
                                         {t('study_flashcard_of', { current: currentIndex + 1, total: flashcardSet.flashcards.length })}
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6">
-                                    <div 
-                                        className="text-center text-base sm:text-xl leading-relaxed"
-                                        dangerouslySetInnerHTML={{
-                                            __html: DOMPurify.sanitize(currentFlashcard.answer)
-                                        }}
-                                    />
+                                <CardContent className="flex-1 overflow-y-auto p-4 sm:p-6">
+                                    <div className="flex items-center justify-center min-h-full">
+                                        <div 
+                                            className="text-center text-base sm:text-xl leading-relaxed max-w-full"
+                                            dangerouslySetInnerHTML={{
+                                                __html: DOMPurify.sanitize(currentFlashcard.answer)
+                                            }}
+                                        />
+                                    </div>
                                 </CardContent>
                             </Card>
                         </div>

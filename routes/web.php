@@ -15,6 +15,7 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\QuizSharingController;
 use App\Http\Controllers\StatisticsController;
+use App\Http\Controllers\CrosswordController;
 use App\Models\User;
 use App\Notifications\NewUserFeedback;
 use Laravel\Horizon\Horizon;
@@ -37,6 +38,12 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('notes', NoteController::class);
     Route::resource('feedback', FeedbackController::class);
     Route::post('/notes/{note}/retry', [NoteController::class, 'retryProcessing'])->name('notes.retry');
+    
+    // Crossword routes
+    Route::resource('crosswords', CrosswordController::class);
+    Route::post('/notes/{note}/generate-crossword', [CrosswordController::class, 'generateFromNote'])->name('notes.generate-crossword');
+    Route::get('/crosswords/{crossword}/status', [CrosswordController::class, 'status'])->name('crosswords.status');
+    Route::post('/crosswords/{crossword}/retry', [CrosswordController::class, 'retry'])->name('crosswords.retry');
     
 
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

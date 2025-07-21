@@ -63,4 +63,12 @@ class DeepSeekService extends AbstractAIService
         
         return $this->sendRequest($prompt);
     }
+
+    public function generateContent(string $prompt): string
+    {
+        $response = $this->sendRequest($prompt);
+        
+        // Return the raw JSON string for crossword generation
+        return json_encode($response);
+    }
 }

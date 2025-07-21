@@ -70,7 +70,7 @@ export function XPBar({ user: initialUser }: XPBarProps) {
     const progress = getLevelProgress(user.level, user.xp);
 
     return (
-        <div className="flex items-center gap-3 px-3 py-2 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
+        <div className="hidden md:flex items-center gap-3 px-3 py-2 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg  dark:border-purple-700">
             {/* Level Badge */}
             <div className="flex items-center gap-1">
                 <div className={`flex items-center justify-center w-8 h-8 rounded-full ${

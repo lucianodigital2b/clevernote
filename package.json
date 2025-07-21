@@ -41,6 +41,7 @@
         "@headlessui/react": "^2.2.0",
         "@heroicons/react": "^2.2.0",
         "@inertiajs/react": "^2.0.0",
+        "@jaredreisinger/react-crossword": "^5.2.0",
         "@laravel/stream-react": "^0.3.5",
         "@microsoft/clarity": "^1.0.0",
         "@radix-ui/react-alert-dialog": "^1.1.6",

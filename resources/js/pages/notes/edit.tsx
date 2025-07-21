@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
-import { Share, MoreHorizontal, Maximize2, X, ArrowLeft, Save, Clock, CheckCircle2, Folder, Trash2, Sparkles, Brain, Map, FileText, Loader2, ChevronRight, Layers, Copy } from 'lucide-react';
+import { Share, MoreHorizontal, Maximize2, X, ArrowLeft, Save, Clock, CheckCircle2, Folder, Trash2, Sparkles, Brain, Map, FileText, Loader2, ChevronRight, Layers, Copy, Grid3X3 } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -360,6 +360,61 @@ export default function Edit({ note }: { note: Note }) {
         }
     };
 
+    // Add new state for crossword loading modal
+    const [isCrosswordLoading, setIsCrosswordLoading] = useState(false);
+
+    const handleCreateCrossword = async () => {
+        setIsCrosswordLoading(true);
+        try {
+            // Check if crossword already exists in preloaded data
+            if (note.crosswords && note.crosswords.length > 0) {
+                setIsCrosswordLoading(false);
+                // Get the last created crossword
+                const lastCrossword = note.crosswords[note.crosswords.length - 1];
+                router.visit(`/crosswords/${lastCrossword.id}`);
+                return;
+            }
+
+            // If no existing crossword, create a new one
+            const response = await axios.post(`/notes/${note.id}/generate-crossword`);
+            if (response.data && response.data.crossword_id) {
+                const crosswordId = response.data.crossword_id;
+                toastConfig.success("Crossword generation started");
+                
+                // Start polling for crossword status
+                const intervalId = setInterval(async () => {
+                    try {
+                        const crosswordResponse = await axios.get(`/crosswords/${crosswordId}/status`);
+                        const crosswordData = crosswordResponse.data;
+                        
+                        if (crosswordData.status === 'completed') {
+                            clearInterval(intervalId);
+                            setIsCrosswordLoading(false);
+                            router.visit(`/crosswords/${crosswordId}`);
+                            
+                        } else if (crosswordData.status === 'failed') {
+                            clearInterval(intervalId);
+                            setIsCrosswordLoading(false);
+                            toastConfig.error("Crossword generation failed: " + (crosswordData.failure_reason || "Unknown error"));
+                        }
+                        // Continue polling if status is 'generating' or 'pending'
+                    } catch (error) {
+                        console.error('Error checking crossword status:', error);
+                        clearInterval(intervalId);
+                        setIsCrosswordLoading(false);
+                        toastConfig.error("Failed to check crossword generation status");
+                    }
+                }, 3000); // Poll every 3 seconds
+                
+            }
+        } catch (error) {
+            console.error('Error creating crossword:', error);
+            setIsCrosswordLoading(false);
+            toastConfig.error("Failed to start crossword generation");
+        }
+    };
+
+
     const actions = [
         { 
             icon: Layers, 
@@ -385,6 +440,14 @@ export default function Edit({ note }: { note: Note }) {
             color: 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700 dark:text-white dark:border-transparent',
             loading: isMindmapLoading
         },
+        // { 
+        //     icon: Grid3X3, 
+        //     label: note.crosswords && note.crosswords.length > 0 ? t('review_crossword') : t('create_crossword'), 
+        //     description: note.crosswords && note.crosswords.length > 0 ? t('review_crossword_puzzle') : t('generate_crossword_puzzle'),
+        //     action: handleCreateCrossword,
+        //     color: 'bg-orange-50 hover:bg-orange-100 border-orange-200 text-orange-700 dark:text-white dark:border-transparent',
+        //     loading: isCrosswordLoading
+        // },
     ];
 
 
@@ -691,7 +754,7 @@ export default function Edit({ note }: { note: Note }) {
                                 </div>
                             </div>
                             
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2">
                                 <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-white">
                                     <div className="flex items-center gap-1">
                                         <CheckCircle2 className="h-4 w-4 text-green-500" />
@@ -704,65 +767,69 @@ export default function Edit({ note }: { note: Note }) {
                                     </div>
                                 </div>
                                 
-                                <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => setIsFolderModalOpen(true)}
-                                    className="flex items-center gap-2"
-                                >
-                                    <Folder className="h-4 w-4" />
-                                    <span className="hidden sm:inline">{t('folder')}</span>
-                                </Button>
-                                
-                                <div className="flex items-center gap-2">
-                                    <label className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-                                        <Switch
-                                            checked={isPublic}
-                                            onCheckedChange={(checked) => {
-                                                setIsPublic(checked);
-                                                // Update the note immediately when share is toggled
-                                                axios.patch(`/notes/${note.id}`, {
-                                                    content,
-                                                    folder_id: selectedFolder,
-                                                    is_public: checked,
-                                                    _method: 'PUT'
-                                                })
-                                                .then(() => {
-                                                })
-                                                .catch((error) => {
-                                                    console.log(error);
-                                                    setIsPublic(!checked); // Revert the state on error
-                                                });
-                                            }}
-                                        />
-                                        {t('public_sharing')}
-                                    </label>
-                                    {isPublic && (
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={handleCopyPublicLink}
-                                            className="flex items-center gap-1 text-xs"
-                                        >
-                                            <Copy className="w-3 h-3" />
-                                            {t('copy_link')}
-                                        </Button>
-                                    )}
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <Button 
+                                        variant="outline" 
+                                        size="sm"
+                                        onClick={() => setIsFolderModalOpen(true)}
+                                        className="flex items-center gap-2"
+                                    >
+                                        <Folder className="h-4 w-4" />
+                                        <span className="hidden sm:inline">{t('folder')}</span>
+                                    </Button>
+                                    
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                        <label className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400 whitespace-nowrap">
+                                            <Switch
+                                                checked={isPublic}
+                                                onCheckedChange={(checked) => {
+                                                    setIsPublic(checked);
+                                                    // Update the note immediately when share is toggled
+                                                    axios.patch(`/notes/${note.id}`, {
+                                                        content,
+                                                        folder_id: selectedFolder,
+                                                        is_public: checked,
+                                                        _method: 'PUT'
+                                                    })
+                                                    .then(() => {
+                                                    })
+                                                    .catch((error) => {
+                                                        console.log(error);
+                                                        setIsPublic(!checked); // Revert the state on error
+                                                    });
+                                                }}
+                                            />
+                                            <span className="hidden sm:inline">{t('public_sharing')}</span>
+                                            <span className="sm:hidden">Public</span>
+                                        </label>
+                                        {isPublic && (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={handleCopyPublicLink}
+                                                className="flex items-center gap-1 text-xs"
+                                            >
+                                                <Copy className="w-3 h-3" />
+                                                <span className="hidden sm:inline">{t('copy_link')}</span>
+                                                <span className="sm:hidden">Copy</span>
+                                            </Button>
+                                        )}
+                                    </div>
+                                    
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="outline" size="sm">
+                                                <MoreHorizontal className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="text-red-600">
+                                                <Trash2 className="h-4 w-4 mr-2" />
+                                                Delete Note
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 </div>
-                                
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" size="sm">
-                                            <MoreHorizontal className="h-4 w-4" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="text-red-600">
-                                            <Trash2 className="h-4 w-4 mr-2" />
-                                            Delete Note
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
                             </div>
                         </div>
 
