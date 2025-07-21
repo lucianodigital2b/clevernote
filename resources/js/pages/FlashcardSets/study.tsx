@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, ArrowRight, PlusCircle, RotateCw, Shuffle } from 'lucide-react';
 import { FlashcardSet } from '@/types';
 import { Progress } from "@/components/ui/progress";
+import { XPNotification } from '@/components/xp-notification';
 import { useTranslation } from 'react-i18next';
 import DOMPurify from 'dompurify';
 import axios from 'axios';
@@ -28,6 +29,15 @@ interface RecallOption {
     quality: number;
 }
 
+interface XPReward {
+    success: boolean;
+    xp_gained: number;
+    total_xp: number;
+    old_level: number;
+    new_level: number;
+    leveled_up: boolean;
+}
+
 const Study = ({ flashcardSet }: Props) => {
     const { t } = useTranslation();
     const [progress, setProgress] = useState<FlashcardProgress[]>([]);
@@ -35,6 +45,7 @@ const Study = ({ flashcardSet }: Props) => {
     const [currentIndex, setCurrentIndex] = useState<number | null>(null);
     const [isFlipped, setIsFlipped] = useState(false);
     const [isComplete, setIsComplete] = useState(false);
+    const [xpReward, setXpReward] = useState<XPReward | null>(null);
     
     // Check if we're in fast review mode
     const urlParams = new URLSearchParams(window.location.search);
@@ -207,13 +218,18 @@ const Study = ({ flashcardSet }: Props) => {
         setProgress(newProgress);
 
         try {
-            await axios.post(`/flashcard-sets/${flashcardSet.id}/progress`, {
+            const response = await axios.post(`/flashcard-sets/${flashcardSet.id}/progress`, {
                 flashcard_id: currentFlashcard!.id,
                 interval: option.interval,
                 repetition: newProgress[currentIndex].repetition,
                 efactor: currentProgress.efactor,
                 next_review: new Date(nextReviewTime).toISOString()
             });
+
+            // Handle XP reward if present in response
+            if (response.data.xp_reward) {
+                setXpReward(response.data.xp_reward);
+            }
         } catch (error) {
             console.error('Failed to update flashcard progress:', error);
             return;
@@ -227,6 +243,10 @@ const Study = ({ flashcardSet }: Props) => {
                 handleNext();
             }, 300); // Small delay to show the selection
         }
+    };
+
+    const handleXPNotificationClose = () => {
+        setXpReward(null);
     };
 
     const studyProgress = dueIndexes.length === 0
@@ -483,6 +503,12 @@ const Study = ({ flashcardSet }: Props) => {
                     </div>
                 </div>
             </div>
+
+            {/* XP Notification */}
+            <XPNotification 
+                xpReward={xpReward} 
+                onClose={handleXPNotificationClose}
+            />
         </AppLayout>
     );
 };

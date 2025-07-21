@@ -1,17 +1,21 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { type BreadcrumbItem as BreadcrumbItemType } from '@/types';
+import { type BreadcrumbItem as BreadcrumbItemType, type SharedData } from '@/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { XPBar } from '@/components/xp-bar';
 import { useTranslation } from 'react-i18next';
 import { useAppearance } from '@/hooks/use-appearance';
+import { usePage } from '@inertiajs/react';
 import { Moon, Sun } from 'lucide-react';
 import languages from '@/utils/languages.json';
 
 export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItemType[] }) {
     const { i18n } = useTranslation();
     const { appearance, updateAppearance } = useAppearance();
+    const page = usePage<SharedData>();
+    const { auth } = page.props;
 
     const handleLanguageChange = (value: string) => {
         if (value) {
@@ -32,6 +36,14 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                 <SidebarTrigger className="-ml-1" />
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
+            
+            {/* XP Bar - centered */}
+            <div className="flex-1 flex justify-center px-4">
+                <div className="max-w-md w-full">
+                    <XPBar user={auth.user} />
+                </div>
+            </div>
+            
             <div className="flex items-center gap-2">
                 <TooltipProvider delayDuration={0}>
                     <Tooltip>

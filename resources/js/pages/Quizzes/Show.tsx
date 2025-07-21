@@ -4,12 +4,20 @@ import { Head } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { QuizContent } from '@/components/quiz/quiz-content';
+import { XPNotification } from '@/components/xp-notification';
 import AppLayout from '@/layouts/app-layout';
 import { toast } from 'sonner';
 import axios from 'axios';
 import { Quiz } from '@/types';
 
-
+interface XPReward {
+    success: boolean;
+    xp_gained: number;
+    total_xp: number;
+    old_level: number;
+    new_level: number;
+    leveled_up: boolean;
+}
 
 interface Props {
     quiz: Quiz;
@@ -18,6 +26,7 @@ interface Props {
 export default function Show({ quiz }: Props) {
     const { t } = useTranslation();
     const [isQuizStarted, setIsQuizStarted] = useState(false);
+    const [xpReward, setXpReward] = useState<XPReward | null>(null);
 
     const handleQuizComplete = async (score: number, selectedAnswers: Array<{ question_id: string; option_id: string }>) => {
         try {
@@ -25,10 +34,20 @@ export default function Show({ quiz }: Props) {
                 answers: selectedAnswers
             });
 
+            
+            // Handle XP reward if present in response
+            if (response.data.xp_reward) {
+                setXpReward(response.data.xp_reward);
+            }
+
         } catch (error) {
             console.error('Error saving quiz attempt:', error);
             toast.error(t('quiz_save_error'));
         }
+    };
+
+    const handleXPNotificationClose = () => {
+        setXpReward(null);
     };
 
     return (
@@ -93,6 +112,12 @@ export default function Show({ quiz }: Props) {
                     </div>
                 </motion.div>
             </div>
+
+            {/* XP Notification */}
+            <XPNotification 
+                xpReward={xpReward} 
+                onClose={handleXPNotificationClose}
+            />
         </AppLayout>
     );
 }

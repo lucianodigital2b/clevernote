@@ -469,6 +469,8 @@
   "spaced_repetition_description": "Cronograma de revisão otimizado baseado na retenção de memória",
   "fast_review_mode_indicator": "⚡ Modo de Revisão Rápida",
   "fast_review_keyboard_shortcuts": "Espaço/Enter para virar/próximo, ← → para navegar, 1/2 para lembrar",
+  "keyboard_shortcuts_label": "Atalhos do Teclado:",
+  "keyboard_shortcuts_help": "Espaço/Enter para virar, ← → para navegar",
   "fast_review_recall_remember": "Lembrar",
   "fast_review_recall_forgot": "Esqueci",
   "record_audio_modal_title": "Gravar Áudio",

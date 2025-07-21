@@ -29,7 +29,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name', 'email', 'password', 'google_id', 'apple_id',
         'preferred_language', 'discovery_source',
-        'primary_subject_interest', 'learning_goals', 'onboarding_completed', 'notes_count', 'survey_data', 'study_plan'
+        'primary_subject_interest', 'learning_goals', 'onboarding_completed', 'notes_count', 'survey_data', 'study_plan', 'xp', 'level'
     ];
 
     /**
@@ -96,5 +96,14 @@ class User extends Authenticatable
     public function flashcardProgress(): HasMany
     {
         return $this->hasMany(FlashcardProgress::class);
+    }
+
+    /**
+     * Get level progress information
+     */
+    public function getLevelProgress(): array
+    {
+        $xpService = app(\App\Services\XPService::class);
+        return $xpService->getLevelProgress($this);
     }
 }

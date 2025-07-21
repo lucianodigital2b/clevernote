@@ -546,6 +546,8 @@
   "spaced_repetition_description": "Optimized review schedule based on memory retention",
   "fast_review_mode_indicator": "⚡ Fast Review Mode",
   "fast_review_keyboard_shortcuts": "Space/Enter to flip/next, ← → to navigate, 1/2 for recall",
+  "keyboard_shortcuts_label": "Keyboard Shortcuts:",
+  "keyboard_shortcuts_help": "Space/Enter to flip, ← → to navigate",
   "fast_review_recall_remember": "Remember",
   "fast_review_recall_forgot": "Forgot",
   "record_audio_modal_title": "Record Audio",

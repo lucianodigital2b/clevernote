@@ -12,6 +12,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use App\Models\QuizAttempt;
 use App\Models\QuizAnswer;
 use App\Services\QuizGeneratorService;
+use App\Services\XPService;
 use App\Jobs\GenerateQuizFromNote;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -22,10 +23,12 @@ use Inertia\Inertia;
 class QuizController extends Controller
 {
     protected $quizGeneratorService;
+    protected $xpService;
 
-    public function __construct(QuizGeneratorService $quizGeneratorService)
+    public function __construct(QuizGeneratorService $quizGeneratorService, XPService $xpService)
     {
         $this->quizGeneratorService = $quizGeneratorService;
+        $this->xpService = $xpService;
     }
 
     public function index(Request $request)
@@ -109,10 +112,14 @@ class QuizController extends Controller
 
             DB::commit();
             
+            // Award XP for creating a quiz
+            $xpResult = $this->xpService->awardXP(Auth::user(), 'create_quiz');
+            
             if ($request->wantsJson()) {
                 return response()->json([
                     'message' => 'Quiz created successfully!',
-                    'quiz' => $quiz->load(['questions.options'])
+                    'quiz' => $quiz->load(['questions.options']),
+                    'xp_reward' => $xpResult
                 ], 201);
             }
 
@@ -285,6 +292,9 @@ class QuizController extends Controller
             $attempt->update(['score' => $score]);
 
             UpdateUserStatistics::dispatch(Auth::user()->id);
+
+            // Award XP for completing a quiz
+            $xpResult = $this->xpService->awardXP(Auth::user(), 'complete_quiz');
     
             
             DB::commit();
@@ -292,6 +302,7 @@ class QuizController extends Controller
                 'score' => $score,
                 'total' => $totalQuestions,
                 'percentage' => ($score / $totalQuestions) * 100,
+                'xp_reward' => $xpResult,
             ]);
 
         } catch (\Exception $e) {
@@ -356,14 +367,24 @@ class QuizController extends Controller
             // Only update user statistics if user is authenticated
             if (Auth::check()) {
                 UpdateUserStatistics::dispatch(Auth::user()->id);
+                
+                // Award XP for completing a quiz
+                $xpResult = $this->xpService->awardXP(Auth::user(), 'complete_quiz');
             }
     
             DB::commit();
-            return response()->json([
+            $response = [
                 'score' => $score,
                 'total' => $totalQuestions,
                 'percentage' => ($score / $totalQuestions) * 100,
-            ]);
+            ];
+            
+            // Add XP reward to response if user is authenticated
+            if (Auth::check() && isset($xpResult)) {
+                $response['xp_reward'] = $xpResult;
+            }
+            
+            return response()->json($response);
 
         } catch (\Exception $e) {
             DB::rollBack();

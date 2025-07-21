@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Jobs\UpdateUserStatistics;
 use App\Models\FlashcardSet;
 use App\Models\Flashcard;
+use App\Services\XPService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,12 @@ use Inertia\Inertia;
 
 class FlashcardSetController extends Controller
 {
+    protected $xpService;
+
+    public function __construct(XPService $xpService)
+    {
+        $this->xpService = $xpService;
+    }
 
     public function index(Request $request)
     {
@@ -54,8 +61,14 @@ class FlashcardSetController extends Controller
             $flashcardSet->flashcards()->attach($validated['flashcard_ids']);
         }
 
+        // Award XP for creating a flashcard set
+        $xpResult = $this->xpService->awardXP(Auth::user(), 'create_flashcard_set');
+
         if ($request->wantsJson()) {
-            return response()->json($flashcardSet);
+            return response()->json([
+                'flashcardSet' => $flashcardSet,
+                'xp_reward' => $xpResult
+            ]);
         }
 
         return redirect()->route('flashcard-sets.index')->with('success', 'Flashcard set created successfully.');
@@ -199,7 +212,13 @@ class FlashcardSetController extends Controller
 
         UpdateUserStatistics::dispatch(Auth::id());
 
-        return response()->json(['success' => true]);
+        // Award XP for completing flashcard study
+        $xpResult = $this->xpService->awardXP(Auth::user(), 'complete_flashcard_set');
+
+        return response()->json([
+            'success' => true,
+            'xp_reward' => $xpResult
+        ]);
     }
     
     public function getFlashcards(Request $request)

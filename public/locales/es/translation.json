@@ -470,6 +470,8 @@
   "spaced_repetition_description": "Horario de revisión optimizado basado en la retención de memoria",
   "fast_review_mode_indicator": "⚡ Modo de Revisión Rápida",
   "fast_review_keyboard_shortcuts": "Espacio/Enter para voltear/siguiente, ← → para navegar, 1/2 para recordar",
+  "keyboard_shortcuts_label": "Atajos de Teclado:",
+  "keyboard_shortcuts_help": "Espacio/Enter para voltear, ← → para navegar",
   "fast_review_recall_remember": "Recordar",
   "fast_review_recall_forgot": "Olvidé",
   "record_audio_modal_title": "Grabar Audio",
