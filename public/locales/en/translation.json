@@ -670,9 +670,9 @@
   "reliability_accuracy_title": "more accurate",
   "reliability_accuracy_description": "Significantly outperforms general AI models on academic content.",
 
-  "hero_heading_make_learning": "Make learning more",
+  "hero_make_learning": "Make learning more",
   "hero_social_proof_loved_by": "Loved by",
-  "hero_social_proof_students": "1 million+ students"
-
+  "hero_million_students": "1 million+ students",
+  "hero_interactive": "interactive"
 
 }

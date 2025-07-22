@@ -7,11 +7,7 @@ import { useTranslation } from "react-i18next";
 const Hero = () => {
   const notesRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
-  const [currentWord, setCurrentWord] = useState(0);
-  const [displayText, setDisplayText] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
-  
-  const words = ['fun', 'easier', 'engaging', 'effective', 'interactive'];
+  // Removed typewriter effect states and words array
 
   useEffect(() => {
     const floatingElements = notesRef.current?.querySelectorAll('.floating-note, .floating-artifact');
@@ -35,28 +31,7 @@ const Hero = () => {
     });
   }, []);
 
-  // Typewriter effect
-  useEffect(() => {
-    const currentWordText = words[currentWord];
-    const timeout = setTimeout(() => {
-      if (!isDeleting) {
-        if (displayText.length < currentWordText.length) {
-          setDisplayText(currentWordText.slice(0, displayText.length + 1));
-        } else {
-          setTimeout(() => setIsDeleting(true), 2000);
-        }
-      } else {
-        if (displayText.length > 0) {
-          setDisplayText(displayText.slice(0, -1));
-        } else {
-          setIsDeleting(false);
-          setCurrentWord((prev) => (prev + 1) % words.length);
-        }
-      }
-    }, isDeleting ? 100 : 150);
-
-    return () => clearTimeout(timeout);
-  }, [displayText, isDeleting, currentWord, words]);
+  // Removed typewriter effect useEffect
 
   return (
     <div 
@@ -78,9 +53,8 @@ const Hero = () => {
             </div>
             <h1 className="mb-8 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight text-gray-900  px-2 sm:px-0">
               {t('hero_make_learning')}{' '}
-              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent relative">
-                {displayText}
-                <span className="animate-pulse">|</span>
+              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                {t('hero_interactive')}
               </span>
             </h1>
             
@@ -124,7 +98,7 @@ const Hero = () => {
                   </div>
                 </div>
                 <div className="text-left sm:text-left ">
-                  <div className="text-indigo-600 font-semibold text-center sm:text-lg">{t('hero_loved_by')}</div>
+                  <div className="text-indigo-600 font-semibold text-center sm:text-lg">{t('hero_social_proof_loved_by')}</div>
                   <div className="text-indigo-600 font-semibold text-center sm:text-lg">{t('hero_million_students')}</div>
                 </div>
               </div>
