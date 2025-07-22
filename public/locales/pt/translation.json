@@ -117,8 +117,8 @@
   "reminder": "Lembrete",
   "study_session": "Sessão de estudo na biblioteca amanhã às 3pm com o grupo de estudo",
   "powerful_features": "Recursos Poderosos",
-  "features_heading": "Tudo que você precisa para se destacar no aprendizado",
-  "features_description": "Projetado para estudantes e aprendizes ao longo da vida, o Clevernote ajuda você a capturar, organizar e reter informações de forma mais eficaz.",
+  "features_heading": "Tudo que você precisa",
+  "features_description": "Projetado para estudantes, o Clevernote ajuda você a capturar, organizar e reter informações de forma mais eficaz.",
   "voice_to_text_title": "Conversão de Voz para Texto",
   "voice_to_text_description": "Transforme seu conteúdo falado em notas escritas com nossa tecnologia de transcrição alimentada por IA. Perfeito para aulas e reuniões.",
   "multilingual_support_title": "Suporte Multilíngue",
@@ -567,7 +567,14 @@
   "month_september": "Setembro",
   "month_october": "Outubro",
   "month_november": "Novembro",
-  "month_december": "Dezembro"
+  "month_december": "Dezembro",
 
+  "reliability_heading_built_for": "Construído para",
+  "reliability_heading_academic_excellence": "excelência acadêmica",
+  "reliability_heading_and_precision": "e precisão",
+  "reliability_sat_math_title": "SAT Matemática Perfeito",
+  "reliability_sat_math_description": "Alcança pontuações perfeitas de 800 enquanto outras ferramentas de IA param em 700.",
+  "reliability_accuracy_title": "mais preciso",
+  "reliability_accuracy_description": "Supera significativamente modelos de IA gerais em conteúdo acadêmico."
 
 }

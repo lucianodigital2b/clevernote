@@ -1,62 +1,71 @@
 
-import React from "react";
+import React, { useState, useRef } from "react";
 import { 
-  BookOpen, 
-  Sparkles, 
-  Search, 
-  Mic,
-  Languages,
-  Lightbulb,
-  FileSearch,
-  FileText
+  Upload, 
+  Youtube, 
+  MessageCircle,
+  FileText,
+  Send,
+  Loader2
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const Features = () => {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<'upload' | 'youtube' | 'chat'>('upload');
+  const [dragActive, setDragActive] = useState(false);
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [chatMessage, setChatMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const featureItems = [
-    {
-      icon: <Mic className="w-5 h-5 text-indigo-600" />,
-      title: t('voice_to_text_title'),
-      description: t('voice_to_text_description'),
-    },
-    {
-      icon: <Languages className="w-5 h-5 text-indigo-600" />,
-      title: t('multilingual_support_title'),
-      description: t('multilingual_support_description'),
-    },
-    {
-      icon: <FileSearch className="w-5 h-5 text-indigo-600" />,
-      title: t('smart_analysis_title'),
-      description: t('smart_analysis_description'),
-    },
-    {
-      icon: <FileText className="w-5 h-5 text-indigo-600" />,
-      title: t('materials_generator_title'),
-      description: t('materials_generator_description'),
-    },
-    {
-      icon: <Search className="w-5 h-5 text-indigo-600" />,
-      title: t('instant_search_title'),
-      description: t('instant_search_description'),
-    },
-    {
-      icon: <Sparkles className="w-5 h-5 text-indigo-600" />,
-      title: t('ai_summaries_title'),
-      description: t('ai_summaries_description'),
-    },
-    {
-      icon: <BookOpen className="w-5 h-5 text-indigo-600" />,
-      title: t('study_modes_title'),
-      description: t('study_modes_description'),
-    },
-    {
-      icon: <Lightbulb className="w-5 h-5 text-indigo-600" />,
-      title: t('knowledge_connections_title'),
-      description: t('knowledge_connections_description'),
-    },
-  ];
+  const redirectToLogin = () => {
+    setIsLoading(true);
+    // Simulate processing time
+    setTimeout(() => {
+      window.location.href = "/login";
+    }, 1500);
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      redirectToLogin();
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      redirectToLogin();
+    }
+  };
+
+  const handleYoutubeSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (youtubeUrl.trim()) {
+      redirectToLogin();
+    }
+  };
+
+  const handleChatSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (chatMessage.trim()) {
+      redirectToLogin();
+    }
+  };
 
   return (
     <section id="features" className="py-20 bg-white">
@@ -73,24 +82,193 @@ const Features = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {featureItems.map((feature, index) => (
-            <div 
-              key={index} 
-              className="card-feature hover-scale group"
-              style={{animationDelay: `${index * 0.1}s`}}
+        {/* Action Tabs */}
+        <div className="flex justify-center mb-8">
+          <div className="flex bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setActiveTab('upload')}
+              className={`flex items-center px-4 py-2 rounded-md transition-all cursor-pointer ${
+                activeTab === 'upload' 
+                  ? 'bg-white shadow-sm text-gray-700' 
+                  : 'text-gray-600 hover:text-gray-700'
+              }`}
             >
-              <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center mb-5 group-hover:bg-indigo-200 transition-colors">
-                {feature.icon}
+              <FileText className="w-4 h-4 text-indigo-600 mr-2" />
+              <span className="text-sm font-medium">{t('features_tab_pdf_word')}</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('youtube')}
+              className={`flex items-center px-4 py-2 rounded-md transition-all cursor-pointer ${
+                activeTab === 'youtube' 
+                  ? 'bg-white shadow-sm text-gray-700' 
+                  : 'text-gray-600 hover:text-gray-700'
+              }`}
+            >
+              <Youtube className="w-4 h-4 mr-2" />
+              <span className="text-sm font-medium">{t('features_tab_youtube')}</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('chat')}
+              className={`flex items-center px-4 py-2 rounded-md transition-all cursor-pointer ${
+                activeTab === 'chat' 
+                  ? 'bg-white shadow-sm text-gray-700' 
+                  : 'text-gray-600 hover:text-gray-700'
+              }`}
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              <span className="text-sm font-medium">{t('features_tab_chat')}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="max-w-4xl mx-auto">
+          <div
+            className={`relative border-2 border-dashed rounded-xl p-12 text-center transition-all duration-200 ${
+              dragActive && activeTab === 'upload'
+                ? "border-indigo-500 bg-indigo-50" 
+                : "border-gray-300 hover:border-indigo-400 hover:bg-gray-50"
+            }`}
+            onDragEnter={activeTab === 'upload' ? handleDrag : undefined}
+            onDragLeave={activeTab === 'upload' ? handleDrag : undefined}
+            onDragOver={activeTab === 'upload' ? handleDrag : undefined}
+            onDrop={activeTab === 'upload' ? handleDrop : undefined}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.doc,.docx"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            
+            {/* Upload Tab Content */}
+            {activeTab === 'upload' && (
+              <div className="space-y-4">
+                <div className="w-16 h-16 mx-auto bg-indigo-100 rounded-full flex items-center justify-center">
+                  {isLoading ? (
+                    <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+                  ) : (
+                    <Upload className="w-8 h-8 text-indigo-600" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {isLoading ? (
+                      t('features_upload_processing')
+                    ) : (
+                      <>
+                        {t('features_upload_drop_files')}{" "}
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isLoading}
+                          className="text-indigo-600 hover:text-indigo-700 underline cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {t('features_upload_browse')}
+                        </button>
+                      </>
+                    )}
+                  </h3>
+                  <p className="text-gray-600">
+                    {isLoading 
+                      ? t('features_upload_processing_description')
+                      : t('features_upload_description')
+                    }
+                  </p>
+                </div>
               </div>
-              <h3 className="text-xl font-medium text-gray-900 mb-2">
-                {feature.title}
-              </h3>
-              <p className="text-gray-600">
-                {feature.description}
-              </p>
-            </div>
-          ))}
+            )}
+
+            {/* YouTube Tab Content */}
+            {activeTab === 'youtube' && (
+              <form onSubmit={handleYoutubeSubmit} className="space-y-6">
+                <div className="w-16 h-16 mx-auto bg-red-100 rounded-full flex items-center justify-center">
+                  {isLoading ? (
+                    <Loader2 className="w-8 h-8 text-red-600 animate-spin" />
+                  ) : (
+                    <Youtube className="w-8 h-8 text-red-600" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {isLoading ? t('features_youtube_processing') : t('features_youtube_title')}
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    {isLoading 
+                      ? t('features_youtube_processing_description')
+                      : t('features_youtube_description')
+                    }
+                  </p>
+                </div>
+                <div className="flex max-w-md mx-auto">
+                  <input
+                    type="url"
+                    value={youtubeUrl}
+                    onChange={(e) => setYoutubeUrl(e.target.value)}
+                    placeholder={t('features_youtube_placeholder')}
+                    disabled={isLoading}
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="px-6 py-3 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Chat Tab Content */}
+            {activeTab === 'chat' && (
+              <form onSubmit={handleChatSubmit} className="space-y-6">
+                <div className="w-16 h-16 mx-auto bg-indigo-100 rounded-full flex items-center justify-center">
+                  {isLoading ? (
+                    <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+                  ) : (
+                    <MessageCircle className="w-8 h-8 text-indigo-600" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {isLoading ? t('features_chat_processing') : t('features_chat_title')}
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    {isLoading 
+                      ? t('features_chat_processing_description')
+                      : t('features_chat_description')
+                    }
+                  </p>
+                </div>
+                <div className="flex max-w-md mx-auto">
+                  <input
+                    type="text"
+                    value={chatMessage}
+                    onChange={(e) => setChatMessage(e.target.value)}
+                    placeholder={t('features_chat_placeholder')}
+                    disabled={isLoading}
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="px-6 py-3 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </section>

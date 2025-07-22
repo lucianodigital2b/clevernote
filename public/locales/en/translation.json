@@ -641,7 +641,34 @@
   "day_wed": "Wed",
   "day_thu": "Thu",
   "day_fri": "Fri",
-  "day_sat": "Sat"
+  "day_sat": "Sat",
+
+  "features_tab_pdf_word": "PDF/Word",
+  "features_tab_youtube": "YouTube",
+  "features_tab_chat": "Chat",
+  "features_upload_drop_files": "Drop your files here or",
+  "features_upload_browse": "browse",
+  "features_upload_description": "Upload PDF or Word documents to get started",
+  "features_upload_processing": "Processing your file...",
+  "features_upload_processing_description": "Please wait while we prepare your learning experience...",
+  "features_youtube_title": "Add YouTube Video",
+  "features_youtube_description": "Paste a YouTube URL to analyze and learn from video content",
+  "features_youtube_placeholder": "Paste YouTube URL here...",
+  "features_youtube_processing": "Processing YouTube video...",
+  "features_youtube_processing_description": "Please wait while we analyze the video content...",
+  "features_chat_title": "Ask a Question",
+  "features_chat_description": "Start a conversation with our AI tutor about any topic",
+  "features_chat_placeholder": "Type your question here...",
+  "features_chat_processing": "Starting conversation...",
+  "features_chat_processing_description": "Please wait while we connect you with our AI tutor...",
+
+  "reliability_heading_built_for": "Built for",
+  "reliability_heading_academic_excellence": "academic excellence",
+  "reliability_heading_and_precision": "and precision",
+  "reliability_sat_math_title": "Perfect SAT Math",
+  "reliability_sat_math_description": "Achieves perfect 800 scores while other AI tools plateau at 700.",
+  "reliability_accuracy_title": "more accurate",
+  "reliability_accuracy_description": "Significantly outperforms general AI models on academic content."
 
 
 }

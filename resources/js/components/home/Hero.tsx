@@ -76,33 +76,66 @@ const Hero = () => {
               <CheckCircle className="w-4 h-4 mr-1" />
               {t('ai_homework_badge')}
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight text-gray-900 mb-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight text-gray-900 mb-4 px-2 sm:px-0">
               Make learning more{' '}
               <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent relative">
                 {displayText}
                 <span className="animate-pulse">|</span>
               </span>
             </h1>
-            <div className="flex items-center justify-center gap-6 mb-6">
-              <div className="flex items-center gap-2 text-gray-600">
-                <Users className="w-5 h-5 text-indigo-600" />
-                <span className="font-medium">Trusted by 10,000+ students</span>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-8">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="flex -space-x-2">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 border-2 border-white shadow-sm flex items-center justify-center">
+                    <span className="text-white text-xs sm:text-sm font-medium">A</span>
+                  </div>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white shadow-sm flex items-center justify-center">
+                    <span className="text-white text-xs sm:text-sm font-medium">M</span>
+                  </div>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 border-2 border-white shadow-sm flex items-center justify-center">
+                    <span className="text-white text-xs sm:text-sm font-medium">S</span>
+                  </div>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-2 border-white shadow-sm flex items-center justify-center">
+                    <span className="text-white text-xs sm:text-sm font-medium">J</span>
+                  </div>
+                </div>
+                <div className="text-left sm:text-left ">
+                  <div className="text-indigo-600 font-semibold text-base sm:text-lg">Loved by</div>
+                  <div className="text-indigo-600 font-semibold text-base sm:text-lg">1 million+ students</div>
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                ))}
-                <span className="ml-1 text-sm text-gray-600 font-medium">4.9/5</span>
+              
+              <div className="flex flex-col items-center gap-2">
+                <div className="flex items-center justify-center relative">
+                  {/* Left Laurel */}
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M5.5 12c0-2.5 1-4.5 2.5-6 1.5 1.5 2.5 3.5 2.5 6s-1 4.5-2.5 6c-1.5-1.5-2.5-3.5-2.5-6zm-1-3c-.5 1-.5 2-.5 3s0 2 .5 3c-.8-.8-1.5-1.8-2-3 .5-1.2 1.2-2.2 2-3zm-1.5-1c-.3.5-.5 1-.7 1.5-.2-.5-.4-1-.7-1.5.4-.3.8-.5 1.4-.5s1 .2 1.4.5z"/>
+                  </svg>
+                  
+                  {/* Rating */}
+                  <div className="mx-4 text-center">
+                    <div className="text-3xl sm:text-4xl font-bold text-gray-800">4.9</div>
+                  </div>
+                  
+                  {/* Right Laurel */}
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 scale-x-[-1]" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M5.5 12c0-2.5 1-4.5 2.5-6 1.5 1.5 2.5 3.5 2.5 6s-1 4.5-2.5 6c-1.5-1.5-2.5-3.5-2.5-6zm-1-3c-.5 1-.5 2-.5 3s0 2 .5 3c-.8-.8-1.5-1.8-2-3 .5-1.2 1.2-2.2 2-3zm-1.5-1c-.3.5-.5 1-.7 1.5-.2-.5-.4-1-.7-1.5.4-.3.8-.5 1.4-.5s1 .2 1.4.5z"/>
+                  </svg>
+                </div>
+                
+                {/* Stars */}
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 sm:w-6 sm:h-6 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
               </div>
             </div>
-            <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed max-w-lg mx-auto">
-              {t('hero_description')}
-            </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 mb-8 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 justify-center px-4 sm:px-0">
               <div className="p-[3px] rounded-full bg-gradient-to-r from-indigo-400 to-indigo-600 hover:from-indigo-600 hover:to-indigo-800">
                 <Button className="border-0 w-full h-full bg-white text-gray-900 hover:bg-gray-100 rounded-full hover:text-dark" variant="outline" asChild>
-                  <a href={route('auth.google')} className="flex items-center justify-center px-8 py-2">
+                  <a href={route('auth.google')} className="flex items-center justify-center px-6 sm:px-8 py-2 text-sm sm:text-base">
                     <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                       <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                       <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -113,7 +146,7 @@ const Hero = () => {
                   </a>
                 </Button>
               </div>
-              <Button className="py-4 bg-indigo-100 hover:bg-indigo-200 text-indigo-600 border-2 px-8 rounded-full font-medium transition-all duration-200 shadow-lg shadow-indigo-200/50 hover:shadow-xl hover:shadow-indigo-300/60 h-full border-indigo-600 dark:text-indigo-600 " asChild>
+              <Button className="py-3 sm:py-4 bg-indigo-100 hover:bg-indigo-200 text-indigo-600 border-2 px-6 sm:px-8 rounded-full font-medium transition-all duration-200 shadow-lg shadow-indigo-200/50 hover:shadow-xl hover:shadow-indigo-300/60 h-full border-indigo-600 dark:text-indigo-600 text-sm sm:text-base" asChild>
                 <a href="/login" className="flex items-center justify-center">
                   {t('premium_cta_email')}
                   <ArrowRight className="w-4 h-4 ml-2" />
