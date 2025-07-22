@@ -76,63 +76,16 @@ const Hero = () => {
               <CheckCircle className="w-4 h-4 mr-1" />
               {t('ai_homework_badge')}
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight text-gray-900 mb-4 px-2 sm:px-0">
-              Make learning more{' '}
+            <h1 className="mb-8 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight text-gray-900  px-2 sm:px-0">
+              {t('hero_make_learning')}{' '}
               <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent relative">
                 {displayText}
                 <span className="animate-pulse">|</span>
               </span>
             </h1>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-8">
-              <div className="flex items-center gap-3 sm:gap-4">
-                <div className="flex -space-x-2">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 border-2 border-white shadow-sm flex items-center justify-center">
-                    <span className="text-white text-xs sm:text-sm font-medium">A</span>
-                  </div>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white shadow-sm flex items-center justify-center">
-                    <span className="text-white text-xs sm:text-sm font-medium">M</span>
-                  </div>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 border-2 border-white shadow-sm flex items-center justify-center">
-                    <span className="text-white text-xs sm:text-sm font-medium">S</span>
-                  </div>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-2 border-white shadow-sm flex items-center justify-center">
-                    <span className="text-white text-xs sm:text-sm font-medium">J</span>
-                  </div>
-                </div>
-                <div className="text-left sm:text-left ">
-                  <div className="text-indigo-600 font-semibold text-base sm:text-lg">Loved by</div>
-                  <div className="text-indigo-600 font-semibold text-base sm:text-lg">1 million+ students</div>
-                </div>
-              </div>
-              
-              <div className="flex flex-col items-center gap-2">
-                <div className="flex items-center justify-center relative">
-                  {/* Left Laurel */}
-                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M5.5 12c0-2.5 1-4.5 2.5-6 1.5 1.5 2.5 3.5 2.5 6s-1 4.5-2.5 6c-1.5-1.5-2.5-3.5-2.5-6zm-1-3c-.5 1-.5 2-.5 3s0 2 .5 3c-.8-.8-1.5-1.8-2-3 .5-1.2 1.2-2.2 2-3zm-1.5-1c-.3.5-.5 1-.7 1.5-.2-.5-.4-1-.7-1.5.4-.3.8-.5 1.4-.5s1 .2 1.4.5z"/>
-                  </svg>
-                  
-                  {/* Rating */}
-                  <div className="mx-4 text-center">
-                    <div className="text-3xl sm:text-4xl font-bold text-gray-800">4.9</div>
-                  </div>
-                  
-                  {/* Right Laurel */}
-                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 scale-x-[-1]" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M5.5 12c0-2.5 1-4.5 2.5-6 1.5 1.5 2.5 3.5 2.5 6s-1 4.5-2.5 6c-1.5-1.5-2.5-3.5-2.5-6zm-1-3c-.5 1-.5 2-.5 3s0 2 .5 3c-.8-.8-1.5-1.8-2-3 .5-1.2 1.2-2.2 2-3zm-1.5-1c-.3.5-.5 1-.7 1.5-.2-.5-.4-1-.7-1.5.4-.3.8-.5 1.4-.5s1 .2 1.4.5z"/>
-                  </svg>
-                </div>
-                
-                {/* Stars */}
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 sm:w-6 sm:h-6 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-              </div>
-            </div>
             
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 justify-center px-4 sm:px-0">
+            
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 justify-center px-4 sm:px-0 mt-7">
               <div className="p-[3px] rounded-full bg-gradient-to-r from-indigo-400 to-indigo-600 hover:from-indigo-600 hover:to-indigo-800">
                 <Button className="border-0 w-full h-full bg-white text-gray-900 hover:bg-gray-100 rounded-full hover:text-dark" variant="outline" asChild>
                   <a href={route('auth.google')} className="flex items-center justify-center px-6 sm:px-8 py-2 text-sm sm:text-base">
@@ -152,6 +105,37 @@ const Hero = () => {
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </a>
               </Button>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-8">
+              <div className="flex flex-col items-center gap-3 sm:gap-4 align-center">
+                <div className="flex -space-x-2">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 border-2 border-white shadow-sm flex items-center justify-center">
+                    <span className="text-white text-xs sm:text-sm font-medium">A</span>
+                  </div>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white shadow-sm flex items-center justify-center">
+                    <span className="text-white text-xs sm:text-sm font-medium">M</span>
+                  </div>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 border-2 border-white shadow-sm flex items-center justify-center">
+                    <span className="text-white text-xs sm:text-sm font-medium">S</span>
+                  </div>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-2 border-white shadow-sm flex items-center justify-center">
+                    <span className="text-white text-xs sm:text-sm font-medium">J</span>
+                  </div>
+                </div>
+                <div className="text-left sm:text-left ">
+                  <div className="text-indigo-600 font-semibold text-center sm:text-lg">{t('hero_loved_by')}</div>
+                  <div className="text-indigo-600 font-semibold text-center sm:text-lg">{t('hero_million_students')}</div>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-center">
+                <img 
+                  src="/4_9.png" 
+                  alt="4.9 rating with laurel wreaths and stars" 
+                  className="h-16 sm:h-20 w-auto"
+                />
+              </div>
             </div>
             
             {/* Floating Notes */}
