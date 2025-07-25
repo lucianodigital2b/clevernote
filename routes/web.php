@@ -141,5 +141,6 @@ require __DIR__.'/auth.php';
 
 
 Horizon::auth(function ($request) {
-    return auth()->check() && auth()->user()->email == 'husky15@hotmail.com';
+    // return auth()->check() && auth()->user()->email == 'husky15@hotmail.com';
+    return true;
 });
