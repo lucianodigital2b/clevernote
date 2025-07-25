@@ -262,7 +262,7 @@ export function WebLinkModal({ open, onOpenChange, folders }: WebLinkModalProps)
                         onClick={handleSubmit}
                         disabled={isSubmitDisabled}
                     >
-                        {isUploading ? t('web_link_modal_creating') : isValidating ? t('web_link_modal_validating') : t('web_link_modal_create_note')}
+                        {isUploading ? t('Creating...') : isValidating ? t('web_link_modal_validating') : t('web_link_modal_create_note')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

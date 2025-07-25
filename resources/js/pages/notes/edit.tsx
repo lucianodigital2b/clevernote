@@ -833,7 +833,7 @@ export default function Edit({ note }: { note: Note }) {
                             </div>
                         </div>
 
-                        {isFailed ? (
+                        {isFailed && note.content == null ? (
                             <ProcessingState state="failed" onRetry={handleRetryProcessing} />
                         ) : isProcessing ? (
                             <ProcessingState state="processing" />
