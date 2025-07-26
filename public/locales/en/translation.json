@@ -417,6 +417,15 @@
   "billing_full_name_placeholder": "Full name",
   "billing_processing": "Processing...",
   "billing_subscribe": "Subscribe",
+  "billing_create_account_and_subscribe": "Create Account and Subscribe",
+  "billing_email": "Email",
+  "billing_email_address": "Email Address",
+  "billing_email_placeholder": "Enter your email",
+  "billing_password": "Password",
+  "billing_password_placeholder": "Enter your password",
+  "billing_password_requirement": "Password must be at least 8 characters long",
+  "billing_account_creation_notice": "We'll create your account during the subscription process.",
+  "billing_creating_account": "We'll create your account during the subscription process.",
   "billing_secure_payment": "Secure payment with 256-bit SSL encryption.",
   "billing_stripe_not_loaded": "Stripe is not loaded.",
   "billing_card_element_not_found": "Card element not found.",
@@ -436,6 +445,8 @@
   "flashcard_filter_new": "New",
   "flashcard_filter_review": "To Review",
   "flashcard_filter_memorised": "Memorised",
+  "did_you_know": "Did you know?",
+  "flashcard_tip_add_import": "You can add and import your own flashcards to this set! Create custom cards to enhance your learning experience.",
   "billing_download_receipt": "Download receipt",
   "billing_confirmation_sent": "Payment confirmation has been sent to your email",
   "billing_order_id": "Order ID: #AI-29384756",
@@ -673,6 +684,6 @@
   "hero_make_learning": "Make learning more",
   "hero_social_proof_loved_by": "Loved by",
   "hero_million_students": "1 million+ students",
-  "hero_interactive": "interactive"
-
+  "hero_interactive": "interactive",
+  "add_some_cards": "Add some cards"
 }

@@ -29,6 +29,12 @@ Route::post('/quizzes/{uuid}/public/attempt', [QuizController::class, 'submitPub
 // Public note routes (UUID-based)
 Route::get('/notes/{uuid}', [NoteController::class, 'showByUuid'])->name('notes.public.show');
 
+// Billing checkout route (accessible to both authenticated and non-authenticated users)
+Route::get('/billing/checkout', fn () => Inertia::render('Billing/Checkout'))->name('billing.checkout');
+
+// Billing subscription routes (accessible to both authenticated and non-authenticated users)
+Route::post('/subscribe', [SubscriptionController::class, 'subscribe'])->name('billing.subscribe');
+Route::get('/setup-intent', [SubscriptionController::class, 'createSetupIntent'])->name('billing.setup-intent');
 
 Route::middleware(['auth'])->group(function () {
     // Folder routes
@@ -87,11 +93,8 @@ Route::middleware(['auth'])->group(function () {
     });
 
 
-    Route::post('/subscribe', [SubscriptionController::class, 'subscribe'])->name('billing.subscribe');
-    Route::get('/setup-intent', [SubscriptionController::class, 'createSetupIntent'])->name('billing.setup-intent');
     Route::get('/billing/success', [SubscriptionController::class, 'success'])->name('billing.success');
     Route::get('/billing/cancel', [SubscriptionController::class, 'cancel'])->name('billing.cancel');
-    Route::get('/checkout', fn () => Inertia::render('Billing/Checkout'))->middleware('auth');
 
 
     Route::get('/onboarding', [OnboardingController::class, 'show'])

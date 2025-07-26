@@ -58,19 +58,10 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
     }, [isOpen]);
 
     const handleUpgrade = () => {
-        const selectedPlanData = plans.find(plan => plan.id === selectedPlan);
-        if (!selectedPlanData) return;
-
-        const priceId = billingCycle === 'yearly' ? selectedPlanData.yearlyPriceId : selectedPlanData.monthlyPriceId;
-        const amount = billingCycle === 'yearly' ? selectedPlanData.annualPrice : selectedPlanData.monthlyPrice;
-        
-        router.visit('/checkout', {
+        router.visit('/billing/checkout', {
             method: 'get',
             data: {
-                plan: billingCycle,
-                product_id: selectedPlanData.id,
-                price_id: priceId,
-                amount: amount
+                plan: billingCycle
             }
         });
     };

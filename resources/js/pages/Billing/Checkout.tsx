@@ -9,9 +9,10 @@ import {
 } from '@stripe/react-stripe-js';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, CreditCard, ShoppingCartIcon } from 'lucide-react';
+import { ArrowLeft, CreditCard, ShoppingCartIcon, Mail, Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { t } from 'i18next';
+import { type SharedData } from '@/types';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
@@ -33,41 +34,44 @@ const CARD_ELEMENT_OPTIONS = {
   };
 
 
-  // Get pricing data from URL parameters
-  const searchParams = new URLSearchParams(window.location.search);
-  const plan = searchParams.get('plan') || 'yearly';
-  const priceId = searchParams.get('price_id');
-  const amount = searchParams.get('amount');
-  const productId = searchParams.get('product_id');
-
-
 function CheckoutForm() {
     const { t } = useTranslation();
     const stripe = useStripe();
     const elements = useElements();
+    const { auth } = usePage<SharedData>().props;
+    const isAuthenticated = !!auth?.user;
     
-    // Get pricing data from URL parameters
+    // Get billing cycle from URL parameters
     const searchParams = new URLSearchParams(window.location.search);
     const plan = searchParams.get('plan') || 'yearly';
-    const priceId = searchParams.get('price_id');
-    const rawAmount = searchParams.get('amount');
-    const productId = searchParams.get('product_id');
 
     const [setupIntent, setSetupIntent] = useState<any>(null);
     const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    
-    // Parse the amount from URL (remove $ and convert to number)
-    const currentPrice = rawAmount ? parseFloat(rawAmount.replace('$', '')) : 0;
-    const [planId, setPlanId] = useState(priceId || '');
+    const [pricingData, setPricingData] = useState<any>(null);
+    const [loadingPricing, setLoadingPricing] = useState(true);
 
-    
     useEffect(() => {
+        // Fetch setup intent
         fetch('/setup-intent', { credentials: 'include' })
             .then(res => res.json())
             .then(data => setSetupIntent(data));
-    }, []);
+
+        // Fetch pricing data based on billing cycle
+        fetch(`/api/pricing-data?plan=${plan}`, { credentials: 'include' })
+            .then(res => res.json())
+            .then(data => {
+                setPricingData(data);
+                setLoadingPricing(false);
+            })
+            .catch(err => {
+                setError('Failed to load pricing data');
+                setLoadingPricing(false);
+            });
+    }, [plan]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -100,7 +104,21 @@ function CheckoutForm() {
             return;
         }
 
-        // Call backend to create subscription
+        // Prepare subscription data
+        const subscriptionData: any = {
+            payment_method: paymentMethod.id,
+            billing_cycle: plan,
+            name,
+        };
+
+        // If user is not authenticated, include registration data
+        if (!isAuthenticated) {
+            subscriptionData.email = email;
+            subscriptionData.password = password;
+            subscriptionData.create_account = true;
+        }
+
+        // Call backend to create subscription (and account if needed)
         const response = await fetch('/subscribe', {
             method: 'POST',
             headers: {
@@ -108,11 +126,7 @@ function CheckoutForm() {
                 'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
             },
             credentials: 'include',
-            body: JSON.stringify({
-                payment_method: paymentMethod.id,
-                plan_id: planId,
-                name,
-            }),
+            body: JSON.stringify(subscriptionData),
         });
 
         const result = await response.json();
@@ -161,12 +175,12 @@ function CheckoutForm() {
         </div>
         <div className="flex justify-between text-gray-700 mt-4">
           <span>{t('billing_price')}</span>
-          <span>${currentPrice}</span>
+          <span>{loadingPricing ? '...' : pricingData ? `$${pricingData.amount}` : '$0'}</span>
         </div>
         <div className="border-t border-purple-200 my-3 opacity-50" />
         <div className="flex justify-between font-bold text-base">
           <span>{t('billing_total')}</span>
-          <span className="text-[oklch(0.511_0.262_276.966)]">${currentPrice}</span>
+          <span className="text-[oklch(0.511_0.262_276.966)]">{loadingPricing ? '...' : pricingData ? `$${pricingData.amount}` : '$0'}</span>
         </div>
       </div>
     </div>
@@ -185,6 +199,16 @@ function CheckoutForm() {
       <CreditCard size={22} />
       {t('billing_payment_details')}
     </h2>
+    
+    {/* Account creation notice for non-authenticated users */}
+    {!isAuthenticated && (
+      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <p className="text-sm text-blue-800">
+          {t('billing_account_creation_notice')}
+        </p>
+      </div>
+    )}
+    
     <form
       className="flex flex-col gap-5"
       onSubmit={handleSubmit}
@@ -196,51 +220,8 @@ function CheckoutForm() {
             <CardElement options={CARD_ELEMENT_OPTIONS} />
         </div>
 
+      </div>
 
-        {/* <label htmlFor="card-number" className="block mb-1 text-gray-700 font-semibold text-sm">
-          Card Number
-        </label>
-        <input
-          id="card-number"
-          type="text"
-          className="block w-full rounded-lg border border-purple-100 bg-gray-50 px-4 py-3 text-lg font-mono focus:outline-none focus:ring-2 focus:ring-[oklch(0.511_0.262_276.966)] transition"
-          placeholder="1234 5678 9012 3456"
-          maxLength={19}
-          pattern="\d{4} \d{4} \d{4} \d{4}"
-          autoComplete="cc-number"
-          required
-        />
-      </div>
-      <div className="flex gap-4">
-        <div className="w-1/2">
-          <label htmlFor="expiry" className="block mb-1 text-gray-700 font-semibold text-sm">
-            Expiry
-          </label>
-          <input
-            id="expiry"
-            type="text"
-            className="block w-full rounded-lg border border-purple-100 bg-gray-50 px-4 py-3 text-lg font-mono focus:outline-none focus:ring-2 focus:ring-[oklch(0.511_0.262_276.966)] transition"
-            placeholder="MM/YY"
-            maxLength={5}
-            autoComplete="cc-exp"
-            required
-          />
-        </div>
-        <div className="w-1/2">
-          <label htmlFor="cvc" className="block mb-1 text-gray-700 font-semibold text-sm">
-            CVC
-          </label>
-          <input
-            id="cvc"
-            type="text"
-            className="block w-full rounded-lg border border-purple-100 bg-gray-50 px-4 py-3 text-lg font-mono focus:outline-none focus:ring-2 focus:ring-[oklch(0.511_0.262_276.966)] transition"
-            placeholder="CVC"
-            maxLength={4}
-            autoComplete="cc-csc"
-            required
-          />
-        </div> */}
-      </div>
       <div>
         <label htmlFor="card-name" className="block mb-1 text-gray-700 font-semibold text-sm">
           {t('billing_name_on_card')}
@@ -256,6 +237,50 @@ function CheckoutForm() {
           required
         />
       </div>
+
+      
+      {/* Account creation fields for non-authenticated users */}
+      {!isAuthenticated && (
+        <>
+          <h1>{t('auth_register_title')}</h1>
+          <div>
+            <label htmlFor="email" className="mb-1 text-gray-700 font-semibold text-sm flex items-center gap-2">
+              <Mail size={16} />
+              {t('billing_email_address')}
+            </label>
+            <input
+              id="email"
+              type="email"
+              className="block w-full rounded-lg border border-purple-100 bg-gray-50 px-4 py-3 text-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-[oklch(0.511_0.262_276.966)] transition"
+              placeholder={t('billing_email_placeholder')}
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className=" mb-1 text-gray-700 font-semibold text-sm flex items-center gap-2">
+              <Lock size={16} />
+              {t('billing_password')}
+            </label>
+            <input
+              id="password"
+              type="password"
+              className="block w-full rounded-lg border border-purple-100 bg-gray-50 px-4 py-3 text-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-[oklch(0.511_0.262_276.966)] transition"
+              placeholder={t('billing_password_placeholder')}
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              minLength={8}
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">{t('billing_password_requirement')}</p>
+          </div>
+        </>
+      )}
+
+      
       {/* <Button
         type="submit"
         className="w-full mt-4 py-5 text-lg bg-[oklch(0.511_0.262_276.966)] hover:bg-[oklch(0.461_0.262_276.966)] text-white rounded-lg shadow transition-colors flex items-center justify-center gap-2"
@@ -271,7 +296,12 @@ function CheckoutForm() {
             className="w-full mt-4 py-5 text-lg bg-[oklch(0.511_0.262_276.966)] hover:bg-[oklch(0.461_0.262_276.966)] text-white rounded-lg shadow transition-colors flex items-center justify-center gap-2"
         >
             <CreditCard size={20} className="mr-1" />
-            {loading ? t('billing_processing') : t('billing_subscribe')}
+            {loading 
+              ? t('billing_processing') 
+              : !isAuthenticated 
+                ? t('billing_create_account_and_subscribe') 
+                : t('billing_subscribe')
+            }
         </Button>
     </form>
     <p className="text-xs text-center text-gray-400 mt-6">

@@ -95,7 +95,9 @@ const Pricing = ({ pricingPlans }: PricingProps) => {
                         ? "bg-indigo-600 hover:bg-indigo-700 text-white"
                         : "bg-white border border-gray-200 text-gray-800 hover:bg-gray-50"
                     }`}
-                    onClick={() => router.visit('/login')}
+                    onClick={() => {
+                      router.visit(`/billing/checkout?plan=${billingCycle}`);
+                    }}
                   >
                     {t(plan.cta)}
                   </Button>

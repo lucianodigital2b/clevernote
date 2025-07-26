@@ -3,10 +3,12 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, ArrowRight, PlusCircle, RotateCw, Shuffle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, PlusCircle, RotateCw, Shuffle, Lightbulb } from 'lucide-react';
 import { FlashcardSet } from '@/types';
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { XPNotification } from '@/components/xp-notification';
+import { StudyCompletionScreen } from '@/components/study/StudyCompletionScreen';
 import { useTranslation } from 'react-i18next';
 import DOMPurify from 'dompurify';
 import axios from 'axios';
@@ -249,6 +251,24 @@ const Study = ({ flashcardSet }: Props) => {
         setXpReward(null);
     };
 
+    const handleRestart = () => {
+        // Restart session: all cards due again
+        const allIndexes = flashcardSet.flashcards.map((_, idx) => idx);
+        // Reset progress to make all cards due
+        const resetProgress = flashcardSet.flashcards.map(flashcard => ({
+            id: flashcard.id.toString(),
+            interval: 1,
+            repetition: 0,
+            efactor: 2.5,
+            nextReview: new Date()
+        }));
+        setProgress(resetProgress);
+        setDueIndexes(allIndexes);
+        setCurrentIndex(allIndexes.length > 0 ? allIndexes[0] : null);
+        setIsFlipped(false);
+        setIsComplete(false);
+    };
+
     const studyProgress = dueIndexes.length === 0
         ? 100
         : ((flashcardSet.flashcards.length - dueIndexes.length) / flashcardSet.flashcards.length) * 100;
@@ -256,52 +276,10 @@ const Study = ({ flashcardSet }: Props) => {
     if (isComplete) {
         return (
             <AppLayout>
-                <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-                    <div className="rounded-xl border shadow-lg p-6 sm:p-8 flex flex-col items-center max-w-md w-full">
-                        <div className="text-xl sm:text-2xl font-semibold mb-2 flex items-center gap-2 text-center">
-                            {t('study_well_done')} <span role="img" aria-label="bee">🐝</span>
-                        </div>
-                        <div className="mb-6 text-white text-center">
-                            {t('study_learning_continues')} <span role="img" aria-label="point">👈</span>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-2 w-full mb-4">
-                            <Button
-                                variant="outline"
-                                className="flex-1"
-                                onClick={() => {
-                                    // Restart session: all cards due again
-                                    const allIndexes = flashcardSet.flashcards.map((_, idx) => idx);
-                                    // Reset progress to make all cards due
-                                    const resetProgress = flashcardSet.flashcards.map(flashcard => ({
-                                        id: flashcard.id.toString(),
-                                        interval: 1,
-                                        repetition: 0,
-                                        efactor: 2.5,
-                                        nextReview: new Date()
-                                    }));
-                                    setProgress(resetProgress);
-                                    setDueIndexes(allIndexes);
-                                    setCurrentIndex(allIndexes.length > 0 ? allIndexes[0] : null);
-                                    setIsFlipped(false);
-                                    setIsComplete(false);
-                                }}
-                            >
-                                <RotateCw className="h-4 w-4 mr-2" />
-                                {t('study_review_all')}
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="flex-1"
-                                asChild
-                            >
-                                <Link href="/flashcard-sets" className="flex items-center gap-2">
-                                    <PlusCircle className="h-4 w-4 mr-2" />
-                                    {t('study_create_new_note')}
-                                </Link>
-                            </Button>
-                        </div>
-                    </div>
-                </div>
+                <StudyCompletionScreen 
+                    flashcardSet={flashcardSet}
+                    onRestart={handleRestart}
+                />
             </AppLayout>
         );
     }

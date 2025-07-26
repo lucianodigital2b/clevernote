@@ -109,6 +109,7 @@ Route::middleware(['auth'])->group(function () {
 
 // Public pricing plans route (no auth required)
 Route::get('/pricing-plans', [ProductController::class, 'getPricingPlans']);
+Route::get('/pricing-data', [SubscriptionController::class, 'getPricingData']);
 
 Route::post('login', [AuthenticatedSessionController::class, 'store']);
 Route::post('register', [RegisteredUserController::class, 'store']);

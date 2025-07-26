@@ -362,6 +362,15 @@
   "billing_full_name_placeholder": "Nombre completo",
   "billing_processing": "Procesando...",
   "billing_subscribe": "Suscribirse",
+  "billing_create_account_and_subscribe": "Crear Cuenta y Suscribirse",
+  "billing_email": "Correo Electrónico",
+  "billing_email_address": "Dirección de Correo Electrónico",
+  "billing_email_placeholder": "Ingresa tu correo electrónico",
+  "billing_password": "Contraseña",
+  "billing_password_placeholder": "Ingresa tu contraseña",
+  "billing_password_requirement": "La contraseña debe tener al menos 8 caracteres",
+  "billing_account_creation_notice": "Crearemos tu cuenta durante el proceso de suscripción.",
+  "billing_creating_account": "Crearemos tu cuenta durante el proceso de suscripción.",
   "billing_secure_payment": "Pago seguro con cifrado SSL de 256 bits.",
   "billing_stripe_not_loaded": "Stripe no está cargado.",
   "billing_card_element_not_found": "Elemento de tarjeta no encontrado.",
@@ -623,6 +632,8 @@
   "hero_make_learning": "Haz que el aprendizaje sea más",
   "hero_social_proof_loved_by": "Amado por",
   "hero_million_students": "1 millón+ estudiantes",
-  "hero_interactive": "interactivo"
+  "hero_interactive": "interactivo",
+  "add_some_cards": "Add some cards"
+
 
 }
