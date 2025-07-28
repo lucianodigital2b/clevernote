@@ -18,6 +18,7 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\QuizSharingController;
 use App\Http\Controllers\StatisticsController;
+use App\Http\Controllers\GroupController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -93,6 +94,18 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::get('/statistics', [StatisticsController::class, 'index']);
     Route::get('/statistics/daily', [StatisticsController::class, 'daily']);
+
+    // Group routes
+    Route::prefix('groups')->group(function () {
+        Route::get('/', [GroupController::class, 'index']);
+        Route::post('/', [GroupController::class, 'store']);
+        Route::post('/join', [GroupController::class, 'join']);
+        Route::get('/{group}', [GroupController::class, 'show']);
+        Route::put('/{group}', [GroupController::class, 'update']);
+        Route::delete('/{group}/leave', [GroupController::class, 'leave']);
+        Route::post('/{group}/regenerate-invite', [GroupController::class, 'regenerateInviteCode']);
+        Route::get('/{group}/leaderboard', [GroupController::class, 'leaderboard']);
+    });
 });
 
 

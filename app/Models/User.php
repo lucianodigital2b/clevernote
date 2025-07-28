@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Notifications\NewUserFeedback;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -96,6 +97,24 @@ class User extends Authenticatable
     public function flashcardProgress(): HasMany
     {
         return $this->hasMany(FlashcardProgress::class);
+    }
+
+    // Group relationships
+    public function groupMemberships(): HasMany
+    {
+        return $this->hasMany(GroupMembership::class);
+    }
+
+    public function groups(): BelongsToMany
+    {
+        return $this->belongsToMany(Group::class, 'group_memberships')
+            ->withPivot(['role', 'joined_at'])
+            ->withTimestamps();
+    }
+
+    public function createdGroups(): HasMany
+    {
+        return $this->hasMany(Group::class, 'created_by');
     }
 
     /**

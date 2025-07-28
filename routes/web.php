@@ -16,6 +16,7 @@ use App\Http\Controllers\QuizController;
 use App\Http\Controllers\QuizSharingController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\CrosswordController;
+use App\Http\Controllers\GroupController;
 use App\Models\User;
 use App\Notifications\NewUserFeedback;
 use Laravel\Horizon\Horizon;
@@ -39,6 +40,11 @@ Route::get('/setup-intent', [SubscriptionController::class, 'createSetupIntent']
 Route::middleware(['auth'])->group(function () {
     // Folder routes
     Route::resource('folders', FolderController::class);
+    
+    // Groups routes
+    Route::resource('groups', GroupController::class);
+    Route::post('groups/{group}/invite', [GroupController::class, 'invite'])->name('groups.invite');
+    Route::delete('groups/{group}/members/{user}', [GroupController::class, 'removeMember'])->name('groups.remove-member');
     
     // Notes routes
     Route::resource('notes', NoteController::class);

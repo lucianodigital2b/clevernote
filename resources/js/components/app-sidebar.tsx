@@ -37,7 +37,11 @@ const mainNavItems: NavItem[] = [
         title: t('Quizzes'),
         url: '/quizzes',
         icon: GraduationCap,
-        tooltip: t('Coming soon'),
+    },
+    {
+        title: t('Groups'),
+        url: '/groups',
+        icon: GraduationCap,
     },
     {
         title: t('Statistics'),
