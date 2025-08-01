@@ -116,14 +116,29 @@ export function NavFooter({
                                             }}
                                             target="_blank" 
                                             rel="noopener noreferrer"
+                                            className="flex items-center justify-between w-full"
                                         >
-                                            {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
-                                            <span>{item.title}</span>
+                                            <div className="flex items-center gap-2">
+                                                {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
+                                                <span>{item.title}</span>
+                                            </div>
+                                            {item.new && (
+                                                <span className="bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                                                    new
+                                                </span>
+                                            )}
                                         </a>
                                     ) : (
-                                        <a href={item.url} target="_blank" rel="noopener noreferrer">
-                                            {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
-                                            <span>{item.title}</span>
+                                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between w-full">
+                                            <div className="flex items-center gap-2">
+                                                {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
+                                                <span>{item.title}</span>
+                                            </div>
+                                            {item.new && (
+                                                <span className="bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                                                    new
+                                                </span>
+                                            )}
                                         </a>
                                     )}
                                 </SidebarMenuButton>

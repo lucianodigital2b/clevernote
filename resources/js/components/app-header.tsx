@@ -73,9 +73,16 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                     <div className="flex h-full flex-col justify-between text-sm">
                                         <div className="flex flex-col space-y-4">
                                             {mainNavItems.map((item) => (
-                                                <Link key={item.title} href={item.url} className="flex items-center space-x-2 font-medium">
-                                                    {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
-                                                    <span>{item.title}</span>
+                                                <Link key={item.title} href={item.url} className="flex items-center justify-between font-medium">
+                                                    <div className="flex items-center space-x-2">
+                                                        {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
+                                                        <span>{item.title}</span>
+                                                    </div>
+                                                    {item.new && (
+                                                        <span className="bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                                                            new
+                                                        </span>
+                                                    )}
                                                 </Link>
                                             ))}
                                         </div>
@@ -87,10 +94,17 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                     href={item.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex items-center space-x-2 font-medium"
+                                                    className="flex items-center justify-between font-medium"
                                                 >
-                                                    {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
-                                                    <span>{item.title}</span>
+                                                    <div className="flex items-center space-x-2">
+                                                        {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
+                                                        <span>{item.title}</span>
+                                                    </div>
+                                                    {item.new && (
+                                                        <span className="bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                                                            new
+                                                        </span>
+                                                    )}
                                                 </a>
                                             ))}
                                         </div>
@@ -115,11 +129,18 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             className={cn(
                                                 navigationMenuTriggerStyle(),
                                                 page.url === item.url && activeItemStyles,
-                                                'h-9 cursor-pointer px-3',
+                                                'h-9 cursor-pointer px-3 flex items-center justify-between',
                                             )}
                                         >
-                                            {item.icon && <Icon iconNode={item.icon} className="mr-2 h-4 w-4" />}
-                                            {item.title}
+                                            <div className="flex items-center">
+                                                {item.icon && <Icon iconNode={item.icon} className="mr-2 h-4 w-4" />}
+                                                {item.title}
+                                            </div>
+                                            {item.new && (
+                                                <span className="bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full font-medium ml-2">
+                                                    new
+                                                </span>
+                                            )}
                                         </Link>
                                         {page.url === item.url && (
                                             <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>

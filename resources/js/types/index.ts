@@ -148,7 +148,7 @@ export interface NavItem {
     icon?: LucideIcon | null;
     isActive?: boolean;
     tooltip?: string;
-
+    new?: boolean;
 }
 
 export interface SharedData {
