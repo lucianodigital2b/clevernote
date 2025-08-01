@@ -746,5 +746,15 @@
   "original_title": "Original Title",
   "by": "by",
   "uploaded": "Uploaded",
-  "views": "views"
+  "views": "views",
+  "Join a Group": "Join a Group",
+  "Enter the invite code to join a group": "Enter the invite code to join a group",
+  "Invite Code": "Invite Code",
+  "Enter invite code": "Enter invite code",
+  "Joining...": "Joining...",
+  "Successfully joined the group!": "Successfully joined the group!",
+  "Invalid invite code": "Invalid invite code",
+  "You are already a member of this group": "You are already a member of this group",
+  "Failed to join group": "Failed to join group",
+  "Please enter an invite code": "Please enter an invite code"
 }

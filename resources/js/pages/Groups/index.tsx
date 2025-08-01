@@ -5,14 +5,25 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Users, Plus, MoreVertical, Trophy } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
+import { useState } from 'react';
+import { toast } from 'sonner';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface Group {
     id: number;
@@ -29,6 +40,10 @@ interface Group {
 
 export default function Index() {
     const { t } = useTranslation();
+    const queryClient = useQueryClient();
+    const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+    const [inviteCode, setInviteCode] = useState('');
+    const [isJoining, setIsJoining] = useState(false);
 
     // Fetch user's groups
     const { data: groups = [], isLoading } = useQuery({
@@ -38,6 +53,37 @@ export default function Index() {
             return response.data;
         }
     });
+
+    const handleJoinGroup = async () => {
+        if (!inviteCode.trim()) {
+            toast.error(t('Please enter an invite code'));
+            return;
+        }
+
+        setIsJoining(true);
+        try {
+            await axios.post('/api/groups/join', {
+                invite_code: inviteCode.trim()
+            });
+            
+            toast.success(t('Successfully joined the group!'));
+            setIsJoinModalOpen(false);
+            setInviteCode('');
+            
+            // Refresh the groups list
+            queryClient.invalidateQueries({ queryKey: ['groups'] });
+        } catch (error: any) {
+            if (error.response?.status === 400) {
+                toast.error(t('Invalid invite code'));
+            } else if (error.response?.status === 409) {
+                toast.error(t('You are already a member of this group'));
+            } else {
+                toast.error(t('Failed to join group'));
+            }
+        } finally {
+            setIsJoining(false);
+        }
+    };
 
     return (
         <AppLayout>
@@ -49,11 +95,13 @@ export default function Index() {
                         {t('Groups')}
                     </h1>
                     <div className="flex gap-2">
-                        <Button asChild variant="outline">
-                            <Link href="/groups/join" className="flex items-center gap-2">
-                                <Plus className="h-4 w-4" />
-                                {t('Join Group')}
-                            </Link>
+                        <Button 
+                            variant="outline" 
+                            onClick={() => setIsJoinModalOpen(true)}
+                            className="flex items-center gap-2"
+                        >
+                            <Plus className="h-4 w-4" />
+                            {t('Join Group')}
                         </Button>
                         <Button asChild>
                             <Link href="/groups/create" className="flex items-center gap-2">
@@ -76,8 +124,11 @@ export default function Index() {
                             {t('Create a new group or join one with an invite code to start collaborating!')}
                         </p>
                         <div className="flex justify-center gap-4">
-                            <Button asChild variant="outline">
-                                <Link href="/groups/join">{t('Join Group')}</Link>
+                            <Button 
+                                variant="outline"
+                                onClick={() => setIsJoinModalOpen(true)}
+                            >
+                                {t('Join Group')}
                             </Button>
                             <Button asChild>
                                 <Link href="/groups/create">{t('Create Group')}</Link>
@@ -149,6 +200,52 @@ export default function Index() {
                     </div>
                 )}
             </div>
+
+            {/* Join Group Modal */}
+            <Dialog open={isJoinModalOpen} onOpenChange={setIsJoinModalOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>{t('Join a Group')}</DialogTitle>
+                        <DialogDescription>
+                            {t('Enter the invite code to join a group')}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="invite-code">{t('Invite Code')}</Label>
+                            <Input
+                                id="invite-code"
+                                placeholder={t('Enter invite code')}
+                                value={inviteCode}
+                                onChange={(e) => setInviteCode(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        handleJoinGroup();
+                                    }
+                                }}
+                            />
+                        </div>
+                        <div className="flex justify-end gap-2">
+                            <Button 
+                                variant="outline" 
+                                onClick={() => {
+                                    setIsJoinModalOpen(false);
+                                    setInviteCode('');
+                                }}
+                                disabled={isJoining}
+                            >
+                                {t('Cancel')}
+                            </Button>
+                            <Button 
+                                onClick={handleJoinGroup}
+                                disabled={isJoining || !inviteCode.trim()}
+                            >
+                                {isJoining ? t('Joining...') : t('Join Group')}
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }
