@@ -56,7 +56,7 @@ const StudyStreakWidget: React.FC<StudyStreakWidgetProps> = ({ userStatistics })
     }, [hasStudiedToday]);
 
     return (
-        <section className="w-1/2">
+        <section className="md:w-1/2">
             <div>
                 <div className="mb-6">
                     <h2 className="text-xl font-semibold mb-1">{t('study_streak_title')}</h2>

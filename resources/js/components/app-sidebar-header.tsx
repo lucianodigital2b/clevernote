@@ -5,10 +5,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { XPBar } from '@/components/xp-bar';
+import { UpgradeModal } from '@/components/upgrade-modal';
 import { useTranslation } from 'react-i18next';
 import { useAppearance } from '@/hooks/use-appearance';
 import { usePage } from '@inertiajs/react';
 import { Moon, Sun } from 'lucide-react';
+import { useState } from 'react';
 import languages from '@/utils/languages.json';
 
 export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItemType[] }) {
@@ -16,6 +18,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
     const { appearance, updateAppearance } = useAppearance();
     const page = usePage<SharedData>();
     const { auth } = page.props;
+    const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
 
     const handleLanguageChange = (value: string) => {
         if (value) {
@@ -38,7 +41,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
             </div>
             
             {/* XP Bar - centered */}
-            <div className="flex-1 flex justify-center px-4">
+            <div className="flex-1 justify-center px-4 hidden md:flex">
                 <div className="max-w-md w-full">
                     <XPBar user={auth.user} />
                 </div>
@@ -66,6 +69,26 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                         </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
+                
+                <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button 
+                                variant="default"
+                                size="sm"
+                                className="relative bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 before:absolute before:inset-0 before:bg-gradient-to-r before:from-purple-400 before:to-indigo-500 before:rounded-md before:blur before:opacity-0 before:animate-[glow_2s_ease-in-out_infinite_alternate] hover:before:opacity-100 hidden md:flex"
+                                onClick={() => setIsUpgradeModalOpen(true)}
+                            >
+                                <span className="relative flex items-center gap-1">
+                                    ⚡ Subscribe
+                                </span>
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Subscribe for premium features</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
                 <Select onValueChange={handleLanguageChange} defaultValue={i18n.language}>
                     <SelectTrigger className="w-[120px]">
                         <SelectValue placeholder="Language" />
@@ -81,6 +104,11 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                     </SelectContent>
                 </Select>
             </div>
+            
+            <UpgradeModal 
+                isOpen={isUpgradeModalOpen} 
+                onClose={() => setIsUpgradeModalOpen(false)} 
+            />
         </header>
     );
 }
