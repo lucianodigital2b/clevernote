@@ -60,34 +60,38 @@ class ProcessLinkNote implements ShouldQueue
         try {
             $language = $this->validatedData['language'];
             $link = $this->validatedData['link'];
-
+    
+            // Extract audio and get metadata
             $audio = $youtubeAudioExtractor->extractAudio($link);
             if(!$audio) {
                 $detailedError = $youtubeAudioExtractor->getLastError() ?: 'Failed to extract audio from YouTube video. The video may be restricted, unavailable for download, or only contains images/storyboards. Please try a different video or check if the video is publicly accessible.';
                 throw new \Exception($detailedError);
             }
-
+    
             $audioPath = $audio->getPathname();
-
+    
+            // Get video metadata (you'll need to implement this in YouTubeAudioExtractor)
+            $metadata = $youtubeAudioExtractor->getVideoMetadata($link);
+    
             $transcription = $transcriptionService->transcribeAudio($audioPath, $language);
-
-            
             $studyNote = $deepseekService->createStudyNote($transcription['text'], $language);
-
-
+    
             $noteData = array_merge($this->validatedData, [
                 'content' => $studyNote['study_note']['content'],
                 'title' => $studyNote['study_note']['title'],
                 'summary' => $studyNote['study_note']['summary'],
                 'status' => 'processed',
-                'transcription' => $transcription['text']
+                'transcription' => $transcription['text'],
+                'source_type' => $this->detectSourceType($link),
+                'source_url' => $link,
+                'external_metadata' => $metadata
             ]);
-
+    
             $note->update($noteData);
-
+    
         } catch (\Exception $e) {
             report($e);
-
+    
             Log::error("Failed to process link note: " . $e->getMessage());
             $note->update([
                 'status' => 'failed', 
@@ -155,5 +159,25 @@ class ProcessLinkNote implements ShouldQueue
         } catch (\Exception $e) {
             Log::warning("Failed to cleanup temp directory: " . $e->getMessage());
         }
+    }
+
+    /**
+     * Detect the source type from URL
+     */
+    private function detectSourceType(string $url): string
+    {
+        if (str_contains($url, 'youtube.com') || str_contains($url, 'youtu.be')) {
+            return 'youtube';
+        }
+        
+        if (str_contains($url, 'vimeo.com')) {
+            return 'vimeo';
+        }
+        
+        if (str_contains($url, 'tiktok.com')) {
+            return 'tiktok';
+        }
+        
+        return 'external';
     }
 }

@@ -75,6 +75,113 @@ class YouTubeAudioExtractor
             return false;
         }
     }
+
+    /**
+     * Get video metadata from YouTube URL
+     */
+    public function getVideoMetadata(string $youtubeUrl): ?array
+    {
+        // Validate and normalize URL
+        $youtubeUrl = $this->validateAndNormalizeUrl($youtubeUrl);
+        if (!$youtubeUrl) {
+            return null;
+        }
+
+        $ytdlp = config('app.ytdlp_path');
+        $cookiesPath = base_path('cookies.txt');
+
+        $command = [
+            $ytdlp,
+            '--dump-json',
+            '--no-playlist',
+            '--no-cache-dir',
+        ];
+
+        // Add cookies if available
+        if ($cookiesPath && file_exists($cookiesPath) && is_readable($cookiesPath)) {
+            $command[] = '--cookies';
+            $command[] = $cookiesPath;
+            $command[] = '--no-cookies-from-browser';
+        }
+
+        // Add additional options to handle bot detection
+        $command[] = '--user-agent';
+        $command[] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
+        $command[] = '--sleep-interval';
+        $command[] = '1';
+        $command[] = '--max-sleep-interval';
+        $command[] = '5';
+
+        // Add proxy configuration
+        $command = $this->addProxyToCommand($command);
+
+        $command[] = $youtubeUrl;
+
+        $process = new Process($command);
+        $process->setTimeout(60); // Short timeout for metadata extraction
+
+        try {
+            $process->mustRun();
+            $output = $process->getOutput();
+            
+            $metadata = json_decode($output, true);
+            
+            if (!$metadata) {
+                logger()->warning('Failed to parse video metadata JSON', [
+                    'url' => $youtubeUrl,
+                    'output' => substr($output, 0, 500)
+                ]);
+                return null;
+            }
+
+            // Extract and format relevant metadata
+            $formattedMetadata = [
+                'video_id' => $metadata['id'] ?? null,
+                'title' => $metadata['title'] ?? null,
+                'description' => $metadata['description'] ?? null,
+                'duration' => $metadata['duration'] ?? null,
+                'thumbnail' => $metadata['thumbnail'] ?? null,
+                'channel' => $metadata['uploader'] ?? $metadata['channel'] ?? null,
+                'channel_id' => $metadata['uploader_id'] ?? $metadata['channel_id'] ?? null,
+                'upload_date' => $metadata['upload_date'] ?? null,
+                'view_count' => $metadata['view_count'] ?? null,
+                'like_count' => $metadata['like_count'] ?? null,
+                'comment_count' => $metadata['comment_count'] ?? null,
+                'tags' => $metadata['tags'] ?? [],
+                'categories' => $metadata['categories'] ?? [],
+                'webpage_url' => $metadata['webpage_url'] ?? $youtubeUrl,
+            ];
+
+            // Format upload_date if available
+            if ($formattedMetadata['upload_date']) {
+                try {
+                    $date = \DateTime::createFromFormat('Ymd', $formattedMetadata['upload_date']);
+                    if ($date) {
+                        $formattedMetadata['upload_date'] = $date->format('Y-m-d');
+                    }
+                } catch (\Exception $e) {
+                    // Keep original format if parsing fails
+                }
+            }
+
+            logger()->info('Successfully extracted video metadata', [
+                'url' => $youtubeUrl,
+                'title' => $formattedMetadata['title'],
+                'duration' => $formattedMetadata['duration'],
+                'channel' => $formattedMetadata['channel']
+            ]);
+
+            return $formattedMetadata;
+
+        } catch (\Exception $e) {
+            logger()->error('Failed to extract video metadata', [
+                'url' => $youtubeUrl,
+                'error' => $e->getMessage(),
+                'command' => implode(' ', $command)
+            ]);
+            return null;
+        }
+    }
     
     /**
      * Add proxy options to yt-dlp command

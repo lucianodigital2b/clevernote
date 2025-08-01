@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
-import { Share, MoreHorizontal, Maximize2, X, ArrowLeft, Save, Clock, CheckCircle2, Folder, Trash2, Sparkles, Brain, Map, FileText, Loader2, ChevronRight, Layers, Copy, Grid3X3 } from 'lucide-react';
+import { Share, MoreHorizontal, Maximize2, X, ArrowLeft, Save, Clock, CheckCircle2, Folder, Trash2, Sparkles, Brain, Map, FileText, Loader2, ChevronRight, Layers, Copy, Grid3X3, ExternalLink, Play, Eye } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -241,6 +241,7 @@ export default function Edit({ note }: { note: Note }) {
     const [folders, setFolders] = useState<Array<{id: number; name: string}>>([]);
     const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
     const [isPublic, setIsPublic] = useState(note.is_public || false);
+    const [isVideoPlaying, setIsVideoPlaying] = useState(false);
     
     useEffect(() => {
         if (isFolderModalOpen) {
@@ -839,6 +840,162 @@ export default function Edit({ note }: { note: Note }) {
                             <ProcessingState state="processing" />
                         ) : (
                             <>
+                                {/* External Source Metadata */}
+                                {currentNote.source_type && currentNote.source_type !== 'upload' && currentNote.external_metadata && (
+                                    <div className="mb-6">
+                                        <Card className="border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50/50 to-transparent dark:from-blue-950/20 dark:to-transparent">
+                                            <CardContent className="p-4">
+                                                <div className="flex flex-col gap-4">
+                                                    {/* Video Player/Thumbnail */}
+                                                    {(currentNote.external_metadata.thumbnail || currentNote.external_metadata.thumbnail_url) && (
+                                                        <div className="w-full">
+                                                            {!isVideoPlaying ? (
+                                                                <div 
+                                                                    className="relative w-full h-48 sm:h-64 rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800 cursor-pointer hover:opacity-90 transition-opacity group"
+                                                                    onClick={() => setIsVideoPlaying(true)}
+                                                                >
+                                                                    <img 
+                                                                        src={currentNote.external_metadata.thumbnail || currentNote.external_metadata.thumbnail_url} 
+                                                                        alt="Video thumbnail"
+                                                                        className="w-full h-full object-cover"
+                                                                    />
+                                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
+                                                                        <div className="bg-white/90 rounded-full p-4 group-hover:scale-110 transition-transform">
+                                                                            <Play className="w-8 h-8 text-black" fill="black" />
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="absolute bottom-4 left-4 bg-black/70 text-white px-2 py-1 rounded text-sm">
+                                                                        Click to play video
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="relative w-full h-64 sm:h-80 rounded-lg overflow-hidden bg-black">
+                                                                    {currentNote.source_type === 'youtube' && currentNote.external_metadata.video_id && (
+                                                                        <iframe
+                                                                            width="100%"
+                                                                            height="100%"
+                                                                            src={`https://www.youtube.com/embed/${currentNote.external_metadata.video_id}?autoplay=1&rel=0`}
+                                                                            title="YouTube video player"
+                                                                            frameBorder="0"
+                                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                                            allowFullScreen
+                                                                            className="rounded-lg"
+                                                                        />
+                                                                    )}
+                                                                    {currentNote.source_type === 'vimeo' && currentNote.external_metadata.video_id && (
+                                                                        <iframe
+                                                                            width="100%"
+                                                                            height="100%"
+                                                                            src={`https://player.vimeo.com/video/${currentNote.external_metadata.video_id}?autoplay=1`}
+                                                                            title="Vimeo video player"
+                                                                            frameBorder="0"
+                                                                            allow="autoplay; fullscreen; picture-in-picture"
+                                                                            allowFullScreen
+                                                                            className="rounded-lg"
+                                                                        />
+                                                                    )}
+                                                                    {currentNote.source_type === 'tiktok' && currentNote.external_metadata.video_id && (
+                                                                        <iframe
+                                                                            width="100%"
+                                                                            height="100%"
+                                                                            src={`https://www.tiktok.com/embed/v2/${currentNote.external_metadata.video_id}`}
+                                                                            title="TikTok video player"
+                                                                            frameBorder="0"
+                                                                            allow="autoplay; fullscreen"
+                                                                            allowFullScreen
+                                                                            className="rounded-lg"
+                                                                        />
+                                                                    )}
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => setIsVideoPlaying(false)}
+                                                                        className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white"
+                                                                    >
+                                                                        <X className="w-4 h-4" />
+                                                                    </Button>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {/* Metadata Info */}
+                                                    <div className="flex items-start gap-4">
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-start justify-between gap-2 mb-2">
+                                                                <div className="flex items-center gap-2">
+                                                                    <Badge variant="secondary" className="text-xs">
+                                                                        {currentNote.source_type === 'youtube' && '📺 YouTube'}
+                                                                        {currentNote.source_type === 'vimeo' && '🎬 Vimeo'}
+                                                                        {currentNote.source_type === 'tiktok' && '🎵 TikTok'}
+                                                                        {currentNote.source_type === 'external' && '🔗 External'}
+                                                                    </Badge>
+                                                                    {currentNote.external_metadata.duration && (
+                                                                        <Badge variant="outline" className="text-xs">
+                                                                            <Clock className="w-3 h-3 mr-1" />
+                                                                            {Math.floor(currentNote.external_metadata.duration / 60)}:{(currentNote.external_metadata.duration % 60).toString().padStart(2, '0')}
+                                                                        </Badge>
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex items-center gap-2">
+                                                                    {!isVideoPlaying && (currentNote.external_metadata.thumbnail || currentNote.external_metadata.thumbnail_url) && (
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            onClick={() => setIsVideoPlaying(true)}
+                                                                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                                                                        >
+                                                                            <Play className="w-4 h-4 mr-1" />
+                                                                            Play
+                                                                        </Button>
+                                                                    )}
+                                                                    {currentNote.source_url && (
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            onClick={() => window.open(currentNote.source_url, '_blank')}
+                                                                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                                                                        >
+                                                                            <ExternalLink className="w-4 h-4" />
+                                                                        </Button>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            {/* Original Title */}
+                                                            {currentNote.external_metadata.title && currentNote.external_metadata.title !== currentNote.title && (
+                                                                <h3 className="font-medium text-sm text-neutral-700 dark:text-neutral-300 mb-1 line-clamp-2">
+                                                                    {t('original_title')}: {currentNote.external_metadata.title}
+                                                                </h3>
+                                                            )}
+                                                            
+                                                            {/* Channel/Creator */}
+                                                            {(currentNote.external_metadata.channel || currentNote.external_metadata.user_name) && (
+                                                                <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-1">
+                                                                    {t('by')} {currentNote.external_metadata.channel || currentNote.external_metadata.user_name}
+                                                                </p>
+                                                            )}
+                                                            
+                                                            {/* Stats */}
+                                                            <div className="flex items-center gap-4 text-xs text-neutral-500 dark:text-neutral-400">
+                                                                {currentNote.external_metadata.upload_date && (
+                                                                    <span>{t('uploaded')} {dayjs(currentNote.external_metadata.upload_date).format('MMM DD, YYYY')}</span>
+                                                                )}
+                                                                {currentNote.external_metadata.view_count && (
+                                                                    <span className="flex items-center gap-1">
+                                                                        <Eye className="w-3 h-3" />
+                                                                        {currentNote.external_metadata.view_count.toLocaleString()} {t('views')}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+                                )}
+
                                 {/* Title Section */}
                                 <div className="mb-8">
                                     <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 dark:text-neutral-100 mb-3 leading-tight">

@@ -742,5 +742,9 @@
   "Delete Group": "Delete Group",
   "Are you sure you want to delete this group? This action cannot be undone.": "Are you sure you want to delete this group? This action cannot be undone.",
   "Group deleted successfully!": "Group deleted successfully!",
-  "Failed to delete group": "Failed to delete group"
+  "Failed to delete group": "Failed to delete group",
+  "original_title": "Original Title",
+  "by": "by",
+  "uploaded": "Uploaded",
+  "views": "views"
 }

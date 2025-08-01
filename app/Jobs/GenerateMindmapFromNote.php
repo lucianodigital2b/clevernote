@@ -36,7 +36,7 @@ class GenerateMindmapFromNote implements ShouldQueue
             
             $response = $deepSeekService->createMindMap($note);
             
-            Log::info('Mindmap generation response: ' . print_r($response, true));
+            // Log::info('Mindmap generation response: ' . print_r($response, true));
             
             // Update mindmap with the generated data
             $mindmap->update([

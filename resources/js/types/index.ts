@@ -35,6 +35,22 @@ export type Note = {
     quizzes: Quiz[];
     mindmaps: Mindmap[];
     media?: MediaFile[];
+    external_metadata?: {
+        video_id?: string;
+        title?: string;
+        description?: string;
+        duration?: number;
+        thumbnail?: string;
+        thumbnail_url?: string;
+        channel?: string;
+        user_name?: string;
+        upload_date?: string;
+        view_count?: number;
+        like_count?: number;
+        [key: string]: any;
+    };
+    source_type?: 'youtube' | 'vimeo' | 'tiktok' | 'external' | 'upload' | null;
+    source_url?: string | null;
 };
 
 export type MediaFile = {

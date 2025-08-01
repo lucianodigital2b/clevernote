@@ -119,7 +119,7 @@ class OnboardingController extends Controller
             // Store the study plan in the user model
             $user->update(['study_plan' => $defaultStudyPlan]);
             
-            Log::info('Default study plan generated successfully for user: ' . $user->id);
+            // Log::info('Default study plan generated successfully for user: ' . $user->id);
         } catch (\Exception $e) {
             Log::error('Failed to generate default study plan for user: ' . $user->id . '. Error: ' . $e->getMessage());
             // Continue with the flow even if study plan generation fails

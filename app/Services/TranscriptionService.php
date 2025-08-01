@@ -101,29 +101,102 @@ class TranscriptionService
         $overlapDuration = 10; // 10 seconds overlap to prevent word cutting
         $chunks = [];
         $transcriptions = [];
+        $maxRetries = 3;
         
         try {
+            // Validate input file before processing
+            if (!file_exists($fullPath)) {
+                throw new \Exception("Input audio file does not exist: {$fullPath}");
+            }
+            
+            if (!is_readable($fullPath)) {
+                throw new \Exception("Input audio file is not readable: {$fullPath}");
+            }
+            
             // Create chunks with overlap
             for ($start = 0; $start < $duration; $start += ($chunkDuration - $overlapDuration)) {
                 $actualDuration = min($chunkDuration, $duration - $start);
-                $chunkPath = $this->createAudioChunk($fullPath, $start, $actualDuration);
-                $chunks[] = $chunkPath;
-                $this->tempFiles[] = $chunkPath;
+                
+                $chunkCreated = false;
+                $lastError = null;
+                
+                // Retry chunk creation up to maxRetries times
+                for ($retry = 0; $retry < $maxRetries; $retry++) {
+                    try {
+                        $chunkPath = $this->createAudioChunk($fullPath, $start, $actualDuration);
+                        $chunks[] = $chunkPath;
+                        $this->tempFiles[] = $chunkPath;
+                        $chunkCreated = true;
+                        break;
+                    } catch (\Exception $e) {
+                        $lastError = $e;
+                        
+                        // Wait before retry (exponential backoff)
+                        if ($retry < $maxRetries - 1) {
+                            usleep(pow(2, $retry) * 100000); // 100ms, 200ms, 400ms
+                        }
+                    }
+                }
+                
+                if (!$chunkCreated) {
+                    throw new \Exception(
+                        "Failed to create audio chunk after {$maxRetries} attempts. " .
+                        "Start: {$start}s, Duration: {$actualDuration}s. " .
+                        "Last error: " . ($lastError ? $lastError->getMessage() : 'Unknown error')
+                    );
+                }
             }
             
-            // Transcribe each chunk
-            foreach ($chunks as $chunkPath) {
-                $result = $this->transcribeSingleFile($chunkPath, $language);
-                $transcriptions[] = $result['text'];
+            // Transcribe each chunk with retry logic
+            foreach ($chunks as $index => $chunkPath) {
+                $transcribed = false;
+                $lastError = null;
+                
+                for ($retry = 0; $retry < $maxRetries; $retry++) {
+                    try {
+                        // Verify chunk file still exists and is readable before transcription
+                        if (!file_exists($chunkPath)) {
+                            throw new \Exception("Chunk file no longer exists: {$chunkPath}");
+                        }
+                        
+                        if (!is_readable($chunkPath)) {
+                            throw new \Exception("Chunk file is not readable: {$chunkPath}");
+                        }
+                        
+                        $result = $this->transcribeSingleFile($chunkPath, $language);
+                        $transcriptions[] = $result['text'];
+                        $transcribed = true;
+                        break;
+                    } catch (\Exception $e) {
+                        $lastError = $e;
+                        
+                        // Wait before retry (exponential backoff)
+                        if ($retry < $maxRetries - 1) {
+                            sleep(pow(2, $retry)); // 1s, 2s, 4s
+                        }
+                    }
+                }
+                
+                if (!$transcribed) {
+                    throw new \Exception(
+                        "Failed to transcribe chunk {$index} after {$maxRetries} attempts. " .
+                        "Chunk path: {$chunkPath}. " .
+                        "Last error: " . ($lastError ? $lastError->getMessage() : 'Unknown error')
+                    );
+                }
             }
             
             // Combine all transcriptions (remove overlap duplicates if needed)
             $combinedText = implode(' ', $transcriptions);
             
+            // Basic cleanup of potential duplicate phrases at chunk boundaries
+            $combinedText = $this->cleanupChunkOverlaps($combinedText);
+            
             return [
                 'text' => $combinedText,
                 'duration' => $duration,
                 'language' => $language ?? 'English',
+                'chunks_processed' => count($chunks),
             ];
             
         } finally {
@@ -136,25 +209,53 @@ class TranscriptionService
      */
     protected function createAudioChunk($inputPath, $start, $duration): string
     {
+        // Validate input file exists and is readable
+        if (!file_exists($inputPath)) {
+            throw new \Exception("Input audio file does not exist: {$inputPath}");
+        }
+        
+        if (!is_readable($inputPath)) {
+            throw new \Exception("Input audio file is not readable: {$inputPath}");
+        }
+        
+        // Get file size to ensure it's not empty
+        $fileSize = filesize($inputPath);
+        if ($fileSize === false || $fileSize === 0) {
+            throw new \Exception("Input audio file is empty or unreadable: {$inputPath}");
+        }
+        
         $ffmpeg = config('app.ffmpeg_path') ?? config('app.ffmpeg_bin');
         
         // If ffmpeg is not configured, try to derive it from ffmpeg_bin
         if (!$ffmpeg || is_dir($ffmpeg)) {
             $ffmpegBin = config('app.ffmpeg_bin');
             if ($ffmpegBin && is_dir($ffmpegBin)) {
-                $ffmpeg = rtrim($ffmpegBin, '\\/') . '\\ffmpeg.exe';
+                $ffmpeg = rtrim($ffmpegBin, '\\/') . DIRECTORY_SEPARATOR . 'ffmpeg' . (PHP_OS_FAMILY === 'Windows' ? '.exe' : '');
             } else {
                 $ffmpeg = $ffmpegBin ?? 'ffmpeg';
             }
         }
         
-        $chunkPath = storage_path('app/tmp/chunk_' . uniqid() . '.flac');
+        // Create a more unique filename with timestamp to avoid collisions
+        $uniqueId = uniqid('chunk_' . time() . '_', true);
+        $chunkPath = storage_path('app' . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . $uniqueId . '.flac');
         
-        // Ensure the tmp directory exists
+        // Ensure the tmp directory exists with proper permissions
         $tmpDir = dirname($chunkPath);
         if (!is_dir($tmpDir)) {
-            mkdir($tmpDir, 0755, true);
+            if (!mkdir($tmpDir, 0755, true)) {
+                throw new \Exception("Failed to create temporary directory: {$tmpDir}");
+            }
         }
+        
+        // Verify directory is writable
+        if (!is_writable($tmpDir)) {
+            throw new \Exception("Temporary directory is not writable: {$tmpDir}");
+        }
+        
+        // Normalize paths for cross-platform compatibility
+        $inputPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $inputPath);
+        $chunkPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $chunkPath);
         
         // Groq-optimized ffmpeg command: 16kHz mono FLAC
         $command = [
@@ -166,21 +267,62 @@ class TranscriptionService
             '-ac', '1',      // Mono channel
             '-map', '0:a',   // Map only audio
             '-c:a', 'flac',  // FLAC codec for lossless compression
+            '-avoid_negative_ts', 'make_zero', // Handle timestamp issues
             '-y',            // Overwrite output file
             $chunkPath
         ];
         
         $process = new Process($command);
         $process->setTimeout(600); // 10 minutes timeout
-        $process->run();
         
-        if (!$process->isSuccessful()) {
-            throw new \Exception('Failed to create audio chunk: ' . $process->getErrorOutput());
+        try {
+            $process->run();
+        } catch (ProcessFailedException $e) {
+            // Clean up partial file if it exists
+            if (file_exists($chunkPath)) {
+                unlink($chunkPath);
+            }
+            throw new \Exception('FFmpeg process failed: ' . $e->getMessage() . "\nCommand: " . implode(' ', $command));
         }
         
+        if (!$process->isSuccessful()) {
+            // Clean up partial file if it exists
+            if (file_exists($chunkPath)) {
+                unlink($chunkPath);
+            }
+            
+            $errorOutput = $process->getErrorOutput();
+            $output = $process->getOutput();
+            
+            throw new \Exception(
+                "Failed to create audio chunk.\n" .
+                "Command: " . implode(' ', $command) . "\n" .
+                "Error: {$errorOutput}\n" .
+                "Output: {$output}\n" .
+                "Exit code: " . $process->getExitCode()
+            );
+        }
+        
+        // Wait a moment for file system to sync (especially on network storage)
+        usleep(100000); // 100ms
+        
         // Verify the chunk file was created and has content
-        if (!file_exists($chunkPath) || filesize($chunkPath) === 0) {
-            throw new \Exception('Audio chunk file was not created or is empty');
+        if (!file_exists($chunkPath)) {
+            throw new \Exception("Audio chunk file was not created: {$chunkPath}");
+        }
+        
+        $chunkSize = filesize($chunkPath);
+        if ($chunkSize === false || $chunkSize === 0) {
+            // Clean up empty file
+            if (file_exists($chunkPath)) {
+                unlink($chunkPath);
+            }
+            throw new \Exception("Audio chunk file is empty: {$chunkPath}");
+        }
+        
+        // Verify the file is readable
+        if (!is_readable($chunkPath)) {
+            throw new \Exception("Audio chunk file is not readable: {$chunkPath}");
         }
         
         return $chunkPath;
@@ -268,6 +410,68 @@ class TranscriptionService
         $this->cleanupTempFiles();
     }
 
+
+    /**
+     * Clean up potential duplicate phrases at chunk boundaries
+     */
+    protected function cleanupChunkOverlaps(string $text): string
+    {
+        // Split into sentences for better overlap detection
+        $sentences = preg_split('/[.!?]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        
+        if (count($sentences) <= 1) {
+            return $text;
+        }
+        
+        $cleanedSentences = [];
+        $previousSentence = '';
+        
+        foreach ($sentences as $sentence) {
+            $sentence = trim($sentence);
+            
+            if (empty($sentence)) {
+                continue;
+            }
+            
+            // Check for similarity with previous sentence (potential overlap)
+            if (!empty($previousSentence)) {
+                $similarity = $this->calculateSimilarity($previousSentence, $sentence);
+                
+                // If sentences are very similar (>80%), skip this one as it's likely an overlap
+                if ($similarity > 0.8) {
+                    continue;
+                }
+            }
+            
+            $cleanedSentences[] = $sentence;
+            $previousSentence = $sentence;
+        }
+        
+        return implode('. ', $cleanedSentences) . '.';
+    }
+    
+    /**
+     * Calculate similarity between two strings using Levenshtein distance
+     */
+    protected function calculateSimilarity(string $str1, string $str2): float
+    {
+        $str1 = strtolower(trim($str1));
+        $str2 = strtolower(trim($str2));
+        
+        if ($str1 === $str2) {
+            return 1.0;
+        }
+        
+        $maxLength = max(strlen($str1), strlen($str2));
+        
+        if ($maxLength === 0) {
+            return 1.0;
+        }
+        
+        $distance = levenshtein($str1, $str2);
+        
+        return 1.0 - ($distance / $maxLength);
+    }
 
     /**
      * Extract YouTube video ID from URL
