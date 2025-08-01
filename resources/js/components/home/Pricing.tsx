@@ -53,14 +53,14 @@ const Pricing = ({ pricingPlans }: PricingProps) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          <div className="col-start-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-4xl lg:max-w-6xl mx-auto">
+          <div className="lg:col-start-2">
             {pricingPlans.map((plan, index) => (
               <div
                 key={index}
                 className={`rounded-2xl overflow-hidden transition-all duration-300 ${
                   plan.popular
-                    ? "transform md:-translate-y-4 border-2 border-brand-500 shadow-lg"
+                    ? "transform lg:-translate-y-4 border-2 border-brand-500 shadow-lg"
                     : "border border-gray-200 shadow-card"
                 }`}
               >
