@@ -19,6 +19,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
     const page = usePage<SharedData>();
     const { auth } = page.props;
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+    const user = (auth as any).user;
 
     const handleLanguageChange = (value: string) => {
         if (value) {
@@ -70,25 +71,27 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                     </Tooltip>
                 </TooltipProvider>
                 
-                <TooltipProvider delayDuration={0}>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button 
-                                variant="default"
-                                size="sm"
-                                className="relative bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 before:absolute before:inset-0 before:bg-gradient-to-r before:from-purple-400 before:to-indigo-500 before:rounded-md before:blur before:opacity-0 before:animate-[glow_2s_ease-in-out_infinite_alternate] hover:before:opacity-100 hidden md:flex"
-                                onClick={() => setIsUpgradeModalOpen(true)}
-                            >
-                                <span className="relative flex items-center gap-1">
-                                    ⚡ Subscribe
-                                </span>
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>Subscribe for premium features</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
+                {user.active_subscriptions?.length == 0 && (
+                    <TooltipProvider delayDuration={0}>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button 
+                                    variant="default"
+                                    size="sm"
+                                    className="relative bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 before:absolute before:inset-0 before:bg-gradient-to-r before:from-purple-400 before:to-indigo-500 before:rounded-md before:blur before:opacity-0 before:animate-[glow_2s_ease-in-out_infinite_alternate] hover:before:opacity-100 hidden md:flex"
+                                    onClick={() => setIsUpgradeModalOpen(true)}
+                                >
+                                    <span className="relative flex items-center gap-1">
+                                        ⚡ Unlock everything
+                                    </span>
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Subscribe for premium features</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                )}
                 <Select onValueChange={handleLanguageChange} defaultValue={i18n.language}>
                     <SelectTrigger className="w-[120px]">
                         <SelectValue placeholder="Language" />

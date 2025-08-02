@@ -54,7 +54,7 @@ const Hero = () => {
             <h1 className="mb-8 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight text-gray-900  px-2 sm:px-0">
               {t('hero_make_learning')}{' '}
               <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                {t('hero_interactive')}
+                {t('hero_fun')}
               </span>
             </h1>
             
@@ -81,27 +81,38 @@ const Hero = () => {
               </Button>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-8">
+            <div className="flex flex-row items-center justify-center gap-4 sm:gap-8 mb-8">
               <div className="flex flex-col items-center gap-3 sm:gap-4 align-center">
                 <div className="flex -space-x-2">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 border-2 border-white shadow-sm flex items-center justify-center">
-                    <span className="text-white text-xs sm:text-sm font-medium">A</span>
-                  </div>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white shadow-sm flex items-center justify-center">
-                    <span className="text-white text-xs sm:text-sm font-medium">M</span>
-                  </div>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 border-2 border-white shadow-sm flex items-center justify-center">
-                    <span className="text-white text-xs sm:text-sm font-medium">S</span>
-                  </div>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-2 border-white shadow-sm flex items-center justify-center">
-                    <span className="text-white text-xs sm:text-sm font-medium">J</span>
-                  </div>
+                  <img 
+                    src="/avatars/300-1.jpg" 
+                    alt="Student avatar" 
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white shadow-sm object-cover"
+                  />
+                  <img 
+                    src="/avatars/300-12.jpg" 
+                    alt="Student avatar" 
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white shadow-sm object-cover"
+                  />
+                  <img 
+                    src="/avatars/300-20.jpg" 
+                    alt="Student avatar" 
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white shadow-sm object-cover"
+                  />
+                  <img 
+                    src="/avatars/300-5.jpg" 
+                    alt="Student avatar" 
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white shadow-sm object-cover"
+                  />
                 </div>
                 <div className="text-left sm:text-left ">
                   <div className="text-indigo-600 font-semibold text-center sm:text-lg">{t('hero_social_proof_loved_by')}</div>
                   <div className="text-indigo-600 font-semibold text-center sm:text-lg">{t('hero_million_students')}</div>
                 </div>
               </div>
+              
+              {/* Aesthetic line separator */}
+              <div className="w-0.5 h-12 sm:h-16 bg-zinc-200 rounded-2xl"></div>
               
               <div className="flex items-center justify-center">
                 <img 

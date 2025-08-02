@@ -684,7 +684,7 @@
   "hero_make_learning": "Make learning more",
   "hero_social_proof_loved_by": "Loved by",
   "hero_million_students": "1 million+ students",
-  "hero_interactive": "interactive",
+  "hero_fun": "fun",
   "add_some_cards": "Add some cards",
   
   "Groups": "Groups",
@@ -756,5 +756,11 @@
   "Invalid invite code": "Invalid invite code",
   "You are already a member of this group": "You are already a member of this group",
   "Failed to join group": "Failed to join group",
-  "Please enter an invite code": "Please enter an invite code"
+  "Please enter an invite code": "Please enter an invite code",
+  "trial_timeline_today": "Today",
+  "trial_timeline_today_description": "Unlimited Pass unlocked, instantly",
+  "trial_timeline_reminder_day": "Day {{day}}",
+  "trial_timeline_reminder_description": "We'll remind you your trial is ending",
+  "trial_timeline_end_day": "Day {{day}}",
+  "trial_timeline_end_description": "Your trial will end and subscription will officially start. Enjoy the improved focus and time!"
 }

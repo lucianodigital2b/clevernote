@@ -3,7 +3,6 @@ import React, { useState, useRef } from "react";
 import { 
   Upload, 
   Youtube, 
-  MessageCircle,
   FileText,
   Send,
   Loader2
@@ -12,10 +11,9 @@ import { useTranslation } from "react-i18next";
 
 const Features = () => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'upload' | 'youtube' | 'chat'>('upload');
+  const [activeTab, setActiveTab] = useState<'upload' | 'youtube'>('upload');
   const [dragActive, setDragActive] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState("");
-  const [chatMessage, setChatMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -60,13 +58,6 @@ const Features = () => {
     }
   };
 
-  const handleChatSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (chatMessage.trim()) {
-      redirectToLogin();
-    }
-  };
-
   return (
     <section id="features" className="py-20 bg-white">
       <div className="container mx-auto px-4 md:px-6">
@@ -106,17 +97,6 @@ const Features = () => {
             >
               <Youtube className="w-4 h-4 mr-2" />
               <span className="text-sm font-medium">{t('features_tab_youtube')}</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('chat')}
-              className={`flex items-center px-4 py-2 rounded-md transition-all cursor-pointer ${
-                activeTab === 'chat' 
-                  ? 'bg-white shadow-sm text-gray-700' 
-                  : 'text-gray-600 hover:text-gray-700'
-              }`}
-            >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              <span className="text-sm font-medium">{t('features_tab_chat')}</span>
             </button>
           </div>
         </div>
@@ -224,50 +204,7 @@ const Features = () => {
               </form>
             )}
 
-            {/* Chat Tab Content */}
-            {activeTab === 'chat' && (
-              <form onSubmit={handleChatSubmit} className="space-y-6">
-                <div className="w-16 h-16 mx-auto bg-indigo-100 rounded-full flex items-center justify-center">
-                  {isLoading ? (
-                    <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
-                  ) : (
-                    <MessageCircle className="w-8 h-8 text-indigo-600" />
-                  )}
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {isLoading ? t('features_chat_processing') : t('features_chat_title')}
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    {isLoading 
-                      ? t('features_chat_processing_description')
-                      : t('features_chat_description')
-                    }
-                  </p>
-                </div>
-                <div className="flex max-w-md mx-auto">
-                  <input
-                    type="text"
-                    value={chatMessage}
-                    onChange={(e) => setChatMessage(e.target.value)}
-                    placeholder={t('features_chat_placeholder')}
-                    disabled={isLoading}
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                  />
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="px-6 py-3 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isLoading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Send className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-              </form>
-            )}
+
           </div>
         </div>
       </div>
