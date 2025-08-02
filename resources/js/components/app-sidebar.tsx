@@ -49,18 +49,18 @@ const mainNavItems: NavItem[] = [
         url: '/statistics',
         icon: ChartAreaIcon,
     },
-    {
-        title: t('Podcast') + ' (' + t('Coming soon') + ')',
-        url: '#',
-        icon: Headphones,
-        tooltip: t('Coming soon'),
-    },
-    {
-        title: t('BrainRot') + ' (' + t('Coming soon') + ')',
-        url: '#',
-        icon: BrainCircuit,
-        tooltip: t('Coming soon'),
-    },
+    // {
+    //     title: t('Podcast') + ' (' + t('Coming soon') + ')',
+    //     url: '#',
+    //     icon: Headphones,
+    //     tooltip: t('Coming soon'),
+    // },
+    // {
+    //     title: t('BrainRot') + ' (' + t('Coming soon') + ')',
+    //     url: '#',
+    //     icon: BrainCircuit,
+    //     tooltip: t('Coming soon'),
+    // },
 ];
 
 const footerNavItems: NavItem[] = [
