@@ -56,6 +56,7 @@ class GenerateFlashcardsFromNote implements ShouldQueue
         } catch (\Exception $e) {
             // Update flashcard set status to failed
             $flashcardSet->update(['status' => 'failed']);
+            Log::error(print_r($flashcards, true));
             Log::error('Failed to generate flashcards: ' . $e->getMessage());
             throw $e;
         }
