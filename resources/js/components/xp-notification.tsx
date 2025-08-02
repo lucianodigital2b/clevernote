@@ -21,17 +21,17 @@ export function XPNotification({ xpReward, onClose }: XPNotificationProps) {
         if (xpReward?.success) {
             setIsVisible(true);
             // Small delay to ensure the element is mounted before starting animation
-            setTimeout(() => setIsAnimating(true), 50);
+            setTimeout(() => setIsAnimating(true), 25);
             
-            // Hide floating XP after 3 seconds
+            // Hide floating XP after 1.5 seconds (faster)
             const timer = setTimeout(() => {
                 setIsAnimating(false);
                 // Wait for fade out animation before hiding completely
                 setTimeout(() => {
                     setIsVisible(false);
                     onClose?.();
-                }, 500);
-            }, 3000);
+                }, 250);
+            }, 1500);
 
             return () => {
                 clearTimeout(timer);
@@ -53,11 +53,11 @@ export function XPNotification({ xpReward, onClose }: XPNotificationProps) {
     return (
         <>
             {/* Floating XP Animation */}
-            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none">
-                <div className={`transition-all duration-500 ease-out transform ${
+            <div className="fixed top-32 left-32 z-50 pointer-events-none">
+                <div className={`transition-all duration-300 ease-out transform ${
                     isAnimating 
-                        ? 'translate-y-0 opacity-100 scale-100' 
-                        : '-translate-y-16 opacity-0 scale-90'
+                        ? 'translate-x-0 opacity-100 scale-100' 
+                        : '-translate-x-16 opacity-0 scale-90'
                 }`}>
                     <div className="flex flex-col items-center gap-3 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 px-8 py-6 backdrop-blur-sm bg-opacity-95 dark:bg-opacity-95">
                         <div className="text-5xl animate-bounce">

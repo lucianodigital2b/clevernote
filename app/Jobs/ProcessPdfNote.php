@@ -119,7 +119,10 @@ class ProcessPdfNote implements ShouldQueue
         try {
             $note = Note::find($this->noteId);
             if ($note) {
-                $note->update(['status' => 'failed']);
+                $note->update([
+                    'status' => 'failed',
+                    'failure_reeason' => $exception->getMessage()
+                ]);
             }
             
             // Clean up the temporary file
