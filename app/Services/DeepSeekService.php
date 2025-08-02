@@ -43,7 +43,6 @@ class DeepSeekService extends AbstractAIService
     {
         $language = $language ?? $this->defaultLanguage;
         $prompt = AIPrompts::flashcardPrompt($content, $language);
-        \Log::error(print_r($content, true));
         return $this->sendRequest($prompt);
     }
 
