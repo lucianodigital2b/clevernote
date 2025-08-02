@@ -357,6 +357,8 @@
   "trial_timeline_reminder_description": "Te recordaremos que tu prueba está terminando",
   "trial_timeline_end_day": "Día {{day}}",
   "trial_timeline_end_description": "Tu prueba terminará y la suscripción comenzará oficialmente. ¡Disfruta del mejor enfoque y tiempo!",
+  
+
   "billing_order_summary": "Resumen del Pedido",
   "billing_clevernote_pro": "Clevernote Pro",
   "billing_unlock_ai_features": "Desbloquea potentes funciones de IA para tus notas.",
@@ -703,6 +705,22 @@
   "original_title": "Título Original",
   "by": "por",
   "uploaded": "Subido",
-  "views": "visualizaciones"
+  "views": "visualizaciones",
+  
+  "upgrade_modal_title": "Prueba Clevernote",
+  "upgrade_modal_title_highlight": "gratis por 7 días",
+  "upgrade_modal_feature_unlimited": "Notas de IA ilimitadas, grabaciones, subidas",
+  "upgrade_modal_feature_quizzes": "Cuestionarios, videos, podcasts y más",
+  "upgrade_modal_feature_sources": "YouTube, PDF, audio, archivos, sitios web",
+  "upgrade_modal_feature_chat": "Chatea con tus notas",
+  "upgrade_modal_feature_secure": "Privado y seguro",
+  "upgrade_modal_save_percent": "Ahorra",
+  "upgrade_modal_price_yearly": "Cargando...",
+  "upgrade_modal_price_yearly_billing": "facturado anualmente",
+  "upgrade_modal_price_monthly": "Cargando...",
+  "upgrade_modal_price_monthly_billing": "facturado mensualmente",
+  "upgrade_modal_cta_button": "Prueba Clevernote por $0",
+  "upgrade_modal_no_risk": "Sin riesgo, sin pago hoy",
+  "upgrade_modal_others_started": "738 otros comenzaron hoy"
 
 }

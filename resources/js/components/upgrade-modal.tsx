@@ -6,6 +6,13 @@ import { Button } from '@/components/ui/button';
 import { router } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 
+type PricingData = {
+    amount: number;
+    currency: string;
+    interval: string;
+    formatted_amount: string;
+};
+
 type UpgradeModalProps = {
     isOpen: boolean;
     onClose: () => void;
@@ -15,6 +22,14 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
     const { t } = useTranslation();
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
     const [timeLeft, setTimeLeft] = useState(120); // 2 minutes in seconds
+    const [pricingData, setPricingData] = useState<{
+        monthly: PricingData | null;
+        yearly: PricingData | null;
+    }>({
+        monthly: null,
+        yearly: null
+    });
+    const [loadingPricing, setLoadingPricing] = useState(true);
 
     useEffect(() => {
         if (!isOpen || timeLeft <= 0) return;
@@ -33,11 +48,59 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
         }
     }, [isOpen]);
 
+    // Fetch pricing data when modal opens
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const fetchPricingData = async () => {
+            setLoadingPricing(true);
+            try {
+                // Fetch both monthly and yearly pricing
+                const [monthlyResponse, yearlyResponse] = await Promise.all([
+                    fetch('/api/pricing-data?plan=monthly', { credentials: 'include' }),
+                    fetch('/api/pricing-data?plan=yearly', { credentials: 'include' })
+                ]);
+
+                const monthlyData = await monthlyResponse.json();
+                const yearlyData = await yearlyResponse.json();
+
+                setPricingData({
+                    monthly: monthlyData,
+                    yearly: yearlyData
+                });
+            } catch (error) {
+                console.error('Failed to fetch pricing data:', error);
+            } finally {
+                setLoadingPricing(false);
+            }
+        };
+
+        fetchPricingData();
+    }, [isOpen]);
+
     // Format time as MM:SS
     const formatTime = (seconds: number) => {
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = seconds % 60;
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    };
+
+    // Calculate savings percentage
+    const calculateSavingsPercentage = () => {
+        if (!pricingData.monthly || !pricingData.yearly) return 0;
+        
+        const monthlyYearlyTotal = pricingData.monthly.amount * 12;
+        const yearlyTotal = pricingData.yearly.amount;
+        const savings = ((monthlyYearlyTotal - yearlyTotal) / monthlyYearlyTotal) * 100;
+        
+        return Math.round(savings);
+    };
+
+    // Format yearly price per month
+    const getYearlyPricePerMonth = () => {
+        if (!pricingData.yearly) return '$0.00';
+        const monthlyEquivalent = pricingData.yearly.amount / 12;
+        return `$${monthlyEquivalent.toFixed(2)}`;
     };
 
     const handleUpgrade = () => {
@@ -82,7 +145,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                         {/* Header */}
                         <div className="text-center mb-12">
                             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                                Try Clevernote <span className="text-purple-600">free for 7 days</span>
+                                {t('upgrade_modal_title')} <span className="text-purple-600">{t('upgrade_modal_title_highlight')}</span>
                             </h1>
                         </div>
 
@@ -93,11 +156,11 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                                 {/* Features */}
                                 <div className="space-y-4">
                                     {[
-                                        'Unlimited AI notes, recordings, uploads',
-                                        'Quizzes, videos, podcasts, & more',
-                                        'YouTube, PDF, audio, files, websites',
-                                        'Chat with your notes',
-                                        'Private and secure'
+                                        t('upgrade_modal_feature_unlimited'),
+                                        t('upgrade_modal_feature_quizzes'),
+                                        t('upgrade_modal_feature_sources'),
+                                        t('upgrade_modal_feature_chat'),
+                                        t('upgrade_modal_feature_secure')
                                     ].map((feature, index) => (
                                         <motion.div
                                             key={index}
@@ -126,13 +189,15 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                                     >
                                         {/* Green Save Banner */}
                                         <div className="bg-green-500 text-white text-center py-2 text-sm font-medium">
-                                            Save 47%
+                                            {loadingPricing ? t('upgrade_modal_save_percent') : `Save ${calculateSavingsPercentage()}%`}
                                         </div>
                                         
                                         <div className="p-4">
                                             <div className="text-center">
-                                                <div className="text-lg font-bold text-gray-900">$3.50 / month</div>
-                                                <div className="text-sm text-gray-500">billed yearly</div>
+                                                <div className="text-lg font-bold text-gray-900">
+                                                    {loadingPricing ? t('upgrade_modal_price_yearly') : `${getYearlyPricePerMonth()} / month`}
+                                                </div>
+                                                <div className="text-sm text-gray-500">{t('upgrade_modal_price_yearly_billing')}</div>
                                             </div>
                                         </div>
                                         
@@ -153,8 +218,10 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                                     >
                                         <div className="p-4">
                                             <div className="text-center">
-                                                <div className="text-lg font-bold text-gray-900">$7.99 / month</div>
-                                                <div className="text-sm text-gray-500">billed monthly</div>
+                                                <div className="text-lg font-bold text-gray-900">
+                                                    {loadingPricing ? t('upgrade_modal_price_monthly') : `${pricingData.monthly?.formatted_amount || '$0.00'} / month`}
+                                                </div>
+                                                <div className="text-sm text-gray-500">{t('upgrade_modal_price_monthly_billing')}</div>
                                             </div>
                                         </div>
                                         
@@ -171,12 +238,12 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                                     onClick={handleUpgrade}
                                     className="w-full py-4 text-lg font-bold bg-purple-600 hover:bg-purple-700 text-white rounded-xl"
                                 >
-                                    Try Clevernote for $0
+                                    {t('upgrade_modal_cta_button')}
                                 </Button>
 
                                 {/* No risk text */}
                                 <p className="text-center text-sm text-gray-600">
-                                    No risk, no payment today
+                                    {t('upgrade_modal_no_risk')}
                                 </p>
 
                                 {/* User avatars and count */}
@@ -192,7 +259,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                                         ))}
                                     </div>
                                     <span className="text-sm text-gray-600 font-medium">
-                                        738 others started today
+                                        {t('upgrade_modal_others_started')}
                                     </span>
                                 </div>
                             </div>

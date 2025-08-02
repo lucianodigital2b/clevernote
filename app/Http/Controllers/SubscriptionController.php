@@ -137,6 +137,7 @@ class SubscriptionController extends Controller
         return response()->json([
             'product_name' => $product->name,
             'amount' => $price->amount,
+            'formatted_amount' => $price->formatted_amount,
             'currency' => $price->currency,
             'interval' => $price->interval,
             'stripe_price_id' => $price->stripe_price_id,
