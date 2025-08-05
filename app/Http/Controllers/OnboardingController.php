@@ -125,6 +125,9 @@ class OnboardingController extends Controller
             // Continue with the flow even if study plan generation fails
         }
 
-        return redirect()->route('dashboard', ['showUpgrade' => 'true']);
+        // Set session flag to show upgrade modal after onboarding
+        session()->flash('show_upgrade_modal', true);
+        
+        return redirect()->route('dashboard');
     }
 }

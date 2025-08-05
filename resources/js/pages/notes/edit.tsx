@@ -202,7 +202,6 @@ export default function Edit({ note }: { note: Note }) {
             const response = await axios.post(`/notes/${note.id}/generate-flashcards`);
             if (response.data && response.data.flashcardSetId) {
                 const flashcardSetId = response.data.flashcardSetId;
-                toastConfig.success("Flashcard generation started");
                 
                 // Start polling for flashcard set status
                 const intervalId = setInterval(async () => {
@@ -273,12 +272,11 @@ export default function Edit({ note }: { note: Note }) {
             const response = await axios.post(`/quizzes/generate-from-note/${note.id}`);
             if (response.data && response.data.quiz_id) {
                 const quizId = response.data.quiz_id;
-                toastConfig.success("Quiz generation started");
                 
                 // Start polling for quiz status
                 const intervalId = setInterval(async () => {
                     try {
-                        const quizResponse = await axios.get(`/quizzes/${quizId}`);
+                        const quizResponse = await axios.get(`/api/quizzes/${quizId}`);
                         const quizData = quizResponse.data.quiz;
                         
                         if (quizData.status === 'completed') {
@@ -328,7 +326,6 @@ export default function Edit({ note }: { note: Note }) {
             const response = await axios.post(`/notes/${note.id}/generate-mindmap`);
             if (response.data && response.data.mindmap) {
                 const mindmapId = response.data.mindmap.id;
-                toastConfig.success("Mindmap generation started");
                 
                 // Start polling for mindmap status
                 const intervalId = setInterval(async () => {
@@ -380,7 +377,6 @@ export default function Edit({ note }: { note: Note }) {
             const response = await axios.post(`/notes/${note.id}/generate-crossword`);
             if (response.data && response.data.crossword_id) {
                 const crosswordId = response.data.crossword_id;
-                toastConfig.success("Crossword generation started");
                 
                 // Start polling for crossword status
                 const intervalId = setInterval(async () => {
@@ -834,7 +830,7 @@ export default function Edit({ note }: { note: Note }) {
                             </div>
                         </div>
 
-                        {isFailed && note.content == null ? (
+                        {isFailed && (note.content == null || note.content === '') ? (
                             <ProcessingState state="failed" onRetry={handleRetryProcessing} />
                         ) : isProcessing ? (
                             <ProcessingState state="processing" />

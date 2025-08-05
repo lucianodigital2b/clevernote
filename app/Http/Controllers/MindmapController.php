@@ -20,6 +20,11 @@ class MindmapController extends Controller
 
     public function show(Mindmap $mindmap, Request $request)
     {
+        // Check if user owns this mindmap
+        if ($mindmap->user_id !== auth()->id()) {
+            abort(403);
+        }
+        
         if ($request->wantsJson()) {
             return response()->json($mindmap->load('note'));
         }
@@ -31,6 +36,9 @@ class MindmapController extends Controller
 
     public function generate(Note $note)
     {
+        // Authorize that the user can update the note (i.e., they own it)
+        $this->authorize('update', $note);
+        
         // Create a new mindmap record with pending status
         $mindmap = Mindmap::create([
             'note_id' => $note->id,
@@ -49,11 +57,21 @@ class MindmapController extends Controller
 
     public function getMindmap(Mindmap $mindmap)
     {
+        // Check if user owns this mindmap
+        if ($mindmap->user_id !== auth()->id()) {
+            abort(403);
+        }
+        
         return response()->json(['mindmap' => $mindmap]);
     }
 
     public function update(Request $request, Mindmap $mindmap)
     {
+        // Check if user owns this mindmap
+        if ($mindmap->user_id !== auth()->id()) {
+            abort(403);
+        }
+        
         $validated = $request->validate([
             'nodes' => 'required|array',
             'edges' => 'required|array',
@@ -66,6 +84,11 @@ class MindmapController extends Controller
 
     public function status(Mindmap $mindmap)
     {
+        // Check if user owns this mindmap
+        if ($mindmap->user_id !== auth()->id()) {
+            abort(403);
+        }
+        
         return [
             'status' => $mindmap->status,
         ];

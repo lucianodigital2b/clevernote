@@ -136,15 +136,10 @@ export default function Dashboard() {
 
     const { requireSubscription } = useRequireSubscription();
     
-    // Show upgrade modal if redirected from onboarding
+    // Show upgrade modal if session flag is set
     useEffect(() => {
         if (showUpgrade) {
             setIsModalOpen(true);
-            // Clean up the URL parameter
-            router.visit(route('dashboard'), {
-                replace: true,
-                preserveState: true
-            });
         }
     }, [showUpgrade]);
     

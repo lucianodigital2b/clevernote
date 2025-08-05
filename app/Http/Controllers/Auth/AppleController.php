@@ -46,7 +46,23 @@ class AppleController extends Controller
             
             Auth::login($user);
             
-            return redirect()->intended(route('onboarding.show'));
+            // Update last_login timestamp
+            $user->update(['last_login' => now()]);
+            
+            // Check if user has completed onboarding
+            if (!$user->onboarding_completed) {
+                return redirect()->intended(route('onboarding.show'));
+            }
+            
+            // Check if user has an active subscription
+             $hasActiveSubscription = $user->activeSubscriptions()->exists();
+
+             // If no active subscription, set session flag to show upgrade modal
+             if (!$hasActiveSubscription) {
+                 session()->flash('show_upgrade_modal', true);
+             }
+
+             return redirect()->route('dashboard');
             
         } catch (\Exception $e) {
             return redirect()->route('login')

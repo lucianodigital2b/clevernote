@@ -32,6 +32,9 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        // Update last_login timestamp
+        $request->user()->update(['last_login' => now()]);
+
         if ($request->expectsJson()) {
             $token = $request->user()->createToken('main')->plainTextToken;
 
@@ -44,6 +47,14 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Check if user has an active subscription
+        $user = $request->user();
+        $hasActiveSubscription = $user->activeSubscriptions()->exists();
+
+        // If no active subscription, set session flag to show upgrade modal
+        if (!$hasActiveSubscription) {
+            $request->session()->flash('show_upgrade_modal', true);
+        }
 
         return redirect()->intended(route('dashboard', absolute: false));
     }

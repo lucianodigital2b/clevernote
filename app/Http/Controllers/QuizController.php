@@ -401,6 +401,9 @@ class QuizController extends Controller
 
     public function generateFromNote(Request $request, Note $note)
     {
+        // Authorize that the user can update the note (i.e., they own it)
+        $this->authorize('update', $note);
+        
         try {
             // Create quiz immediately with pending status
             $quiz = Quiz::create([

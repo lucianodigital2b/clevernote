@@ -23,10 +23,6 @@ use Laravel\Horizon\Horizon;
 
 Route::get('/', [App\Http\Controllers\WelcomeController::class, 'index'])->name('home');
 
-// Public quiz routes (UUID-based)
-Route::get('/quizzes/{uuid}', [QuizSharingController::class, 'showByUuid'])->name('quizzes.public.show');
-Route::post('/quizzes/{uuid}/public/attempt', [QuizController::class, 'submitPublicAttempt'])->name('quizzes.public.attempt');
-
 // Public note routes (UUID-based)
 Route::get('/notes/{uuid}', [NoteController::class, 'showByUuid'])->name('notes.public.show');
 
@@ -98,10 +94,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{quiz}/leaderboard', [QuizSharingController::class, 'leaderboard'])->name('quizzes.leaderboard');
     });
 
-
     Route::get('/billing/success', [SubscriptionController::class, 'success'])->name('billing.success');
     Route::get('/billing/cancel', [SubscriptionController::class, 'cancel'])->name('billing.cancel');
-
 
     Route::get('/onboarding', [OnboardingController::class, 'show'])
         ->name('onboarding.show');
@@ -112,14 +106,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/mindmaps/{mindmap}', [MindmapController::class, 'show'])->name('mindmaps.show');
     Route::patch('/mindmaps/{mindmap}', [MindmapController::class, 'update'])->name('mindmaps.update');
 
-    
     Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
-
 
     // How page route
     Route::get('/how', fn () => Inertia::render('how'))->name('how');
-
 });
+
+// Public quiz routes (UUID-based) - Must come after resource routes to avoid conflicts
+Route::get('/quizzes/{uuid}', [QuizSharingController::class, 'showByUuid'])->name('quizzes.public.show');
+Route::post('/quizzes/{uuid}/public/attempt', [QuizController::class, 'submitPublicAttempt'])->name('quizzes.public.attempt');
 
 
 

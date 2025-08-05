@@ -36,7 +36,7 @@ class GenerateQuizFromNote implements ShouldQueue
             
             $response = $quizGeneratorService->generateFromNote($note);
             
-            Log::error(print_r($response));
+            // Log::error(print_r($response, true));
             // Extract questions from the JSON response
             $questions = $response['quiz'] ?? [];
             
