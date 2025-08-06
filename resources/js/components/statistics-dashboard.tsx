@@ -95,7 +95,7 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                 {/* Left Column - Today's Activity and Streaks */}
                 <div className="space-y-6">
                     {/* Today's Activity */}
-                    <Card className="bg-white  border-gray-200 dark:border-neutral-700">
+                    <Card className="bg-white  border-gray-200 dark:border-transparent">
                         <CardHeader className="pb-3">
                             <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                                 <Target className="w-5 h-5 text-blue-500 dark:text-blue-400" />
@@ -124,7 +124,7 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                     </Card>
                     
                     {/* Streaks */}
-                    <Card className="bg-white  border-gray-200 dark:border-neutral-700">
+                    <Card className="bg-white  border-gray-200 dark:border-transparent">
                         <CardHeader className="pb-3">
                             <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                                 <Flame className="w-5 h-5 text-orange-500 dark:text-orange-400" />
@@ -158,7 +158,7 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                 
                 {/* Right Column - Calendar */}
                 <div className="lg:col-span-2">
-                    <Card className="bg-white  border-gray-200 dark:border-neutral-700">
+                    <Card className="bg-white  border-gray-200 dark:border-transparent">
                         <CardHeader className="pb-3">
                             <div className="flex items-center justify-between">
                                 <button 
@@ -197,7 +197,7 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                                                 w-full h-full flex items-center justify-center rounded-lg text-sm font-medium transition-colors
                                                 ${dayData.hasActivity 
                                                     ? 'bg-green-500 dark:bg-green-600 text-white' 
-                                                    : 'bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+                                                    : 'bg-gray-100 dark:bg-accent-foreground/5 text-gray-900 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-800/50'
                                                 }
                                             `}>
                                                 {dayData.day}
@@ -210,7 +210,7 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                             </div>
                             
                             {/* Calendar Stats */}
-                            <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-neutral-700">
+                            <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-transparent items-center">
                                 <div className="text-center">
                                     <p className="text-gray-600 dark:text-slate-400 text-sm">{t('stats_days_active')}</p>
                                     <p className="text-gray-900 dark:text-white text-lg font-bold">{totalDaysWithActivity} {t('stats_of')} {daysInMonth}</p>
@@ -230,7 +230,7 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
             </div>
             
             {/* Lifetime Statistics */}
-            <Card className="bg-white  border-gray-200 dark:border-neutral-700">
+            <Card className="bg-white  border-gray-200 dark:border-transparent">
                 <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                         <Trophy className="w-5 h-5 text-purple-500 dark:text-purple-400" />
