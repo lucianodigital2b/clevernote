@@ -101,9 +101,7 @@
   "No notes yet": "Nenhum resumo ainda",
   "Create your first note": "Crie sua primeira resumo gravando áudio, enviando um arquivo ou adicionando um link da web nas opções acima.",
   "learning_journey": "Sua jornada de aprendizado, simplificada",
-  "hero_title": "Pare de sofrer com",
-  "hero_highlight": "dever de casa",
-  "hero_title_suffix": "Deixe a IA ajudar você",
+
   "hero_description": "Entenda suas tarefas instantaneamente e entrege soluções precisas em segundos. Chega de noites em claro, chega de frustração.",
   "start_free": "Começar grátis",
   "free_trial": "3 dias de teste grátis",
@@ -597,9 +595,9 @@
   "reliability_sat_math_description": "Alcança pontuações perfeitas de 800 enquanto outras ferramentas de IA param em 700.",
   "reliability_accuracy_title": "mais preciso",
   "reliability_accuracy_description": "Supera significativamente modelos de IA gerais em conteúdo acadêmico.",
-  "hero_make_learning": "Torne o aprendizado mais",
+  "hero_make_learning": "Aumente sua chance de aprovação com ajuda de uma IA que te faz memorizar 3x mais conteúdo.",
   "hero_social_proof_loved_by": "Amado por",
-  "hero_million_students": "1 milhão+ estudantes",
+  "hero_million_students": "+50.000 estudantes",
   "hero_fun": "interativo",
 
   "Groups": "Grupos",
@@ -676,6 +674,14 @@
   "upgrade_modal_price_monthly_billing": "cobrado mensalmente",
   "upgrade_modal_cta_button": "Experimente o Clevernote por R$ 0",
   "upgrade_modal_no_risk": "Sem risco, sem pagamento hoje",
-  "upgrade_modal_others_started": "738 outros começaram hoje"
+  "upgrade_modal_others_started": "738 outros começaram hoje",
+  "whos_it_for_students_studying_alt": "Estudantes estudando juntos",
+  "whos_it_for_trusted_by_students": "Confiado por mais de 50.000 estudantes",
+  "whos_it_for_secret_weapon": "A arma secreta dos",
+  "whos_it_for_top_performers": "melhores alunos",
+  "whos_it_for_description": "De concurseiros a vestibulandos, o Clevernote é o impulso que faltava para você chegar lá.",
+  "whos_it_for_perfect_for_title": "Perfeito para futuros advogados e médicos",
+  "whos_it_for_perfect_for_description": "Domine conceitos médicos complexos 3x mais rápido. Transforme livros didáticos avassaladores em compreensão cristalina. Navegue pela jurisprudência como um profissional. Transforme textos jurídicos densos em insights memoráveis.",
+  "whos_it_for_student_success_alt": "Estudante alcançando sucesso"
 
 }

@@ -401,6 +401,14 @@
   "Multiple Choice": "Multiple Choice",
   "True/False": "True/False",
   "Fill in the Blank": "Fill in the Blank",
+  "whos_it_for_students_studying_alt": "Students studying together",
+  "whos_it_for_trusted_by_students": "Trusted by 50,000+ students",
+  "whos_it_for_secret_weapon": "The secret weapon of",
+  "whos_it_for_top_performers": "top performers",
+  "whos_it_for_description": "From Harvard Med to Yale Law, the brightest minds use CleverNote to transform their study sessions into competitive advantages.",
+  "whos_it_for_perfect_for_title": "Perfect for Future Lawyers and Doctors",
+  "whos_it_for_perfect_for_description": "Master complex medical concepts 3x faster. Turn overwhelming textbooks into crystal-clear understanding. Navigate case law like a pro. Transform dense legal texts into memorable insights.",
+  "whos_it_for_student_success_alt": "Student achieving success",
   "Answer Options": "Answer Options",
   "Add Option": "Add Option",
   "Option": "Option",
@@ -683,7 +691,7 @@
 
   "hero_make_learning": "Make learning more",
   "hero_social_proof_loved_by": "Loved by",
-  "hero_million_students": "1 million+ students",
+  "hero_million_students": "+50.000 students",
   "hero_fun": "fun",
   "add_some_cards": "Add some cards",
   

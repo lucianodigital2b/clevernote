@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import Navbar from "../components/home/Navbar";
 import Hero from "../components/home/Hero";
+import WhosItFor from "../components/home/WhosItFor";
 import HowItWorks from "../components/home/HowItWorks";
 import Features from "../components/home/Features";
 import Reliability from "../components/home/Reliability";
@@ -61,7 +62,7 @@ const Welcome = ({ pricingPlans }: WelcomeProps) => {
       });
     }, observerOptions);
 
-    const sections = document.querySelectorAll('#how-it-works, #features, #reliability, #testimonials, #pricing, #cta');
+    const sections = document.querySelectorAll('#whos-it-for, #how-it-works, #features, #reliability, #testimonials, #pricing, #cta');
     sections.forEach(section => {
       section.classList.add('opacity-0');
       observer.observe(section);
@@ -74,10 +75,12 @@ const Welcome = ({ pricingPlans }: WelcomeProps) => {
     <div className="min-h-screen bg-white">
       <Navbar />
       <Hero />
+      <section id="whos-it-for"><WhosItFor /></section>
       {/* <section id="how-it-works"><HowItWorks /></section> */}
-      <section id="features"><Features /></section>
-      {/* <section id="testimonials"><Testimonials /></section> */}
+      {/* <section id="features"><Features /></section> */}
       <section id="pricing"><Pricing pricingPlans={pricingPlans} /></section>
+      {/* <section id="testimonials"><Testimonials /></section> */}
+
       <section id="faq"><FAQ /></section>
       {/* <section id="reliability"><Reliability /></section> */}
       <section id="cta"><CallToAction /></section>
