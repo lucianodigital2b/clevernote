@@ -511,14 +511,14 @@ export default function Edit({ note }: { note: Note }) {
             color: 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700 dark:text-white dark:border-transparent',
             loading: isMindmapLoading
         },
-        { 
-            icon: Mic, 
-            label: note.podcast_status === 'completed' ? 'Listen to Podcast' : 'Generate Podcast', 
-            description: note.podcast_status === 'completed' ? 'Play the generated audio version' : 'Convert note to audio podcast',
-            action: handleGeneratePodcast,
-            color: 'bg-orange-50 hover:bg-orange-100 border-orange-200 text-orange-700 dark:text-white dark:border-transparent',
-            loading: isPodcastLoading || note.podcast_status === 'processing'
-        },
+        // { 
+        //     icon: Mic, 
+        //     label: note.podcast_status === 'completed' ? 'Listen to Podcast' : 'Generate Podcast', 
+        //     description: note.podcast_status === 'completed' ? 'Play the generated audio version' : 'Convert note to audio podcast',
+        //     action: handleGeneratePodcast,
+        //     color: 'bg-orange-50 hover:bg-orange-100 border-orange-200 text-orange-700 dark:text-white dark:border-transparent',
+        //     loading: isPodcastLoading || note.podcast_status === 'processing'
+        // },
         // { 
         //     icon: Grid3X3, 
         //     label: note.crosswords && note.crosswords.length > 0 ? t('review_crossword') : t('create_crossword'), 
