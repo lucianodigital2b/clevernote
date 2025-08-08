@@ -67,12 +67,12 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
-            <a
+            {/* <a
               href="#features"
               className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
             >
               {t('nav_features')}
-            </a>
+            </a> */}
             <a
               href="#faq"
               className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
@@ -134,13 +134,13 @@ const Navbar = () => {
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-md p-4 border-t border-gray-100 animate-fade-in-fast">
           <div className="flex flex-col space-y-3">
-            <a
+            {/* <a
               href="#features"
               className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               {t('nav_features')}
-            </a>
+            </a> */}
             <a
               href="#testimonials"
               className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"

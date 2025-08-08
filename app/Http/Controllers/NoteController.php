@@ -8,6 +8,7 @@ use App\Services\TranscriptionService;
 use App\Http\Requests\StoreNoteRequest;
 use App\Http\Requests\UpdateNoteRequest;
 use App\Jobs\GenerateFlashcardsFromNote;
+use App\Jobs\GenerateNotePodcastJob;
 use App\Jobs\ProcessAudioNote;
 use App\Jobs\ProcessLinkNote;
 use App\Jobs\ProcessPdfNote;
@@ -287,6 +288,131 @@ class NoteController extends Controller
         return response()->json([
             'success' => true,
             'flashcardSetId' => $flashcardSet->id,
+        ]);
+    }
+
+    /**
+     * Generate a podcast from the note content
+     */
+    public function generatePodcast(Request $request, Note $note)
+    {
+        $this->authorize('update', $note);
+
+        // Validate the request
+        $validated = $request->validate([
+            'voice_id' => 'nullable|string|max:50',
+            'language_code' => 'nullable|string|max:10',
+            'engine' => 'nullable|string|in:standard,neural',
+            'include_intro' => 'nullable|boolean',
+            'include_conclusion' => 'nullable|boolean',
+            'use_ssml' => 'nullable|boolean',
+        ]);
+
+        // Check if note is already being processed or has a podcast
+        if ($note->podcast_status === 'processing') {
+            return response()->json([
+                'error' => 'Podcast generation is already in progress for this note.'
+            ], 409);
+        }
+
+        if ($note->podcast_status === 'completed') {
+            return response()->json([
+                'error' => 'This note already has a podcast. Delete the existing podcast first if you want to regenerate it.'
+            ], 409);
+        }
+
+        // Check if note has content
+        if (empty($note->content)) {
+            return response()->json([
+                'error' => 'Cannot generate podcast from an empty note.'
+            ], 400);
+        }
+
+        // Check if note is processed (if using status field)
+        if (isset($note->status) && $note->status !== 'processed') {
+            return response()->json([
+                'error' => 'Note must be fully processed before generating a podcast.'
+            ], 400);
+        }
+
+        // Set default options from config
+        $options = array_merge([
+            'voice_id' => config('tts.providers.amazon_polly.defaults.voice_id'),
+            'language_code' => config('tts.providers.amazon_polly.defaults.language_code'),
+            'engine' => config('tts.providers.amazon_polly.defaults.engine'),
+            'include_intro' => config('tts.settings.podcast_defaults.include_intro'),
+            'include_conclusion' => config('tts.settings.podcast_defaults.include_conclusion'),
+            'use_ssml' => config('tts.settings.podcast_defaults.use_ssml'),
+        ], $validated);
+
+        // Update note status to processing
+        $note->update([
+            'podcast_status' => 'processing',
+            'podcast_failure_reason' => null,
+        ]);
+
+        // Dispatch the podcast generation job
+        GenerateNotePodcastJob::dispatch($note, $options);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Podcast generation started. You will be notified when it\'s ready.',
+            'note_id' => $note->id,
+            'podcast_status' => 'processing',
+        ]);
+    }
+
+    /**
+     * Get the podcast status for a note
+     */
+    public function podcastStatus(Note $note)
+    {
+        $this->authorize('view', $note);
+
+        return response()->json([
+            'podcast_status' => $note->podcast_status,
+            'podcast_file_path' => $note->podcast_file_path,
+            'podcast_url' => $note->podcast_url,
+            'podcast_duration' => $note->podcast_duration,
+            'podcast_file_size' => $note->podcast_file_size,
+            'podcast_failure_reason' => $note->podcast_failure_reason,
+            'podcast_generated_at' => $note->podcast_generated_at,
+            'podcast_metadata' => $note->podcast_metadata,
+        ]);
+    }
+
+    /**
+     * Delete the podcast for a note
+     */
+    public function deletePodcast(Note $note)
+    {
+        $this->authorize('update', $note);
+
+        if (!$note->hasPodcast() && $note->podcast_status !== 'failed') {
+            return response()->json([
+                'error' => 'No podcast found for this note.'
+            ], 404);
+        }
+
+        // Delete the audio file if it exists
+        if ($note->podcast_file_path) {
+            \Storage::disk(config('tts.settings.storage.disk'))->delete($note->podcast_file_path);
+        }
+
+        // Reset podcast-related fields
+        $note->update([
+            'podcast_file_path' => null,
+            'podcast_duration' => null,
+            'podcast_file_size' => null,
+            'podcast_status' => null,
+            'podcast_failure_reason' => null,
+            'podcast_metadata' => null,
+            'podcast_generated_at' => null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Podcast deleted successfully.',
         ]);
     }
 

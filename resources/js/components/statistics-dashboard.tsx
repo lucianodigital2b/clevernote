@@ -22,9 +22,78 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
     const { t } = useTranslation();
     const [currentDate, setCurrentDate] = useState(new Date());
     
+    const ENABLE_DUMMY_DATA = false;
+    
     // Get current month and year
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
+    
+    // Generate impressive dummy data for any month with 70-90% activity rate
+    const generateDummyData = () => {
+        const dummyData: any = {};
+        
+        // Generate data for multiple months to ensure good coverage
+        const monthsToGenerate = [
+            { month: currentMonth === 0 ? 11 : currentMonth - 1, year: currentMonth === 0 ? currentYear - 1 : currentYear }, // Last month
+            { month: currentMonth, year: currentYear }, // Current month
+            { month: currentMonth === 11 ? 0 : currentMonth + 1, year: currentMonth === 11 ? currentYear + 1 : currentYear } // Next month
+        ];
+        
+        monthsToGenerate.forEach(({ month, year }) => {
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            // Calculate how many days should have activity (70-90%)
+            const minActivityDays = Math.floor(daysInMonth * 0.7);
+            const maxActivityDays = Math.floor(daysInMonth * 0.9);
+            const targetActivityDays = Math.floor(Math.random() * (maxActivityDays - minActivityDays + 1)) + minActivityDays;
+            
+            // Create array of all days and shuffle to randomly select which days have activity
+            const allDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+            const shuffledDays = allDays.sort(() => Math.random() - 0.5);
+            const activeDays = shuffledDays.slice(0, targetActivityDays);
+            
+            activeDays.forEach(day => {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                dummyData[dateStr] = {
+                    quiz_total_questions: Math.floor(Math.random() * 50) + 20, // 20-70 questions per day
+                    flashcard_reviews: Math.floor(Math.random() * 100) + 50, // 50-150 flashcards per day
+                    study_time_minutes: Math.floor(Math.random() * 180) + 60 // 1-4 hours per day
+                };
+            });
+        });
+        
+        return dummyData;
+    };
+    
+    // Merge dummy data with existing data only if debug mode is enabled
+    const enhancedYearlyHeatmap = ENABLE_DUMMY_DATA ? {
+        ...yearlyHeatmap,
+        ...generateDummyData()
+    } : yearlyHeatmap;
+    
+    // Generate impressive dummy streaks when debug mode is active
+    const enhancedStreaks = ENABLE_DUMMY_DATA ? {
+        currentStreak: Math.floor(Math.random() * 15) + 12, // 12-26 days current streak
+        maxStreak: Math.floor(Math.random() * 25) + 30 // 30-54 days best streak
+    } : {
+        currentStreak: overallStats.currentStreak,
+        maxStreak: overallStats.maxStreak
+    };
+    
+    // Enhanced lifetime statistics with dummy data when debug mode is active
+    const enhancedLifetimeStats = ENABLE_DUMMY_DATA ? {
+        totalQuestions: Math.floor(Math.random() * 2000) + 3000,      // 3000-4999 questions
+        totalFlashcardReviews: Math.floor(Math.random() * 5000) + 8000, // 8000-12999 reviews
+        totalActiveDays: Math.floor(Math.random() * 50) + 120         // 120-169 active days
+    } : {
+        totalQuestions: overallStats.totalQuestions || totalQuizQuestions,
+        totalFlashcardReviews: overallStats.totalFlashcardReviews || totalFlashcardReviews,
+        totalActiveDays: Object.keys(enhancedYearlyHeatmap).filter(date => {
+            const day = enhancedYearlyHeatmap[date];
+            return day.quiz_total_questions > 0 || day.flashcard_reviews > 0;
+        }).length
+    };
+    
     const monthNames = [
         t('month_january'), t('month_february'), t('month_march'), t('month_april'), 
         t('month_may'), t('month_june'), t('month_july'), t('month_august'), 
@@ -33,7 +102,7 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
     
     // Calculate today's stats
     const today = new Date().toISOString().split('T')[0];
-    const todayStats = yearlyHeatmap[today] || { quiz_total_questions: 0, flashcard_reviews: 0, study_time_minutes: 0 };
+    const todayStats = enhancedYearlyHeatmap[today] || { quiz_total_questions: 0, flashcard_reviews: 0, study_time_minutes: 0 };
     const todayQuizzes = todayStats.quiz_total_questions || 0;
     const todayFlashcards = todayStats.flashcard_reviews || 0;
     
@@ -56,26 +125,42 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
     // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const dayStats = yearlyHeatmap[dateStr];
+        const dayStats = enhancedYearlyHeatmap[dateStr];
         const hasActivity = dayStats && (dayStats.quiz_total_questions > 0 || dayStats.flashcard_reviews > 0);
         calendarDays.push({ day, hasActivity, dateStr });
     }
     
-    // Calculate statistics for current month only
+    // Calculate statistics for currently displayed month
     const totalDaysWithActivity = calendarDays.filter(dayData => 
         dayData && dayData.hasActivity
     ).length;
     
-    const totalQuizQuestions = Object.values(yearlyHeatmap).reduce((sum: number, day: any) => 
+    // Calculate totals for currently displayed month only
+    const currentMonthQuizQuestions = calendarDays.reduce((sum: number, dayData) => {
+        if (dayData && dayData.dateStr && enhancedYearlyHeatmap[dayData.dateStr]) {
+            return sum + (enhancedYearlyHeatmap[dayData.dateStr].quiz_total_questions || 0);
+        }
+        return sum;
+    }, 0);
+    
+    const currentMonthFlashcardReviews = calendarDays.reduce((sum: number, dayData) => {
+        if (dayData && dayData.dateStr && enhancedYearlyHeatmap[dayData.dateStr]) {
+            return sum + (enhancedYearlyHeatmap[dayData.dateStr].flashcard_reviews || 0);
+        }
+        return sum;
+    }, 0);
+    
+    // Calculate lifetime totals (all data)
+    const totalQuizQuestions = Object.values(enhancedYearlyHeatmap).reduce((sum: number, day: any) => 
         sum + (day.quiz_total_questions || 0), 0
     );
     
-    const totalFlashcardReviews = Object.values(yearlyHeatmap).reduce((sum: number, day: any) => 
+    const totalFlashcardReviews = Object.values(enhancedYearlyHeatmap).reduce((sum: number, day: any) => 
         sum + (day.flashcard_reviews || 0), 0
     );
     
-    const avgQuizQuestionsPerDay = totalDaysWithActivity > 0 ? Math.floor(totalQuizQuestions / totalDaysWithActivity) : 0;
-    const avgFlashcardsPerDay = totalDaysWithActivity > 0 ? Math.floor(totalFlashcardReviews / totalDaysWithActivity) : 0;
+    const avgQuizQuestionsPerDay = totalDaysWithActivity > 0 ? Math.floor(currentMonthQuizQuestions / totalDaysWithActivity) : 0;
+    const avgFlashcardsPerDay = totalDaysWithActivity > 0 ? Math.floor(currentMonthFlashcardReviews / totalDaysWithActivity) : 0;
     
     const navigateMonth = (direction: 'prev' | 'next') => {
         setCurrentDate(prev => {
@@ -130,10 +215,6 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                                 <Flame className="w-5 h-5 text-orange-500 dark:text-orange-400" />
                                 {t('stats_streaks')}
                             </CardTitle>
-                            <p className="text-green-600 dark:text-green-400 text-sm flex items-center gap-1">
-                                <span className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full"></span>
-                                {t('stats_activity_goal_complete')}
-                            </p>
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-2 gap-4">
@@ -142,14 +223,14 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                                         <Flame className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                                     </div>
                                     <p className="text-gray-600 dark:text-slate-400 text-sm">{t('stats_current_streak')}</p>
-                                    <p className="text-gray-900 dark:text-white text-xl font-bold">{overallStats.currentStreak} {t('stats_days')}</p>
+                                    <p className="text-gray-900 dark:text-white text-xl font-bold">{enhancedStreaks.currentStreak} {t('stats_days')}</p>
                                 </div>
                                 <div className="bg-yellow-50 dark:bg-yellow-500/10 rounded-lg p-4 text-center">
                                     <div className="flex items-center justify-center w-8 h-8 bg-yellow-100 dark:bg-yellow-500/20 rounded-full mb-2 mx-auto">
                                         <Trophy className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
                                     </div>
                                     <p className="text-gray-600 dark:text-slate-400 text-sm">{t('stats_best_streak')}</p>
-                                    <p className="text-gray-900 dark:text-white text-xl font-bold">{overallStats.maxStreak} {t('stats_days')}</p>
+                                    <p className="text-gray-900 dark:text-white text-xl font-bold">{enhancedStreaks.maxStreak} {t('stats_days')}</p>
                                 </div>
                             </div>
                     </CardContent>
@@ -167,9 +248,11 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                                 >
                                     <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-slate-400" />
                                 </button>
-                                <h3 className="text-gray-900 dark:text-white text-lg font-semibold">
-                                    {monthNames[currentMonth]} {currentYear}
-                                </h3>
+                                <div className="text-center">
+                                    <h3 className="text-gray-900 dark:text-white text-lg font-semibold">
+                                        {monthNames[currentMonth]} {currentYear}
+                                    </h3>
+                                </div>
                                 <button 
                                     onClick={() => navigateMonth('next')}
                                     className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
@@ -245,21 +328,21 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                                 <BarChart3 className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                             </div>
                             <p className="text-gray-600 dark:text-slate-400 text-sm mb-1">{t('stats_total_quiz_questions')}</p>
-                            <p className="text-gray-900 dark:text-white text-2xl font-bold">{overallStats.totalQuestions}</p>
+                            <p className="text-gray-900 dark:text-white text-2xl font-bold">{enhancedLifetimeStats.totalQuestions}</p>
                         </div>
                         <div className="bg-blue-50 dark:bg-blue-500/10 rounded-lg p-6 text-center">
                             <div className="flex items-center justify-center w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-full mb-3 mx-auto">
                                 <Clock className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                             </div>
                             <p className="text-gray-600 dark:text-slate-400 text-sm mb-1">{t('stats_total_flashcard_reviews')}</p>
-                            <p className="text-gray-900 dark:text-white text-2xl font-bold">{overallStats.totalFlashcardReviews || totalFlashcardReviews}</p>
+                            <p className="text-gray-900 dark:text-white text-2xl font-bold">{enhancedLifetimeStats.totalFlashcardReviews}</p>
                         </div>
                         <div className="bg-orange-50 dark:bg-orange-500/10 rounded-lg p-6 text-center">
                             <div className="flex items-center justify-center w-12 h-12 bg-orange-100 dark:bg-orange-500/20 rounded-full mb-3 mx-auto">
                                 <Calendar className="w-6 h-6 text-orange-600 dark:text-orange-400" />
                             </div>
                             <p className="text-gray-600 dark:text-slate-400 text-sm mb-1">{t('stats_active_days')}</p>
-                            <p className="text-gray-900 dark:text-white text-2xl font-bold">{totalDaysWithActivity}</p>
+                            <p className="text-gray-900 dark:text-white text-2xl font-bold">{enhancedLifetimeStats.totalActiveDays}</p>
                         </div>
                     </div>
                 </CardContent>

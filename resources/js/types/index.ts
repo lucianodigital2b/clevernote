@@ -51,6 +51,13 @@ export type Note = {
     };
     source_type?: 'youtube' | 'vimeo' | 'tiktok' | 'external' | 'upload' | null;
     source_url?: string | null;
+    podcast_file_path?: string | null;
+    podcast_duration?: number | null;
+    podcast_file_size?: number | null;
+    podcast_status?: 'pending' | 'processing' | 'completed' | 'failed' | null;
+    podcast_failure_reason?: string | null;
+    podcast_metadata?: any | null;
+    podcast_generated_at?: string | null;
 };
 
 export type MediaFile = {

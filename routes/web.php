@@ -79,6 +79,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('flashcard-sets/{flashcardSet}/study', [FlashcardSetController::class, 'study'])->name('flashcard-sets.study');
     Route::post('flashcard-sets/{flashcardSet}/progress', [FlashcardSetController::class, 'saveProgress'])->name('flashcard-sets.progress.store');
     Route::post('notes/{note}/generate-flashcards', [NoteController::class, 'generateFlashcards'])->name('notes.generate-flashcards');
+    
+    // Podcast routes
+    Route::post('notes/{note}/generate-podcast', [NoteController::class, 'generatePodcast'])->name('notes.generate-podcast');
+    Route::get('notes/{note}/podcast-status', [NoteController::class, 'podcastStatus'])->name('notes.podcast-status');
+    Route::delete('notes/{note}/podcast', [NoteController::class, 'deletePodcast'])->name('notes.delete-podcast');
 
     // Quiz routes
     Route::resource('quizzes', QuizController::class);

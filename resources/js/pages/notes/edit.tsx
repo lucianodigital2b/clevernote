@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
-import { Share, MoreHorizontal, Maximize2, X, ArrowLeft, Save, Clock, CheckCircle2, Folder, Trash2, Sparkles, Brain, Map, FileText, Loader2, ChevronRight, Layers, Copy, Grid3X3, ExternalLink, Play, Eye } from 'lucide-react';
+import { Share, MoreHorizontal, Maximize2, X, ArrowLeft, Save, Clock, CheckCircle2, Folder, Trash2, Sparkles, Brain, Map, FileText, Loader2, ChevronRight, Layers, Copy, Grid3X3, ExternalLink, Play, Eye, Mic } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -361,6 +361,9 @@ export default function Edit({ note }: { note: Note }) {
     // Add new state for crossword loading modal
     const [isCrosswordLoading, setIsCrosswordLoading] = useState(false);
 
+    // Add new state for podcast loading modal
+    const [isPodcastLoading, setIsPodcastLoading] = useState(false);
+
     const handleCreateCrossword = async () => {
         setIsCrosswordLoading(true);
         try {
@@ -411,6 +414,77 @@ export default function Edit({ note }: { note: Note }) {
         }
     };
 
+    const handleGeneratePodcast = async () => {
+        setIsPodcastLoading(true);
+        try {
+            // Check if podcast already exists
+            if (note.podcast_status === 'completed' && note.podcast_file_path) {
+                setIsPodcastLoading(false);
+                toastConfig.success("Podcast already exists for this note");
+                return;
+            }
+
+            // If podcast is already processing, just show status
+            if (note.podcast_status === 'processing') {
+                setIsPodcastLoading(false);
+                toastConfig.info("Podcast generation is already in progress");
+                return;
+            }
+
+            // Generate new podcast
+            const response = await axios.post(`/notes/${note.id}/generate-podcast`, {
+                voice: 'Joanna', // Default voice
+                add_intro: true,
+                add_conclusion: true,
+                use_ssml: true
+            });
+            
+            if (response.data && response.data.message) {
+                // Start polling for podcast status
+                const intervalId = setInterval(async () => {
+                    try {
+                        const podcastResponse = await axios.get(`/notes/${note.id}/podcast-status`);
+                        const podcastData = podcastResponse.data;
+                        
+                        if (podcastData.status === 'completed') {
+                            clearInterval(intervalId);
+                            setIsPodcastLoading(false);
+                            setCurrentNote(prev => ({
+                                ...prev,
+                                podcast_status: 'completed',
+                                podcast_file_path: podcastData.file_path,
+                                podcast_duration: podcastData.duration,
+                                podcast_file_size: podcastData.file_size
+                            }));
+                            toastConfig.success("Podcast generated successfully!");
+                            
+                        } else if (podcastData.status === 'failed') {
+                            clearInterval(intervalId);
+                            setIsPodcastLoading(false);
+                            toastConfig.error(`Podcast generation failed: ${podcastData.failure_reason || 'Unknown error'}`);
+                        }
+                        // Continue polling if status is 'processing' or 'pending'
+                    } catch (error) {
+                        console.error('Error checking podcast status:', error);
+                        clearInterval(intervalId);
+                        setIsPodcastLoading(false);
+                        toastConfig.error("Failed to check podcast generation status");
+                    }
+                }, 5000); // Poll every 5 seconds
+                
+                toastConfig.success("Podcast generation started");
+            }
+        } catch (error) {
+            setIsPodcastLoading(false);
+            console.error('Error generating podcast:', error);
+            if (error.response?.data?.message) {
+                toastConfig.error(error.response.data.message);
+            } else {
+                toastConfig.error("Failed to start podcast generation");
+            }
+        }
+    };
+
 
     const actions = [
         { 
@@ -436,6 +510,14 @@ export default function Edit({ note }: { note: Note }) {
             action: handleCreateMindmap,
             color: 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700 dark:text-white dark:border-transparent',
             loading: isMindmapLoading
+        },
+        { 
+            icon: Mic, 
+            label: note.podcast_status === 'completed' ? 'Listen to Podcast' : 'Generate Podcast', 
+            description: note.podcast_status === 'completed' ? 'Play the generated audio version' : 'Convert note to audio podcast',
+            action: handleGeneratePodcast,
+            color: 'bg-orange-50 hover:bg-orange-100 border-orange-200 text-orange-700 dark:text-white dark:border-transparent',
+            loading: isPodcastLoading || note.podcast_status === 'processing'
         },
         // { 
         //     icon: Grid3X3, 
@@ -1063,6 +1145,62 @@ export default function Edit({ note }: { note: Note }) {
                                     </div>
                                 )}
 
+                                {/* Podcast Player Section */}
+                                {currentNote.podcast_status === 'completed' && currentNote.podcast_file_path && (
+                                    <div className="mb-8">
+                                        <div className="bg-gradient-to-r from-orange-50/50 to-transparent dark:from-orange-950/20 dark:to-transparent border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <div className="bg-orange-100 dark:bg-orange-900/30 w-8 h-8 rounded-full flex items-center justify-center">
+                                                    <Mic className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-medium text-orange-900 dark:text-orange-100">Generated Podcast</h3>
+                                                    <div className="flex items-center gap-4 text-xs text-orange-600 dark:text-orange-400">
+                                                        {currentNote.podcast_duration && (
+                                                            <span className="flex items-center gap-1">
+                                                                <Clock className="w-3 h-3" />
+                                                                {Math.floor(currentNote.podcast_duration / 60)}:{(currentNote.podcast_duration % 60).toString().padStart(2, '0')}
+                                                            </span>
+                                                        )}
+                                                        {currentNote.podcast_file_size && (
+                                                            <span>
+                                                                {(currentNote.podcast_file_size / (1024 * 1024)).toFixed(1)} MB
+                                                            </span>
+                                                        )}
+                                                        {currentNote.podcast_generated_at && (
+                                                            <span>
+                                                                Generated {dayjs(currentNote.podcast_generated_at).fromNow()}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <AudioPlayer
+                                                src={currentNote.podcast_file_path}
+                                                onPlay={e => console.log("Podcast playing")}
+                                                className="rounded-lg"
+                                                customAdditionalControls={[]}
+                                                showJumpControls={false}
+                                                showPlaybackRateControls={true}
+                                                playbackRates={[0.5, 0.75, 1, 1.25, 1.5, 2]}
+                                                layout="horizontal-reverse"
+                                                style={{
+                                                    backgroundColor: 'transparent',
+                                                    boxShadow: 'none',
+                                                    border: '1px solid rgb(251 146 60)',
+                                                    borderRadius: '0.5rem',
+                                                    '--rhap_theme-color': '#ea580c',
+                                                    '--rhap_bar-color': '#fed7aa',
+                                                    '--rhap_time-color': '#9a3412',
+                                                    '--rhap_font-family': 'inherit',
+                                                    '--rhap_main-controls-button-size': '32px',
+                                                    '--rhap_button-height': '32px',
+                                                    '--rhap_button-width': '32px',
+                                                } as React.CSSProperties}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* AI Actions Section */}
                                 <div className="mb-8">

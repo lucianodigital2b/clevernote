@@ -58,6 +58,14 @@ return [
 
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
-    ]
+    ],
+
+    'aws' => [
+        'polly' => [
+            'access_key_id' => env('AWS_POLLY_ACCESS_KEY_ID', env('AWS_ACCESS_KEY_ID')),
+            'secret_access_key' => env('AWS_POLLY_SECRET_ACCESS_KEY', env('AWS_SECRET_ACCESS_KEY')),
+            'region' => env('AWS_POLLY_REGION', env('AWS_DEFAULT_REGION', 'us-east-1')),
+        ],
+    ],
 
 ];

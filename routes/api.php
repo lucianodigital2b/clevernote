@@ -65,6 +65,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('flashcard-sets/{flashcardSet}/study', [FlashcardSetController::class, 'study']);
     Route::post('flashcard-sets/{flashcardSet}/progress', [FlashcardSetController::class, 'saveProgress']);
     Route::post('notes/{note}/generate-flashcards', [NoteController::class, 'generateFlashcards']);
+    
+    // Podcast routes
+    Route::post('notes/{note}/generate-podcast', [NoteController::class, 'generatePodcast']);
+    Route::get('notes/{note}/podcast-status', [NoteController::class, 'podcastStatus']);
+    Route::delete('notes/{note}/podcast', [NoteController::class, 'deletePodcast']);
 
     // Quiz routes
     Route::resource('quizzes', QuizController::class)->names('api.quizzes');
