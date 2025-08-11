@@ -71,14 +71,13 @@ class NoteController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreNoteRequest $request)
     {
         try {
-            $validated = $request->all();
+            $validated = $request->validated();
             $user = Auth::user();
             $validated['user_id'] = $user->id;
 
-            \Log::error(print_r($validated, true));
             // Check subscription status and note count
             if ($user->notes_count >= 3 && $user->activeSubscriptions->isEmpty()) {
                 if ($request->wantsJson()) {

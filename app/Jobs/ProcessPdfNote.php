@@ -70,9 +70,6 @@ class ProcessPdfNote implements ShouldQueue
                 $text = $noteService->extractTextFromWord($fullPath);
             }
 
-
-            Log::error(print_r($text, true));
-
             $language = $this->validatedData['language'] ?? null;
             $studyNote = $deepseekService->createStudyNote($text, $language);
 
@@ -81,7 +78,6 @@ class ProcessPdfNote implements ShouldQueue
             $media = $note->addMediaFromDisk($this->filePath, 'public')
                 ->toMediaCollection($mediaCollection);
 
-            Log::info("Extracted text length: " . strlen($text) . " characters");
 
             $noteData = array_merge($this->validatedData, [
                 'content' => $studyNote['study_note']['content'],
