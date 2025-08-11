@@ -580,7 +580,6 @@ export default function Edit({ note }: { note: Note }) {
         // },
     ];
 
-
     
     const editor = useEditor({
         extensions: [
@@ -640,30 +639,6 @@ export default function Edit({ note }: { note: Note }) {
         editor?.chain().focus().setImage({ src: url }).run()
     }
 
-
-    // useEffect(() => {
-    //     if (editor && note.content) {
-    //       // parse your HTML as a paragraph node
-    //       const wrapper = document.createElement('div');
-    //       wrapper.innerHTML = note.content;
-      
-    //       const blocks = Array.from(wrapper.children).map((child) => ({
-    //         type: 'sectionBlock',
-    //         content: [{
-    //           type: 'paragraph',
-    //           content: [{ type: 'text', text: child.textContent || '' }],
-    //         }],
-    //       }));
-      
-    //       editor.commands.setContent({
-    //         type: 'doc',
-    //         content: blocks,
-    //       });
-    //     }
-    //   }, [editor]);
-
-
-
     
     // Add useEffect for note status polling
     useEffect(() => {
@@ -706,8 +681,6 @@ export default function Edit({ note }: { note: Note }) {
                         setIsProcessing(false);
                         setIsFailed(false); // Ensure failed state is cleared
                         setCurrentNote(noteData);
-                        // Content will be updated by the separate useEffect
-                        toastConfig.success("Note processing completed");
                         
                         // Open feedback modal after processing is complete
                         setTimeout(() => {

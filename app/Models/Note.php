@@ -30,7 +30,6 @@ class Note extends Model implements HasMedia
         'external_metadata',
         'source_type',
         'source_url',
-        'language',
         // Podcast-related fields
         'podcast_file_path',
         'podcast_duration',

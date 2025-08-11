@@ -20,7 +20,6 @@ import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 import StudyPlanCalendar from '@/components/StudyPlanCalendar';
 import StudyPlanPreview from '@/components/StudyPlanPreview';
-import StudyStreakWidget from '@/components/StudyStreakWidget';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -46,8 +45,6 @@ export default function Dashboard() {
 
     const user = (auth as any).user;
 
-
-    
     // Query for notes with pagination
     const { 
         data: notesData, 
@@ -87,26 +84,7 @@ export default function Dashboard() {
     
     const folders = data || [];
     
-    // Query for user statistics (current week)
-    const { data: userStatistics } = useQuery({
-        queryKey: ['userStatistics'],
-        queryFn: async () => {
-            const today = new Date();
-            const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
-            const endOfWeek = new Date(startOfWeek);
-            endOfWeek.setDate(startOfWeek.getDate() + 6);
-            
-            const response = await axios.get('/api/statistics/daily', {
-                params: {
-                    start_date: startOfWeek.toISOString().split('T')[0],
-                    end_date: endOfWeek.toISOString().split('T')[0]
-                }
-            });
-            return response.data.data;
-        },
-        staleTime: 30000, // Data remains fresh for 30 seconds
-        refetchOnWindowFocus: false // Prevent refetch on window focus
-    });
+
     
     // Add back modal states
     const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
@@ -160,9 +138,6 @@ export default function Dashboard() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={t('Dashboard')} />
             <div className="flex sm:flex-start h-full flex-1 flex-col gap-6 p-6 max-w-7xl mx-auto w-full relative">
-                {/* Study Streak Section */}
-                <StudyStreakWidget userStatistics={userStatistics} />
-
                 {/* New Note Section - Desktop */}
                 <section className="hidden md:block">
                     <h2 className="text-xl font-semibold mb-2">{t('New note')}</h2>

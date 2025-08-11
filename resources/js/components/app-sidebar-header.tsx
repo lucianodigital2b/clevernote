@@ -1,17 +1,16 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { type BreadcrumbItem as BreadcrumbItemType, type SharedData } from '@/types';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { XPBar } from '@/components/xp-bar';
 import { UpgradeModal } from '@/components/upgrade-modal';
+import { StatisticsTooltip } from '@/components/statistics-tooltip';
 import { useTranslation } from 'react-i18next';
 import { useAppearance } from '@/hooks/use-appearance';
 import { usePage } from '@inertiajs/react';
 import { Moon, Sun } from 'lucide-react';
 import { useState } from 'react';
-import languages from '@/utils/languages.json';
 
 export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItemType[] }) {
     const { i18n } = useTranslation();
@@ -21,13 +20,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
     const user = (auth as any).user;
 
-    const handleLanguageChange = (value: string) => {
-        if (value) {
-            i18n.changeLanguage(value);
-            // Optionally save to localStorage
-            localStorage.setItem('i18nextLng', value);
-        }
-    };
+
 
     const toggleDarkMode = () => {
         const newMode = appearance === 'dark' ? 'light' : 'dark';
@@ -49,6 +42,8 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
             </div>
             
             <div className="flex items-center gap-2">
+                <StatisticsTooltip />
+                
                 <TooltipProvider delayDuration={0}>
                     <Tooltip>
                         <TooltipTrigger asChild>
@@ -92,20 +87,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                         </Tooltip>
                     </TooltipProvider>
                 )}
-                <Select onValueChange={handleLanguageChange} defaultValue={i18n.language}>
-                    <SelectTrigger className="w-[120px]">
-                        <SelectValue placeholder="Language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {languages
-                            .filter(lang => lang.value && ['en', 'es', 'pt'].includes(lang.value))
-                            .map((lang) => (
-                                <SelectItem key={lang.value} value={lang.value || ''}>
-                                    {lang.label}
-                                </SelectItem>
-                            ))}
-                    </SelectContent>
-                </Select>
+
             </div>
             
             <UpgradeModal 
