@@ -31,6 +31,8 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
     // Generate impressive dummy data for any month with 70-90% activity rate
     const generateDummyData = () => {
         const dummyData: any = {};
+        const currentDate = new Date();
+        const todayStr = currentDate.toISOString().split('T')[0];
         
         // Generate data for multiple months to ensure good coverage
         const monthsToGenerate = [
@@ -54,11 +56,15 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
             
             activeDays.forEach(day => {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                dummyData[dateStr] = {
-                    quiz_total_questions: Math.floor(Math.random() * 50) + 20, // 20-70 questions per day
-                    flashcard_reviews: Math.floor(Math.random() * 100) + 50, // 50-150 flashcards per day
-                    study_time_minutes: Math.floor(Math.random() * 180) + 60 // 1-4 hours per day
-                };
+                
+                // Only add activity for dates that are not in the future
+                if (dateStr <= todayStr) {
+                    dummyData[dateStr] = {
+                        quiz_total_questions: Math.floor(Math.random() * 50) + 20, // 20-70 questions per day
+                        flashcard_reviews: Math.floor(Math.random() * 100) + 50, // 50-150 flashcards per day
+                        study_time_minutes: Math.floor(Math.random() * 180) + 60 // 1-4 hours per day
+                    };
+                }
             });
         });
         
@@ -80,6 +86,15 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
         maxStreak: overallStats.maxStreak
     };
     
+    // Calculate lifetime totals (all data) - moved here to be available for enhancedLifetimeStats
+    const totalQuizQuestions = Object.values(enhancedYearlyHeatmap).reduce((sum: number, day: any) => 
+        sum + (day.quiz_total_questions || 0), 0
+    );
+    
+    const totalFlashcardReviews = Object.values(enhancedYearlyHeatmap).reduce((sum: number, day: any) => 
+        sum + (day.flashcard_reviews || 0), 0
+    );
+
     // Enhanced lifetime statistics with dummy data when debug mode is active
     const enhancedLifetimeStats = ENABLE_DUMMY_DATA ? {
         totalQuestions: Math.floor(Math.random() * 2000) + 3000,      // 3000-4999 questions
@@ -150,14 +165,7 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
         return sum;
     }, 0);
     
-    // Calculate lifetime totals (all data)
-    const totalQuizQuestions = Object.values(enhancedYearlyHeatmap).reduce((sum: number, day: any) => 
-        sum + (day.quiz_total_questions || 0), 0
-    );
-    
-    const totalFlashcardReviews = Object.values(enhancedYearlyHeatmap).reduce((sum: number, day: any) => 
-        sum + (day.flashcard_reviews || 0), 0
-    );
+
     
     const avgQuizQuestionsPerDay = totalDaysWithActivity > 0 ? Math.floor(currentMonthQuizQuestions / totalDaysWithActivity) : 0;
     const avgFlashcardsPerDay = totalDaysWithActivity > 0 ? Math.floor(currentMonthFlashcardReviews / totalDaysWithActivity) : 0;
@@ -279,10 +287,11 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                                             <div className={`
                                                 w-full h-full flex items-center justify-center rounded-lg text-sm font-medium transition-colors
                                                 ${dayData.hasActivity 
-                                                    ? 'bg-green-500 dark:bg-green-600 text-white' 
+                                                    ? 'text-white' 
                                                     : 'bg-gray-100 dark:bg-accent-foreground/5 text-gray-900 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-800/50'
                                                 }
-                                            `}>
+                                            `}
+                                            style={dayData.hasActivity ? { backgroundColor: '#AB9FF2' } : {}}>
                                                 {dayData.day}
                                             </div>
                                         ) : (
