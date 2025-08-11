@@ -30,6 +30,7 @@ class Note extends Model implements HasMedia
         'external_metadata',
         'source_type',
         'source_url',
+        'language',
         // Podcast-related fields
         'podcast_file_path',
         'podcast_duration',
@@ -67,6 +68,7 @@ class Note extends Model implements HasMedia
         $this->addMediaCollection('note-videos')->useDisk('r2');
         $this->addMediaCollection('note-docs')->useDisk('r2');
         $this->addMediaCollection('note-texts')->useDisk('r2');
+        $this->addMediaCollection('note-podcasts')->useDisk('r2');
     }
 
 
@@ -155,7 +157,8 @@ class Note extends Model implements HasMedia
      */
     public function hasPodcast(): bool
     {
-        return $this->podcast_status === 'completed' && !empty($this->podcast_file_path);
+        return $this->podcast_status === 'completed' && 
+               (!empty($this->podcast_file_path) || $this->hasMedia('note-podcasts'));
     }
 
     /**
@@ -183,6 +186,13 @@ class Note extends Model implements HasMedia
             return null;
         }
 
+        // Try to get URL from media library first
+        $podcastMedia = $this->getFirstMedia('note-podcasts');
+        if ($podcastMedia) {
+            return $podcastMedia->getUrl();
+        }
+
+        // Fallback to direct storage URL for backward compatibility
         return \Storage::disk('r2')->url($this->podcast_file_path);
     }
 
@@ -224,24 +234,68 @@ class Note extends Model implements HasMedia
     }
 
     /**
-     * Get podcast metadata with defaults
+     * Get podcast metadata as array with default values and flattened common options
      */
-    public function getPodcastMetadataAttribute($value): array
+    public function getPodcastMetadataAttribute($value)
     {
-        $metadata = json_decode($value, true) ?? [];
-        
-        return array_merge([
+        $defaults = [
             'service' => null,
             'voice_id' => null,
             'language_code' => null,
             'engine' => null,
-            'format' => null,
+            'format' => 'mp3',
             'options_used' => [],
             'generated_at' => null,
-            'metadata' => []
-        ], $metadata);
+            'metadata' => [],
+            'media_id' => null,
+            'uses_media_library' => false,
+            'use_ssml' => false,
+            'ssml_break_time' => '1s',
+            'voice_speed' => '1.0'
+        ];
+        
+        if (is_null($value) || $value === '') {
+            return $defaults;
+        }
+        
+        $metadata = [];
+        
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            if (is_array($decoded)) {
+                $metadata = $decoded;
+            } else {
+                return $defaults;
+            }
+        } elseif (is_array($value)) {
+            $metadata = $value;
+        } else {
+            return $defaults;
+        }
+        
+        // Start with defaults and merge with stored metadata
+        $result = array_merge($defaults, $metadata);
+        
+        // Flatten commonly used values from options_used and metadata to top level
+        if (isset($result['options_used']) && is_array($result['options_used'])) {
+            foreach (['use_ssml', 'ssml_break_time', 'voice_speed'] as $key) {
+                if (isset($result['options_used'][$key])) {
+                    $result[$key] = $result['options_used'][$key];
+                }
+            }
+        }
+        
+        if (isset($result['metadata']) && is_array($result['metadata'])) {
+            foreach (['use_ssml', 'voice_id'] as $key) {
+                if (isset($result['metadata'][$key])) {
+                    $result[$key] = $result['metadata'][$key];
+                }
+            }
+        }
+        
+        return $result;
     }
-
+ 
     /**
      * Scope to get notes with podcasts
      */

@@ -74,10 +74,15 @@ class GenerateNotePodcastJob implements ShouldQueue
             // Generate the podcast
             $result = $podcastGenerator->generatePodcast($note, $this->options);
 
+            // Validate result structure
+            if (!isset($result['podcast_data']) || !is_array($result['podcast_data'])) {
+                throw new \Exception('Invalid podcast generation result: missing or invalid podcast_data');
+            }
+
             Log::info('Podcast generation job completed successfully', [
                 'note_id' => $this->noteId,
-                'file_path' => $result['podcast_data']['file_path'],
-                'duration' => $result['podcast_data']['duration']
+                'file_path' => $result['podcast_data']['file_path'] ?? 'N/A',
+                'duration' => $result['podcast_data']['duration'] ?? 'N/A'
             ]);
 
             // Dispatch any follow-up jobs if needed
@@ -165,7 +170,7 @@ class GenerateNotePodcastJob implements ShouldQueue
                 'user_id' => $note->user_id,
                 'note_id' => $note->id,
                 'note_title' => $note->title,
-                'duration' => $result['podcast_data']['duration']
+                'duration' => $result['podcast_data']['duration'] ?? 'N/A'
             ]);
 
             // Example notification implementation:
@@ -212,13 +217,7 @@ class GenerateNotePodcastJob implements ShouldQueue
         return [30, 60, 120]; // Wait 30s, then 60s, then 120s between retries
     }
 
-    /**
-     * Determine if the job should be retried based on the exception.
-     */
-    public function retryUntil(): \DateTime
-    {
-        return now()->addMinutes(30); // Stop retrying after 30 minutes
-    }
+
 
     /**
      * Get the tags that should be assigned to the job.

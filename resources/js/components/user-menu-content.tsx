@@ -3,7 +3,7 @@ import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { type User } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut, Settings, Bug } from 'lucide-react';
 
 interface UserMenuContentProps {
     user: User;
@@ -27,6 +27,14 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                         Settings
                     </Link>
                 </DropdownMenuItem>
+                {user.email === 'husky15@hotmail.com' && (
+                    <DropdownMenuItem asChild>
+                        <Link className="block w-full" href="/debug/bucket-contents" as="button" prefetch onClick={cleanup}>
+                            <Bug className="mr-2" />
+                            Debug - Bucket Contents
+                        </Link>
+                    </DropdownMenuItem>
+                )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>

@@ -71,15 +71,15 @@ class NoteToPodcastFeatureTest extends TestCase
             'include_conclusion' => false,
         ];
 
-        GenerateNotePodcastJob::dispatch($note, $options);
+        GenerateNotePodcastJob::dispatch($note->id, $options);
 
         // Assert job was queued
         Queue::assertPushed(GenerateNotePodcastJob::class, function ($job) use ($note, $options) {
-            return $job->note->id === $note->id && $job->options === $options;
+            return $job->noteId === $note->id && $job->options === $options;
         });
 
         // Process the job
-        $job = new GenerateNotePodcastJob($note, $options);
+        $job = new GenerateNotePodcastJob($note->id, $options);
         $job->handle();
 
         // Refresh note and verify podcast was generated
@@ -127,7 +127,7 @@ class NoteToPodcastFeatureTest extends TestCase
             ]);
 
         // Process the job
-        $job = new GenerateNotePodcastJob($note, []);
+        $job = new GenerateNotePodcastJob($note->id, []);
         $job->handle();
 
         // Verify the podcast was generated with combined chunks
@@ -154,7 +154,7 @@ class NoteToPodcastFeatureTest extends TestCase
             ->andThrow(new \Exception('TTS service unavailable'));
 
         // Process the job
-        $job = new GenerateNotePodcastJob($note, []);
+        $job = new GenerateNotePodcastJob($note->id, []);
         $job->handle();
 
         // Verify the failure was handled properly
@@ -285,7 +285,7 @@ class NoteToPodcastFeatureTest extends TestCase
                 'metadata' => ['voice_id' => 'Joanna'],
             ]);
 
-        $job = new GenerateNotePodcastJob($note, []);
+        $job = new GenerateNotePodcastJob($note->id, []);
         $job->handle();
 
         $note->refresh();
@@ -327,7 +327,7 @@ class NoteToPodcastFeatureTest extends TestCase
                 'metadata' => ['voice_id' => 'Joanna', 'use_ssml' => true],
             ]);
 
-        $job = new GenerateNotePodcastJob($note, $options);
+        $job = new GenerateNotePodcastJob($note->id, $options);
         $job->handle();
 
         $note->refresh();

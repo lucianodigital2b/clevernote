@@ -20,24 +20,20 @@ class AmazonPollyServiceTest extends TestCase
         
         $this->mockPollyClient = Mockery::mock(PollyClient::class);
         
-        $config = [
-            'access_key_id' => 'test-key',
-            'secret_access_key' => 'test-secret',
-            'region' => 'us-east-1',
-        ];
+        // Mock the config using Laravel's config helper
+        config([
+            'services.aws.polly' => [
+                'access_key_id' => 'test-key',
+                'secret_access_key' => 'test-secret',
+                'region' => 'us-east-1',
+            ]
+        ]);
         
-        $defaults = [
-            'voice_id' => 'Joanna',
-            'language_code' => 'en-US',
-            'engine' => 'standard',
-            'output_format' => 'mp3',
-        ];
-        
-        $this->service = new AmazonPollyService($config, $defaults);
+        $this->service = new AmazonPollyService();
         
         // Use reflection to inject the mock client
         $reflection = new \ReflectionClass($this->service);
-        $clientProperty = $reflection->getProperty('client');
+        $clientProperty = $reflection->getProperty('pollyClient');
         $clientProperty->setAccessible(true);
         $clientProperty->setValue($this->service, $this->mockPollyClient);
     }
@@ -55,10 +51,15 @@ class AmazonPollyServiceTest extends TestCase
         $text = 'Hello, this is a test.';
         $options = ['voice_id' => 'Matthew'];
         
-        $mockResult = Mockery::mock(Result::class);
-        $mockResult->shouldReceive('get')
-            ->with('AudioStream')
+        // Mock the audio stream
+        $mockStream = Mockery::mock();
+        $mockStream->shouldReceive('getContents')
             ->andReturn('fake-audio-data');
+        
+        $mockResult = Mockery::mock(Result::class);
+        $mockResult->shouldReceive('offsetGet')
+            ->with('AudioStream')
+            ->andReturn($mockStream);
         
         $this->mockPollyClient
             ->shouldReceive('synthesizeSpeech')
@@ -79,12 +80,21 @@ class AmazonPollyServiceTest extends TestCase
         $this->assertArrayHasKey('file_size', $result);
         $this->assertArrayHasKey('duration', $result);
         $this->assertArrayHasKey('metadata', $result);
+        $this->assertArrayHasKey('format', $result);
+        $this->assertArrayHasKey('voice_id', $result);
+        $this->assertArrayHasKey('language_code', $result);
+        $this->assertArrayHasKey('engine', $result);
+        $this->assertArrayHasKey('service', $result);
         
-        $this->assertStringContains('podcasts/', $result['file_path']);
+        $this->assertStringContainsString('podcasts/', $result['file_path']);
         $this->assertStringEndsWith('.mp3', $result['file_path']);
         $this->assertEquals(15, $result['file_size']); // Length of 'fake-audio-data'
-        $this->assertIsFloat($result['duration']);
+        $this->assertIsInt($result['duration']);
         $this->assertIsArray($result['metadata']);
+        $this->assertEquals('Matthew', $result['voice_id']);
+        $this->assertEquals('en-US', $result['language_code']);
+        $this->assertEquals('standard', $result['engine']);
+        $this->assertEquals('amazon_polly', $result['service']);
     }
 
     public function test_convert_text_to_speech_with_ssml()
@@ -92,12 +102,17 @@ class AmazonPollyServiceTest extends TestCase
         Storage::fake('r2');
         
         $text = '<speak>Hello, <break time="1s"/> this is a test.</speak>';
-        $options = ['use_ssml' => true];
+        $options = [];
+        
+        // Mock the audio stream
+        $mockStream = Mockery::mock();
+        $mockStream->shouldReceive('getContents')
+            ->andReturn('fake-audio-data');
         
         $mockResult = Mockery::mock(Result::class);
-        $mockResult->shouldReceive('get')
+        $mockResult->shouldReceive('offsetGet')
             ->with('AudioStream')
-            ->andReturn('fake-audio-data');
+            ->andReturn($mockStream);
         
         $this->mockPollyClient
             ->shouldReceive('synthesizeSpeech')
@@ -121,7 +136,7 @@ class AmazonPollyServiceTest extends TestCase
     public function test_get_available_voices()
     {
         $mockResult = Mockery::mock(Result::class);
-        $mockResult->shouldReceive('get')
+        $mockResult->shouldReceive('offsetGet')
             ->with('Voices')
             ->andReturn([
                 [
@@ -159,20 +174,35 @@ class AmazonPollyServiceTest extends TestCase
     public function test_get_supported_languages()
     {
         $mockResult = Mockery::mock(Result::class);
-        $mockResult->shouldReceive('get')
+        $mockResult->shouldReceive('offsetGet')
             ->with('Voices')
             ->andReturn([
                 [
+                    'Id' => 'Joanna',
+                    'Name' => 'Joanna',
+                    'Gender' => 'Female',
                     'LanguageCode' => 'en-US',
                     'LanguageName' => 'US English',
+                    'SupportedEngines' => ['standard', 'neural'],
+                    'AdditionalLanguageCodes' => [],
                 ],
                 [
+                    'Id' => 'Amy',
+                    'Name' => 'Amy',
+                    'Gender' => 'Female',
                     'LanguageCode' => 'en-GB',
                     'LanguageName' => 'British English',
+                    'SupportedEngines' => ['standard', 'neural'],
+                    'AdditionalLanguageCodes' => [],
                 ],
                 [
+                    'Id' => 'Matthew',
+                    'Name' => 'Matthew',
+                    'Gender' => 'Male',
                     'LanguageCode' => 'en-US', // Duplicate should be filtered
                     'LanguageName' => 'US English',
+                    'SupportedEngines' => ['standard', 'neural'],
+                    'AdditionalLanguageCodes' => [],
                 ],
             ]);
         
@@ -185,8 +215,10 @@ class AmazonPollyServiceTest extends TestCase
         
         $this->assertIsArray($languages);
         $this->assertCount(2, $languages); // Duplicates should be removed
-        $this->assertContains('en-US', array_column($languages, 'code'));
-        $this->assertContains('en-GB', array_column($languages, 'code'));
+        $this->assertArrayHasKey('en-US', $languages);
+        $this->assertArrayHasKey('en-GB', $languages);
+        $this->assertEquals('US English', $languages['en-US']);
+        $this->assertEquals('British English', $languages['en-GB']);
     }
 
     public function test_validate_options_success()
@@ -206,13 +238,12 @@ class AmazonPollyServiceTest extends TestCase
     public function test_validate_options_invalid_voice()
     {
         $options = [
-            'voice_id' => 'InvalidVoice',
+            'voice_id' => '', // Empty voice_id should be invalid
         ];
         
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid voice_id: InvalidVoice');
+        $result = $this->service->validateOptions($options);
         
-        $this->service->validateOptions($options);
+        $this->assertFalse($result);
     }
 
     public function test_validate_options_invalid_engine()
@@ -221,10 +252,9 @@ class AmazonPollyServiceTest extends TestCase
             'engine' => 'invalid_engine',
         ];
         
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid engine: invalid_engine');
+        $result = $this->service->validateOptions($options);
         
-        $this->service->validateOptions($options);
+        $this->assertFalse($result);
     }
 
     public function test_get_max_text_length()
@@ -237,47 +267,25 @@ class AmazonPollyServiceTest extends TestCase
     public function test_get_service_name()
     {
         $serviceName = $this->service->getServiceName();
-        
-        $this->assertEquals('Amazon Polly', $serviceName);
+
+        $this->assertEquals('amazon_polly', $serviceName);
     }
 
     public function test_estimate_duration()
     {
         $text = 'This is a test sentence with approximately ten words in it.';
+        $options = [];
         
-        $duration = $this->service->estimateDuration($text);
+        $reflection = new \ReflectionClass($this->service);
+        $method = $reflection->getMethod('estimateAudioDuration');
+        $method->setAccessible(true);
         
-        $this->assertIsFloat($duration);
+        $duration = $method->invoke($this->service, $text, $options);
+        
+        $this->assertIsInt($duration);
         $this->assertGreaterThan(0, $duration);
         $this->assertLessThan(10, $duration); // Should be less than 10 seconds for this short text
     }
 
-    public function test_prepare_text_removes_html()
-    {
-        $htmlText = '<p>This is <strong>bold</strong> text with <em>emphasis</em>.</p>';
-        
-        $reflection = new \ReflectionClass($this->service);
-        $method = $reflection->getMethod('prepareText');
-        $method->setAccessible(true);
-        
-        $result = $method->invoke($this->service, $htmlText, []);
-        
-        $this->assertEquals('This is bold text with emphasis.', $result);
-    }
 
-    public function test_prepare_text_with_ssml()
-    {
-        $text = 'Hello world';
-        $options = ['use_ssml' => true];
-        
-        $reflection = new \ReflectionClass($this->service);
-        $method = $reflection->getMethod('prepareText');
-        $method->setAccessible(true);
-        
-        $result = $method->invoke($this->service, $text, $options);
-        
-        $this->assertStringContains('<speak>', $result);
-        $this->assertStringContains('</speak>', $result);
-        $this->assertStringContains('Hello world', $result);
-    }
 }

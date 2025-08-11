@@ -22,18 +22,17 @@ class StoreNoteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'string|max:255',
+            'title' => 'nullable|string|max:255',
             'folder_id' => 'nullable|integer|exists:folders,id',
-            'audio_file' =>'file|mimes:mp3,ogg,flac,wav',
-            'pdf_file' =>'file|nullable|mimes:pdf,doc,docx,txt,ppt,pptx',
-            'title' => 'nullable|string', 
-            'link' => 'nullable|string', 
+            'audio_file' => 'nullable|file|mimes:mp3,ogg,flac,wav',
+            'pdf_file' => 'nullable|file|mimes:pdf,doc,docx,txt,ppt,pptx',
+            'link' => 'nullable|string|url', 
             'content' => 'nullable|string', 
             'transcription' => 'nullable|string', 
             'summary' => 'nullable|string', 
-            'is_pinned' => 'nullable|integer',
+            'is_pinned' => 'nullable|boolean',
             'language' => 'nullable|string',
-            
+            'icon' => 'nullable|string',
         ];
     }
 }

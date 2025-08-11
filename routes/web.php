@@ -17,6 +17,7 @@ use App\Http\Controllers\QuizSharingController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\CrosswordController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\DebugController;
 use App\Models\User;
 use App\Notifications\NewUserFeedback;
 use Laravel\Horizon\Horizon;
@@ -84,6 +85,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('notes/{note}/generate-podcast', [NoteController::class, 'generatePodcast'])->name('notes.generate-podcast');
     Route::get('notes/{note}/podcast-status', [NoteController::class, 'podcastStatus'])->name('notes.podcast-status');
     Route::delete('notes/{note}/podcast', [NoteController::class, 'deletePodcast'])->name('notes.delete-podcast');
+    Route::get('notes/{note}/podcasts/{filename}', [NoteController::class, 'servePodcast'])->name('notes.serve-podcast');
 
     // Quiz routes
     Route::resource('quizzes', QuizController::class);
@@ -142,6 +144,18 @@ Route::get('auth/apple/callback', [\App\Http\Controllers\Auth\AppleController::c
 Route::get('/auth/apple/generate-jwt', [\App\Http\Controllers\Auth\AppleController::class, 'generateClientSecret'])
     ->name('auth.apple.generate-jwt')
     ->middleware(['auth', 'admin']); // Add appropriate middleware
+
+// Debug routes - restricted to specific admin email
+Route::middleware(['auth', 'admin.email'])->group(function () {
+    Route::get('/debug/bucket-contents', [DebugController::class, 'bucketContents'])
+        ->name('debug.bucket-contents');
+    
+    Route::get('/debug/download-file', [DebugController::class, 'downloadFile'])
+        ->name('debug.download-file');
+    
+    Route::get('/debug/export-notes', [DebugController::class, 'exportNotesData'])
+        ->name('debug.export-notes');
+});
 
 require __DIR__.'/settings.php';
 

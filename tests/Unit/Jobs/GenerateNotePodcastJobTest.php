@@ -51,7 +51,7 @@ class GenerateNotePodcastJobTest extends TestCase
             ->with($this->note, $options)
             ->andReturn(true);
 
-        $job = new GenerateNotePodcastJob($this->note, $options);
+        $job = new GenerateNotePodcastJob($this->note->id, $options);
         $job->handle();
 
         // Refresh the note to check status
@@ -69,7 +69,7 @@ class GenerateNotePodcastJobTest extends TestCase
             ->with($this->note, $options)
             ->andReturn(false);
 
-        $job = new GenerateNotePodcastJob($this->note, $options);
+        $job = new GenerateNotePodcastJob($this->note->id, $options);
         $job->handle();
 
         // The job should complete without throwing an exception
@@ -89,7 +89,7 @@ class GenerateNotePodcastJobTest extends TestCase
             ->with($this->note, $options)
             ->andThrow(new \Exception('Unexpected error'));
 
-        $job = new GenerateNotePodcastJob($this->note, $options);
+        $job = new GenerateNotePodcastJob($this->note->id, $options);
         
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Unexpected error');
@@ -102,7 +102,7 @@ class GenerateNotePodcastJobTest extends TestCase
         $options = ['voice_id' => 'Joanna'];
         $exception = new \Exception('Job failed');
         
-        $job = new GenerateNotePodcastJob($this->note, $options);
+        $job = new GenerateNotePodcastJob($this->note->id, $options);
         $job->failed($exception);
 
         $this->note->refresh();
@@ -112,7 +112,7 @@ class GenerateNotePodcastJobTest extends TestCase
 
     public function test_job_has_correct_configuration()
     {
-        $job = new GenerateNotePodcastJob($this->note, []);
+        $job = new GenerateNotePodcastJob($this->note->id, []);
         
         $this->assertEquals('default', $job->queue);
         $this->assertEquals(600, $job->timeout);
@@ -123,7 +123,7 @@ class GenerateNotePodcastJobTest extends TestCase
     public function test_job_serialization()
     {
         $options = ['voice_id' => 'Matthew', 'use_ssml' => true];
-        $job = new GenerateNotePodcastJob($this->note, $options);
+        $job = new GenerateNotePodcastJob($this->note->id, $options);
         
         // Test that the job can be serialized and unserialized
         $serialized = serialize($job);
@@ -144,7 +144,7 @@ class GenerateNotePodcastJobTest extends TestCase
         // Set initial status
         $this->note->update(['podcast_status' => 'pending']);
         
-        $job = new GenerateNotePodcastJob($this->note, []);
+        $job = new GenerateNotePodcastJob($this->note->id, []);
         $job->handle();
 
         // The job should have updated the status to processing at the start
@@ -160,7 +160,7 @@ class GenerateNotePodcastJobTest extends TestCase
             ->with($this->note, [])
             ->andReturn(true);
 
-        $job = new GenerateNotePodcastJob($this->note);
+        $job = new GenerateNotePodcastJob($this->note->id);
         $job->handle();
 
         $this->assertTrue(true);
@@ -175,7 +175,7 @@ class GenerateNotePodcastJobTest extends TestCase
 
     public function test_job_retries_on_failure()
     {
-        $job = new GenerateNotePodcastJob($this->note, []);
+        $job = new GenerateNotePodcastJob($this->note->id, []);
         
         // Test that the job has retry configuration
         $this->assertEquals(3, $job->tries);
@@ -198,7 +198,7 @@ class GenerateNotePodcastJobTest extends TestCase
             ->once()
             ->andReturn(true);
 
-        $job = new GenerateNotePodcastJob($this->note, []);
+        $job = new GenerateNotePodcastJob($this->note->id, []);
         $job->handle();
     }
 
@@ -217,7 +217,7 @@ class GenerateNotePodcastJobTest extends TestCase
             ->once()
             ->andReturn(false);
 
-        $job = new GenerateNotePodcastJob($this->note, []);
+        $job = new GenerateNotePodcastJob($this->note->id, []);
         $job->handle();
     }
 }

@@ -18,6 +18,8 @@ class AmazonPollyService implements TextToSpeechServiceInterface
     {
         $this->config = config('services.aws.polly');
         
+        Log::info('Amazon Polly Service Config', $this->config);
+
         $this->pollyClient = new PollyClient([
             'version' => 'latest',
             'region' => $this->config['region'] ?? 'us-east-1',
@@ -65,12 +67,12 @@ class AmazonPollyService implements TextToSpeechServiceInterface
             // Call Amazon Polly
             $result = $this->pollyClient->synthesizeSpeech($params);
 
-            // Generate unique filename
-            $filename = 'podcasts/' . Str::uuid() . '.' . ($options['output_format'] ?? 'mp3');
+            // Generate unique filename for temporary storage
+            $filename = 'temp/podcasts/' . Str::uuid() . '.' . ($options['output_format'] ?? 'mp3');
 
-            // Save audio stream to storage
+            // Save audio stream to temporary storage (local disk)
             $audioStream = $result['AudioStream']->getContents();
-            Storage::disk('r2')->put($filename, $audioStream);
+            Storage::disk('local')->put($filename, $audioStream);
 
             // Get file metadata
             $fileSize = strlen($audioStream);
@@ -83,7 +85,7 @@ class AmazonPollyService implements TextToSpeechServiceInterface
             ]);
 
             return [
-                'file_path' => $filename,
+                'temp_file_path' => $filename,
                 'file_size' => $fileSize,
                 'duration' => $duration,
                 'format' => $options['output_format'] ?? 'mp3',
@@ -91,6 +93,7 @@ class AmazonPollyService implements TextToSpeechServiceInterface
                 'language_code' => $params['LanguageCode'],
                 'engine' => $params['Engine'],
                 'service' => $this->getServiceName(),
+                'needs_media_processing' => true,
                 'metadata' => [
                     'characters_count' => strlen($text),
                     'words_count' => str_word_count($text),

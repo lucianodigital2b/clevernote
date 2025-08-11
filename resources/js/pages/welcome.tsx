@@ -78,7 +78,7 @@ const Welcome = ({ pricingPlans }: WelcomeProps) => {
       <section id="whos-it-for"><WhosItFor /></section>
       {/* <section id="how-it-works"><HowItWorks /></section> */}
       {/* <section id="features"><Features /></section> */}
-      <section id="pricing"><Pricing pricingPlans={pricingPlans} /></section>
+      {/* <section id="pricing"><Pricing pricingPlans={pricingPlans} /></section> */}
       {/* <section id="testimonials"><Testimonials /></section> */}
 
       <section id="faq"><FAQ /></section>

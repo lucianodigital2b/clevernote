@@ -95,10 +95,10 @@ export function Dropzone({ onDrop, accept, className }: DropzoneProps) {
                         isFading ? "opacity-0" : "opacity-100"
                     )}
                 >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                         {getFileIcon(selectedFile)}
-                        <div>
-                            <div className="font-medium">{selectedFile.name}</div>
+                        <div className="min-w-0 flex-1">
+                            <div className="font-medium break-words text-sm leading-tight">{selectedFile.name}</div>
                             <div className="text-xs text-neutral-500">
                                 .{selectedFile.name.split('.').pop()?.toLowerCase() || ''} &bull; {getFileSize(selectedFile)}
                             </div>

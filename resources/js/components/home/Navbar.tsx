@@ -79,12 +79,12 @@ const Navbar = () => {
             >
               FAQ
             </a>
-            <a
+            {/* <a
               href="#pricing"
               className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
             >
               {t('nav_pricing')}
-            </a>
+            </a> */}
             <div className="ml-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -148,13 +148,13 @@ const Navbar = () => {
             >
               {t('nav_testimonials')}
             </a>
-            <a
+            {/* <a
               href="#pricing"
               className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
               {t('nav_pricing')}
-            </a>
+            </a> */}
             <div className="flex space-x-2 pt-2">
               <Button variant="outline" size="sm" className="flex-1 bg-white text-black border-zinc-200 hover:bg-white hover:text-black" asChild>
                 <a href="/login">{t('nav_login')}</a>

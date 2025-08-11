@@ -48,7 +48,7 @@ import { MathExtension } from "@aarkue/tiptap-math-extension";
 import "katex/dist/katex.min.css";
 import Image from '@tiptap/extension-image'
 import { useDebounce } from '@/hooks/use-debounce';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
@@ -363,6 +363,15 @@ export default function Edit({ note }: { note: Note }) {
 
     // Add new state for podcast loading modal
     const [isPodcastLoading, setIsPodcastLoading] = useState(false);
+    const [podcastError, setPodcastError] = useState<string | null>(
+        currentNote.podcast_status === 'failed' ? currentNote.podcast_failure_reason || 'Podcast generation failed' : null
+    );
+    
+    // Add ref to store podcast polling interval
+    const podcastPollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    
+    // Add ref for the podcast audio player
+    const podcastPlayerRef = useRef<any>(null);
 
     const handleCreateCrossword = async () => {
         setIsCrosswordLoading(true);
@@ -414,18 +423,46 @@ export default function Edit({ note }: { note: Note }) {
         }
     };
 
+    const handlePlayPodcast = () => {
+        // Scroll to the podcast section smoothly
+        const podcastSection = document.querySelector('[data-podcast-section]');
+        if (podcastSection) {
+            podcastSection.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+            
+            // Try to start playing the audio after scrolling
+            setTimeout(() => {
+                if (podcastPlayerRef.current && podcastPlayerRef.current.audio && podcastPlayerRef.current.audio.current) {
+                    try {
+                        podcastPlayerRef.current.audio.current.play();
+                        toastConfig.success("🎧 Playing your podcast!");
+                    } catch (error) {
+                        console.log('Auto-play prevented by browser, user interaction required');
+                    }
+                } else {
+                }
+            }, 800); // Increased delay to ensure smooth scrolling completes
+        } else {
+            // Fallback: scroll to top of page where podcast section should be
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
     const handleGeneratePodcast = async () => {
         setIsPodcastLoading(true);
+        setPodcastError(null); // Clear any previous errors
+        
+        // Clear any existing polling interval
+        if (podcastPollingIntervalRef.current) {
+            clearInterval(podcastPollingIntervalRef.current);
+            podcastPollingIntervalRef.current = null;
+        }
+        
         try {
-            // Check if podcast already exists
-            if (note.podcast_status === 'completed' && note.podcast_file_path) {
-                setIsPodcastLoading(false);
-                toastConfig.success("Podcast already exists for this note");
-                return;
-            }
-
             // If podcast is already processing, just show status
-            if (note.podcast_status === 'processing') {
+            if (currentNote.podcast_status === 'processing') {
                 setIsPodcastLoading(false);
                 toastConfig.info("Podcast generation is already in progress");
                 return;
@@ -441,34 +478,50 @@ export default function Edit({ note }: { note: Note }) {
             
             if (response.data && response.data.message) {
                 // Start polling for podcast status
-                const intervalId = setInterval(async () => {
+                podcastPollingIntervalRef.current = setInterval(async () => {
                     try {
                         const podcastResponse = await axios.get(`/notes/${note.id}/podcast-status`);
                         const podcastData = podcastResponse.data;
                         
-                        if (podcastData.status === 'completed') {
-                            clearInterval(intervalId);
+                        if (podcastData.podcast_status === 'completed') {
+                            if (podcastPollingIntervalRef.current) {
+                                clearInterval(podcastPollingIntervalRef.current);
+                                podcastPollingIntervalRef.current = null;
+                            }
                             setIsPodcastLoading(false);
+                            setPodcastError(null);
                             setCurrentNote(prev => ({
                                 ...prev,
                                 podcast_status: 'completed',
-                                podcast_file_path: podcastData.file_path,
-                                podcast_duration: podcastData.duration,
-                                podcast_file_size: podcastData.file_size
+                                podcast_file_path: podcastData.podcast_file_path,
+                                podcast_url: podcastData.podcast_url,
+                                podcast_duration: podcastData.podcast_duration,
+                                podcast_file_size: podcastData.podcast_file_size,
+                                podcast_generated_at: podcastData.podcast_generated_at
                             }));
                             toastConfig.success("Podcast generated successfully!");
                             
-                        } else if (podcastData.status === 'failed') {
-                            clearInterval(intervalId);
+                        } else if (podcastData.podcast_status === 'failed') {
+                            if (podcastPollingIntervalRef.current) {
+                                clearInterval(podcastPollingIntervalRef.current);
+                                podcastPollingIntervalRef.current = null;
+                            }
                             setIsPodcastLoading(false);
-                            toastConfig.error(`Podcast generation failed: ${podcastData.failure_reason || 'Unknown error'}`);
+                            const errorMessage = podcastData.podcast_failure_reason || 'Unknown error';
+                            setPodcastError(errorMessage);
+                            toastConfig.error(`Podcast generation failed: ${errorMessage}`);
                         }
                         // Continue polling if status is 'processing' or 'pending'
                     } catch (error) {
                         console.error('Error checking podcast status:', error);
-                        clearInterval(intervalId);
+                        if (podcastPollingIntervalRef.current) {
+                            clearInterval(podcastPollingIntervalRef.current);
+                            podcastPollingIntervalRef.current = null;
+                        }
                         setIsPodcastLoading(false);
-                        toastConfig.error("Failed to check podcast generation status");
+                        const errorMessage = "Failed to check podcast generation status";
+                        setPodcastError(errorMessage);
+                        toastConfig.error(errorMessage);
                     }
                 }, 5000); // Poll every 5 seconds
                 
@@ -477,11 +530,9 @@ export default function Edit({ note }: { note: Note }) {
         } catch (error) {
             setIsPodcastLoading(false);
             console.error('Error generating podcast:', error);
-            if (error.response?.data?.message) {
-                toastConfig.error(error.response.data.message);
-            } else {
-                toastConfig.error("Failed to start podcast generation");
-            }
+            const errorMessage = error.response?.data?.message || "Failed to start podcast generation";
+            setPodcastError(errorMessage);
+            toastConfig.error(errorMessage);
         }
     };
 
@@ -512,12 +563,12 @@ export default function Edit({ note }: { note: Note }) {
             loading: isMindmapLoading
         },
         // { 
-        //     icon: Mic, 
-        //     label: note.podcast_status === 'completed' ? 'Listen to Podcast' : 'Generate Podcast', 
-        //     description: note.podcast_status === 'completed' ? 'Play the generated audio version' : 'Convert note to audio podcast',
-        //     action: handleGeneratePodcast,
+        //     icon: currentNote.podcast_status === 'completed' ? Play : Mic, 
+        //     label: currentNote.podcast_status === 'completed' ? 'Listen to Podcast' : 'Generate Podcast', 
+        //     description: currentNote.podcast_status === 'completed' ? 'Play the generated audio version' : 'Convert note to audio podcast',
+        //     action: currentNote.podcast_status === 'completed' ? handlePlayPodcast : handleGeneratePodcast,
         //     color: 'bg-orange-50 hover:bg-orange-100 border-orange-200 text-orange-700 dark:text-white dark:border-transparent',
-        //     loading: isPodcastLoading || note.podcast_status === 'processing'
+        //     loading: isPodcastLoading || currentNote.podcast_status === 'processing'
         // },
         // { 
         //     icon: Grid3X3, 
@@ -710,7 +761,15 @@ export default function Edit({ note }: { note: Note }) {
         }
     }, [debouncedContent, editor, currentNote.content, isProcessing, note.id, selectedFolder]);
 
-
+    // Cleanup podcast polling interval on component unmount
+    useEffect(() => {
+        return () => {
+            if (podcastPollingIntervalRef.current) {
+                clearInterval(podcastPollingIntervalRef.current);
+                podcastPollingIntervalRef.current = null;
+            }
+        };
+    }, []);
 
     const handleDelete = () => {
         router.delete(`/notes/${note.id}`, {
@@ -913,7 +972,7 @@ export default function Edit({ note }: { note: Note }) {
                         </div>
 
                         {isFailed && (note.content == null || note.content === '') ? (
-                            <ProcessingState state="failed" onRetry={handleRetryProcessing} />
+                            <ProcessingState state="failed" onRetry={handleRetryProcessing} showRetryButton={false} />
                         ) : isProcessing ? (
                             <ProcessingState state="processing" />
                         ) : (
@@ -1145,67 +1204,11 @@ export default function Edit({ note }: { note: Note }) {
                                     </div>
                                 )}
 
-                                {/* Podcast Player Section */}
-                                {currentNote.podcast_status === 'completed' && currentNote.podcast_file_path && (
+                                {/* AI Actions Section - Hidden when note has failed */}
+                                {currentNote.status !== 'failed' && (
                                     <div className="mb-8">
-                                        <div className="bg-gradient-to-r from-orange-50/50 to-transparent dark:from-orange-950/20 dark:to-transparent border border-orange-200 dark:border-orange-800 rounded-lg p-4">
-                                            <div className="flex items-center gap-3 mb-3">
-                                                <div className="bg-orange-100 dark:bg-orange-900/30 w-8 h-8 rounded-full flex items-center justify-center">
-                                                    <Mic className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                                                </div>
-                                                <div>
-                                                    <h3 className="font-medium text-orange-900 dark:text-orange-100">Generated Podcast</h3>
-                                                    <div className="flex items-center gap-4 text-xs text-orange-600 dark:text-orange-400">
-                                                        {currentNote.podcast_duration && (
-                                                            <span className="flex items-center gap-1">
-                                                                <Clock className="w-3 h-3" />
-                                                                {Math.floor(currentNote.podcast_duration / 60)}:{(currentNote.podcast_duration % 60).toString().padStart(2, '0')}
-                                                            </span>
-                                                        )}
-                                                        {currentNote.podcast_file_size && (
-                                                            <span>
-                                                                {(currentNote.podcast_file_size / (1024 * 1024)).toFixed(1)} MB
-                                                            </span>
-                                                        )}
-                                                        {currentNote.podcast_generated_at && (
-                                                            <span>
-                                                                Generated {dayjs(currentNote.podcast_generated_at).fromNow()}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <AudioPlayer
-                                                src={currentNote.podcast_file_path}
-                                                onPlay={e => console.log("Podcast playing")}
-                                                className="rounded-lg"
-                                                customAdditionalControls={[]}
-                                                showJumpControls={false}
-                                                showPlaybackRateControls={true}
-                                                playbackRates={[0.5, 0.75, 1, 1.25, 1.5, 2]}
-                                                layout="horizontal-reverse"
-                                                style={{
-                                                    backgroundColor: 'transparent',
-                                                    boxShadow: 'none',
-                                                    border: '1px solid rgb(251 146 60)',
-                                                    borderRadius: '0.5rem',
-                                                    '--rhap_theme-color': '#ea580c',
-                                                    '--rhap_bar-color': '#fed7aa',
-                                                    '--rhap_time-color': '#9a3412',
-                                                    '--rhap_font-family': 'inherit',
-                                                    '--rhap_main-controls-button-size': '32px',
-                                                    '--rhap_button-height': '32px',
-                                                    '--rhap_button-width': '32px',
-                                                } as React.CSSProperties}
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* AI Actions Section */}
-                                <div className="mb-8">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
-                                        {actions.map((action, index) => {
+                                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
+                                            {actions.map((action, index) => {
                                             const IconComponent = action.icon;
                                             return (
                                                 <Card key={index} className={` py-2 transition-all duration-300 cursor-pointer hover:shadow-lg hover:scale-[1.02] hover:-translate-y-1 word-break ${action.color}`}>
@@ -1240,7 +1243,135 @@ export default function Edit({ note }: { note: Note }) {
                                             );
                                         })}
                                     </div>
+                                    
+                                    {/* Podcast Error Alert */}
+                                    {podcastError && (
+                                        <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex-shrink-0">
+                                                    <X className="h-5 w-5 text-red-500" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h4 className="text-sm font-medium text-red-800 dark:text-red-200 mb-1">
+                                                        Podcast Generation Failed
+                                                    </h4>
+                                                    <p className="text-sm text-red-700 dark:text-red-300 mb-3">
+                                                        {podcastError}
+                                                    </p>
+                                                    <div className="flex gap-2">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            onClick={handleGeneratePodcast}
+                                                            disabled={isPodcastLoading}
+                                                            className="text-red-700 border-red-300 hover:bg-red-100 dark:text-red-300 dark:border-red-600 dark:hover:bg-red-900/30"
+                                                        >
+                                                            {isPodcastLoading ? (
+                                                                <>
+                                                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                                    Retrying...
+                                                                </>
+                                                            ) : (
+                                                                'Try Again'
+                                                            )}
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => setPodcastError(null)}
+                                                    className="flex-shrink-0 text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400"
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
+                                )}
+
+                                {/* Podcast Player Section - Positioned after AI Actions */}
+                                {currentNote.podcast_status === 'completed' && (currentNote.podcast_url || currentNote.podcast_file_path) && (
+                                    <div data-podcast-section className="mb-8">
+                                        <div className="bg-gradient-to-r from-orange-50/50 to-transparent dark:from-orange-950/20 dark:to-transparent border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <div className="bg-orange-100 dark:bg-orange-900/30 w-8 h-8 rounded-full flex items-center justify-center">
+                                                    <Mic className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-medium text-orange-900 dark:text-orange-100">Generated Podcast</h3>
+                                                    <div className="flex items-center gap-4 text-xs text-orange-600 dark:text-orange-400">
+                                                        {currentNote.podcast_duration && (
+                                                            <span className="flex items-center gap-1">
+                                                                <Clock className="w-3 h-3" />
+                                                                {Math.floor(currentNote.podcast_duration / 60)}:{(currentNote.podcast_duration % 60).toString().padStart(2, '0')}
+                                                            </span>
+                                                        )}
+                                                        {currentNote.podcast_file_size && (
+                                                            <span>
+                                                                {(currentNote.podcast_file_size / (1024 * 1024)).toFixed(1)} MB
+                                                            </span>
+                                                        )}
+                                                        {currentNote.podcast_generated_at && (
+                                                            <span>
+                                                                Generated {dayjs(currentNote.podcast_generated_at).fromNow()}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <AudioPlayer
+                                                ref={podcastPlayerRef}
+                                                src={currentNote.podcast_url || currentNote.podcast_file_path}
+                                                onPlay={e => {
+                                                    console.log("🎧 Podcast playing");
+                                                    console.log("📁 Podcast file details:", {
+                                                        url: currentNote.podcast_url,
+                                                        file_path: currentNote.podcast_file_path,
+                                                        duration: currentNote.podcast_duration,
+                                                        file_size: currentNote.podcast_file_size,
+                                                        generated_at: currentNote.podcast_generated_at,
+                                                        note_id: currentNote.id,
+                                                        note_title: currentNote.title
+                                                    });
+                                                    console.log("🔊 Audio element:", e.target);
+                                                    console.log("📊 Audio source:", e.target.src);
+                                                }}
+                                                onLoadStart={e => {
+                                                    console.log("📥 Podcast loading started from bucket");
+                                                    console.log("🌐 Loading URL:", e.target.src);
+                                                }}
+                                                onLoadedData={e => {
+                                                    console.log("✅ Podcast data loaded from bucket");
+                                                    console.log("⏱️ Audio duration:", e.target.duration);
+                                                    console.log("📦 Audio ready state:", e.target.readyState);
+                                                }}
+                                                onError={e => {
+                                                    console.error("❌ Podcast loading error:", e);
+                                                    console.error("🔗 Failed URL:", e.target.src);
+                                                }}
+                                                className="rounded-lg"
+                                                customAdditionalControls={[]}
+                                                showJumpControls={false}
+                                                showPlaybackRateControls={true}
+                                                playbackRates={[0.5, 0.75, 1, 1.25, 1.5, 2]}
+                                                layout="horizontal-reverse"
+                                                style={{
+                                                    backgroundColor: 'transparent',
+                                                    boxShadow: 'none',
+                                                    border: '1px solid rgb(251 146 60)',
+                                                    borderRadius: '0.5rem',
+                                                    '--rhap_theme-color': '#ea580c',
+                                                    '--rhap_bar-color': '#fed7aa',
+                                                    '--rhap_time-color': '#9a3412',
+                                                    '--rhap_font-family': 'inherit',
+                                                    '--rhap_main-controls-button-size': '32px',
+                                                    '--rhap_button-height': '32px',
+                                                    '--rhap_button-width': '32px',
+                                                } as React.CSSProperties}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Content Section */}
                                 <div className="">

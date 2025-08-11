@@ -617,5 +617,4 @@ class NoteControllerTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
         Storage::disk('public')->assertMissing('images/' . $invalidFile->hashName());
     }
-    }
 }

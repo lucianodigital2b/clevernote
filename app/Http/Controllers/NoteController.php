@@ -88,19 +88,24 @@ class NoteController extends Controller
                     ->withErrors(['error' => 'You have reached the maximum number of notes for free users. Please subscribe to create more notes.']);
             }
             
-            // Create a placeholder note immediately
+            // Determine if this note requires processing
+            $requiresProcessing = isset($validated['pdf_file']) || isset($validated['audio_file']) || isset($validated['link']);
+            
+            // Create the note with appropriate status
             $note = Note::create([
                 'user_id' => $validated['user_id'],
-                'title' => $validated['title'] ?? 'Processing Note',
-                'content' => '', // Placeholder content
-                'status' => 'processing', // Add a status column to the notes table
+                'title' => $validated['title'] ?? ($requiresProcessing ? 'Processing Note' : 'New Note'),
+                'content' => $validated['content'] ?? '', // Use provided content or empty string
+                'status' => $requiresProcessing ? 'processing' : 'completed',
                 'folder_id' => $validated['folder_id'] ?? null,
                 'icon' => $validated['icon'] ?? 'file',
+                'transcription' => $validated['transcription'] ?? null,
+                'summary' => $validated['summary'] ?? null,
+                'is_pinned' => $validated['is_pinned'] ?? false,
             ]);
 
             // Increment user's notes count
             $user->increment('notes_count');
-
 
             if (isset($validated['pdf_file'])) {
                 $file = $validated['pdf_file'];
@@ -141,9 +146,13 @@ class NoteController extends Controller
                 return response()->json($note);
             }
 
-            // Redirect to the edit page of the newly created note
+            // Redirect to the edit page of the newly created note with appropriate message
+            $successMessage = $requiresProcessing 
+                ? 'Note processing started. You will be redirected to the note once it\'s ready.'
+                : 'Note created successfully.';
+                
             return redirect()->route('notes.edit', $note->id)
-                ->with('success', 'Note processing started. You will be redirected to the note once it\'s ready.');
+                ->with('success', $successMessage);
         } catch (\Exception $e) {
 
             Log::error($e->getMessage());
@@ -352,7 +361,7 @@ class NoteController extends Controller
         ]);
 
         // Dispatch the podcast generation job
-        GenerateNotePodcastJob::dispatch($note, $options);
+        GenerateNotePodcastJob::dispatch($note->id, $options);
 
         return response()->json([
             'success' => true,
@@ -395,7 +404,12 @@ class NoteController extends Controller
         }
 
         // Delete the audio file if it exists
-        if ($note->podcast_file_path) {
+        $podcastMedia = $note->getFirstMedia('note-podcasts');
+        if ($podcastMedia) {
+            // Delete from media library
+            $podcastMedia->delete();
+        } elseif ($note->podcast_file_path) {
+            // Delete from legacy storage
             \Storage::disk(config('tts.settings.storage.disk'))->delete($note->podcast_file_path);
         }
 
@@ -414,6 +428,47 @@ class NoteController extends Controller
             'success' => true,
             'message' => 'Podcast deleted successfully.',
         ]);
+    }
+
+    /**
+     * Serve the podcast file for a note
+     */
+    public function servePodcast(Note $note, $filename)
+    {
+        $this->authorize('view', $note);
+
+        if (!$note->hasPodcast()) {
+            abort(404, 'Podcast not found');
+        }
+
+        // Try to get the media from the media library first
+        $podcastMedia = $note->getFirstMedia('note-podcasts');
+        if ($podcastMedia && $podcastMedia->file_name === $filename) {
+            // Get the file path from the media library
+            $filePath = $podcastMedia->getPath();
+            
+            if (file_exists($filePath)) {
+                return response()->file($filePath, [
+                    'Content-Type' => 'audio/mpeg',
+                    'Content-Disposition' => 'inline; filename="' . $filename . '"',
+                ]);
+            }
+        }
+
+        // Fallback to direct storage for backward compatibility
+        if ($note->podcast_file_path) {
+            $disk = \Storage::disk('r2');
+            if ($disk->exists($note->podcast_file_path)) {
+                return response()->stream(function () use ($disk, $note) {
+                    echo $disk->get($note->podcast_file_path);
+                }, 200, [
+                    'Content-Type' => 'audio/mpeg',
+                    'Content-Disposition' => 'inline; filename="' . $filename . '"',
+                ]);
+            }
+        }
+
+        abort(404, 'Podcast file not found');
     }
 
     public function upload(Request $request, Note $note)
