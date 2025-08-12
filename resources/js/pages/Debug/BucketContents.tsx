@@ -47,13 +47,49 @@ interface MediaFile {
     url: string;
 }
 
+interface PaginationData<T> {
+    data: T[];
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+    from: number;
+    to: number;
+}
+
+interface BucketFilesPagination {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+    from: number;
+    to: number;
+}
+
+interface MediaFilesPagination {
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+    from: number;
+    to: number;
+}
+
 interface Props {
-    notes: Note[];
+    notes: PaginationData<Note>;
     bucketFiles: BucketFile[] | { error: string };
     mediaFiles: MediaFile[] | { error: string };
+    bucketFilesPagination: BucketFilesPagination | null;
+    mediaFilesPagination: MediaFilesPagination | null;
     totalNotes: number;
     totalBucketFiles: number;
     totalMediaFiles: number;
+    pagination: {
+        per_page: number;
+        notes_page: number;
+        bucket_page: number;
+        media_page: number;
+    };
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -67,19 +103,61 @@ export default function BucketContents({
     notes, 
     bucketFiles, 
     mediaFiles, 
+    bucketFilesPagination,
+    mediaFilesPagination,
     totalNotes, 
     totalBucketFiles, 
-    totalMediaFiles 
+    totalMediaFiles,
+    pagination
 }: Props) {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('all');
 
-    const filteredNotes = notes.filter(note => {
+    const filteredNotes = notes.data.filter(note => {
         const matchesSearch = note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             note.content.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesStatus = selectedStatus === 'all' || note.status === selectedStatus;
         return matchesSearch && matchesStatus;
     });
+
+    const handlePageChange = (page: number, type: 'notes' | 'bucket' | 'media') => {
+        const params = new URLSearchParams(window.location.search);
+        params.set(`${type}_page`, page.toString());
+        router.get(`/debug/bucket-contents?${params.toString()}`);
+    };
+
+    const PaginationControls = ({ pagination, type }: { pagination: any, type: 'notes' | 'bucket' | 'media' }) => {
+        if (!pagination || pagination.last_page <= 1) return null;
+        
+        return (
+            <div className="flex items-center justify-between mt-4">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                Showing {pagination.from} to {pagination.to} of {pagination.total} results
+            </div>
+                <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={pagination.current_page === 1}
+                        onClick={() => handlePageChange(pagination.current_page - 1, type)}
+                    >
+                        Previous
+                    </Button>
+                    <span className="px-3 py-1 text-sm">
+                        Page {pagination.current_page} of {pagination.last_page}
+                    </span>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={pagination.current_page === pagination.last_page}
+                        onClick={() => handlePageChange(pagination.current_page + 1, type)}
+                    >
+                        Next
+                    </Button>
+                </div>
+            </div>
+        );
+    };
 
     const handleDownloadFile = (filePath: string) => {
         window.open(`/debug/download-file?file_path=${encodeURIComponent(filePath)}`, '_blank');
@@ -87,6 +165,10 @@ export default function BucketContents({
 
     const handleExportNotes = () => {
         window.open('/debug/export-notes', '_blank');
+    };
+
+    const handleDownloadNoteFiles = (noteId: number) => {
+        window.location.href = `/debug/download-note-files?note_id=${noteId}`;
     };
 
     const formatFileSize = (bytes: number) => {
@@ -123,9 +205,9 @@ export default function BucketContents({
             <div className="flex sm:flex-start h-full flex-1 flex-col gap-6 p-6 max-w-7xl mx-auto w-full relative">
                             <div className="flex justify-between items-center mb-6">
                                 <div>
-                                    <h1 className="text-3xl font-bold text-gray-900">Debug - Bucket Contents</h1>
-                                    <p className="text-gray-600 mt-2">Administrative debugging interface for CleverNote storage</p>
-                                </div>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Debug - Bucket Contents</h1>
+                    <p className="text-gray-600 dark:text-gray-400 mt-2">Administrative debugging interface for CleverNote storage</p>
+                </div>
                                 <Button onClick={handleExportNotes} className="flex items-center gap-2">
                                     <Download className="h-4 w-4" />
                                     Export All Notes Data
@@ -175,19 +257,19 @@ export default function BucketContents({
                                 <TabsContent value="notes" className="space-y-4">
                                     <div className="flex gap-4 mb-4">
                                         <div className="relative flex-1">
-                                            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                                            <Input
-                                                placeholder="Search notes..."
-                                                value={searchTerm}
-                                                onChange={(e) => setSearchTerm(e.target.value)}
-                                                className="pl-10"
-                                            />
-                                        </div>
-                                        <select
-                                            value={selectedStatus}
-                                            onChange={(e) => setSelectedStatus(e.target.value)}
-                                            className="px-3 py-2 border border-gray-300 rounded-md"
-                                        >
+                            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400 dark:text-gray-500" />
+                            <Input
+                                placeholder="Search notes..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-10"
+                            />
+                        </div>
+                        <select
+                            value={selectedStatus}
+                            onChange={(e) => setSelectedStatus(e.target.value)}
+                            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                        >
                                             <option value="all">All Status</option>
                                             <option value="processed">Processed</option>
                                             <option value="processing">Processing</option>
@@ -219,7 +301,16 @@ export default function BucketContents({
                                                                 )}
                                                             </CardDescription>
                                                         </div>
-                                                        <div className="flex gap-2">
+                                                        <div className="flex gap-2 items-center">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={() => handleDownloadNoteFiles(note.id)}
+                                                                className="flex items-center gap-1"
+                                                            >
+                                                                <Download className="h-3 w-3" />
+                                                                Download Files
+                                                            </Button>
                                                             <Badge className={getStatusColor(note.status)}>
                                                                 {note.status}
                                                             </Badge>
@@ -235,18 +326,18 @@ export default function BucketContents({
                                                     <div className="space-y-3">
                                                         {note.content && (
                                                             <div>
-                                                                <h4 className="font-medium text-sm text-gray-700 mb-1">Content Preview:</h4>
-                                                                <p className="text-sm text-gray-600 line-clamp-3">
+                                                                <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-1">Content Preview:</h4>
+                                                                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
                                                                     {note.content.substring(0, 200)}...
                                                                 </p>
                                                             </div>
                                                         )}
                                                         
                                                         {note.podcast_file_path && (
-                                                            <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg">
+                                                            <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
                                                                 <div>
-                                                                    <p className="text-sm font-medium">Podcast File</p>
-                                                                    <p className="text-xs text-gray-600">{note.podcast_file_path}</p>
+                                                                    <p className="text-sm font-medium dark:text-gray-200">Podcast File</p>
+                                                                    <p className="text-xs text-gray-600 dark:text-gray-400">{note.podcast_file_path}</p>
                                                                     <Badge className="mt-1" variant={note.podcast_status === 'completed' ? 'default' : 'secondary'}>
                                                                         {note.podcast_status}
                                                                     </Badge>
@@ -276,6 +367,7 @@ export default function BucketContents({
                                             </Card>
                                         ))}
                                     </div>
+                                    <PaginationControls pagination={notes} type="notes" />
                                 </TabsContent>
 
                                 <TabsContent value="bucket" className="space-y-4">
@@ -286,8 +378,8 @@ export default function BucketContents({
                                                     <CardContent className="p-4">
                                                         <div className="flex justify-between items-center">
                                                             <div className="flex-1">
-                                                                <p className="font-medium">{file.path}</p>
-                                                                <p className="text-sm text-gray-600">
+                                                                <p className="font-medium dark:text-gray-200">{file.path}</p>
+                                                                <p className="text-sm text-gray-600 dark:text-gray-400">
                                                                     {formatFileSize(file.size)} • {formatDate(file.last_modified)}
                                                                 </p>
                                                             </div>
@@ -314,10 +406,11 @@ export default function BucketContents({
                                     ) : (
                                         <Card>
                                             <CardContent className="p-4">
-                                                <p className="text-red-600">Error: {bucketFiles.error}</p>
+                                                <p className="text-red-600 dark:text-red-400">Error: {bucketFiles.error}</p>
                                             </CardContent>
                                         </Card>
                                     )}
+                                    <PaginationControls pagination={bucketFilesPagination} type="bucket" />
                                 </TabsContent>
 
                                 <TabsContent value="media" className="space-y-4">
@@ -328,11 +421,11 @@ export default function BucketContents({
                                                     <CardContent className="p-4">
                                                         <div className="flex justify-between items-center">
                                                             <div className="flex-1">
-                                                                <p className="font-medium">{file.name}</p>
-                                                                <p className="text-sm text-gray-600">
+                                                                <p className="font-medium dark:text-gray-200">{file.name}</p>
+                                                                <p className="text-sm text-gray-600 dark:text-gray-400">
                                                                     {file.collection_name} • {formatFileSize(file.size)} • {formatDate(file.created_at)}
                                                                 </p>
-                                                                <p className="text-xs text-gray-500">
+                                                                <p className="text-xs text-gray-500 dark:text-gray-500">
                                                                     {file.model_type} ID: {file.model_id} • Disk: {file.disk}
                                                                 </p>
                                                             </div>
@@ -350,10 +443,11 @@ export default function BucketContents({
                                     ) : (
                                         <Card>
                                             <CardContent className="p-4">
-                                                <p className="text-red-600">Error: {mediaFiles.error}</p>
+                                                <p className="text-red-600 dark:text-red-400">Error: {mediaFiles.error}</p>
                                             </CardContent>
                                         </Card>
                                     )}
+                                    <PaginationControls pagination={mediaFilesPagination} type="media" />
                                 </TabsContent>
                             </Tabs>
             </div>

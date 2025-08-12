@@ -15,14 +15,19 @@ class DebugController extends Controller
      * Display a listing of all note contents from the bucket for debugging
      * Only accessible to husky15@hotmail.com
      */
-    public function bucketContents()
+    public function bucketContents(Request $request)
     {
         // Double-check authorization
         if (Auth::user()->email !== 'husky15@hotmail.com') {
             abort(403, 'Unauthorized access');
         }
 
-        // Get all notes with their file information
+        $perPage = $request->get('per_page', 50);
+        $notesPage = $request->get('notes_page', 1);
+        $bucketPage = $request->get('bucket_page', 1);
+        $mediaPage = $request->get('media_page', 1);
+
+        // Get paginated notes with their file information
         $notes = Note::with(['tags', 'folder'])
             ->select([
                 'id', 'title', 'content', 'transcription', 'summary', 
@@ -30,16 +35,19 @@ class DebugController extends Controller
                 'podcast_file_path', 'podcast_status', 'user_id', 'folder_id'
             ])
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate($perPage, ['*'], 'notes_page', $notesPage);
 
-        // Get bucket files information
+        // Get bucket files information with pagination
         $bucketFiles = [];
+        $bucketFilesTotal = 0;
+        $bucketFilesPagination = null;
         try {
             $disk = Storage::disk('r2');
             $allFiles = $disk->allFiles();
             
+            $allBucketFiles = [];
             foreach ($allFiles as $file) {
-                $bucketFiles[] = [
+                $allBucketFiles[] = [
                     'path' => $file,
                     'size' => $disk->size($file),
                     'last_modified' => $disk->lastModified($file),
@@ -48,19 +56,37 @@ class DebugController extends Controller
             }
             
             // Sort bucket files by last_modified in descending order
-            usort($bucketFiles, function($a, $b) {
+            usort($allBucketFiles, function($a, $b) {
                 return $b['last_modified'] <=> $a['last_modified'];
             });
+            
+            // Implement pagination for bucket files
+            $bucketFilesTotal = count($allBucketFiles);
+            $bucketOffset = ($bucketPage - 1) * $perPage;
+            $bucketFiles = array_slice($allBucketFiles, $bucketOffset, $perPage);
+            
+            $bucketFilesPagination = [
+                'current_page' => $bucketPage,
+                'per_page' => $perPage,
+                'total' => $bucketFilesTotal,
+                'last_page' => ceil($bucketFilesTotal / $perPage),
+                'from' => $bucketOffset + 1,
+                'to' => min($bucketOffset + $perPage, $bucketFilesTotal)
+            ];
         } catch (\Exception $e) {
             $bucketFiles = ['error' => 'Could not retrieve bucket files: ' . $e->getMessage()];
         }
 
-        // Get media library files
+        // Get paginated media library files
         $mediaFiles = [];
+        $mediaFilesTotal = 0;
+        $mediaFilesPagination = null;
         try {
-            $mediaItems = \Spatie\MediaLibrary\MediaCollections\Models\Media::all();
-            foreach ($mediaItems as $media) {
-                $mediaFiles[] = [
+            $allMediaItems = \Spatie\MediaLibrary\MediaCollections\Models\Media::orderBy('created_at', 'desc')->get();
+            
+            $allMediaFiles = [];
+            foreach ($allMediaItems as $media) {
+                $allMediaFiles[] = [
                     'id' => $media->id,
                     'model_type' => $media->model_type,
                     'model_id' => $media->model_id,
@@ -73,6 +99,20 @@ class DebugController extends Controller
                     'url' => $media->getUrl(),
                 ];
             }
+            
+            // Implement pagination for media files
+            $mediaFilesTotal = count($allMediaFiles);
+            $mediaOffset = ($mediaPage - 1) * $perPage;
+            $mediaFiles = array_slice($allMediaFiles, $mediaOffset, $perPage);
+            
+            $mediaFilesPagination = [
+                'current_page' => $mediaPage,
+                'per_page' => $perPage,
+                'total' => $mediaFilesTotal,
+                'last_page' => ceil($mediaFilesTotal / $perPage),
+                'from' => $mediaOffset + 1,
+                'to' => min($mediaOffset + $perPage, $mediaFilesTotal)
+            ];
         } catch (\Exception $e) {
             $mediaFiles = ['error' => 'Could not retrieve media files: ' . $e->getMessage()];
         }
@@ -81,9 +121,17 @@ class DebugController extends Controller
             'notes' => $notes,
             'bucketFiles' => $bucketFiles,
             'mediaFiles' => $mediaFiles,
-            'totalNotes' => $notes->count(),
-            'totalBucketFiles' => is_array($bucketFiles) ? count($bucketFiles) : 0,
-            'totalMediaFiles' => is_array($mediaFiles) ? count($mediaFiles) : 0,
+            'bucketFilesPagination' => $bucketFilesPagination,
+            'mediaFilesPagination' => $mediaFilesPagination,
+            'totalNotes' => $notes->total(),
+            'totalBucketFiles' => $bucketFilesTotal,
+            'totalMediaFiles' => $mediaFilesTotal,
+            'pagination' => [
+                'per_page' => $perPage,
+                'notes_page' => $notesPage,
+                'bucket_page' => $bucketPage,
+                'media_page' => $mediaPage,
+            ],
         ]);
     }
 
@@ -122,6 +170,104 @@ class DebugController extends Controller
 
         } catch (\Exception $e) {
             abort(500, 'Error downloading file: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download all files related to a specific note
+     */
+    public function downloadNoteFiles(Request $request)
+    {
+        // Double-check authorization
+        if (Auth::user()->email !== 'husky15@hotmail.com') {
+            abort(403, 'Unauthorized access');
+        }
+
+        $noteId = $request->get('note_id');
+        
+        if (!$noteId) {
+            abort(400, 'Note ID is required');
+        }
+
+        $note = Note::with(['tags', 'folder'])->find($noteId);
+        
+        if (!$note) {
+            abort(404, 'Note not found');
+        }
+
+        try {
+            $zip = new \ZipArchive();
+            $zipFileName = 'note_' . $noteId . '_files_' . now()->format('Y-m-d_H-i-s') . '.zip';
+            $zipPath = storage_path('app/temp/' . $zipFileName);
+            
+            // Ensure temp directory exists
+            if (!file_exists(dirname($zipPath))) {
+                mkdir(dirname($zipPath), 0755, true);
+            }
+
+            if ($zip->open($zipPath, \ZipArchive::CREATE) !== TRUE) {
+                abort(500, 'Cannot create zip file');
+            }
+
+            $disk = Storage::disk('r2');
+            $filesAdded = 0;
+
+            // Add note data as JSON
+            $noteData = [
+                'id' => $note->id,
+                'title' => $note->title,
+                'content' => $note->content,
+                'transcription' => $note->transcription,
+                'summary' => $note->summary,
+                'status' => $note->status,
+                'source_type' => $note->source_type,
+                'source_url' => $note->source_url,
+                'podcast_file_path' => $note->podcast_file_path,
+                'podcast_status' => $note->podcast_status,
+                'created_at' => $note->created_at,
+                'updated_at' => $note->updated_at,
+                'tags' => $note->tags->pluck('name'),
+                'folder' => $note->folder ? $note->folder->name : null,
+            ];
+            $zip->addFromString('note_data.json', json_encode($noteData, JSON_PRETTY_PRINT));
+            $filesAdded++;
+
+            // Add podcast file if exists
+            if ($note->podcast_file_path && $disk->exists($note->podcast_file_path)) {
+                $podcastContent = $disk->get($note->podcast_file_path);
+                $zip->addFromString('podcast_' . basename($note->podcast_file_path), $podcastContent);
+                $filesAdded++;
+            }
+
+            // Look for related media files
+            $mediaFiles = \Spatie\MediaLibrary\MediaCollections\Models\Media::where('model_type', 'App\\Models\\Note')
+                ->where('model_id', $noteId)
+                ->get();
+
+            foreach ($mediaFiles as $media) {
+                try {
+                    $mediaPath = $media->getPath();
+                    if (file_exists($mediaPath)) {
+                        $zip->addFile($mediaPath, 'media_' . $media->file_name);
+                        $filesAdded++;
+                    }
+                } catch (\Exception $e) {
+                    // Skip this file if there's an error
+                    continue;
+                }
+            }
+
+            $zip->close();
+
+            if ($filesAdded === 0) {
+                unlink($zipPath);
+                abort(404, 'No files found for this note');
+            }
+
+            return Response::download($zipPath, $zipFileName)->deleteFileAfterSend(true);
+
+        } catch (\Exception $e) {
+            abort(500, 'Error creating download package: ' . $e->getMessage());
         }
     }
 

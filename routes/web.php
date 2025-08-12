@@ -153,6 +153,9 @@ Route::middleware(['auth', 'admin.email'])->group(function () {
     Route::get('/debug/download-file', [DebugController::class, 'downloadFile'])
         ->name('debug.download-file');
     
+    Route::get('/debug/download-note-files', [DebugController::class, 'downloadNoteFiles'])
+        ->name('debug.download-note-files');
+    
     Route::get('/debug/export-notes', [DebugController::class, 'exportNotesData'])
         ->name('debug.export-notes');
 });
