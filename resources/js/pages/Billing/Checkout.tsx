@@ -26,6 +26,9 @@ const CARD_ELEMENT_OPTIONS = {
         '::placeholder': {
           color: '#9ca3af', // text-gray-400
         },
+        '@media (max-width: 640px)': {
+          fontSize: '14px',
+        },
       },
       invalid: {
         color: '#ef4444', // text-red-500
@@ -156,29 +159,29 @@ function CheckoutForm() {
 <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-purple-50 px-4 py-8">
 <div className="w-full max-w-4xl bg-white rounded-2xl grid grid-cols-1 lg:grid-cols-2 overflow-hidden animate-fade-in">
   {/* Left: Summary */}
-  <div className="flex flex-col justify-between p-8 bg-white h-full">
+  <div className="flex flex-col justify-between p-4 sm:p-6 lg:p-8 bg-white h-full">
     <div>
       <div className="mb-6 flex flex-col gap-2">
         <div className="flex items-center">
-          <ShoppingCartIcon className="text-[oklch(0.511_0.262_276.966)] mr-2" size={32} />
-          <span className="font-bold text-xl text-[oklch(0.511_0.262_276.966)]">{t('billing_order_summary')}</span>
+          <ShoppingCartIcon className="text-[oklch(0.511_0.262_276.966)] mr-2" size={28} />
+          <span className="font-bold text-lg sm:text-xl text-[oklch(0.511_0.262_276.966)]">{t('billing_order_summary')}</span>
         </div>
       </div>
       <div className="rounded-xl border border-purple-100 bg-purple-50 p-5">
         <div className="mb-3">
-          <h2 className="font-semibold text-lg text-gray-800">
+          <h2 className="font-semibold text-base sm:text-lg text-gray-800">
             {t('billing_clevernote_pro')}
           </h2>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-gray-500 text-xs sm:text-sm mt-1">
             {t('billing_unlock_ai_features')}
           </p>
         </div>
-        <div className="flex justify-between text-gray-700 mt-4">
+        <div className="flex justify-between text-gray-700 mt-4 text-sm sm:text-base">
           <span>{t('billing_price')}</span>
           <span>{loadingPricing ? '...' : pricingData ? `$${pricingData.amount}` : '$0'}</span>
         </div>
         <div className="border-t border-purple-200 my-3 opacity-50" />
-        <div className="flex justify-between font-bold text-base">
+        <div className="flex justify-between font-bold text-sm sm:text-base">
           <span>{t('billing_total')}</span>
           <span className="text-[oklch(0.511_0.262_276.966)]">{loadingPricing ? '...' : pricingData ? `$${pricingData.amount}` : '$0'}</span>
         </div>
@@ -187,16 +190,16 @@ function CheckoutForm() {
     <Button
       variant="ghost"
       className="mt-8 w-full text-neutral-500 flex items-center justify-center gap-2 hover:bg-purple-50"
-      onClick={() => router.visit("/")}
+      onClick={() => router.visit(isAuthenticated ? "/dashboard" : "/")}
     >
       <ArrowLeft size={16} />
-      {t('billing_back_to_home')}
+      {t('back')}
     </Button>
   </div>
   {/* Right: Payment */}
-  <div className="flex flex-col justify-center bg-white p-8 relative">
-    <h2 className="text-xl font-bold mb-6 text-[oklch(0.511_0.262_276.966)] flex items-center gap-2">
-      <CreditCard size={22} />
+  <div className="flex flex-col justify-center bg-white p-4 sm:p-6 lg:p-8 relative">
+    <h2 className="text-lg sm:text-xl font-bold mb-6 text-[oklch(0.511_0.262_276.966)] flex items-center gap-2">
+      <CreditCard size={20} />
       {t('billing_payment_details')}
     </h2>
     
@@ -216,7 +219,7 @@ function CheckoutForm() {
     >
       <div>
 
-        <div className="block w-full rounded-lg border border-purple-100 bg-gray-50 px-4 py-3 text-lg font-mono focus:outline-none focus:ring-2 focus:ring-[oklch(0.511_0.262_276.966)] transition">
+        <div className="block w-full rounded-lg border border-purple-100 bg-gray-50 px-3 sm:px-4 py-3 text-base sm:text-lg font-mono focus:outline-none focus:ring-2 focus:ring-[oklch(0.511_0.262_276.966)] transition">
             <CardElement options={CARD_ELEMENT_OPTIONS} />
         </div>
 
@@ -229,7 +232,7 @@ function CheckoutForm() {
         <input
           id="card-name"
           type="text"
-          className="block w-full rounded-lg border border-purple-100 bg-gray-50 px-4 py-3 text-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-[oklch(0.511_0.262_276.966)] transition"
+          className="block w-full rounded-lg border border-purple-100 bg-gray-50 px-3 sm:px-4 py-3 text-base sm:text-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-[oklch(0.511_0.262_276.966)] transition"
           placeholder={t('billing_full_name_placeholder')}
           autoComplete="cc-name"
           value={name}
@@ -242,7 +245,7 @@ function CheckoutForm() {
       {/* Account creation fields for non-authenticated users */}
       {!isAuthenticated && (
         <>
-          <h1>{t('auth_register_title')}</h1>
+          <h1 className="text-lg sm:text-xl font-semibold mb-2">{t('auth_register_title')}</h1>
           <div>
             <label htmlFor="email" className="mb-1 text-gray-700 font-semibold text-sm flex items-center gap-2">
               <Mail size={16} />
@@ -251,7 +254,7 @@ function CheckoutForm() {
             <input
               id="email"
               type="email"
-              className="block w-full rounded-lg border border-purple-100 bg-gray-50 px-4 py-3 text-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-[oklch(0.511_0.262_276.966)] transition"
+              className="block w-full rounded-lg border border-purple-100 bg-gray-50 px-3 sm:px-4 py-3 text-base sm:text-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-[oklch(0.511_0.262_276.966)] transition"
               placeholder={t('billing_email_placeholder')}
               autoComplete="email"
               value={email}
@@ -267,7 +270,7 @@ function CheckoutForm() {
             <input
               id="password"
               type="password"
-              className="block w-full rounded-lg border border-purple-100 bg-gray-50 px-4 py-3 text-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-[oklch(0.511_0.262_276.966)] transition"
+              className="block w-full rounded-lg border border-purple-100 bg-gray-50 px-3 sm:px-4 py-3 text-base sm:text-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-[oklch(0.511_0.262_276.966)] transition"
               placeholder={t('billing_password_placeholder')}
               autoComplete="new-password"
               value={password}
@@ -293,9 +296,9 @@ function CheckoutForm() {
         <Button 
             type="submit" 
             disabled={loading}
-            className="w-full mt-4 py-5 text-lg bg-[oklch(0.511_0.262_276.966)] hover:bg-[oklch(0.461_0.262_276.966)] text-white rounded-lg shadow transition-colors flex items-center justify-center gap-2"
+            className="w-full mt-4 py-4 sm:py-5 text-base sm:text-lg bg-[oklch(0.511_0.262_276.966)] hover:bg-[oklch(0.461_0.262_276.966)] text-white rounded-lg shadow transition-colors flex items-center justify-center gap-2"
         >
-            <CreditCard size={20} className="mr-1" />
+            <CreditCard size={18} className="mr-1" />
             {loading 
               ? t('billing_processing') 
               : !isAuthenticated 
