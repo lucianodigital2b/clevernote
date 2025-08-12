@@ -46,6 +46,11 @@ class DebugController extends Controller
                     'url' => $disk->url($file),
                 ];
             }
+            
+            // Sort bucket files by last_modified in descending order
+            usort($bucketFiles, function($a, $b) {
+                return $b['last_modified'] <=> $a['last_modified'];
+            });
         } catch (\Exception $e) {
             $bucketFiles = ['error' => 'Could not retrieve bucket files: ' . $e->getMessage()];
         }
