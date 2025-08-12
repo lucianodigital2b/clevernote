@@ -27,6 +27,12 @@ Route::get('/user', function (Request $request) {
 Route::middleware('auth:sanctum')->post('/feedback', [FeedbackController::class, 'store']);
 Route::middleware('auth:sanctum')->get('/feedback/stats', [FeedbackController::class, 'stats']);
 
+// Coupon validation route (accessible to both authenticated and non-authenticated users)
+Route::post('/validate-coupon', [SubscriptionController::class, 'validateCoupon']);
+
+// Pricing data route (accessible to both authenticated and non-authenticated users)
+Route::get('/pricing-data', [SubscriptionController::class, 'getPricingData']);
+
 // AI Flashcard Generation Routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/flashcards/generate', [FlashcardAIController::class, 'generate']);

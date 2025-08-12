@@ -9,7 +9,7 @@ import {
 } from '@stripe/react-stripe-js';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, CreditCard, ShoppingCartIcon, Mail, Lock } from 'lucide-react';
+import { ArrowLeft, CreditCard, ShoppingCartIcon, Mail, Lock, Tag, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { t } from 'i18next';
 import { type SharedData } from '@/types';
@@ -52,6 +52,11 @@ function CheckoutForm() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [couponCode, setCouponCode] = useState('');
+    const [couponError, setCouponError] = useState('');
+    const [couponApplied, setCouponApplied] = useState(false);
+    const [validatingCoupon, setValidatingCoupon] = useState(false);
+    const [couponData, setCouponData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [pricingData, setPricingData] = useState<any>(null);
@@ -75,6 +80,63 @@ function CheckoutForm() {
                 setLoadingPricing(false);
             });
     }, [plan]);
+
+    const validateCoupon = async (code: string) => {
+        if (!code.trim()) {
+            setCouponError('');
+            setCouponApplied(false);
+            return;
+        }
+
+        setValidatingCoupon(true);
+        setCouponError('');
+        setCouponApplied(false);
+
+        try {
+            const response = await fetch('/api/validate-coupon', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
+                },
+                credentials: 'include',
+                body: JSON.stringify({ coupon: code.trim() }),
+            });
+
+            const result = await response.json();
+
+            if (result.valid) {
+                setCouponApplied(true);
+                setCouponError('');
+                setCouponData(result.coupon);
+            } else {
+                setCouponData(null);
+                setCouponApplied(false);
+                switch (result.error) {
+                    case 'invalid':
+                        setCouponError(t('billing_coupon_invalid'));
+                        break;
+                    case 'expired':
+                        setCouponError(t('billing_coupon_expired'));
+                        break;
+                    case 'not_found':
+                        setCouponError(t('billing_coupon_not_found'));
+                        break;
+                    case 'max_redemptions':
+                        setCouponError(t('billing_coupon_max_redemptions'));
+                        break;
+                    default:
+                        setCouponError(result.message || t('billing_coupon_error'));
+                }
+            }
+        } catch (error) {
+            setCouponError(t('billing_coupon_validation_error'));
+            setCouponApplied(false);
+            setCouponData(null);
+        } finally {
+            setValidatingCoupon(false);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -114,6 +176,11 @@ function CheckoutForm() {
             name,
         };
 
+        // Add coupon if provided
+        if (couponCode.trim()) {
+            subscriptionData.coupon = couponCode.trim();
+        }
+
         // If user is not authenticated, include registration data
         if (!isAuthenticated) {
             subscriptionData.email = email;
@@ -148,7 +215,30 @@ function CheckoutForm() {
                 router.visit('/billing/success');
             }
         } else {
-            setError(result.message || t('billing_subscription_failed'));
+            // Handle coupon-specific errors
+            if (result.coupon_error) {
+                switch (result.coupon_error) {
+                    case 'invalid':
+                        setCouponError(t('billing_coupon_invalid'));
+                        break;
+                    case 'expired':
+                        setCouponError(t('billing_coupon_expired'));
+                        break;
+                    case 'not_found':
+                        setCouponError(t('billing_coupon_not_found'));
+                        break;
+                    case 'max_redemptions':
+                        setCouponError(t('billing_coupon_max_redemptions'));
+                        break;
+                    case 'validation_error':
+                        setCouponError(t('billing_coupon_validation_error'));
+                        break;
+                    default:
+                        setCouponError(result.message || t('billing_coupon_error'));
+                }
+            } else {
+                setError(result.message || t('billing_subscription_failed'));
+            }
             setLoading(false);
         }
     };
@@ -178,12 +268,43 @@ function CheckoutForm() {
         </div>
         <div className="flex justify-between text-gray-700 mt-4 text-sm sm:text-base">
           <span>{t('billing_price')}</span>
-          <span>{loadingPricing ? '...' : pricingData ? `$${pricingData.amount}` : '$0'}</span>
+          <span>{loadingPricing ? '...' : pricingData ? `$${(parseFloat(pricingData.amount) || 0).toFixed(2)}` : '$0'}</span>
         </div>
+        
+        {/* Coupon Discount */}
+        {couponApplied && couponData && (
+          <div className="flex justify-between text-green-600 mt-2 text-sm sm:text-base">
+            <span>{t('billing_discount')} ({couponData.name || couponCode})</span>
+            <span>
+              {couponData.percent_off 
+                ? `-${couponData.percent_off}%`
+                : couponData.amount_off 
+                  ? `-$${(couponData.amount_off / 100).toFixed(2)}`
+                  : t('billing_discount_applied')
+              }
+            </span>
+          </div>
+        )}
+        
         <div className="border-t border-purple-200 my-3 opacity-50" />
         <div className="flex justify-between font-bold text-sm sm:text-base">
           <span>{t('billing_total')}</span>
-          <span className="text-[oklch(0.511_0.262_276.966)]">{loadingPricing ? '...' : pricingData ? `$${pricingData.amount}` : '$0'}</span>
+          <span className="text-[oklch(0.511_0.262_276.966)]">
+            {loadingPricing ? '...' : (() => {
+              if (!pricingData) return '$0';
+              let total = parseFloat(pricingData.amount) || 0;
+              
+              if (couponApplied && couponData) {
+                if (couponData.percent_off) {
+                  total = total * (1 - couponData.percent_off / 100);
+                } else if (couponData.amount_off) {
+                  total = Math.max(0, total - (couponData.amount_off / 100));
+                }
+              }
+              
+              return `$${total.toFixed(2)}`;
+            })()}
+          </span>
         </div>
       </div>
     </div>
@@ -239,6 +360,40 @@ function CheckoutForm() {
           onChange={(e) => setName(e.target.value)}
           required
         />
+      </div>
+
+      {/* Coupon Code Field */}
+      <div>
+        <label htmlFor="coupon-code" className=" mb-1 text-gray-700 font-semibold text-sm flex items-center gap-2">
+           {validatingCoupon ? <Loader2 size={16} className="animate-spin" /> : <Tag size={16} />}
+           {t('billing_coupon_code')}
+         </label>
+        <input
+          id="coupon-code"
+          type="text"
+          className={`block w-full rounded-lg border px-3 sm:px-4 py-3 text-base sm:text-lg text-gray-800 focus:outline-none focus:ring-2 transition ${
+            couponError 
+              ? 'border-red-300 bg-red-50 focus:ring-red-500' 
+              : couponApplied 
+                ? 'border-green-300 bg-green-50 focus:ring-green-500'
+                : 'border-purple-100 bg-gray-50 focus:ring-[oklch(0.511_0.262_276.966)]'
+          }`}
+          placeholder={t('billing_coupon_placeholder')}
+          value={couponCode}
+          onChange={(e) => {
+              setCouponCode(e.target.value);
+              setCouponError('');
+              setCouponApplied(false);
+              setCouponData(null);
+            }}
+           onBlur={(e) => validateCoupon(e.target.value)}
+        />
+        {couponError && (
+          <p className="text-red-600 text-sm mt-1">{couponError}</p>
+        )}
+        {couponApplied && (
+          <p className="text-green-600 text-sm mt-1">{t('billing_coupon_applied')}</p>
+        )}
       </div>
 
       

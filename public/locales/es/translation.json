@@ -360,6 +360,15 @@
   
 
   "billing_order_summary": "Resumen del Pedido",
+  "billing_coupon_code": "Código de cupón",
+  "billing_coupon_placeholder": "Ingresa el código del cupón",
+  "billing_coupon_applied": "¡Cupón aplicado!",
+  "billing_discount": "Descuento",
+  "billing_coupon_invalid": "Código de cupón inválido",
+  "billing_coupon_expired": "El cupón ha expirado",
+  "billing_coupon_not_found": "Cupón no encontrado",
+  "billing_coupon_max_redemptions": "El cupón ha alcanzado el límite máximo de canjes",
+  "billing_coupon_validation_error": "Error al validar el cupón",
   "billing_clevernote_pro": "Clevernote Pro",
   "billing_unlock_ai_features": "Desbloquea potentes funciones de IA para tus notas.",
   "billing_subtotal": "Subtotal",

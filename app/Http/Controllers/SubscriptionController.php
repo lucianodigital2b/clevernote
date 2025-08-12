@@ -158,6 +158,7 @@ class SubscriptionController extends Controller
                 'password' => ['required', Rules\Password::defaults()],
                 'payment_method' => 'required|string',
                 'billing_cycle' => 'required|string|in:monthly,yearly,annual',
+                'coupon' => 'nullable|string|max:255',
             ]);
 
             // Create new user
@@ -175,6 +176,7 @@ class SubscriptionController extends Controller
                 'payment_method' => 'required|string',
                 'billing_cycle' => 'required|string|in:monthly,yearly,annual',
                 'name' => 'nullable|string|max:255',
+                'coupon' => 'nullable|string|max:255',
             ]);
         }
 
@@ -209,8 +211,59 @@ class SubscriptionController extends Controller
             $user->updateDefaultPaymentMethod($request->payment_method);
 
             // Create subscription using the found price
-            $subscription = $user->newSubscription('default', $price->stripe_price_id)
-                ->create($request->payment_method);
+            $subscriptionBuilder = $user->newSubscription('default', $price->stripe_price_id);
+            
+            // Apply coupon if provided
+            if ($request->filled('coupon')) {
+                try {
+                    // Validate coupon with Stripe
+                    $stripe = new \Stripe\StripeClient(config('cashier.secret'));
+                    $coupon = $stripe->coupons->retrieve($request->coupon);
+                    
+                    // Check if coupon is valid and not expired
+                    if (!$coupon->valid) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'The coupon code is not valid.',
+                            'coupon_error' => 'invalid'
+                        ], 422);
+                    }
+                    
+                    // Check if coupon has expired
+                    if ($coupon->redeem_by && $coupon->redeem_by < time()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'The coupon code has expired.',
+                            'coupon_error' => 'expired'
+                        ], 422);
+                    }
+                    
+                    // Check if coupon has reached max redemptions
+                    if ($coupon->max_redemptions && $coupon->times_redeemed >= $coupon->max_redemptions) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'The coupon code has reached its maximum number of uses.',
+                            'coupon_error' => 'max_redemptions'
+                        ], 422);
+                    }
+                    
+                    $subscriptionBuilder->withCoupon($request->coupon);
+                } catch (\Stripe\Exception\InvalidRequestException $e) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'The coupon code does not exist.',
+                        'coupon_error' => 'not_found'
+                    ], 422);
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Error validating coupon: ' . $e->getMessage(),
+                        'coupon_error' => 'validation_error'
+                    ], 422);
+                }
+            }
+            
+            $subscription = $subscriptionBuilder->create($request->payment_method);
             
             return response()->json([
                 'success' => true,
@@ -266,5 +319,78 @@ class SubscriptionController extends Controller
         return response()->json([
             'hasActiveSubscription' => $hasActiveSubscription
         ]);
+    }
+
+    /**
+     * Validate a coupon code.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function validateCoupon(Request $request)
+    {
+        $request->validate([
+            'coupon' => 'required|string|max:255',
+        ]);
+
+        try {
+            // Validate coupon with Stripe
+            $stripe = new \Stripe\StripeClient(config('cashier.secret'));
+            $coupon = $stripe->coupons->retrieve($request->coupon);
+            
+            // Check if coupon is valid
+            if (!$coupon->valid) {
+                return response()->json([
+                    'valid' => false,
+                    'error' => 'invalid',
+                    'message' => 'The coupon code is not valid.'
+                ]);
+            }
+            
+            // Check if coupon has expired
+            if ($coupon->redeem_by && $coupon->redeem_by < time()) {
+                return response()->json([
+                    'valid' => false,
+                    'error' => 'expired',
+                    'message' => 'The coupon code has expired.'
+                ]);
+            }
+            
+            // Check if coupon has reached max redemptions
+            if ($coupon->max_redemptions && $coupon->times_redeemed >= $coupon->max_redemptions) {
+                return response()->json([
+                    'valid' => false,
+                    'error' => 'max_redemptions',
+                    'message' => 'The coupon code has reached its maximum number of uses.'
+                ]);
+            }
+            
+            // Coupon is valid
+            return response()->json([
+                'valid' => true,
+                'coupon' => [
+                    'id' => $coupon->id,
+                    'name' => $coupon->name,
+                    'percent_off' => $coupon->percent_off,
+                    'amount_off' => $coupon->amount_off,
+                    'currency' => $coupon->currency,
+                    'duration' => $coupon->duration,
+                    'duration_in_months' => $coupon->duration_in_months
+                ]
+            ]);
+            
+        } catch (\Stripe\Exception\InvalidRequestException $e) {
+            return response()->json([
+                'valid' => false,
+                'error' => 'not_found',
+                'message' => 'The coupon code does not exist.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'valid' => false,
+                'error' => 'validation_error',
+                'message' => 'Error validating coupon: ' . $e->getMessage()
+            ]);
+        }
     }
 }

@@ -211,6 +211,7 @@ class DebugController extends Controller
 
             $disk = Storage::disk('r2');
             $filesAdded = 0;
+            $debugInfo = [];
 
             // Add note data as JSON
             $noteData = [
@@ -231,12 +232,21 @@ class DebugController extends Controller
             ];
             $zip->addFromString('note_data.json', json_encode($noteData, JSON_PRETTY_PRINT));
             $filesAdded++;
+            $debugInfo[] = 'Added note_data.json';
 
             // Add podcast file if exists
-            if ($note->podcast_file_path && $disk->exists($note->podcast_file_path)) {
-                $podcastContent = $disk->get($note->podcast_file_path);
-                $zip->addFromString('podcast_' . basename($note->podcast_file_path), $podcastContent);
-                $filesAdded++;
+            if ($note->podcast_file_path) {
+                $debugInfo[] = 'Podcast file path: ' . $note->podcast_file_path;
+                if ($disk->exists($note->podcast_file_path)) {
+                    $podcastContent = $disk->get($note->podcast_file_path);
+                    $zip->addFromString('podcast_' . basename($note->podcast_file_path), $podcastContent);
+                    $filesAdded++;
+                    $debugInfo[] = 'Added podcast file: ' . basename($note->podcast_file_path);
+                } else {
+                    $debugInfo[] = 'Podcast file not found in R2: ' . $note->podcast_file_path;
+                }
+            } else {
+                $debugInfo[] = 'No podcast file path for this note';
             }
 
             // Look for related media files
@@ -244,24 +254,53 @@ class DebugController extends Controller
                 ->where('model_id', $noteId)
                 ->get();
 
+            $debugInfo[] = 'Found ' . $mediaFiles->count() . ' media files for note ' . $noteId;
+
             foreach ($mediaFiles as $media) {
                 try {
-                    $mediaPath = $media->getPath();
-                    if (file_exists($mediaPath)) {
-                        $zip->addFile($mediaPath, 'media_' . $media->file_name);
-                        $filesAdded++;
+                    $debugInfo[] = 'Processing media file: ' . $media->file_name . ' (disk: ' . $media->disk . ')';
+                    
+                    // For R2 storage, we need to get the file content from the disk
+                    if ($media->disk === 'r2') {
+                        $mediaPath = $media->getPathRelativeToRoot();
+                        $debugInfo[] = 'R2 media path: ' . $mediaPath;
+                        
+                        if ($disk->exists($mediaPath)) {
+                            $mediaContent = $disk->get($mediaPath);
+                            $zip->addFromString('media_' . $media->file_name, $mediaContent);
+                            $filesAdded++;
+                            $debugInfo[] = 'Added R2 media file: ' . $media->file_name;
+                        } else {
+                            $debugInfo[] = 'R2 media file not found: ' . $mediaPath;
+                        }
+                    } else {
+                        // For local storage, use the original method
+                        $mediaPath = $media->getPath();
+                        $debugInfo[] = 'Local media path: ' . $mediaPath;
+                        
+                        if (file_exists($mediaPath)) {
+                            $zip->addFile($mediaPath, 'media_' . $media->file_name);
+                            $filesAdded++;
+                            $debugInfo[] = 'Added local media file: ' . $media->file_name;
+                        } else {
+                            $debugInfo[] = 'Local media file not found: ' . $mediaPath;
+                        }
                     }
                 } catch (\Exception $e) {
-                    // Skip this file if there's an error
+                    $debugInfo[] = 'Error processing media file ' . $media->file_name . ': ' . $e->getMessage();
                     continue;
                 }
             }
 
+            // Add debug information to the zip
+            $zip->addFromString('debug_info.txt', implode("\n", $debugInfo));
+            $filesAdded++;
+
             $zip->close();
 
-            if ($filesAdded === 0) {
+            if ($filesAdded <= 2) { // Only note_data.json and debug_info.txt
                 unlink($zipPath);
-                abort(404, 'No files found for this note');
+                abort(404, 'No files found for this note. Check debug_info.txt for details.');
             }
 
             return Response::download($zipPath, $zipFileName)->deleteFileAfterSend(true);
