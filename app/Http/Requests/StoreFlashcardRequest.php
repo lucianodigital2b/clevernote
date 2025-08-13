@@ -35,6 +35,7 @@ class StoreFlashcardRequest extends FormRequest
             'question' => ['nullable', 'string', 'max:65535'], // Max TEXT size
             'answer' => ['nullable', 'string', 'max:65535'], // Max TEXT size
             'flashcard_set_id' => ['required', 'integer',], 
+            'description' => ['nullable', 'string', 'max:255'],
             'folder_id' => [
                 'nullable',
                 'integer',
