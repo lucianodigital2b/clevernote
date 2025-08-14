@@ -784,7 +784,7 @@
   "trial_timeline_end_description": "Your trial will end and subscription will officially start. Enjoy the improved focus and time!",
   
   "upgrade_modal_title": "Try Clevernote",
-  "upgrade_modal_title_highlight": "free for 7 days",
+  "upgrade_modal_title_highlight": "free for 3 days",
   "upgrade_modal_feature_unlimited": "Unlimited AI notes, recordings, uploads",
   "upgrade_modal_feature_quizzes": "Quizzes, videos, podcasts, & more",
   "upgrade_modal_feature_sources": "YouTube, PDF, audio, files, websites",
@@ -797,5 +797,6 @@
   "upgrade_modal_price_monthly_billing": "billed monthly",
   "upgrade_modal_cta_button": "Try Clevernote for $0",
   "upgrade_modal_no_risk": "No risk, no payment today",
-  "upgrade_modal_others_started": "738 others started today"
+  "upgrade_modal_others_started": "738 others started today",
+  "upgrade_modal_promo_message": "⚡ You snooze, you lose! 50% off annual with the coupon 50OFF"
 }

@@ -21,7 +21,7 @@ type UpgradeModalProps = {
 export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
     const { t } = useTranslation();
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
-    const [timeLeft, setTimeLeft] = useState(120); // 2 minutes in seconds
+    const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
     const [pricingData, setPricingData] = useState<{
         monthly: PricingData | null;
         yearly: PricingData | null;
@@ -44,7 +44,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
     // Reset timer when modal opens
     useEffect(() => {
         if (isOpen) {
-            setTimeLeft(120);
+            setTimeLeft(600);
         }
     }, [isOpen]);
 
@@ -122,16 +122,8 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                 exit={{ opacity: 0, scale: 0.95 }}
                 className="bg-white w-full h-full overflow-y-auto relative"
             >
-                {/* Timer Badge and Close Button */}
-                <div className="absolute top-4 right-4 z-10 flex items-center gap-3">
-                    {/* Countdown Timer Badge */}
-                    <div className="px-3 py-1 bg-white border border-gray-200 rounded-full shadow-sm">
-                        <span className="text-sm font-medium text-gray-700">
-                            {formatTime(timeLeft)}
-                        </span>
-                    </div>
-                    
-                    {/* Close Button */}
+                {/* Close Button */}
+                <div className="absolute top-4 right-4 z-10">
                     <button
                         onClick={onClose}
                         className="p-2 rounded-full hover:bg-gray-100 transition-colors"
@@ -144,9 +136,26 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                     <div className="w-full max-w-6xl mx-auto">
                         {/* Header */}
                         <div className="text-center mb-12">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                            <h1 className="text-3xl font-bold text-gray-900 mb-6">
                                 {t('upgrade_modal_title')} <span className="text-purple-600">{t('upgrade_modal_title_highlight')}</span>
                             </h1>
+                            
+                            {/* Timer and Promo Message */}
+                            <div className="flex items-center justify-center gap-4 mb-4">
+                                {/* Promo Message */}
+                                <div className="relative bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 before:absolute before:inset-0 before:bg-gradient-to-r before:from-purple-400 before:to-indigo-500 before:rounded-md before:blur before:opacity-0 before:animate-[glow_2s_ease-in-out_infinite_alternate] hover:before:opacity-100 px-4 py-2 rounded-full">
+                                    <span className="relative flex items-center gap-2 text-sm font-bold">
+                                        {t('upgrade_modal_promo_message')}
+                                    </span>
+                                </div>
+                                
+                                {/* Countdown Timer Badge */}
+                                <div className="px-4 py-2 bg-white border border-gray-200 rounded-full shadow-sm">
+                                    <span className="text-sm font-bold text-gray-700">
+                                        {formatTime(timeLeft)}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Two Column Layout */}
@@ -276,9 +285,9 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                                     {(() => {
                                         const today = new Date();
                                         const reminderDate = new Date(today);
-                                        reminderDate.setDate(today.getDate() + 6); // Day 7 of trial
+                                        reminderDate.setDate(today.getDate() + 2); // Day 3 of trial
                                         const endDate = new Date(today);
-                                        endDate.setDate(today.getDate() + 7); // Day 8, trial ends
+                                        endDate.setDate(today.getDate() + 3); // Day 4, trial ends
                                         
                                         const formatDate = (date: Date) => {
                                             return date.toLocaleDateString('en-US', { 
@@ -287,37 +296,54 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                                             });
                                         };
                                         
+                                        const timelineItems = [
+                                            {
+                                                day: 1,
+                                                title: t('trial_timeline_today'),
+                                                description: t('trial_timeline_today_description'),
+                                                date: formatDate(today)
+                                            },
+                                            {
+                                                day: 3,
+                                                title: formatDate(reminderDate),
+                                                description: t('trial_timeline_reminder_description'),
+                                                date: formatDate(reminderDate)
+                                            },
+                                            {
+                                                day: 4,
+                                                title: formatDate(endDate),
+                                                description: t('trial_timeline_end_description'),
+                                                date: formatDate(endDate)
+                                            }
+                                        ];
+
                                         return (
                                             <>
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                                                        <span className="text-purple-600 font-bold text-sm">1</span>
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-medium text-gray-900">{t('trial_timeline_today')}</div>
-                                                        <div className="text-sm text-gray-600">{t('trial_timeline_today_description')}</div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                                                        <span className="text-purple-600 font-bold text-sm">7</span>
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-medium text-gray-900">{formatDate(reminderDate)}</div>
-                                                        <div className="text-sm text-gray-600">{t('trial_timeline_reminder_description')}</div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                                                        <span className="text-purple-600 font-bold text-sm">8</span>
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-medium text-gray-900">{formatDate(endDate)}</div>
-                                                        <div className="text-sm text-gray-600">{t('trial_timeline_end_description')}</div>
-                                                    </div>
-                                                </div>
+                                                {timelineItems.map((item, index) => (
+                                                    <motion.div
+                                                        key={index}
+                                                        className="flex items-center gap-4"
+                                                        initial={{ opacity: 0, x: -20 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        transition={{ 
+                                                            delay: index * 0.2,
+                                                            duration: 0.5,
+                                                            ease: "easeOut"
+                                                        }}
+                                                    >
+                                                        <motion.div 
+                                                            className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0"
+                                                            whileHover={{ scale: 1.1 }}
+                                                            transition={{ duration: 0.2 }}
+                                                        >
+                                                            <span className="text-purple-600 font-bold text-sm">{item.day}</span>
+                                                        </motion.div>
+                                                        <div>
+                                                            <div className="font-medium text-gray-900">{item.title}</div>
+                                                            <div className="text-sm text-gray-600">{item.description}</div>
+                                                        </div>
+                                                    </motion.div>
+                                                ))}
                                             </>
                                         );
                                     })()}

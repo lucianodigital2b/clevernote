@@ -670,7 +670,7 @@
   "views": "visualizações",
   
   "upgrade_modal_title": "Experimente o Clevernote",
-  "upgrade_modal_title_highlight": "grátis por 7 dias",
+  "upgrade_modal_title_highlight": "grátis por 3 dias",
   "upgrade_modal_feature_unlimited": "Resumos com IA ilimitados, gravações, uploads",
   "upgrade_modal_feature_quizzes": "Questionários, vídeos, podcasts e mais",
   "upgrade_modal_feature_sources": "YouTube, PDF, áudio, arquivos, sites",
@@ -691,6 +691,7 @@
   "whos_it_for_description": "De Harvard Med a Yale Law, as mentes mais brilhantes usam CleverNote para transformar suas sessões de estudo em vantagens competitivas.",
   "whos_it_for_perfect_for_title": "Perfeito para Futuros Advogados e Médicos",
   "whos_it_for_perfect_for_description": "Domine conceitos médicos complexos 3x mais rápido. Transforme livros didáticos avassaladores em compreensão cristalina. Navegue pela jurisprudência como um profissional. Transforme textos jurídicos densos em insights memoráveis.",
-  "whos_it_for_student_success_alt": "Estudante alcançando sucesso"
+  "whos_it_for_student_success_alt": "Estudante alcançando sucesso",
+  "upgrade_modal_promo_message": "⚡ Não perca tempo! 50% de desconto anual com o cupom 50OFF"
 
 }

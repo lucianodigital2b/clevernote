@@ -732,7 +732,7 @@
   "views": "visualizaciones",
   
   "upgrade_modal_title": "Prueba Clevernote",
-  "upgrade_modal_title_highlight": "gratis por 7 días",
+  "upgrade_modal_title_highlight": "gratis por 3 días",
   "upgrade_modal_feature_unlimited": "Notas de IA ilimitadas, grabaciones, subidas",
   "upgrade_modal_feature_quizzes": "Cuestionarios, videos, podcasts y más",
   "upgrade_modal_feature_sources": "YouTube, PDF, audio, archivos, sitios web",
@@ -745,6 +745,7 @@
   "upgrade_modal_price_monthly_billing": "facturado mensualmente",
   "upgrade_modal_cta_button": "Prueba Clevernote por $0",
   "upgrade_modal_no_risk": "Sin riesgo, sin pago hoy",
-  "upgrade_modal_others_started": "738 otros comenzaron hoy"
+  "upgrade_modal_others_started": "738 otros comenzaron hoy",
+  "upgrade_modal_promo_message": "⚡ ¡No pierdas tiempo! 50% de descuento anual con el cupón 50OFF"
 
 }
