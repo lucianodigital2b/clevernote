@@ -122,8 +122,16 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                 exit={{ opacity: 0, scale: 0.95 }}
                 className="bg-white w-full h-full overflow-y-auto relative"
             >
-                {/* Close Button */}
-                <div className="absolute top-4 right-4 z-10">
+                {/* Close Button and Timer */}
+                <div className="absolute top-4 right-4 z-10 flex justify-between items-center">
+                    {/* Timer */}
+                    <div className="px-4 py-2 bg-white border border-gray-200 rounded-full shadow-sm">
+                        <span className="text-sm font-bold text-red-500">
+                            {formatTime(timeLeft)}
+                        </span>
+                    </div>
+                    
+                    {/* Close Button */}
                     <button
                         onClick={onClose}
                         className="p-2 rounded-full hover:bg-gray-100 transition-colors"
@@ -140,19 +148,11 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                                 {t('upgrade_modal_title')} <span className="text-purple-600">{t('upgrade_modal_title_highlight')}</span>
                             </h1>
                             
-                            {/* Timer and Promo Message */}
-                            <div className="flex items-center justify-center gap-4 mb-4">
-                                {/* Promo Message */}
+                            {/* Promo Message */}
+                            <div className="flex items-center justify-center mb-4">
                                 <div className="relative bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 before:absolute before:inset-0 before:bg-gradient-to-r before:from-purple-400 before:to-indigo-500 before:rounded-md before:blur before:opacity-0 before:animate-[glow_2s_ease-in-out_infinite_alternate] hover:before:opacity-100 px-4 py-2 rounded-full">
                                     <span className="relative flex items-center gap-2 text-sm font-bold">
                                         {t('upgrade_modal_promo_message')}
-                                    </span>
-                                </div>
-                                
-                                {/* Countdown Timer Badge */}
-                                <div className="px-4 py-2 bg-white border border-gray-200 rounded-full shadow-sm">
-                                    <span className="text-sm font-bold text-gray-700">
-                                        {formatTime(timeLeft)}
                                     </span>
                                 </div>
                             </div>
