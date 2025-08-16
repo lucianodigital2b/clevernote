@@ -116,6 +116,8 @@ class ProcessPdfNote implements ShouldQueue
                 $userMessage = 'The document was too large and could not be fully processed. Please try splitting it into smaller files.';
             } elseif (strpos($e->getMessage(), 'Content exceeds token limit') !== false) {
                 $userMessage = 'The document is very large and is being processed in sections. This may take longer than usual.';
+            } elseif (strpos($e->getMessage(), 'Missing catalog') !== false) {
+                $userMessage = 'The PDF file appears to be corrupted or damaged. Please try uploading a different PDF file.';
             }
             
             $note->update([
@@ -157,6 +159,8 @@ class ProcessPdfNote implements ShouldQueue
                     $userMessage = 'The document was too large and could not be fully processed. Please try splitting it into smaller files.';
                 } elseif (strpos($exception->getMessage(), 'Content exceeds token limit') !== false) {
                     $userMessage = 'The document is very large and is being processed in sections. This may take longer than usual.';
+                } elseif (strpos($exception->getMessage(), 'Missing catalog') !== false) {
+                    $userMessage = 'The PDF file appears to be corrupted or damaged. Please try uploading a different PDF file.';
                 }
                 
                 $note->update([

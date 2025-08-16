@@ -1,0 +1,49 @@
+/* Tawk.to Custom Positioning Styles */
+
+/* Base styles for Tawk.to widget */
+#tawkchat-container,
+.tawk-min-container,
+[id*="tawk"] {
+  transition: all 0.3s ease !important;
+}
+
+/* Mobile responsive positioning */
+@media (max-width: 767px) {
+  #tawkchat-container,
+  .tawk-min-container,
+  [id*="tawk"] {
+    bottom: 80px !important;
+    right: 20px !important;
+    z-index: 45 !important;
+  }
+  
+  /* Ensure the widget doesn't interfere with the floating action button */
+  .tawk-min-container {
+    margin-bottom: 0 !important;
+  }
+}
+
+/* Desktop positioning */
+@media (min-width: 768px) {
+  #tawkchat-container,
+  .tawk-min-container,
+  [id*="tawk"] {
+    bottom: 20px !important;
+    right: 20px !important;
+    z-index: 1000 !important;
+  }
+}
+
+/* Ensure smooth transitions when resizing */
+#tawkchat-container *,
+.tawk-min-container *,
+[id*="tawk"] * {
+  transition: inherit !important;
+}
+
+/* Hide widget when it might conflict with modals */
+.modal-open #tawkchat-container,
+.modal-open .tawk-min-container,
+.modal-open [id*="tawk"] {
+  z-index: 40 !important;
+}

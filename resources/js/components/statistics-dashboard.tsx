@@ -22,7 +22,7 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
     const { t } = useTranslation();
     const [currentDate, setCurrentDate] = useState(new Date());
     
-    const ENABLE_DUMMY_DATA = true;
+    const ENABLE_DUMMY_DATA = false;
     
     // Get current month and year
     const currentMonth = currentDate.getMonth();

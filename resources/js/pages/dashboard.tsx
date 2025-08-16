@@ -20,6 +20,8 @@ import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 import StudyPlanCalendar from '@/components/StudyPlanCalendar';
 import StudyPlanPreview from '@/components/StudyPlanPreview';
+import TawkTo from '@/components/TawkTo';
+import { TAWKTO_CONFIG, isTawkToConfigured } from '@/config/tawkto';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -440,6 +442,14 @@ export default function Dashboard() {
                 isOpen={isModalOpen} 
                 onClose={() => setIsModalOpen(false)} 
             />
+
+            {/* Tawk.to Chat Widget */}
+            {isTawkToConfigured() && (
+                <TawkTo 
+                    propertyId={TAWKTO_CONFIG.propertyId} 
+                    widgetId={TAWKTO_CONFIG.widgetId} 
+                />
+            )}
 
             {/* Study Plan Modal */}
             {/* {showStudyPlan && (
