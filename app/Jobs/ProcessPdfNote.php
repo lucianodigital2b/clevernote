@@ -28,7 +28,7 @@ class ProcessPdfNote implements ShouldQueue
      *
      * @var int
      */
-    public $timeout = 300; // 5 minutes
+    public $timeout = 900; // 15 minutes (increased for chunked processing)
 
     /**
      * The number of times the job may be attempted.
@@ -71,6 +71,11 @@ class ProcessPdfNote implements ShouldQueue
             }
 
             $language = $this->validatedData['language'] ?? null;
+            
+            // Log the text length for monitoring
+            $textLength = strlen($text);
+            Log::info("Processing note with text length: {$textLength} characters");
+            
             $studyNote = $deepseekService->createStudyNote($text, $language);
 
             // Upload file to R2 storage using media collections
@@ -93,9 +98,29 @@ class ProcessPdfNote implements ShouldQueue
 
         } catch (\Exception $e) {
             Log::error("Failed to process PDF/Doc note: " . $e->getMessage());
+            Log::error("Stack trace: " . $e->getTraceAsString());
+            
+            // Provide user-friendly error messages
+            $userMessage = $e->getMessage();
+            if (strpos($e->getMessage(), 'PDF file is too large') !== false) {
+                $userMessage = 'The PDF file is too large to process. Please try with a file smaller than 200MB.';
+            } elseif (strpos($e->getMessage(), 'PDF file is too complex') !== false) {
+                $userMessage = 'The PDF file is too complex to process. Please try with a simpler PDF file or convert it to a different format.';
+            } elseif (strpos($e->getMessage(), 'regular expression is too large') !== false) {
+                $userMessage = 'The document is too large or complex to process. Please try with a smaller file.';
+            } elseif (strpos($e->getMessage(), 'Memory usage too high') !== false) {
+                $userMessage = 'The PDF file was partially processed but stopped due to memory constraints. Consider splitting the document into smaller files.';
+            } elseif (strpos($e->getMessage(), 'Processing stopped due to memory constraints') !== false) {
+                $userMessage = 'The PDF file was partially processed. Some pages may have been skipped due to size limitations.';
+            } elseif (strpos($e->getMessage(), 'Failed to process content chunk') !== false) {
+                $userMessage = 'The document was too large and could not be fully processed. Please try splitting it into smaller files.';
+            } elseif (strpos($e->getMessage(), 'Content exceeds token limit') !== false) {
+                $userMessage = 'The document is very large and is being processed in sections. This may take longer than usual.';
+            }
+            
             $note->update([
                 'status' => 'failed',
-                'failure_reeason' => $e->getMessage()
+                'failure_reeason' => $userMessage
             ]);
             
             // Clean up the temporary file on failure as well
@@ -111,13 +136,32 @@ class ProcessPdfNote implements ShouldQueue
     public function failed(\Throwable $exception): void
     {
         Log::error("PDF/Doc note processing job failed: " . $exception->getMessage());
+        Log::error("Stack trace: " . $exception->getTraceAsString());
         
         try {
             $note = Note::find($this->noteId);
             if ($note) {
+                // Provide user-friendly error messages
+                $userMessage = $exception->getMessage();
+                if (strpos($exception->getMessage(), 'PDF file is too large') !== false) {
+                    $userMessage = 'The PDF file is too large to process. Please try with a file smaller than 200MB.';
+                } elseif (strpos($exception->getMessage(), 'PDF file is too complex') !== false) {
+                    $userMessage = 'The PDF file is too complex to process. Please try with a simpler PDF file or convert it to a different format.';
+                } elseif (strpos($exception->getMessage(), 'regular expression is too large') !== false) {
+                    $userMessage = 'The document is too large or complex to process. Please try with a smaller file.';
+                } elseif (strpos($exception->getMessage(), 'Memory usage too high') !== false) {
+                    $userMessage = 'The PDF file was partially processed but stopped due to memory constraints. Consider splitting the document into smaller files.';
+                } elseif (strpos($exception->getMessage(), 'Processing stopped due to memory constraints') !== false) {
+                    $userMessage = 'The PDF file was partially processed. Some pages may have been skipped due to size limitations.';
+                } elseif (strpos($exception->getMessage(), 'Failed to process content chunk') !== false) {
+                    $userMessage = 'The document was too large and could not be fully processed. Please try splitting it into smaller files.';
+                } elseif (strpos($exception->getMessage(), 'Content exceeds token limit') !== false) {
+                    $userMessage = 'The document is very large and is being processed in sections. This may take longer than usual.';
+                }
+                
                 $note->update([
                     'status' => 'failed',
-                    'failure_reeason' => $exception->getMessage()
+                    'failure_reeason' => $userMessage
                 ]);
             }
             

@@ -16,19 +16,133 @@ class NoteService
             throw new \InvalidArgumentException('PDF file path is required');
         }
 
+        $fullPath = storage_path('app/public/' . $path);
+        
+        // Check file size - increased limit but with chunking strategy
+        $fileSize = filesize($fullPath);
+        if ($fileSize > 200 * 1024 * 1024) { // 200MB hard limit
+            throw new \RuntimeException('PDF file is too large (max 200MB allowed)');
+        }
+
         try {
-            $parser = new Parser();
-            $pdf = $parser->parseFile(storage_path('app/public/' . $path));
+            // Set memory limit and execution time for large files
+            $originalMemoryLimit = ini_get('memory_limit');
+            $originalTimeLimit = ini_get('max_execution_time');
             
-            $text = $pdf->getText();
+            ini_set('memory_limit', '1024M'); // Increased memory limit
+            ini_set('max_execution_time', 600); // 10 minutes
+            
+            // Use chunked processing for large files
+            if ($fileSize > 50 * 1024 * 1024) {
+                $text = $this->extractTextFromLargePdf($fullPath);
+            } else {
+                $text = $this->extractTextFromStandardPdf($fullPath);
+            }
+            
+            // Restore original limits
+            ini_set('memory_limit', $originalMemoryLimit);
+            ini_set('max_execution_time', $originalTimeLimit);
             
             if (empty($text)) {
                 throw new \RuntimeException('Could not extract text from PDF');
             }
             
+            // Limit text size to prevent downstream issues
+            if (strlen($text) > 2000000) { // 2MB of text
+                $text = substr($text, 0, 2000000) . '\n\n[Text truncated due to size limits]';
+            }
+            
             return $text;
         } catch (\Exception $e) {
+            // Restore original limits on error
+            if (isset($originalMemoryLimit)) {
+                ini_set('memory_limit', $originalMemoryLimit);
+            }
+            if (isset($originalTimeLimit)) {
+                ini_set('max_execution_time', $originalTimeLimit);
+            }
+            
+            // Handle specific regex compilation error
+            if (strpos($e->getMessage(), 'preg_match') !== false && strpos($e->getMessage(), 'regular expression is too large') !== false) {
+                throw new \RuntimeException('PDF file is too complex or large to process. Please try with a smaller or simpler PDF file.');
+            }
+            
             throw new \RuntimeException('Failed to process PDF file: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Extract text from standard-sized PDF files
+     */
+    private function extractTextFromStandardPdf($fullPath)
+    {
+        $parser = new Parser();
+        $pdf = $parser->parseFile($fullPath);
+        return $pdf->getText();
+    }
+
+    /**
+     * Extract text from large PDF files using page-by-page processing
+     */
+    private function extractTextFromLargePdf($fullPath)
+    {
+        try {
+            $config = new \Smalot\PdfParser\Config();
+            $config->setRetainImageContent(false); // Disable image processing to save memory
+            $config->setDecodeMemoryLimit(100 * 1024 * 1024); // 100MB decode limit
+            
+            $parser = new Parser([], $config);
+            $pdf = $parser->parseFile($fullPath);
+            
+            $pages = $pdf->getPages();
+            $totalPages = count($pages);
+            $text = '';
+            $processedPages = 0;
+            
+            // Process pages in chunks to manage memory
+            $chunkSize = 10; // Process 10 pages at a time
+            
+            for ($i = 0; $i < $totalPages; $i += $chunkSize) {
+                $chunkText = '';
+                $endIndex = min($i + $chunkSize, $totalPages);
+                
+                // Process chunk of pages
+                for ($j = $i; $j < $endIndex; $j++) {
+                    try {
+                        $pageText = $pages[$j]->getText();
+                        if (!empty(trim($pageText))) {
+                            $chunkText .= $pageText . "\n";
+                        }
+                        $processedPages++;
+                    } catch (\Exception $e) {
+                        \Log::warning("Failed to extract text from page " . ($j + 1) . ": " . $e->getMessage());
+                        continue;
+                    }
+                }
+                
+                $text .= $chunkText;
+                
+                // Force garbage collection after each chunk
+                if (function_exists('gc_collect_cycles')) {
+                    gc_collect_cycles();
+                }
+                
+                // Check memory usage and break if getting too high
+                $memoryUsage = memory_get_usage(true);
+                if ($memoryUsage > 800 * 1024 * 1024) { // 800MB threshold
+                    \Log::warning("Memory usage too high, stopping at page " . ($processedPages + 1));
+                    $text .= "\n\n[Processing stopped due to memory constraints after " . $processedPages . " pages]";
+                    break;
+                }
+            }
+            
+            \Log::info("Successfully processed " . $processedPages . " out of " . $totalPages . " pages");
+            return $text;
+            
+        } catch (\Exception $e) {
+            // Fallback to standard processing if chunked processing fails
+            \Log::warning("Chunked processing failed, attempting standard processing: " . $e->getMessage());
+            return $this->extractTextFromStandardPdf($fullPath);
         }
     }
 
