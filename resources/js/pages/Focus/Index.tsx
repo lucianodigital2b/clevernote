@@ -358,42 +358,47 @@ export default function FocusIndex({ activeSession: initialSession, tags, todayS
         >
             <Head title="Focus Timer" />
             
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div className="py-4 sm:py-8 lg:py-12">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="bg-white dark:bg-[#212121] overflow-hidden shadow-sm sm:rounded-lg">
-                        <div className="p-6">
-                            <div className="flex items-center justify-between mb-8">
-                                <div>
-                                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                        <div className="p-4 sm:p-6">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
+                                <div className="text-center sm:text-left">
+                                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                                         Focus Timer
                                     </h1>
-                                    <p className="text-gray-600 dark:text-gray-300 mt-2">
+                                    <p className="text-gray-600 dark:text-gray-300 mt-1 sm:mt-2 text-sm sm:text-base">
                                         Stay focused with the Pomodoro technique
                                     </p>
                                 </div>
-                                <FocusStats stats={todayStats} />
+                                <div className="flex justify-center sm:justify-end">
+                                    <FocusStats stats={todayStats} />
+                                </div>
                             </div>
 
                             <Tabs defaultValue="timer" className="w-full">
                                 <TabsList className="grid w-full grid-cols-3">
-                                    <TabsTrigger value="timer" className="flex items-center gap-2">
-                                        <Timer className="h-4 w-4" />
-                                        Timer
+                                    <TabsTrigger value="timer" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                                        <Timer className="h-3 w-3 sm:h-4 sm:w-4" />
+                                        <span className="hidden sm:inline">Timer</span>
+                                        <span className="sm:hidden">⏱</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="leaderboard" className="flex items-center gap-2">
-                                        <Trophy className="h-4 w-4" />
-                                        Leaderboard
+                                    <TabsTrigger value="leaderboard" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                                        <Trophy className="h-3 w-3 sm:h-4 sm:w-4" />
+                                        <span className="hidden sm:inline">Leaderboard</span>
+                                        <span className="sm:hidden">🏆</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="history" className="flex items-center gap-2">
-                                        <Clock className="h-4 w-4" />
-                                        History
+                                    <TabsTrigger value="history" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                                        <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                                        <span className="hidden sm:inline">History</span>
+                                        <span className="sm:hidden">📊</span>
                                     </TabsTrigger>
                                 </TabsList>
 
-                                <TabsContent value="timer" className="mt-6">
-                                    <div className="space-y-8">
+                                <TabsContent value="timer" className="mt-4 sm:mt-6">
+                                    <div className="space-y-6 sm:space-y-8">
                                         {/* Tag Selection - Always visible */}
-                                        <div className="max-w-md mx-auto">
+                                        <div className="max-w-sm sm:max-w-md mx-auto px-2 sm:px-0">
                                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                                 Tag (Optional)
                                             </label>
@@ -412,11 +417,11 @@ export default function FocusIndex({ activeSession: initialSession, tags, todayS
                                         </div>
 
                                         {/* Timer Display */}
-                                        <div className="p-8">
+                                        <div className="p-4 sm:p-6 lg:p-8">
                                                 <div className="text-center">
                                                     {activeSession ? (
-                                                        <div className="space-y-6">
-                                                            <div className="relative w-64 h-64 mx-auto">
+                                                        <div className="space-y-4 sm:space-y-6">
+                                                            <div className="relative w-48 h-48 sm:w-56 sm:h-56 lg:w-64 lg:h-64 mx-auto">
                                                                 {/* Gradient Background */}
                                                                 <div 
                                                                     className="absolute inset-0 rounded-full blur-lg"
@@ -465,74 +470,78 @@ export default function FocusIndex({ activeSession: initialSession, tags, todayS
                                                                 </svg>
                                                                 <div className="absolute inset-0 flex items-center justify-center z-20">
                                                                     <div className="text-center">
-                                                                        <div className="text-4xl font-bold text-gray-900 dark:text-white">
+                                                                        <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">
                                                                             {formatTime(timeRemaining, secondsRemaining)}
                                                                         </div>
-                                                                        <div className="text-sm text-gray-500 dark:text-gray-300 mt-2">
+                                                                        <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-300 mt-1 sm:mt-2 px-2">
                                                                             {activeSession.tag?.name || 'No tag'}
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
 
-                                                            <div className="flex items-center justify-center gap-4">
+                                                            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 px-4">
                                                                 {activeSession.status === 'active' ? (
                                                                     <Button
                                                                         onClick={handlePause}
                                                                         disabled={isLoading}
-                                                                        size="lg"
+                                                                        size="sm"
+                                                                        className="sm:size-default lg:size-lg w-full sm:w-auto"
                                                                         variant="outline"
                                                                     >
-                                                                        <Pause className="h-5 w-5 mr-2" />
-                                                                        Pause
+                                                                        <Pause className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+                                                                        <span className="text-sm sm:text-base">Pause</span>
                                                                     </Button>
                                                                 ) : (
                                                                     <Button
                                                                         onClick={handleResume}
                                                                         disabled={isLoading}
-                                                                        size="lg"
+                                                                        size="sm"
+                                                                        className="sm:size-default lg:size-lg w-full sm:w-auto"
                                                                     >
-                                                                        <Play className="h-5 w-5 mr-2" />
-                                                                        Resume
+                                                                        <Play className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+                                                                        <span className="text-sm sm:text-base">Resume</span>
                                                                     </Button>
                                                                 )}
                                                                 
                                                                 <Button
                                                                     onClick={handleComplete}
                                                                     disabled={isLoading}
-                                                                    size="lg"
+                                                                    size="sm"
+                                                                    className="sm:size-default lg:size-lg w-full sm:w-auto"
                                                                     variant="default"
                                                                 >
-                                                                    <Target className="h-5 w-5 mr-2" />
-                                                                    Complete
+                                                                    <Target className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+                                                                    <span className="text-sm sm:text-base">Complete</span>
                                                                 </Button>
                                                                 
                                                                 <Button
                                                                     onClick={handleCancel}
                                                                     disabled={isLoading}
-                                                                    size="lg"
+                                                                    size="sm"
+                                                                    className="sm:size-default lg:size-lg w-full sm:w-auto"
                                                                     variant="destructive"
                                                                 >
-                                                                    <Square className="h-5 w-5 mr-2" />
-                                                                    Cancel
+                                                                    <Square className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+                                                                    <span className="text-sm sm:text-base">Cancel</span>
                                                                 </Button>
                                                             </div>
 
-                                                            <div className="space-y-4">
+                                                            <div className="space-y-4 px-4 sm:px-0">
                                                                 <Textarea
                                                                     placeholder="Add notes about this focus session..."
                                                                     value={sessionNotes}
                                                                     onChange={(e) => setSessionNotes(e.target.value)}
-                                                                    className="min-h-[100px]"
+                                                                    className="min-h-[80px] sm:min-h-[100px] text-sm sm:text-base"
                                                                 />
                                                             </div>
                                                         </div>
                                                     ) : (
-                                                        <div className="space-y-6">
-                                                            <div className="w-64 h-64 mx-auto flex items-center justify-center border-4 border-dashed border-gray-300 dark:border-gray-600 rounded-full">
+                                                        <div className="space-y-4 sm:space-y-6">
+                                                            <div className="w-48 h-48 sm:w-56 sm:h-56 lg:w-64 lg:h-64 mx-auto flex items-center justify-center border-4 border-dashed border-gray-300 dark:border-gray-600 rounded-full">
                                                                 <div className="text-center">
-                                                                    <Clock className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                                                                    <p className="text-gray-500 dark:text-gray-300">
+                                                                    <Clock className="h-12 w-12 sm:h-14 sm:w-14 lg:h-16 lg:w-16 text-gray-400 mx-auto mb-3 sm:mb-4" />
+                                                                    <p className="text-gray-500 dark:text-gray-300 text-sm sm:text-base px-4">
                                                                         Ready to focus?
                                                                     </p>
                                                                 </div>
@@ -544,18 +553,18 @@ export default function FocusIndex({ activeSession: initialSession, tags, todayS
 
                                         {/* Duration Selection and Start Button - Only when no active session */}
                                         {!activeSession && (
-                                            <div className="max-w-md mx-auto space-y-4">
+                                            <div className="max-w-sm sm:max-w-md mx-auto space-y-4 px-4 sm:px-0">
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                                         Duration
                                                     </label>
                                                     <Select value={selectedDuration.toString()} onValueChange={(value) => setSelectedDuration(parseInt(value))}>
-                                                        <SelectTrigger>
+                                                        <SelectTrigger className="text-sm sm:text-base">
                                                             <SelectValue />
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             {TIMER_DURATIONS.map((duration) => (
-                                                                <SelectItem key={duration.value} value={duration.value.toString()}>
+                                                                <SelectItem key={duration.value} value={duration.value.toString()} className="text-sm sm:text-base">
                                                                     {duration.label}
                                                                 </SelectItem>
                                                             ))}
@@ -566,10 +575,10 @@ export default function FocusIndex({ activeSession: initialSession, tags, todayS
                                                 <Button
                                                     onClick={handleStart}
                                                     disabled={isLoading}
-                                                    size="lg"
-                                                    className="w-full"
+                                                    size="sm"
+                                                    className="sm:size-default lg:size-lg w-full text-sm sm:text-base"
                                                 >
-                                                    <Play className="h-5 w-5 mr-2" />
+                                                    <Play className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
                                                     Start Focus Session
                                                 </Button>
                                             </div>
@@ -577,12 +586,16 @@ export default function FocusIndex({ activeSession: initialSession, tags, todayS
                                     </div>
                                 </TabsContent>
 
-                                <TabsContent value="leaderboard" className="mt-6">
-                                    <FocusLeaderboard />
+                                <TabsContent value="leaderboard" className="mt-4 sm:mt-6">
+                                    <div className="px-2 sm:px-0">
+                                        <FocusLeaderboard />
+                                    </div>
                                 </TabsContent>
 
-                                <TabsContent value="history" className="mt-6">
-                                    <FocusHistory />
+                                <TabsContent value="history" className="mt-4 sm:mt-6">
+                                    <div className="px-2 sm:px-0">
+                                        <FocusHistory />
+                                    </div>
                                 </TabsContent>
                             </Tabs>
                         </div>
