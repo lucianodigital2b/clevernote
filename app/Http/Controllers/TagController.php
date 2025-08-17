@@ -13,7 +13,8 @@ class TagController extends Controller
      */
     public function index()
     {
-        //
+        $tags = auth()->user()->tags()->orderBy('name')->get();
+        return response()->json($tags);
     }
 
     /**
@@ -29,7 +30,16 @@ class TagController extends Controller
      */
     public function store(StoreTagRequest $request)
     {
-        //
+        $validated = $request->validated();
+        
+        $tag = auth()->user()->tags()->create([
+            'name' => $validated['name']
+        ]);
+        
+        return response()->json([
+            'tag' => $tag,
+            'message' => 'Tag created successfully'
+        ], 201);
     }
 
     /**

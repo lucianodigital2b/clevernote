@@ -4,13 +4,13 @@
 
 export const TAWKTO_CONFIG = {
   // Example: propertyId: '5f8b1c2d3e4f5a6b7c8d9e0f'
-  propertyId: process.env.VITE_TAWKTO_PROPERTY_ID || 'YOUR_PROPERTY_ID',
+  propertyId: import.meta.env.VITE_TAWKTO_PROPERTY_ID || 'YOUR_PROPERTY_ID',
   
   // Example: widgetId: 'default' or '1a2b3c4d5e6f7g8h9i0j'
-  widgetId: process.env.VITE_TAWKTO_WIDGET_ID || 'default',
+  widgetId: import.meta.env.VITE_TAWKTO_WIDGET_ID || 'default',
   
   // Optional: Enable/disable Tawk.to
-  enabled: process.env.VITE_TAWKTO_ENABLED !== 'false',
+  enabled: import.meta.env.VITE_TAWKTO_ENABLED !== 'false',
 };
 
 // Helper function to check if Tawk.to is properly configured

@@ -18,6 +18,8 @@ return new class extends Migration
             $table->integer('flashcard_reviews')->default(0);
             $table->integer('flashcard_correct')->default(0);
             $table->integer('study_time_minutes')->default(0);
+            $table->integer('focus_sessions_completed')->default(0);
+            $table->integer('focus_time_minutes')->default(0);
             $table->integer('current_streak')->default(0);
             $table->integer('max_streak')->default(0);
             $table->timestamps();

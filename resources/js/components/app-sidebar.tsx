@@ -6,7 +6,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarGroupContent } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, ChevronRight, Plus, Layers, MessageSquare, BrainCircuit, Headphones, GraduationCap, ChartAreaIcon, HelpCircle, Phone, Users } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, ChevronRight, Plus, Layers, MessageSquare, BrainCircuit, Headphones, GraduationCap, ChartAreaIcon, HelpCircle, Phone, Users, Timer } from 'lucide-react';
 import AppLogo from './app-logo';
 import { CreateFolderModal } from '@/components/create-folder-modal';
 import axios from 'axios';
@@ -42,6 +42,11 @@ const mainNavItems: NavItem[] = [
         title: t('Groups'),
         url: '/groups',
         icon: Users,
+    },
+    {
+        title: 'Focus',
+        url: '/focus',
+        icon: Timer,
         new: true,
     },
     {

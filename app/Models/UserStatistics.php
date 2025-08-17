@@ -16,6 +16,8 @@ class UserStatistics extends Model
         'flashcard_reviews',
         'flashcard_correct',
         'study_time_minutes',
+        'focus_sessions_completed',
+        'focus_time_minutes',
         'current_streak',
         'max_streak'
     ];
@@ -28,6 +30,8 @@ class UserStatistics extends Model
         'flashcard_reviews' => 'integer',
         'flashcard_correct' => 'integer',
         'study_time_minutes' => 'integer',
+        'focus_sessions_completed' => 'integer',
+        'focus_time_minutes' => 'integer',
         'current_streak' => 'integer',
         'max_streak' => 'integer'
     ];

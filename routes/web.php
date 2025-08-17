@@ -17,6 +17,7 @@ use App\Http\Controllers\QuizSharingController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\CrosswordController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\FocusController;
 use App\Http\Controllers\DebugController;
 use App\Models\User;
 use App\Notifications\NewUserFeedback;
@@ -37,6 +38,9 @@ Route::get('/setup-intent', [SubscriptionController::class, 'createSetupIntent']
 Route::middleware(['auth'])->group(function () {
     // Folder routes
     Route::resource('folders', FolderController::class);
+    
+    // Tags routes
+    Route::resource('tags', \App\Http\Controllers\TagController::class);
     
     // Groups routes
     Route::resource('groups', GroupController::class);
@@ -114,6 +118,19 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/mindmaps/{mindmap}', [MindmapController::class, 'update'])->name('mindmaps.update');
 
     Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
+
+    // Focus routes
+    Route::prefix('focus')->group(function () {
+        Route::get('/', [FocusController::class, 'index'])->name('focus.index');
+        Route::post('/start', [FocusController::class, 'start'])->name('focus.start');
+        Route::post('/pause', [FocusController::class, 'pause'])->name('focus.pause');
+        Route::post('/resume', [FocusController::class, 'resume'])->name('focus.resume');
+        Route::post('/complete', [FocusController::class, 'complete'])->name('focus.complete');
+        Route::post('/cancel', [FocusController::class, 'cancel'])->name('focus.cancel');
+        Route::get('/status', [FocusController::class, 'status'])->name('focus.status');
+        Route::get('/leaderboard', [FocusController::class, 'leaderboard'])->name('focus.leaderboard');
+        Route::get('/history', [FocusController::class, 'history'])->name('focus.history');
+    });
 
     // How page route
     Route::get('/how', fn () => Inertia::render('how'))->name('how');

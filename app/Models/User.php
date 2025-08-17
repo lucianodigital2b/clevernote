@@ -118,6 +118,16 @@ class User extends Authenticatable
         return $this->hasMany(Group::class, 'created_by');
     }
 
+    public function focusSessions(): HasMany
+    {
+        return $this->hasMany(FocusSession::class);
+    }
+
+    public function tags(): HasMany
+    {
+        return $this->hasMany(Tag::class);
+    }
+
     /**
      * Get level progress information
      */
