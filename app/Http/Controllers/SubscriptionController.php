@@ -213,6 +213,9 @@ class SubscriptionController extends Controller
             // Create subscription using the found price
             $subscriptionBuilder = $user->newSubscription('default', $price->stripe_price_id);
             
+            // Add 3-day trial for new subscribers
+            $subscriptionBuilder->trialDays(3);
+            
             // Apply coupon if provided
             if ($request->filled('coupon')) {
                 try {
@@ -269,6 +272,7 @@ class SubscriptionController extends Controller
                 'success' => true,
                 'subscription_id' => $subscription->id,
                 'user_created' => $createAccount,
+                'trial_ends_at' => $subscription->trial_ends_at ? $subscription->trial_ends_at->toISOString() : null,
                 'product' => [
                     'name' => $product->name,
                     'amount' => $price->amount,

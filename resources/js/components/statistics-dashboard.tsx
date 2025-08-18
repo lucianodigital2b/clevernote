@@ -28,45 +28,26 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
     
-    // Generate impressive dummy data for any month with 70-90% activity rate
+    // Generate dummy data for every day until current date
     const generateDummyData = () => {
         const dummyData: any = {};
         const currentDate = new Date();
         const todayStr = currentDate.toISOString().split('T')[0];
         
-        // Generate data for multiple months to ensure good coverage
-        const monthsToGenerate = [
-            { month: currentMonth === 0 ? 11 : currentMonth - 1, year: currentMonth === 0 ? currentYear - 1 : currentYear }, // Last month
-            { month: currentMonth, year: currentYear }, // Current month
-            { month: currentMonth === 11 ? 0 : currentMonth + 1, year: currentMonth === 11 ? currentYear + 1 : currentYear } // Next month
-        ];
+        // Start from January 1st of current year
+        const startDate = new Date(currentYear, 0, 1);
+        const endDate = new Date();
         
-        monthsToGenerate.forEach(({ month, year }) => {
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
+        // Generate data for every day from start of year until today
+        for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
+            const dateStr = date.toISOString().split('T')[0];
             
-            // Calculate how many days should have activity (70-90%)
-            const minActivityDays = Math.floor(daysInMonth * 0.7);
-            const maxActivityDays = Math.floor(daysInMonth * 0.9);
-            const targetActivityDays = Math.floor(Math.random() * (maxActivityDays - minActivityDays + 1)) + minActivityDays;
-            
-            // Create array of all days and shuffle to randomly select which days have activity
-            const allDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-            const shuffledDays = allDays.sort(() => Math.random() - 0.5);
-            const activeDays = shuffledDays.slice(0, targetActivityDays);
-            
-            activeDays.forEach(day => {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                
-                // Only add activity for dates that are not in the future
-                if (dateStr <= todayStr) {
-                    dummyData[dateStr] = {
-                        quiz_total_questions: Math.floor(Math.random() * 50) + 20, // 20-70 questions per day
-                        flashcard_reviews: Math.floor(Math.random() * 100) + 50, // 50-150 flashcards per day
-                        study_time_minutes: Math.floor(Math.random() * 180) + 60 // 1-4 hours per day
-                    };
-                }
-            });
-        });
+            dummyData[dateStr] = {
+                quiz_total_questions: Math.floor(Math.random() * 50) + 20, // 20-70 questions per day
+                flashcard_reviews: Math.floor(Math.random() * 100) + 50, // 50-150 flashcards per day
+                study_time_minutes: Math.floor(Math.random() * 180) + 60 // 1-4 hours per day
+            };
+        }
         
         return dummyData;
     };
@@ -194,7 +175,7 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                                 <Target className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                                 {t('stats_todays_activity')}
                             </CardTitle>
-                            <p className="text-gray-600 dark:text-slate-400 text-sm">Thursday, June 19</p>
+                            <p className="text-gray-600 dark:text-slate-400 text-sm">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-2 gap-4">
@@ -302,18 +283,22 @@ export function StatisticsDashboard({ weeklyStats, yearlyHeatmap, overallStats }
                             </div>
                             
                             {/* Calendar Stats */}
-                            <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-transparent items-center">
-                                <div className="text-center">
-                                    <p className="text-gray-600 dark:text-slate-400 text-sm">{t('stats_days_active')}</p>
-                                    <p className="text-gray-900 dark:text-white text-lg font-bold">{totalDaysWithActivity} {t('stats_of')} {daysInMonth}</p>
-                                </div>
-                                <div className="text-center">
-                                    <p className="text-gray-600 dark:text-slate-400 text-sm">{t('stats_avg_quizzes_day')}</p>
-                                    <p className="text-gray-900 dark:text-white text-lg font-bold">{avgQuizQuestionsPerDay}</p>
-                                </div>
-                                <div className="text-center">
-                                    <p className="text-gray-600 dark:text-slate-400 text-sm">{t('stats_avg_flashcards_day')}</p>
-                                    <p className="text-gray-900 dark:text-white text-lg font-bold">{avgFlashcardsPerDay}</p>
+                            <div className="mt-6 pt-4 border-t border-gray-200 dark:border-transparent">
+                                <div className="flex flex-col md:flex-row md:items-center md:justify-center md:gap-8">
+                                    <div className="text-center mb-4 md:mb-0">
+                                        <p className="text-gray-600 dark:text-slate-400 text-sm">{t('stats_days_active')}</p>
+                                        <p className="text-gray-900 dark:text-white text-lg font-bold">{totalDaysWithActivity} {t('stats_of')} {daysInMonth}</p>
+                                    </div>
+                                    <div className="hidden md:block text-gray-400 dark:text-slate-500">•</div>
+                                    <div className="text-center mb-4 md:mb-0">
+                                        <p className="text-gray-600 dark:text-slate-400 text-sm">{t('stats_avg_quizzes_day')}</p>
+                                        <p className="text-gray-900 dark:text-white text-lg font-bold">{avgQuizQuestionsPerDay}</p>
+                                    </div>
+                                    <div className="hidden md:block text-gray-400 dark:text-slate-500">•</div>
+                                    <div className="text-center">
+                                        <p className="text-gray-600 dark:text-slate-400 text-sm">{t('stats_avg_flashcards_day')}</p>
+                                        <p className="text-gray-900 dark:text-white text-lg font-bold">{avgFlashcardsPerDay}</p>
+                                    </div>
                                 </div>
                             </div>
                         </CardContent>

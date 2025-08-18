@@ -368,7 +368,7 @@ export default function FocusIndex({ activeSession: initialSession, tags, todayS
                                         Focus Timer
                                     </h1>
                                     <p className="text-gray-600 dark:text-gray-300 mt-1 sm:mt-2 text-sm sm:text-base">
-                                        Stay focused with the Pomodoro technique
+                                        Time to lock in
                                     </p>
                                 </div>
                                 <div className="flex justify-center sm:justify-end">

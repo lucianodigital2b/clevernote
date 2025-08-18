@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CheckIcon, SparklesIcon, StarIcon, ShieldCheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { Button } from '@/components/ui/button';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 
 type PricingData = {
@@ -19,6 +19,7 @@ type UpgradeModalProps = {
 };
 
 export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
+    const { auth } = usePage().props as any;
     const { t } = useTranslation();
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
     const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
@@ -30,6 +31,16 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
         yearly: null
     });
     const [loadingPricing, setLoadingPricing] = useState(true);
+
+    // Check if user registered after 17/08/2025 to determine if modal is closable
+    const isClosable = () => {
+        if (!auth?.user?.created_at) return true; // Default to closable if no date provided
+        
+        const cutoffDate = new Date('2025-08-17');
+        const registrationDate = new Date(auth.user.created_at);
+        
+        return registrationDate <= cutoffDate;
+    };
 
     useEffect(() => {
         if (!isOpen || timeLeft <= 0) return;
@@ -47,6 +58,23 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
             setTimeLeft(600);
         }
     }, [isOpen]);
+
+    // Handle escape key press
+    useEffect(() => {
+        const handleEscapeKey = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && isOpen && isClosable()) {
+                onClose();
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener('keydown', handleEscapeKey);
+        }
+
+        return () => {
+            document.removeEventListener('keydown', handleEscapeKey);
+        };
+    }, [isOpen, onClose, auth?.user?.created_at]);
 
     // Fetch pricing data when modal opens
     useEffect(() => {
@@ -115,12 +143,16 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+        <div 
+            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
+            onClick={isClosable() ? onClose : undefined}
+        >
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 className="bg-white w-full h-full overflow-y-auto relative"
+                onClick={(e) => e.stopPropagation()}
             >
                 {/* Close Button and Timer */}
                 <div className="absolute top-4 right-4 z-10 flex justify-between items-center">
@@ -131,13 +163,15 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
                         </span>
                     </div>
                     
-                    {/* Close Button */}
-                    <button
-                        onClick={onClose}
-                        className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                    >
-                        <XMarkIcon className="h-5 w-5 text-gray-500" />
-                    </button>
+                    {/* Close Button - Only show if modal is closable */}
+                    {isClosable() && (
+                        <button
+                            onClick={onClose}
+                            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                        >
+                            <XMarkIcon className="h-5 w-5 text-gray-500" />
+                        </button>
+                    )}
                 </div>
 
                 <div className="flex items-center justify-center min-h-full py-14 px-4 md:p-8">
