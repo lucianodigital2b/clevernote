@@ -60,10 +60,23 @@ class ProfileController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         $request->validate([
-            'password' => ['required', 'current_password'],
+            'reason' => ['nullable', 'string', 'max:500'],
         ]);
 
         $user = $request->user();
+
+        // Create negative feedback entry if reason is provided
+        if ($request->filled('reason')) {
+            \App\Models\Feedback::create([
+                'user_id' => $user->id,
+                'is_positive' => false,
+                'reason' => $request->input('reason'),
+                'metadata' => [
+                    'type' => 'account_deletion',
+                    'deleted_at' => now()->toISOString()
+                ]
+            ]);
+        }
 
         Auth::logout();
 

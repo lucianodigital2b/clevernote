@@ -68,7 +68,7 @@ class ProfileUpdateTest extends TestCase
         $response = $this
             ->actingAs($user)
             ->delete('/settings/profile', [
-                'password' => 'password',
+                'reason' => 'No longer needed',
             ]);
 
         $response
@@ -77,21 +77,50 @@ class ProfileUpdateTest extends TestCase
 
         $this->assertGuest();
         $this->assertNull($user->fresh());
+        
+        // Assert feedback was created
+        $this->assertDatabaseHas('feedback', [
+            'user_id' => $user->id,
+            'is_positive' => false,
+            'reason' => 'No longer needed'
+        ]);
     }
 
-    public function test_correct_password_must_be_provided_to_delete_account()
+    public function test_user_can_delete_account_without_reason()
     {
         $user = User::factory()->create();
 
         $response = $this
             ->actingAs($user)
+            ->delete('/settings/profile');
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/');
+
+        $this->assertGuest();
+        $this->assertNull($user->fresh());
+        
+        // Assert no feedback was created when no reason provided
+        $this->assertDatabaseMissing('feedback', [
+            'user_id' => $user->id
+        ]);
+    }
+
+    public function test_reason_must_not_exceed_max_length()
+    {
+        $user = User::factory()->create();
+        $longReason = str_repeat('a', 501); // Exceeds 500 character limit
+
+        $response = $this
+            ->actingAs($user)
             ->from('/settings/profile')
             ->delete('/settings/profile', [
-                'password' => 'wrong-password',
+                'reason' => $longReason,
             ]);
 
         $response
-            ->assertSessionHasErrors('password')
+            ->assertSessionHasErrors('reason')
             ->assertRedirect('/settings/profile');
 
         $this->assertNotNull($user->fresh());

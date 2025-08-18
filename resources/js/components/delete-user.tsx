@@ -11,8 +11,8 @@ import HeadingSmall from '@/components/heading-small';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export default function DeleteUser() {
-    const passwordInput = useRef<HTMLInputElement>(null);
-    const { data, setData, delete: destroy, processing, reset, errors, clearErrors } = useForm({ password: '' });
+    const reasonInput = useRef<HTMLInputElement>(null);
+    const { data, setData, delete: destroy, processing, reset, errors, clearErrors } = useForm({ reason: '' });
 
     const deleteUser: FormEventHandler = (e) => {
         e.preventDefault();
@@ -20,7 +20,7 @@ export default function DeleteUser() {
         destroy(route('profile.destroy'), {
             preserveScroll: true,
             onSuccess: () => closeModal(),
-            onError: () => passwordInput.current?.focus(),
+            onError: () => reasonInput.current?.focus(),
             onFinish: () => reset(),
         });
     };
@@ -46,27 +46,26 @@ export default function DeleteUser() {
                     <DialogContent>
                         <DialogTitle>Are you sure you want to delete your account?</DialogTitle>
                         <DialogDescription>
-                            Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your password
-                            to confirm you would like to permanently delete your account.
+                            Once your account is deleted, all of its resources and data will also be permanently deleted. Please tell us why you're leaving
+                            to help us improve our service.
                         </DialogDescription>
                         <form className="space-y-6" onSubmit={deleteUser}>
                             <div className="grid gap-2">
-                                <Label htmlFor="password" className="sr-only">
-                                    Password
+                                <Label htmlFor="reason">
+                                    Reason for leaving (optional)
                                 </Label>
 
                                 <Input
-                                    id="password"
-                                    type="password"
-                                    name="password"
-                                    ref={passwordInput}
-                                    value={data.password}
-                                    onChange={(e) => setData('password', e.target.value)}
-                                    placeholder="Password"
-                                    autoComplete="current-password"
+                                    id="reason"
+                                    type="text"
+                                    name="reason"
+                                    ref={reasonInput}
+                                    value={data.reason}
+                                    onChange={(e) => setData('reason', e.target.value)}
+                                    placeholder="Tell us why you're leaving..."
                                 />
 
-                                <InputError message={errors.password} />
+                                <InputError message={errors.reason} />
                             </div>
 
                             <DialogFooter className="gap-2">
