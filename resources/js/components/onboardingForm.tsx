@@ -105,7 +105,7 @@ const CustomSelect = ({ value, onValueChange, children, placeholder, options = [
             </button>
             
             {isOpen && (
-                <div className="absolute z-50 mt-1 max-h-96 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
+                <div className="absolute z-[99999] mt-1 max-h-96 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg" style={{ zIndex: 99999 }}>
                     <div className="p-1">
                         {children({ handleSelect })}
                     </div>
@@ -269,7 +269,7 @@ export default function OnboardingForm({ onClose, onComplete }: { onClose?: () =
 
     return (
         <>
-            <div className="max-h-[90vh] overflow-y-auto px-4 py-2">
+            <div className="max-h-[90vh] overflow-y-auto px-4 py-2 relative z-0">
                 <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6" translate="yes">
                 <div className="mb-8 sm:mb-12 flex justify-center" translate="no">
                     <div className="flex items-center space-x-2">
