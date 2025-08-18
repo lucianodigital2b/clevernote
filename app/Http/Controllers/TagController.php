@@ -33,13 +33,23 @@ class TagController extends Controller
         $validated = $request->validated();
         
         $tag = auth()->user()->tags()->create([
-            'name' => $validated['name']
+            'name' => $validated['name'],
+            'color' => $this->generateRandomColor()
         ]);
         
         return response()->json([
             'tag' => $tag,
             'message' => 'Tag created successfully'
         ], 201);
+    }
+
+    /**
+     * Generate a random hex color
+     */
+    private function generateRandomColor(): string
+    {
+        // Generate a random hex color
+        return '#' . str_pad(dechex(mt_rand(0, 0xFFFFFF)), 6, '0', STR_PAD_LEFT);
     }
 
     /**

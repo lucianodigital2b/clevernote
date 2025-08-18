@@ -128,9 +128,15 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/complete', [FocusController::class, 'complete'])->name('focus.complete');
         Route::post('/cancel', [FocusController::class, 'cancel'])->name('focus.cancel');
         Route::get('/status', [FocusController::class, 'status'])->name('focus.status');
+        Route::get('/statistics', [FocusController::class, 'statistics'])->name('focus.statistics');
         Route::get('/leaderboard', [FocusController::class, 'leaderboard'])->name('focus.leaderboard');
         Route::get('/history', [FocusController::class, 'history'])->name('focus.history');
     });
+    
+    // Focus Leaderboard page route
+    Route::get('/focus/leaderboard', function () {
+        return Inertia::render('Focus/Leaderboard');
+    })->name('focus.leaderboard.page');
 
     // How page route
     Route::get('/how', fn () => Inertia::render('how'))->name('how');

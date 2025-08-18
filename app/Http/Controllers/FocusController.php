@@ -222,6 +222,74 @@ class FocusController extends Controller
     }
 
     /**
+     * Get focus session statistics for charts
+     */
+    public function statistics(Request $request): JsonResponse
+    {
+        $user = auth()->user();
+        $days = $request->input('days', 7); // Default to last 7 days
+        
+        $startDate = now()->subDays($days - 1)->startOfDay();
+        $endDate = now()->endOfDay();
+        
+        // Get focus sessions with tags for the specified period
+        $sessions = FocusSession::where('user_id', $user->id)
+            ->where('status', 'completed')
+            ->whereBetween('started_at', [$startDate, $endDate])
+            ->with('tag')
+            ->get();
+        
+        // Group sessions by date and tag
+        $statisticsData = [];
+        $allTags = [];
+        
+        for ($i = 0; $i < $days; $i++) {
+            $date = now()->subDays($days - 1 - $i)->toDateString();
+            $dayName = now()->subDays($days - 1 - $i)->format('M j');
+            
+            $daySessions = $sessions->filter(function ($session) use ($date) {
+                return $session->started_at->toDateString() === $date;
+            });
+            
+            $tagData = [];
+            $totalMinutes = 0;
+            
+            foreach ($daySessions as $session) {
+                $tagName = $session->tag ? $session->tag->name : 'No Tag';
+                $tagColor = $session->tag ? $session->tag->color : '#6B7280';
+                $minutes = $session->actual_duration_minutes ?? 0;
+                
+                if (!isset($tagData[$tagName])) {
+                    $tagData[$tagName] = [
+                        'name' => $tagName,
+                        'color' => $tagColor,
+                        'minutes' => 0
+                    ];
+                }
+                
+                $tagData[$tagName]['minutes'] += $minutes;
+                $totalMinutes += $minutes;
+                
+                if (!in_array($tagName, $allTags)) {
+                    $allTags[] = $tagName;
+                }
+            }
+            
+            $statisticsData[] = [
+                'date' => $date,
+                'day' => $dayName,
+                'tags' => array_values($tagData),
+                'total_minutes' => $totalMinutes
+            ];
+        }
+        
+        return response()->json([
+            'data' => $statisticsData,
+            'all_tags' => $allTags
+        ]);
+    }
+
+    /**
      * Get today's focus statistics for the user
      */
     private function getTodayStats(int $userId): array
