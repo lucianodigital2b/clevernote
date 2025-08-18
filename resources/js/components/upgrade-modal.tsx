@@ -34,6 +34,7 @@ export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
 
     // Check if user registered after 17/08/2025 to determine if modal is closable
     const isClosable = () => {
+        return true;
         if (!auth?.user?.created_at) return true; // Default to closable if no date provided
         
         const cutoffDate = new Date('2025-08-17');
