@@ -20,20 +20,7 @@ const Footer = () => {
             <p className="text-gray-600 mb-6 max-w-sm">
               The intuitive digital notepad designed to transform how you learn, organize, and retain information.
             </p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-brand-600 transition-colors">
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-brand-600 transition-colors">
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-brand-600 transition-colors">
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-brand-600 transition-colors">
-                <Linkedin className="w-5 h-5" />
-              </a>
-            </div>
+            
           </div>
 
           {/* <div>

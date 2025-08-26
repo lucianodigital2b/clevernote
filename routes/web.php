@@ -19,11 +19,24 @@ use App\Http\Controllers\CrosswordController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\FocusController;
 use App\Http\Controllers\DebugController;
+use App\Http\Controllers\ToolsController;
 use App\Models\User;
 use App\Notifications\NewUserFeedback;
 use Laravel\Horizon\Horizon;
 
 Route::get('/', [App\Http\Controllers\WelcomeController::class, 'index'])->name('home');
+
+// Blog routes (internationalized)
+Route::get('/blog/{locale}', [App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{locale}/{slug}', [App\Http\Controllers\BlogController::class, 'show'])->name('blog.show');
+
+// Free Tools routes
+Route::get('/tools/{locale}', [ToolsController::class, 'index'])->name('tools.index');
+Route::get('/tools/{locale}/note-template-generator', [ToolsController::class, 'noteTemplateGenerator'])->name('tools.note-template-generator');
+Route::get('/tools/{locale}/study-schedule-planner', [ToolsController::class, 'studySchedulePlanner'])->name('tools.study-schedule-planner');
+Route::get('/tools/{locale}/flashcard-creator', [ToolsController::class, 'flashcardCreator'])->name('tools.flashcard-creator');
+Route::get('/tools/{locale}/note-taking-style-quiz', [ToolsController::class, 'noteTakingStyleQuiz'])->name('tools.note-taking-style-quiz');
+Route::get('/tools/{locale}/productivity-calculator', [ToolsController::class, 'productivityCalculator'])->name('tools.productivity-calculator');
 
 // Public note routes (UUID-based)
 Route::get('/notes/{uuid}', [NoteController::class, 'showByUuid'])->name('notes.public.show');
@@ -130,14 +143,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/status', [FocusController::class, 'status'])->name('focus.status');
         Route::get('/statistics', [FocusController::class, 'statistics'])->name('focus.statistics');
         Route::get('/leaderboard', [FocusController::class, 'leaderboard'])->name('focus.leaderboard');
+        Route::get('/level-leaderboard', [FocusController::class, 'levelLeaderboard'])->name('focus.level-leaderboard');
         Route::get('/history', [FocusController::class, 'history'])->name('focus.history');
     });
     
-    // Focus Leaderboard page route
-    Route::get('/focus/leaderboard', function () {
-        return Inertia::render('Focus/Leaderboard');
-    })->name('focus.leaderboard.page');
-
     // How page route
     Route::get('/how', fn () => Inertia::render('how'))->name('how');
 });

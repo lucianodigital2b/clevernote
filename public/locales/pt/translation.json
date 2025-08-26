@@ -209,10 +209,12 @@
   "auth_no_account": "Não tem uma conta?",
   "auth_sign_up": "Cadastre-se",
   "nav_features": "Recursos",
+  "nav_blog": "Blog",
+  "nav_tools": "Ferramentas",
   "nav_testimonials": "Depoimentos",
   "nav_pricing": "Preços",
   "nav_login": "Entrar",
-  "nav_signup": "Cadastre-se",
+  "nav_signup": "Cadastrar","Cadastre-se",
 
   "My Quizzes": "Meus Questionários",
   "No quizzes yet": "Ainda não há questionários",

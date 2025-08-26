@@ -73,6 +73,7 @@ class NoteController extends Controller
      */
     public function store(StoreNoteRequest $request)
     {
+        \Log::error(print_r($request->all(), true));
         try {
             $validated = $request->validated();
             $user = Auth::user();

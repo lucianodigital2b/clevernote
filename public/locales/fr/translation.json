@@ -1,4 +1,11 @@
 {
+  "nav_features": "Fonctionnalités",
+  "nav_blog": "Blog",
+  "nav_tools": "Outils",
+  "nav_testimonials": "Témoignages",
+  "nav_pricing": "Tarifs",
+  "nav_login": "Se connecter",
+  "nav_signup": "S'inscrire",
   "welcome_to_clevernote": "Bienvenue sur Clevernote",
   "personalize_experience": "Personnalisons votre expérience",
   "welcome_title": "Bienvenue sur Clevernote ! 👋",

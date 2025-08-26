@@ -52,7 +52,7 @@ class RegisteredUserController extends Controller
 
             return response()->json([
                 'message' => 'Authentication successful',
-                'user' => $request->user(),
+                'user' => $user,
                 'token' => $token,
             ]);
         }

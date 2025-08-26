@@ -188,6 +188,57 @@ class FocusController extends Controller
     }
 
     /**
+     * Get level-based leaderboard data
+     */
+    public function levelLeaderboard(Request $request): JsonResponse
+    {
+        $currentUser = auth()->user();
+        $limit = $request->input('limit', 50);
+
+        $leaderboard = User::select('id', 'name', 'level', 'xp')
+            ->orderBy('level', 'desc')
+            ->orderBy('xp', 'desc')
+            ->limit($limit)
+            ->get()
+            ->map(function ($user, $index) use ($currentUser) {
+                return [
+                    'rank' => $index + 1,
+                    'user_id' => $user->id,
+                    'name' => $user->name,
+                    'level' => $user->level,
+                    'xp' => $user->xp,
+                    'is_current_user' => $user->id === $currentUser->id
+                ];
+            });
+
+        // Find current user's rank if not in top list
+        $currentUserRank = $leaderboard->firstWhere('is_current_user');
+        if (!$currentUserRank) {
+            // Calculate current user's rank
+            $usersAbove = User::where('level', '>', $currentUser->level)
+                ->orWhere(function ($query) use ($currentUser) {
+                    $query->where('level', $currentUser->level)
+                          ->where('xp', '>', $currentUser->xp);
+                })
+                ->count();
+
+            $currentUserRank = [
+                'rank' => $usersAbove + 1,
+                'user_id' => $currentUser->id,
+                'name' => $currentUser->name,
+                'level' => $currentUser->level,
+                'xp' => $currentUser->xp,
+                'is_current_user' => true
+            ];
+        }
+
+        return response()->json([
+            'leaderboard' => $leaderboard->values(),
+            'current_user' => $currentUserRank
+        ]);
+    }
+
+    /**
      * Get user's focus session history
      */
     public function history(Request $request): JsonResponse

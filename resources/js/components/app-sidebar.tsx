@@ -50,11 +50,6 @@ const mainNavItems: NavItem[] = [
         new: true,
     },
     {
-        title: 'Focus Leaderboard',
-        url: '/focus/leaderboard',
-        icon: Trophy,
-    },
-    {
         title: t('Statistics'),
         url: '/statistics',
         icon: ChartAreaIcon,

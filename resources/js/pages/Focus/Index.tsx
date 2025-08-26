@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import { Play, Pause, Square, RotateCcw, Clock, BarChart3, Target, Timer, Plus } from 'lucide-react';
-import FocusStatisticsChart from '@/components/FocusStatisticsChart';
+import LevelLeaderboard from '@/components/Focus/LevelLeaderboard';
 import { toast } from 'sonner';
 import AppLayout from '@/layouts/app-layout';
 import FocusHistory from '@/components/Focus/FocusHistory';
@@ -383,10 +383,10 @@ export default function FocusIndex({ activeSession: initialSession, tags, todayS
                                         <span className="hidden sm:inline">Timer</span>
                                         <span className="sm:hidden">⏱</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="statistics" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                                        <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
-                                        <span className="hidden sm:inline">Statistics</span>
-                                        <span className="sm:hidden">📊</span>
+                                    <TabsTrigger value="leaderboard" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                                        <Target className="h-3 w-3 sm:h-4 sm:w-4" />
+                                        <span className="hidden sm:inline">Leaderboard</span>
+                                        <span className="sm:hidden">🏆</span>
                                     </TabsTrigger>
                                     <TabsTrigger value="history" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
                                         <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -586,9 +586,9 @@ export default function FocusIndex({ activeSession: initialSession, tags, todayS
                                     </div>
                                 </TabsContent>
 
-                                <TabsContent value="statistics" className="mt-4 sm:mt-6">
+                                <TabsContent value="leaderboard" className="mt-4 sm:mt-6">
                                     <div className="px-2 sm:px-0">
-                                        <FocusStatisticsChart />
+                                        <LevelLeaderboard />
                                     </div>
                                 </TabsContent>
 

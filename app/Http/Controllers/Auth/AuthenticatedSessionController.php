@@ -40,7 +40,7 @@ class AuthenticatedSessionController extends Controller
 
             return response()->json([
                 'message' => 'Authentication successful',
-                'user' => $request->user(),
+                'user' => $request->user()->load('subscriptions', 'activeSubscriptions')->makeVisible(['xp', 'level'])->append('avatar'),
                 'token' => $token,
             ]);
         }

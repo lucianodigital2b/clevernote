@@ -74,6 +74,18 @@ const Navbar = () => {
               {t('nav_features')}
             </a> */}
             <a
+              href={`/blog/${currentLang}`}
+              className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
+            >
+              {t('nav_blog')}
+            </a>
+            <a
+              href={`/tools/${currentLang}`}
+              className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
+            >
+              {t('nav_tools')}
+            </a>
+            <a
               href="#faq"
               className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
             >
@@ -141,6 +153,20 @@ const Navbar = () => {
             >
               {t('nav_features')}
             </a> */}
+            <a
+              href={`/blog/${currentLang}`}
+              className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {t('nav_blog')}
+            </a>
+            <a
+              href={`/tools/${currentLang}`}
+              className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {t('nav_tools')}
+            </a>
             <a
               href="#testimonials"
               className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 transition-colors"

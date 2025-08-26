@@ -21,7 +21,7 @@ const CallToAction = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-10">
-            <Button className="py-4 bg-indigo-100 hover:bg-indigo-200 text-indigo-600 border-2 px-8 rounded-full font-medium transition-all duration-200 shadow-lg shadow-indigo-200/50 hover:shadow-xl hover:shadow-indigo-300/60 h-full border-indigo-600 dark:text-indigo-600 " asChild>
+            <Button className="py-4 bg-indigo-100 hover:bg-indigo-200 text-indigo-600 border-2 px-8 rounded-full font-medium transition-all duration-200 shadow-lg shadow-indigo-200/50 hover:shadow-xl hover:shadow-indigo-300/60 h-full border-indigo-600" asChild>
               <a href="/login" >
                 {t('start_free')}
               </a>

@@ -43,7 +43,7 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user() ? $request->user()->load('subscriptions', 'activeSubscriptions')->makeVisible(['xp', 'level']) : null,
+                'user' => $request->user() ? $request->user()->load('subscriptions', 'activeSubscriptions')->makeVisible(['xp', 'level'])->append('avatar') : null,
             ],
         ];
     }

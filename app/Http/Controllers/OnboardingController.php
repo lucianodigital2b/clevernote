@@ -21,7 +21,7 @@ class OnboardingController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'preferred_language' => 'required|string',
+            'preferred_language' => 'nullable|string',
             'discovery_source' => 'nullable|string|max:255',
             'primary_subject_interest' => 'nullable|string|max:255',
             'learning_goals' => 'nullable|string',
@@ -125,6 +125,12 @@ class OnboardingController extends Controller
             // Continue with the flow even if study plan generation fails
         }
 
+        if($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Onboarding completed successfully',
+                'user' => $user
+            ]);
+        }
         // Set session flag to show upgrade modal after onboarding
         session()->flash('show_upgrade_modal', true);
         

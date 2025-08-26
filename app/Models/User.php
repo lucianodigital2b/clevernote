@@ -13,11 +13,14 @@ use Illuminate\Notifications\Notifiable;
 use Jijunair\LaravelReferral\Traits\Referrable;
 use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, Billable, HasApiTokens, Referrable;
+    use HasFactory, Notifiable, Billable, HasApiTokens, Referrable, InteractsWithMedia;
 
     protected $with = ['subscriptions', 'activeSubscriptions'];
     protected $withCount = ['notes'];
@@ -135,5 +138,56 @@ class User extends Authenticatable
     {
         $xpService = app(\App\Services\XPService::class);
         return $xpService->getLevelProgress($this);
+    }
+
+    /**
+     * Register media collections
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('profile_pictures')
+            ->singleFile()
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp'])
+            ->useDisk('public');
+    }
+
+    /**
+     * Register media conversions
+     */
+    public function registerMediaConversions(Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->width(150)
+            ->height(150)
+            ->sharpen(10)
+            ->performOnCollections('profile_pictures');
+
+        $this->addMediaConversion('avatar')
+            ->width(300)
+            ->height(300)
+            ->sharpen(10)
+            ->performOnCollections('profile_pictures');
+    }
+
+    /**
+     * Get the user's profile picture URL
+     */
+    public function getProfilePictureUrl(string $conversion = 'avatar'): ?string
+    {
+        $media = $this->getFirstMedia('profile_pictures');
+        
+        if (!$media) {
+            return null;
+        }
+
+        return $media->getUrl($conversion);
+    }
+
+    /**
+     * Get the avatar attribute (for API serialization)
+     */
+    public function getAvatarAttribute(): ?string
+    {
+        return $this->getProfilePictureUrl();
     }
 }

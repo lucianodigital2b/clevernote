@@ -35,6 +35,7 @@ class ProfileController extends Controller
             'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
             'subscriptions' => $subscriptions,
+            'profilePictureUrl' => $user->getProfilePictureUrl(),
         ]);
     }
 
@@ -107,5 +108,42 @@ class ProfileController extends Controller
         return Inertia::render('settings/invoices', [
             'invoices' => $invoices,
         ]);
+    }
+
+    /**
+     * Upload a profile picture.
+     */
+    public function uploadProfilePicture(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'profile_picture' => [
+                'required',
+                'image',
+                'mimes:jpeg,png,webp',
+                'max:2048' // 2MB
+            ]
+        ]);
+
+        $user = $request->user();
+        
+        // Delete existing profile picture if any
+        $user->clearMediaCollection('profile_pictures');
+        
+        // Add new profile picture
+        $user->addMediaFromRequest('profile_picture')
+            ->toMediaCollection('profile_pictures');
+
+        return back()->with('status', 'Profile picture updated successfully.');
+    }
+
+    /**
+     * Delete the profile picture.
+     */
+    public function deleteProfilePicture(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        $user->clearMediaCollection('profile_pictures');
+
+        return back()->with('status', 'Profile picture deleted successfully.');
     }
 }
