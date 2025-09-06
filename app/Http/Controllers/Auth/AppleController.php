@@ -5,9 +5,14 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\AppleJWTService;
+use Firebase\JWT\JWK;
+use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AppleController extends Controller
 {
@@ -23,19 +28,21 @@ class AppleController extends Controller
         return Socialite::driver('apple')->stateless()->redirect();
     }
 
-    public function handleAppleCallback()
+    public function handleAppleCallback(Request $request)
     {
         try {
             // Generate fresh client secret on each request
             config()->set('services.apple.client_secret', $this->appleJWTService->generate());
             
             $appleUser = Socialite::driver('apple')->stateless()->user();
-            $user = User::where('email', $appleUser->email)->first();
+            $user = User::where('apple_id', $appleUser->id)->first();
             
+            Log::error(print_r($appleUser, true));
+
             if (!$user) {
                 $user = User::create([
                     'name' => $appleUser->name ?? 'Apple User',
-                    'email' => $appleUser->email,
+                    'email' => $appleUser->email ?? 'Apple Email',
                     'apple_id' => $appleUser->id,
                     'password' => bcrypt(Str::random(16)),
                 ]);
@@ -44,11 +51,21 @@ class AppleController extends Controller
                 $user->save();
             }
             
-            Auth::login($user);
-            
             // Update last_login timestamp
             $user->update(['last_login' => now()]);
             
+            if($request->wantsJson()) {
+                $token = $user->createToken('mobile-app')->plainTextToken;
+                
+                return response()->json([
+                    'token' => $token,
+                    'user' => $user
+                ]);
+
+            }
+
+
+            Auth::login($user);
             // Check if user has completed onboarding
             if (!$user->onboarding_completed) {
                 return redirect()->intended(route('onboarding.show'));
@@ -65,8 +82,8 @@ class AppleController extends Controller
              return redirect()->route('dashboard');
             
         } catch (\Exception $e) {
-            return redirect()->route('login')
-                ->with('error', 'Apple authentication failed. Please try again.');
+            Log::error($e->getMessage());
+            throw new \Exception($e->getMessage());
         }
     }
 
@@ -90,6 +107,65 @@ class AppleController extends Controller
                 'success' => false,
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+
+    public function loginWithApple(Request $request)
+    {
+        // Log::error(print_r($request->all(), true));
+
+        $request->validate([
+            'identity_token' => 'required|string',
+        ]);
+
+        $identityToken = $request->input('identity_token');
+
+        try {
+            // 1. Fetch Apple public keys
+            $jwks = Http::get('https://appleid.apple.com/auth/keys')->json();
+
+            // 2. Verify token
+            $decoded = JWT::decode($identityToken, JWK::parseKeySet($jwks));
+
+            // 3. Validate claims
+            if ($decoded->iss !== 'https://appleid.apple.com') {
+                throw new \Exception('Invalid issuer');
+            }
+        Log::error(print_r($decoded, true));
+
+            if ($decoded->aud !== config('services.apple.client_id')) {
+                throw new \Exception('Invalid audience');
+            }
+
+            // 4. Extract Apple ID + email
+            $appleId = $decoded->sub;
+            $email   = $decoded->email ?? $request->input('email'); // fallback
+            $name    = $request->input('fullName.givenName') ?? 'Apple User';
+
+            // 5. Find or create user
+            $user = User::firstOrCreate(
+                ['apple_id' => $appleId],
+                [
+                    'email' => $email,
+                    'name'  => $name,
+                    'password' => bcrypt(str()->random(16)),
+                ]
+            );
+
+            // 6. Issue Laravel token
+            $token = $user->createToken('mobile-app')->plainTextToken;
+
+            return response()->json([
+                'token' => $token,
+                'user'  => $user,
+            ]);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json([
+                'error' => 'Apple authentication failed',
+                'details' => $e->getMessage(),
+            ], 401);
         }
     }
 }

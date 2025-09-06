@@ -19,6 +19,7 @@ use App\Http\Controllers\QuizController;
 use App\Http\Controllers\QuizSharingController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\Api\NewsController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -129,6 +130,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/folders-with-counts', [FolderController::class, 'getFoldersWithCounts']);
 
+    // News routes
+Route::get('/news/unread', [NewsController::class, 'getUnreadNews']);
+Route::get('/news/paginated', [NewsController::class, 'getPaginatedNews']);
+Route::post('/news/{newsId}/mark-viewed', [NewsController::class, 'markAsViewed']);
+Route::resource('news', NewsController::class)->names('api.news');
+
 });
 
 // Public pricing plans route (no auth required)
@@ -139,7 +146,8 @@ Route::post('login', [AuthenticatedSessionController::class, 'store']);
 Route::post('register', [RegisteredUserController::class, 'store']);
 
 Route::post('auth/google/callback', [\App\Http\Controllers\Auth\GoogleController::class, 'handleMobileGoogleAuth']);
-
+Route::post('auth/apple/callback', [\App\Http\Controllers\Auth\AppleController::class, 'loginWithApple'])
+    ->name('auth.apple.callback');
     
 Route::get('/test', function(){
     return 'test';

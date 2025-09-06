@@ -22,6 +22,8 @@ import StudyPlanCalendar from '@/components/StudyPlanCalendar';
 import StudyPlanPreview from '@/components/StudyPlanPreview';
 import TawkTo from '@/components/TawkTo';
 import { TAWKTO_CONFIG, isTawkToConfigured } from '@/config/tawkto';
+import { NewsModal } from '@/components/news-modal';
+import { useNews, usePaginatedNews } from '@/hooks/use-news';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -93,7 +95,44 @@ export default function Dashboard() {
     const [isWebLinkModalOpen, setIsWebLinkModalOpen] = useState(false);
     const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
     const [isUploadAudioModalOpen, setIsUploadAudioModalOpen] = useState(false);
+    
+    // News modal state
+    const { unreadNews, markAsViewed: markUnreadNewsAsViewed } = useNews();
+    const { 
+        newsItems, 
+        isLoading: isLoadingNews, 
+        isLoadingMore, 
+        hasMore, 
+        loadMore, 
+        markAsViewed 
+    } = usePaginatedNews();
+    const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
+    
+    // Auto-show news modal when unread news is available
+    useEffect(() => {
+        if (unreadNews && !isNewsModalOpen) {
+            setIsNewsModalOpen(true);
+        }
+    }, [unreadNews, isNewsModalOpen]);
+    
+    const handleNewsModalClose = () => {
+        setIsNewsModalOpen(false);
+        // Optimistically mark the single unread news item as viewed to prevent auto-reopen
+        if (unreadNews) {
+            // Fire-and-forget; useNews handles optimistic clearing and rollback on failure
+            markUnreadNewsAsViewed(unreadNews.id);
+        }
+    };
+    
+    const handleMarkNewsAsViewed = async (newsId: number) => {
+        try {
+            await markAsViewed(newsId);
+        } catch (error) {
+            console.error('Failed to mark news as viewed:', error);
+        }
+    };
 
+    console.log(isNewsModalOpen)
     // Add back the getIconComponent function
     const getIconComponent = (iconName: string) => {
         switch (iconName) {
@@ -442,6 +481,17 @@ export default function Dashboard() {
                 isOpen={isModalOpen} 
                 onClose={() => setIsModalOpen(false)} 
             />
+            
+            <NewsModal
+                    isOpen={isNewsModalOpen}
+                    onClose={handleNewsModalClose}
+                    newsItems={newsItems}
+                    isLoading={isLoadingNews}
+                    isLoadingMore={isLoadingMore}
+                    hasMore={hasMore}
+                    onLoadMore={loadMore}
+                    onMarkAsViewed={handleMarkNewsAsViewed}
+                />
 
             {/* Tawk.to Chat Widget */}
             {isTawkToConfigured() && (

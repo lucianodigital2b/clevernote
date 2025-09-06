@@ -190,6 +190,11 @@ Route::middleware(['auth', 'admin.email'])->group(function () {
     
     Route::get('/debug/export-notes', [DebugController::class, 'exportNotesData'])
         ->name('debug.export-notes');
+    
+    // Admin news management
+    Route::get('/admin/news', function () {
+        return \Inertia\Inertia::render('admin/news');
+    })->name('admin.news');
 });
 
 require __DIR__.'/settings.php';
