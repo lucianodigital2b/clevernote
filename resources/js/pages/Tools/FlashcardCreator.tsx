@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Head } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import Layout from '@/layouts/Layout';
+import AppLayout from '@/layouts/app-layout';
 
 interface FlashcardCreatorProps {
     locale: string;
@@ -205,7 +205,7 @@ const FlashcardCreator: React.FC<FlashcardCreatorProps> = ({ locale }) => {
 
     if (studyMode) {
         return (
-            <Layout>
+            <AppLayout>
                 <Head title={getLocalizedText('title')} />
                 
                 <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 py-12">
@@ -292,12 +292,12 @@ const FlashcardCreator: React.FC<FlashcardCreatorProps> = ({ locale }) => {
                         )}
                     </div>
                 </div>
-            </Layout>
+            </AppLayout>
         );
     }
 
     return (
-        <Layout>
+        <AppLayout>
             <Head title={getLocalizedText('title')} />
             
             <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 py-12">
@@ -440,7 +440,7 @@ const FlashcardCreator: React.FC<FlashcardCreatorProps> = ({ locale }) => {
                     </div>
                 </div>
             </div>
-        </Layout>
+        </AppLayout>
     );
 };
 

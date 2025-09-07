@@ -568,7 +568,8 @@ V. Applications
       }
     };
 
-    const template = templates[selectedStyle as keyof typeof templates]?.[selectedSubject as keyof typeof templates[selectedStyle as keyof typeof templates]] || 
+    const styleTemplates = templates[selectedStyle as keyof typeof templates];
+    const template = styleTemplates?.[selectedSubject as keyof typeof styleTemplates] || 
                     `# ${customTopic || 'Study Notes'}
 
 **Date:** ___________

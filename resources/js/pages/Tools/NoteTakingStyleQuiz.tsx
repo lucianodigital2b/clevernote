@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Head } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import Layout from '@/layouts/Layout';
+import AppLayout from '@/layouts/app-layout';
 
 interface NoteTakingStyleQuizProps {
     locale: string;
@@ -367,7 +367,7 @@ const NoteTakingStyleQuiz: React.FC<NoteTakingStyleQuizProps> = ({ locale }) => 
 
     if (showResult && result) {
         return (
-            <Layout>
+            <AppLayout>
                 <Head title={getLocalizedText('title')} />
                 
                 <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 py-12">
@@ -431,12 +431,12 @@ const NoteTakingStyleQuiz: React.FC<NoteTakingStyleQuizProps> = ({ locale }) => 
                         </div>
                     </div>
                 </div>
-            </Layout>
+            </AppLayout>
         );
     }
 
     return (
-        <Layout>
+        <AppLayout>
             <Head title={getLocalizedText('title')} />
             
             <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 py-12">
@@ -517,7 +517,7 @@ const NoteTakingStyleQuiz: React.FC<NoteTakingStyleQuizProps> = ({ locale }) => 
                     </div>
                 </div>
             </div>
-        </Layout>
+        </AppLayout>
     );
 };
 

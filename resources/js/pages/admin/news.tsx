@@ -16,7 +16,7 @@ import { Plus, Edit, Trash2, MoreHorizontal, Image as ImageIcon } from 'lucide-r
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import dayjs from 'dayjs';
 
 interface News {
     id: number;
@@ -278,10 +278,10 @@ export default function AdminNews() {
                                                 </Badge>
                                             </TableCell>
                                             <TableCell>
-                                                {format(new Date(news.published_at), 'MMM dd, yyyy')}
+                                                {dayjs(news.published_at).format('MMM DD, YYYY')}
                                             </TableCell>
                                             <TableCell>
-                                                {format(new Date(news.created_at), 'MMM dd, yyyy')}
+                                                {dayjs(news.created_at).format('MMM DD, YYYY')}
                                             </TableCell>
                                             <TableCell>
                                                 <DropdownMenu>

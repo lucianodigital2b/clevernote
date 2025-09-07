@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Head } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import Layout from '@/layouts/Layout';
+import AppLayout from '@/layouts/app-layout';
 
 interface ProductivityCalculatorProps {
     locale: string;
@@ -353,7 +353,7 @@ const ProductivityCalculator: React.FC<ProductivityCalculatorProps> = ({ locale 
     };
 
     return (
-        <Layout>
+        <AppLayout>
             <Head title={getLocalizedText('title')} />
             
             <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-100 py-12">
@@ -613,7 +613,7 @@ const ProductivityCalculator: React.FC<ProductivityCalculatorProps> = ({ locale 
                     </div>
                 </div>
             </div>
-        </Layout>
+        </AppLayout>
     );
 };
 
