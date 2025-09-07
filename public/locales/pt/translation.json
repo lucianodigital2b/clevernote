@@ -106,6 +106,9 @@
   "hero_description": "Entenda suas tarefas instantaneamente e entrege soluções precisas em segundos. Chega de noites em claro, chega de frustração.",
   "start_free": "Começar grátis",
   "free_trial": "3 dias de teste grátis",
+  "scan_on_iphone": "Escanear no iPhone",
+  "ios_app_title": "Use o Clevernote em movimento com nosso app iOS",
+  "ios_app_description": "Grave aulas rapidamente, crie notas e muito mais",
   "biology_notes": "Notas de Biologia 101",
   "cell_structure": "Estrutura e Função Celular",
   "photosynthesis": "Processo de Fotossíntese",
@@ -214,7 +217,7 @@
   "nav_testimonials": "Depoimentos",
   "nav_pricing": "Preços",
   "nav_login": "Entrar",
-  "nav_signup": "Cadastrar","Cadastre-se",
+  "nav_signup": "Cadastrar",
 
   "My Quizzes": "Meus Questionários",
   "No quizzes yet": "Ainda não há questionários",

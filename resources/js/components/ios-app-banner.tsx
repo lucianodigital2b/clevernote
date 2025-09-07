@@ -39,17 +39,17 @@ const IosAppBanner = () => {
               <img src="/qrcode.png" alt="iOS App QR Code" className="w-20 h-20" />
             </div>
             <div className="text-xs text-center mt-1 font-medium">
-              Scan on iPhone
+              {t('scan_on_iphone')}
             </div>
           </div>
           
           {/* Content */}
           <div className="text-center">
             <h3 className="font-semibold text-gray-900 text-xs mb-1">
-              Use Clevernote on the go with our iOS app
+              {t('ios_app_title')}
             </h3>
             <p className="text-xs text-gray-600">
-              Quickly record lectures, create notes, and more
+              {t('ios_app_description')}
             </p>
           </div>
         </div>
