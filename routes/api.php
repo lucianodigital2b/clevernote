@@ -131,10 +131,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/folders-with-counts', [FolderController::class, 'getFoldersWithCounts']);
 
     // News routes
-Route::get('/news/unread', [NewsController::class, 'getUnreadNews']);
-Route::get('/news/paginated', [NewsController::class, 'getPaginatedNews']);
-Route::post('/news/{newsId}/mark-viewed', [NewsController::class, 'markAsViewed']);
-Route::resource('news', NewsController::class)->names('api.news');
+    Route::get('/news/unread', [NewsController::class, 'getUnreadNews']);
+    Route::get('/news/paginated', [NewsController::class, 'getPaginatedNews']);
+    Route::post('/news/{newsId}/mark-viewed', [NewsController::class, 'markAsViewed']);
+    Route::resource('news', NewsController::class)->names('api.news');
 
 });
 

@@ -75,7 +75,8 @@ const Welcome = ({ pricingPlans }: WelcomeProps) => {
     <div className="min-h-screen bg-white">
       <Navbar />
       <Hero />
-      <section id="whos-it-for"><WhosItFor /></section>
+
+      {/* <section id="whos-it-for"><WhosItFor /></section> */}
       {/* <section id="how-it-works"><HowItWorks /></section> */}
       {/* <section id="features"><Features /></section> */}
       {/* <section id="pricing"><Pricing pricingPlans={pricingPlans} /></section> */}
