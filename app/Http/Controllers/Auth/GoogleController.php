@@ -29,6 +29,7 @@ class GoogleController extends Controller
                     'email' => $googleUser->email,
                     'password' => bcrypt(Str::random(16)),
                     'google_id' => $googleUser->id,
+                    'registered_from_mobile' => true, // This method is specifically for mobile Google auth
                 ]);
             } else if (!$user->google_id) {
                 $user->google_id = $googleUser->id;

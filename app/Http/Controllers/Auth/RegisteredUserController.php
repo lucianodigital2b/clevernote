@@ -41,6 +41,7 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'registered_from_mobile' => $request->expectsJson(), // Mobile apps typically send JSON requests
         ]);
 
         event(new Registered($user));

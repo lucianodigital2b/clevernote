@@ -45,6 +45,7 @@ class AppleController extends Controller
                     'email' => $appleUser->email ?? 'Apple Email',
                     'apple_id' => $appleUser->id,
                     'password' => bcrypt(Str::random(16)),
+                    'registered_from_mobile' => $request->wantsJson(), // Set flag based on JSON request
                 ]);
             } else if (!$user->apple_id) {
                 $user->apple_id = $appleUser->id;
@@ -150,6 +151,7 @@ class AppleController extends Controller
                     'email' => $email,
                     'name'  => $name,
                     'password' => bcrypt(str()->random(16)),
+                    'registered_from_mobile' => true, // This method is specifically for mobile Apple auth
                 ]
             );
 

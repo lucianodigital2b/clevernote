@@ -33,7 +33,7 @@ class User extends Authenticatable implements HasMedia
     protected $fillable = [
         'name', 'email', 'password', 'google_id', 'apple_id',
         'preferred_language', 'discovery_source',
-        'primary_subject_interest', 'learning_goals', 'onboarding_completed', 'notes_count', 'survey_data', 'study_plan', 'xp', 'level', 'last_login'
+        'primary_subject_interest', 'learning_goals', 'onboarding_completed', 'notes_count', 'survey_data', 'study_plan', 'xp', 'level', 'last_login', 'registered_from_mobile'
     ];
 
     /**
@@ -60,6 +60,7 @@ class User extends Authenticatable implements HasMedia
             'survey_data' => 'array',
             'study_plan' => 'array',
             'last_login' => 'datetime',
+            'registered_from_mobile' => 'boolean',
         ];
     }
 
