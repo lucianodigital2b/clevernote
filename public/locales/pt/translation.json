@@ -143,8 +143,8 @@
   "is_clevernote_free": "O Clevernote é gratuito?",
   "is_clevernote_free_answer": "Sim! O Clevernote tem uma versão gratuita que inclui recursos essenciais. Você também pode fazer upgrade para obter ferramentas mais avançadas e suporte personalizado.",
   
-  "has_mobile_app": "Existe um aplicativo Clevernote para iOS e Android?",
-  "has_mobile_app_answer": "Não, ainda não, mas fique atento",
+  "has_mobile_app": "Existe um aplicativo móvel Clevernote?",
+  "has_mobile_app_answer": "Sim! Nosso aplicativo para iOS já está disponível na App Store. Escaneie o código QR em nossa página inicial ou visite <a href='https://apps.apple.com/us/app/clevernote-ai-homework-helper/id6747533532' target='_blank' rel='noopener noreferrer'>este link</a> para baixar. Versão para Android em breve!",
   
   "is_it_legal_in_school": "Isso é permitido na minha escola?",
   "is_it_legal_in_school_answer": "Com certeza. O Clevernote foi projetado para apoiar seu aprendizado, não para substituí-lo. Apenas certifique-se de seguir as políticas de integridade acadêmica da sua escola.",
@@ -698,6 +698,14 @@
   "whos_it_for_perfect_for_title": "Perfeito para Futuros Advogados e Médicos",
   "whos_it_for_perfect_for_description": "Domine conceitos médicos complexos 3x mais rápido. Transforme livros didáticos avassaladores em compreensão cristalina. Navegue pela jurisprudência como um profissional. Transforme textos jurídicos densos em insights memoráveis.",
   "whos_it_for_student_success_alt": "Estudante alcançando sucesso",
-  "upgrade_modal_promo_message": "⚡ Não perca tempo! 50% de desconto anual com o cupom 50OFF"
+  "upgrade_modal_promo_message": "⚡ Não perca tempo! 50% de desconto anual com o cupom 50OFF",
+  "mobile_app_showcase_title": "Aplicativo móvel Clevernote",
+  "mobile_app_showcase_description": "Experimente o Clevernote em qualquer lugar com nosso poderoso aplicativo para iOS. Versão para Android em breve!",
+  "feature_quick_notes": "Notas Rápidas",
+  "feature_quick_notes_desc": "Capture ideias e notas em qualquer lugar",
+  "feature_search": "Busca Inteligente",
+  "feature_search_desc": "Encontre suas notas instantaneamente",
+  "feature_sync": "Sincronização na Nuvem",
+  "feature_sync_desc": "Acesse suas notas de qualquer dispositivo"
 
 }

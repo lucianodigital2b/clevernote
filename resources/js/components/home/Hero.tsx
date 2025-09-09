@@ -33,7 +33,7 @@ const Hero = () => {
             </h1>
             
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 justify-center px-4 sm:px-0 mt-7">
-              <div className="p-[3px] rounded-full bg-gradient-to-r from-indigo-400 to-indigo-600 hover:from-indigo-600 hover:to-indigo-800">
+              <div className="p-[3px] rounded-full bg-gradient-to-r from-purple-400 to-purple-600 hover:from-purple-600 hover:to-purple-800">
                 <Button className="border-0 w-full h-full bg-white text-gray-900 hover:bg-gray-100 rounded-full hover:text-dark" variant="outline" asChild>
                   <a href={route('auth.google')} className="flex items-center justify-center px-6 sm:px-8 py-2 text-sm sm:text-base">
                     <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -46,12 +46,13 @@ const Hero = () => {
                   </a>
                 </Button>
               </div>
-              <Button className="py-3 sm:py-4 bg-indigo-100 hover:bg-indigo-200 text-indigo-600 border-2 px-6 sm:px-8 rounded-full font-medium transition-all duration-200 shadow-lg shadow-indigo-200/50 hover:shadow-xl hover:shadow-indigo-300/60 h-full border-indigo-600 text-sm sm:text-base" asChild>
-                <a href="/login" className="flex items-center justify-center">
-                  {t('premium_cta_email')}
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </a>
-              </Button>
+              <a href="https://apps.apple.com/us/app/clevernote-ai-homework-helper/id6747533532" className="inline-block">
+                <img 
+                  src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" 
+                  alt="Download on the App Store" 
+                  className="h-12 sm:h-14 w-auto rounded-lg hover:opacity-80 transition-opacity duration-200"
+                />
+              </a>
             </div>
 
             <div className="flex flex-row items-center justify-center gap-4 sm:gap-8 mb-8">
@@ -79,8 +80,8 @@ const Hero = () => {
                   />
                 </div>
                 <div className="text-left sm:text-left ">
-                  <div className="text-indigo-600 font-semibold text-center sm:text-lg">{t('hero_social_proof_loved_by')}</div>
-                  <div className="text-indigo-600 font-semibold text-center sm:text-lg">{t('hero_million_students')}</div>
+                  <div className="text-purple-600 font-semibold text-center sm:text-lg">{t('hero_social_proof_loved_by')}</div>
+                  <div className="text-purple-600 font-semibold text-center sm:text-lg">{t('hero_million_students')}</div>
                 </div>
               </div>
               
@@ -111,7 +112,7 @@ const Hero = () => {
             </h1>
             
             <div className="flex flex-col lg:flex-row gap-4 mb-8 mt-7">
-              <div className="p-[3px] rounded-full bg-gradient-to-r from-indigo-400 to-indigo-600 hover:from-indigo-600 hover:to-indigo-800">
+              <div className="p-[3px] rounded-full bg-gradient-to-r from-purple-400 to-purple-600 hover:from-purple-600 hover:to-purple-800">
                 <Button className="border-0 w-full h-full bg-white text-gray-900 hover:bg-gray-100 rounded-full hover:text-dark" variant="outline" asChild>
                   <a href={route('auth.google')} className="flex items-center justify-center px-6 lg:px-8 py-2 text-base">
                     <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -124,12 +125,13 @@ const Hero = () => {
                   </a>
                 </Button>
               </div>
-              <Button className="py-3 lg:py-4 bg-indigo-100 hover:bg-indigo-200 text-indigo-600 border-2 px-6 lg:px-8 rounded-full font-medium transition-all duration-200 shadow-lg shadow-indigo-200/50 hover:shadow-xl hover:shadow-indigo-300/60 h-full border-indigo-600 text-base" asChild>
-                <a href="/login" className="flex items-center justify-center">
-                  {t('premium_cta_email')}
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </a>
-              </Button>
+              <a href="https://apps.apple.com/us/app/clevernote-ai-homework-helper/id6747533532" className="inline-block">
+                <img 
+                  src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" 
+                  alt="Download on the App Store" 
+                  className="h-14 lg:h-16 w-auto rounded-lg hover:opacity-80 transition-opacity duration-200"
+                />
+              </a>
             </div>
 
             <div className="flex flex-row items-center gap-8 mb-8">
@@ -157,8 +159,8 @@ const Hero = () => {
                   />
                 </div>
                 <div className="text-left">
-                  <div className="text-indigo-600 font-semibold text-lg">{t('hero_social_proof_loved_by')}</div>
-                  <div className="text-indigo-600 font-semibold text-lg">{t('hero_million_students')}</div>
+                  <div className="text-purple-600 font-semibold text-lg">{t('hero_social_proof_loved_by')}</div>
+                  <div className="text-purple-600 font-semibold text-lg">{t('hero_million_students')}</div>
                 </div>
               </div>
               

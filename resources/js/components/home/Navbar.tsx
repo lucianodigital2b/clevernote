@@ -59,7 +59,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between">
           <a href="#" className="flex items-center space-x-2">
             <span className={`text-xl font-display font-bold tracking-tight ${
-              isScrolled ? "text-gray-900" : "text-indigo-900"
+              isScrolled ? "text-gray-900" : "text-purple-900"
             }`}>
               Clevernote
             </span>
@@ -122,7 +122,7 @@ const Navbar = () => {
               <Button variant="outline" size="sm" className="mr-2 bg-white text-black border-zinc-200 hover:bg-zinc-100 hover:text-black" asChild>
                 <a href="/login">{t('nav_login')}</a>
               </Button>
-              <Button size="sm" className="bg-indigo-500 hover:bg-indigo-600 text-white" asChild>
+              <Button size="sm" className="bg-purple-500 hover:bg-purple-600 text-white" asChild>
                 <a href="/register">{t('nav_signup')}</a>
               </Button>
             </div>
@@ -185,7 +185,7 @@ const Navbar = () => {
               <Button variant="outline" size="sm" className="flex-1 bg-white text-black border-zinc-200 hover:bg-white hover:text-black" asChild>
                 <a href="/login">{t('nav_login')}</a>
               </Button>
-              <Button size="sm" className="flex-1 bg-indigo-500 hover:bg-indigo-600" asChild>
+              <Button size="sm" className="flex-1 bg-purple-500 hover:bg-purple-600" asChild>
                 <a href="/register">{t('nav_signup')}</a>
               </Button>
             </div>

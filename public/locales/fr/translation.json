@@ -52,8 +52,16 @@
   "study_frequency_few_weekly": "Quelques fois par semaine",
   "study_frequency_weekly": "Hebdomadairement",
   "study_frequency_rarely": "Rarement",
-  "premium_title": "Débloquez les fonctionnalités Premium",
+  "premium_title": "Débloquez les fonctionnalités premium",
   "premium_description": "Tirez le meilleur parti de votre expérience d'apprentissage",
+  "mobile_app_showcase_title": "Application mobile Clevernote",
+  "mobile_app_showcase_description": "Découvrez Clevernote en déplacement avec notre puissante application iOS. Version Android bientôt disponible !",
+  "feature_quick_notes": "Notes Rapides",
+  "feature_quick_notes_desc": "Capturez des idées et des notes en déplacement",
+  "feature_search": "Recherche Intelligente",
+  "feature_search_desc": "Trouvez vos notes instantanément",
+  "feature_sync": "Synchronisation Cloud",
+  "feature_sync_desc": "Accédez à vos notes depuis n'importe quel appareil",
   "premium_ai_summaries": "Résumés générés par IA",
   "premium_topic_segmentation": "Segmentation intelligente des sujets",
   "premium_gamified_progress": "Suivi du progrès ludifié",
@@ -270,6 +278,15 @@
 "upgrade_modal_others_started": "738 autres ont commencé aujourd'hui",
 "scan_on_iphone": "Scanner sur iPhone",
 "ios_app_title": "Utilisez Clevernote en déplacement avec notre app iOS",
-"ios_app_description": "Enregistrez rapidement des cours, créez des notes et plus encore"
+"ios_app_description": "Enregistrez rapidement des cours, créez des notes et plus encore",
+
+"is_clevernote_free": "Clevernote est-il gratuit ?",
+"is_clevernote_free_answer": "Oui ! Clevernote propose une version gratuite qui inclut les fonctionnalités essentielles. Vous pouvez également passer à la version premium pour des outils plus avancés et un support personnalisé.",
+
+"has_mobile_app": "Existe-t-il une application mobile Clevernote ?",
+"has_mobile_app_answer": "Oui ! Notre application iOS est maintenant disponible sur l'App Store. Scannez le code QR sur notre page d'accueil ou visitez <a href='https://apps.apple.com/us/app/clevernote-ai-homework-helper/id6747533532' target='_blank' rel='noopener noreferrer'>ce lien</a> pour la télécharger. Version Android bientôt disponible !",
+
+"is_it_legal_in_school": "Est-ce légal dans mon école ?",
+"is_it_legal_in_school_answer": "Clevernote est conçu comme un outil d'étude et d'apprentissage. Nous encourageons les utilisateurs à vérifier les politiques de leur établissement concernant les outils d'assistance à l'apprentissage et à utiliser Clevernote de manière responsable et éthique."
 
 }

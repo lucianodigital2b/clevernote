@@ -66,8 +66,7 @@ const FAQ = () => {
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <div className="px-6 pb-4 text-gray-600">
-                      {item.answer}
+                    <div className="px-6 pb-4 text-gray-600" dangerouslySetInnerHTML={{ __html: item.answer }}>
                     </div>
                   </motion.div>
                 )}

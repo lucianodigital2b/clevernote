@@ -11,6 +11,7 @@ import Testimonials from "../components/home/Testimonials";
 import Pricing from "../components/home/Pricing";
 import CallToAction from "../components/home/CallToAction";
 import Footer from "../components/home/Footer";
+import MobileAppShowcase from "../components/home/MobileAppShowcase";
 
 interface WelcomeProps {
   pricingPlans: any[];
@@ -62,7 +63,7 @@ const Welcome = ({ pricingPlans }: WelcomeProps) => {
       });
     }, observerOptions);
 
-    const sections = document.querySelectorAll('#whos-it-for, #how-it-works, #features, #reliability, #testimonials, #pricing, #cta');
+    const sections = document.querySelectorAll('#whos-it-for, #how-it-works, #features, #reliability, #testimonials, #pricing, #mobile-app, #cta');
     sections.forEach(section => {
       section.classList.add('opacity-0');
       observer.observe(section);
@@ -83,6 +84,7 @@ const Welcome = ({ pricingPlans }: WelcomeProps) => {
       {/* <section id="testimonials"><Testimonials /></section> */}
 
       <section id="faq"><FAQ /></section>
+      {/* <section id="mobile-app" className="opacity-0"><MobileAppShowcase /></section> */}
       {/* <section id="reliability"><Reliability /></section> */}
       <section id="cta"><CallToAction /></section>
       <Footer />

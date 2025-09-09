@@ -78,7 +78,6 @@ export function NewsModal({
         // Close the modal first
         onClose();
 
-        
         // Mark all unread news as viewed asynchronously
         const unreadNewsIds = newsItems
             .filter(item => !item.is_viewed)
