@@ -20,7 +20,19 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
     const user = (auth as any).user;
 
-
+    // Check if user has active subscription or is on trial
+    const hasActiveSubscriptionOrTrial = () => {
+        if (!user?.subscriptions) return false;
+        
+        return user.subscriptions.some((subscription: any) => {
+            const isActiveOrTrialing = subscription.stripe_status === 'active' || subscription.stripe_status === 'trialing';
+            const isNotExpired = !subscription.ends_at || new Date(subscription.ends_at) > new Date();
+            return isActiveOrTrialing && isNotExpired;
+        });
+    };
+    
+    // Hide premium banners if user has active subscription or is on trial
+    const shouldShowPremiumBanners = !hasActiveSubscriptionOrTrial();
 
     const toggleDarkMode = () => {
         const newMode = appearance === 'dark' ? 'light' : 'dark';
@@ -66,7 +78,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                     </Tooltip>
                 </TooltipProvider>
                 
-                {user.active_subscriptions?.length == 0 && (
+                {shouldShowPremiumBanners && (
                     <TooltipProvider delayDuration={0}>
                         <Tooltip>
                             <TooltipTrigger asChild>

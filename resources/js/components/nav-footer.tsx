@@ -36,11 +36,25 @@ export function NavFooter({
     
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
+    
+    // Check if user has active subscription or is on trial
+    const hasActiveSubscriptionOrTrial = () => {
+        if (!user?.subscriptions) return false;
+        
+        return user.subscriptions.some((subscription: any) => {
+            const isActiveOrTrialing = subscription.stripe_status === 'active' || subscription.stripe_status === 'trialing';
+            const isNotExpired = !subscription.ends_at || new Date(subscription.ends_at) > new Date();
+            return isActiveOrTrialing && isNotExpired;
+        });
+    };
+    
+    // Hide premium banners if user has active subscription or is on trial
+    const shouldShowPremiumBanners = !hasActiveSubscriptionOrTrial();
 
     return (
         <SidebarGroup {...props} className={`${className || ''}`}>
             {/* Full Progress Bar (Expanded Sidebar) */}
-            {user.active_subscriptions?.length == 0 && (
+            {shouldShowPremiumBanners && (
 
                 <div className={`px-2 mb-2 transition-all duration-200 ${isCollapsed ? 'hidden' : 'block'}`}>
                     <div className="bg-neutral-100 dark:bg-neutral-800 rounded-md p-3">
@@ -71,26 +85,28 @@ export function NavFooter({
             )}
 
             {/* Compact Progress Icon (Collapsed Sidebar) */}
-            <div className={`transition-all duration-200 ${isCollapsed ? 'block' : 'hidden'}`}>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <button 
-                            onClick={() => setIsModalOpen(true)}
-                            className="flex items-center justify-center w-full p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md transition-colors"
-                        >
-                            <div className="relative">
-                                <SparklesIcon className="h-5 w-5 text-indigo-500" />
-                                <div className="absolute -top-1 -right-1 bg-indigo-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                                    {freeNotesLeft}
+            {shouldShowPremiumBanners && (
+                <div className={`transition-all duration-200 ${isCollapsed ? 'block' : 'hidden'}`}>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <button 
+                                onClick={() => setIsModalOpen(true)}
+                                className="flex items-center justify-center w-full p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md transition-colors"
+                            >
+                                <div className="relative">
+                                    <SparklesIcon className="h-5 w-5 text-indigo-500" />
+                                    <div className="absolute -top-1 -right-1 bg-indigo-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                                        {freeNotesLeft}
+                                    </div>
                                 </div>
-                            </div>
-                        </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">
-                        {t('upgrade_for_unlimited_notes')}
-                    </TooltipContent>
-                </Tooltip>
-            </div>
+                            </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right">
+                            {t('upgrade_for_unlimited_notes')}
+                        </TooltipContent>
+                    </Tooltip>
+                </div>
+            )}
 
             <SidebarGroupContent>
                 <SidebarMenu>

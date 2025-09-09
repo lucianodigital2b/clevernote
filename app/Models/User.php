@@ -191,4 +191,43 @@ class User extends Authenticatable implements HasMedia
     {
         return $this->getProfilePictureUrl();
     }
+
+    /**
+     * Check if user is currently on trial
+     */
+    public function onTrial(): bool
+    {
+        return $this->subscriptions()
+            ->where('stripe_status', 'trialing')
+            ->where(function ($query) {
+                $query->whereNull('ends_at')
+                    ->orWhere('ends_at', '>', now());
+            })
+            ->exists();
+    }
+
+    /**
+     * Check if user has active subscription or is on trial
+     */
+    public function hasActiveSubscriptionOrTrial(): bool
+    {
+        return $this->subscriptions()
+            ->where(function ($query) {
+                $query->where('stripe_status', 'active')
+                    ->orWhere('stripe_status', 'trialing');
+            })
+            ->where(function ($query) {
+                $query->whereNull('ends_at')
+                    ->orWhere('ends_at', '>', now());
+            })
+            ->exists();
+    }
+
+    /**
+     * Check if user should see premium features (active subscription or trial)
+     */
+    public function shouldHidePremiumBanners(): bool
+    {
+        return $this->hasActiveSubscriptionOrTrial();
+    }
 }
