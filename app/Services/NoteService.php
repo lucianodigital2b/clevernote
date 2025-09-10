@@ -190,10 +190,13 @@ class NoteService
     private function extractTextFromPowerPointFallback($fullPath)
     {
         try {
+            // Check if it's a ZIP-based format (PPTX) or binary format (PPT)
             $zip = new \ZipArchive();
             $text = '';
             
-            if ($zip->open($fullPath) === TRUE) {
+            $zipResult = $zip->open($fullPath);
+            if ($zipResult === TRUE) {
+                // This is a PPTX file (ZIP-based format)
                 // Extract from slides
                 for ($i = 0; $i < $zip->numFiles; $i++) {
                     $filename = $zip->getNameIndex($i);
@@ -215,15 +218,71 @@ class NoteService
                     }
                 }
                 $zip->close();
+            } else {
+                // This might be an older PPT file (binary format)
+                \Log::info("File is not a ZIP archive (error code: $zipResult), attempting binary PPT extraction");
+                $text = $this->extractTextFromBinaryPpt($fullPath);
             }
             
             if (empty(trim($text))) {
-                throw new \RuntimeException('Could not extract text from PowerPoint file');
+                // Provide more helpful error message
+                $fileExtension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+                if ($fileExtension === 'ppt') {
+                    throw new \RuntimeException('This appears to be an older PowerPoint (.ppt) file format. Please convert it to .pptx format or try uploading as a PDF instead.');
+                } else {
+                    throw new \RuntimeException('Could not extract text from PowerPoint file. The file may be corrupted or in an unsupported format.');
+                }
             }
             
             return $text;
         } catch (\Exception $e) {
+            // Provide more specific error messages
+            if (strpos($e->getMessage(), 'older PowerPoint') !== false) {
+                throw $e; // Re-throw our custom message
+            }
             throw new \RuntimeException('Failed to process PowerPoint file: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Attempt to extract text from binary PPT files
+     */
+    private function extractTextFromBinaryPpt($fullPath)
+    {
+        try {
+            // For binary PPT files, we can try to extract readable text using basic string extraction
+            $content = file_get_contents($fullPath);
+            if ($content === false) {
+                throw new \RuntimeException('Could not read file contents');
+            }
+            
+            // Extract readable text using regex patterns
+            // This is a basic approach and may not work for all PPT files
+            $text = '';
+            
+            // Look for text patterns in the binary data
+            // PPT files often have readable text interspersed with binary data
+            if (preg_match_all('/[\x20-\x7E]{4,}/u', $content, $matches)) {
+                foreach ($matches[0] as $match) {
+                    // Filter out common binary patterns and keep likely text content
+                    if (strlen($match) > 10 && 
+                        !preg_match('/^[0-9\s]+$/', $match) && // Skip number-only strings
+                        !preg_match('/^[^a-zA-Z]*$/', $match) && // Skip non-alphabetic strings
+                        strpos($match, 'Microsoft') === false && // Skip metadata
+                        strpos($match, 'PowerPoint') === false) {
+                        $text .= trim($match) . "\n";
+                    }
+                }
+            }
+            
+            // Clean up the extracted text
+            $text = preg_replace('/\s+/', ' ', $text); // Normalize whitespace
+            $text = preg_replace('/[^\x20-\x7E\n\r\t]/', '', $text); // Remove non-printable characters
+            
+            return trim($text);
+        } catch (\Exception $e) {
+            \Log::warning("Binary PPT extraction failed: " . $e->getMessage());
+            return ''; // Return empty string to trigger the main error handling
         }
     }
 
