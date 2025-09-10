@@ -22,7 +22,7 @@ class FlashcardController extends Controller
             $query->where('user_id', Auth::id());
 
             if(isset($data['flashcard_set_id'])){
-                $query->where('id', $data['flashcard_set_id']);
+                $query->where('flashcard_sets.id', $data['flashcard_set_id']);
             }
             
         })

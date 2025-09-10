@@ -47,7 +47,6 @@ const mainNavItems: NavItem[] = [
         title: 'Focus',
         url: '/focus',
         icon: Timer,
-        new: true,
     },
     {
         title: t('Statistics'),
