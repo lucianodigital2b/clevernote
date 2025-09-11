@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Contracts\TextToSpeechServiceInterface;
 use App\Models\Note;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class NoteToPodcastGenerator
@@ -586,7 +587,7 @@ class NoteToPodcastGenerator
     {
         try {
             $tempFilePath = $ttsResult['temp_file_path'];
-            $fullTempPath = storage_path('app/' . $tempFilePath);
+            $fullTempPath = Storage::disk('local')->path($tempFilePath);
             
             Log::info('Starting media library processing', [
                 'note_id' => $note->id,

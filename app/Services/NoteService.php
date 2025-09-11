@@ -6,6 +6,7 @@ use App\Models\Note;
 use App\Models\FlashcardSet;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
 use Smalot\PdfParser\Parser;
 
 class NoteService
@@ -115,7 +116,7 @@ class NoteService
                         }
                         $processedPages++;
                     } catch (\Exception $e) {
-                        \Log::warning("Failed to extract text from page " . ($j + 1) . ": " . $e->getMessage());
+                        Log::warning("Failed to extract text from page " . ($j + 1) . ": " . $e->getMessage());
                         continue;
                     }
                 }
@@ -130,18 +131,18 @@ class NoteService
                 // Check memory usage and break if getting too high
                 $memoryUsage = memory_get_usage(true);
                 if ($memoryUsage > 800 * 1024 * 1024) { // 800MB threshold
-                    \Log::warning("Memory usage too high, stopping at page " . ($processedPages + 1));
+                    Log::warning("Memory usage too high, stopping at page " . ($processedPages + 1));
                     $text .= "\n\n[Processing stopped due to memory constraints after " . $processedPages . " pages]";
                     break;
                 }
             }
             
-            \Log::info("Successfully processed " . $processedPages . " out of " . $totalPages . " pages");
+            Log::info("Successfully processed " . $processedPages . " out of " . $totalPages . " pages");
             return $text;
             
         } catch (\Exception $e) {
             // Fallback to standard processing if chunked processing fails
-            \Log::warning("Chunked processing failed, attempting standard processing: " . $e->getMessage());
+            Log::warning("Chunked processing failed, attempting standard processing: " . $e->getMessage());
             return $this->extractTextFromStandardPdf($fullPath);
         }
     }
@@ -176,10 +177,10 @@ class NoteService
             
             return $text;
         } catch (\TypeError $e) {
-            \Log::warning("PowerPoint processing failed with type error, attempting alternative extraction: " . $e->getMessage());
+            Log::warning("PowerPoint processing failed with type error, attempting alternative extraction: " . $e->getMessage());
             return $this->extractTextFromPowerPointFallback($fullPath);
         } catch (\Exception $e) {
-            \Log::warning("PowerPoint processing failed, attempting fallback extraction: " . $e->getMessage());
+            Log::warning("PowerPoint processing failed, attempting fallback extraction: " . $e->getMessage());
             return $this->extractTextFromPowerPointFallback($fullPath);
         }
     }
@@ -220,7 +221,7 @@ class NoteService
                 $zip->close();
             } else {
                 // This might be an older PPT file (binary format)
-                \Log::info("File is not a ZIP archive (error code: $zipResult), attempting binary PPT extraction");
+                Log::info("File is not a ZIP archive (error code: $zipResult), attempting binary PPT extraction");
                 $text = $this->extractTextFromBinaryPpt($fullPath);
             }
             
@@ -281,7 +282,7 @@ class NoteService
             
             return trim($text);
         } catch (\Exception $e) {
-            \Log::warning("Binary PPT extraction failed: " . $e->getMessage());
+            Log::warning("Binary PPT extraction failed: " . $e->getMessage());
             return ''; // Return empty string to trigger the main error handling
         }
     }
@@ -329,7 +330,7 @@ class NoteService
             }
             
         } catch (\Exception $e) {
-            \Log::debug("Error parsing slide XML: " . $e->getMessage());
+            Log::debug("Error parsing slide XML: " . $e->getMessage());
         }
         
         return $text;

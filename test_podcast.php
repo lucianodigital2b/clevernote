@@ -9,10 +9,10 @@ use App\Models\Note;
 use App\Services\NoteToPodcastGenerator;
 
 // Find a note to test with
-$note = Note::find(199);
+$note = Note::first();
 
 if (!$note) {
-    echo "Note not found\n";
+    echo "No notes found in database\n";
     exit(1);
 }
 

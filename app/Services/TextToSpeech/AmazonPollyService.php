@@ -13,10 +13,13 @@ class AmazonPollyService implements TextToSpeechServiceInterface
 {
     protected PollyClient $pollyClient;
     protected array $config;
+    protected array $defaults;
 
-    public function __construct()
+    public function __construct(array $config = [], array $defaults = [])
     {
-        $this->config = config('services.aws.polly');
+        // Use provided config or fallback to services config
+        $this->config = !empty($config) ? $config : config('services.aws.polly');
+        $this->defaults = $defaults;
         
         Log::info('Amazon Polly Service Config', $this->config);
 
@@ -43,13 +46,13 @@ class AmazonPollyService implements TextToSpeechServiceInterface
                 throw new \InvalidArgumentException('Invalid options provided');
             }
 
-            // Prepare synthesis parameters
+            // Prepare synthesis parameters with defaults
             $params = [
                 'Text' => $text,
-                'OutputFormat' => $options['output_format'] ?? 'mp3',
-                'VoiceId' => $options['voice_id'] ?? 'Joanna',
-                'LanguageCode' => $options['language_code'] ?? 'en-US',
-                'Engine' => $options['engine'] ?? 'standard',
+                'OutputFormat' => $options['output_format'] ?? $this->defaults['output_format'] ?? 'mp3',
+                'VoiceId' => $options['voice_id'] ?? $this->defaults['voice_id'] ?? 'Joanna',
+                'LanguageCode' => $options['language_code'] ?? $this->defaults['language_code'] ?? 'en-US',
+                'Engine' => $options['engine'] ?? $this->defaults['engine'] ?? 'standard',
             ];
 
             // Add SSML support if text contains SSML tags
