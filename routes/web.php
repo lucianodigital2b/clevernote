@@ -135,11 +135,6 @@ Route::middleware(['auth'])->group(function () {
     // Focus routes
     Route::prefix('focus')->group(function () {
         Route::get('/', [FocusController::class, 'index'])->name('focus.index');
-        Route::post('/start', [FocusController::class, 'start'])->name('focus.start');
-        Route::post('/pause', [FocusController::class, 'pause'])->name('focus.pause');
-        Route::post('/resume', [FocusController::class, 'resume'])->name('focus.resume');
-        Route::post('/complete', [FocusController::class, 'complete'])->name('focus.complete');
-        Route::post('/cancel', [FocusController::class, 'cancel'])->name('focus.cancel');
         Route::get('/status', [FocusController::class, 'status'])->name('focus.status');
         Route::get('/statistics', [FocusController::class, 'statistics'])->name('focus.statistics');
         Route::get('/leaderboard', [FocusController::class, 'leaderboard'])->name('focus.leaderboard');

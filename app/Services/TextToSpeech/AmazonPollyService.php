@@ -207,6 +207,11 @@ class AmazonPollyService implements TextToSpeechServiceInterface
         return 'amazon_polly';
     }
 
+    public function supportsSSML(): bool
+    {
+        return true;
+    }
+
     /**
      * Check if text contains SSML tags
      */

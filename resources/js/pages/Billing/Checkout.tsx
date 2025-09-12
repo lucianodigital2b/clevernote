@@ -97,7 +97,6 @@ function CheckoutForm() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
                 },
                 credentials: 'include',
                 body: JSON.stringify({ coupon: code.trim() }),
@@ -193,7 +192,6 @@ function CheckoutForm() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
             },
             credentials: 'include',
             body: JSON.stringify(subscriptionData),

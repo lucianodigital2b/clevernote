@@ -22,7 +22,6 @@ export function useCreateNote() {
 
         try {
             const formData = new FormData();
-            formData.append('props', props.csrf_token as string);
 
             if (data.title) formData.append('title', data.title);
 

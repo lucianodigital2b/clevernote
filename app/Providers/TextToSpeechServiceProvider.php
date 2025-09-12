@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\TextToSpeechServiceInterface;
 use App\Services\TextToSpeech\AmazonPollyService;
+use App\Services\TextToSpeech\MurfService;
 use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 
@@ -23,6 +24,10 @@ class TextToSpeechServiceProvider extends ServiceProvider
         // Register named providers for manual selection
         $this->app->bind('tts.amazon_polly', function ($app) {
             return $this->createProvider('amazon_polly');
+        });
+        
+        $this->app->bind('tts.murf', function ($app) {
+            return $this->createProvider('murf');
         });
         
         // Future providers can be registered here
@@ -69,6 +74,11 @@ class TextToSpeechServiceProvider extends ServiceProvider
                 $config['defaults'] ?? []
             ),
             
+            'murf' => new MurfService(
+                $config['config'],
+                $config['defaults'] ?? []
+            ),
+            
             // Future providers
             // 'google_cloud' => new GoogleCloudTTSService(
             //     $config['config'],
@@ -94,6 +104,7 @@ class TextToSpeechServiceProvider extends ServiceProvider
         return [
             TextToSpeechServiceInterface::class,
             'tts.amazon_polly',
+            'tts.murf',
         ];
     }
 }

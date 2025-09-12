@@ -52,14 +52,9 @@ createInertiaApp({
 // This will set light / dark mode on load...
 initializeTheme();
 
-// Set CSRF token for all axios requests
-const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-if (csrfToken) {
-    axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
-}
+// Configure axios for Laravel
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common['Accept'] = 'application/json';
-
 axios.defaults.withXSRFToken = true;
 
 // Initialize i18n after DOM is ready and stable

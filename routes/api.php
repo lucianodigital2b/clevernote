@@ -107,6 +107,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/statistics', [StatisticsController::class, 'index']);
     Route::get('/statistics/daily', [StatisticsController::class, 'daily']);
 
+    // Focus routes
+    Route::prefix('focus')->group(function () {
+        Route::post('/start', [\App\Http\Controllers\FocusController::class, 'start']);
+        Route::post('/pause', [\App\Http\Controllers\FocusController::class, 'pause']);
+        Route::post('/resume', [\App\Http\Controllers\FocusController::class, 'resume']);
+        Route::post('/complete', [\App\Http\Controllers\FocusController::class, 'complete']);
+        Route::post('/cancel', [\App\Http\Controllers\FocusController::class, 'cancel']);
+        Route::get('/status', [\App\Http\Controllers\FocusController::class, 'status']);
+    });
+
     // Group routes
     Route::prefix('groups')->group(function () {
         Route::get('/', [GroupController::class, 'index']);

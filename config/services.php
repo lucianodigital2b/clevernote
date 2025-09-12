@@ -68,4 +68,7 @@ return [
         ],
     ],
 
+    'murf' => [
+        'api_key' => env('MURF_API_KEY')
+    ]
 ];

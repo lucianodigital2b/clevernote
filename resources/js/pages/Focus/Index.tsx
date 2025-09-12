@@ -141,8 +141,7 @@ export default function FocusIndex({ activeSession: initialSession, tags, todayS
             const response = await fetch('/tags', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     name: tagName
@@ -175,11 +174,10 @@ export default function FocusIndex({ activeSession: initialSession, tags, todayS
     const handleStart = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch('/focus/start', {
+            const response = await fetch('/api/focus/start', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     tag_id: selectedTagId === "none" ? null : selectedTagId,
@@ -206,11 +204,10 @@ export default function FocusIndex({ activeSession: initialSession, tags, todayS
     const handlePause = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch('/focus/pause', {
+            const response = await fetch('/api/focus/pause', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    'Content-Type': 'application/json'
                 }
             });
 
@@ -231,11 +228,10 @@ export default function FocusIndex({ activeSession: initialSession, tags, todayS
     const handleResume = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch('/focus/resume', {
+            const response = await fetch('/api/focus/resume', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    'Content-Type': 'application/json'
                 }
             });
 
@@ -256,11 +252,10 @@ export default function FocusIndex({ activeSession: initialSession, tags, todayS
     const handleComplete = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch('/focus/complete', {
+            const response = await fetch('/api/focus/complete', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     notes: sessionNotes
@@ -286,11 +281,10 @@ export default function FocusIndex({ activeSession: initialSession, tags, todayS
     const handleCancel = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch('/focus/cancel', {
+            const response = await fetch('/api/focus/cancel', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    'Content-Type': 'application/json'
                 }
             });
 

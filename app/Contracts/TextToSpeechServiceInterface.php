@@ -49,4 +49,11 @@ interface TextToSpeechServiceInterface
      * @return string Service name
      */
     public function getServiceName(): string;
+
+    /**
+     * Check if the service supports SSML formatting
+     *
+     * @return bool True if SSML is supported
+     */
+    public function supportsSSML(): bool;
 }

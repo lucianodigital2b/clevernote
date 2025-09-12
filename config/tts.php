@@ -43,6 +43,22 @@ return [
             ],
         ],
 
+        'murf' => [
+            'driver' => 'murf',
+            'enabled' => env('TTS_MURF_ENABLED', true),
+            'config' => [
+                'api_key' => env('MURF_API_KEY'),
+            ],
+            'defaults' => [
+                'voice_id' => env('TTS_MURF_DEFAULT_VOICE', 'en-US-natalie'),
+                'language_code' => env('TTS_MURF_DEFAULT_LANGUAGE', 'en-US'),
+                'output_format' => env('TTS_MURF_DEFAULT_FORMAT', 'mp3'),
+                'rate' => env('TTS_MURF_DEFAULT_RATE', 0),
+                'pitch' => env('TTS_MURF_DEFAULT_PITCH', 0),
+                'variation' => env('TTS_MURF_DEFAULT_VARIATION', 0),
+            ],
+        ],
+
         // Future providers can be added here
         // 'google_cloud' => [
         //     'driver' => 'google_cloud',

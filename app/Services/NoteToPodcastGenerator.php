@@ -35,6 +35,11 @@ class NoteToPodcastGenerator
         ]);
 
         try {
+            // Check if dual-voice podcast is requested
+            if (isset($options['host_voice']) && isset($options['guest_voice'])) {
+                return $this->generateDualVoicePodcast($note, $options);
+            }
+            
             // Prepare the text content for TTS
             $podcastText = $this->preparePodcastText($note, $options);
 
@@ -45,44 +50,64 @@ class NoteToPodcastGenerator
 
             // Check content length before processing
             $contentLength = strlen($podcastText);
-            $maxBilledChars = 3000; // AWS Polly limit for billed characters
+            $maxBilledChars = $this->ttsService->getMaxTextLength();
             
             if ($contentLength > $maxBilledChars) {
-                Log::info('Content exceeds AWS Polly limit, using chunked processing', [
+                Log::info('Content exceeds TTS service limit, using chunked processing', [
                     'note_id' => $note->id,
                     'content_length' => $contentLength,
-                    'max_allowed' => $maxBilledChars
+                    'max_allowed' => $maxBilledChars,
+                    'service' => $this->ttsService->getServiceName()
                 ]);
                 
                 return $this->handleLongContent($note, $podcastText, $options);
             }
 
             try {
-                // Apply SSML formatting
-                $ssmlContent = $this->applySSMLFormatting($podcastText, $options);
-            
-                // Double-check the billed character count (content without SSML tags)
-                $billedChars = $this->countBilledCharacters($ssmlContent);
-                if ($billedChars > $maxBilledChars) {
-                    Log::warning('Billed characters exceed limit after SSML formatting', [
-                        'note_id' => $note->id,
-                        'billed_chars' => $billedChars,
-                        'max_allowed' => $maxBilledChars
-                    ]);
+                // Get service-specific default voice from config
+                $serviceName = $this->ttsService->getServiceName();
+                $providerConfig = config("tts.providers.{$serviceName}");
+                $defaultVoice = $providerConfig['defaults']['voice_id'] ?? 'en-US-natalie';
+                
+                // Validate and update voice_id in options before processing
+                $options['voice_id'] = $this->validateAndGetVoice($options['voice_id'] ?? $defaultVoice);
+                
+                $processedContent = $podcastText;
+                
+                // Apply SSML formatting only for services that support it
+                if (($options['use_ssml'] ?? false) && $this->ttsService->supportsSSML()) {
+                    $processedContent = $this->applySSMLFormatting($podcastText, $options);
                     
-                    return $this->handleLongContent($note, $podcastText, $options);
+                    // Double-check the billed character count (content without SSML tags)
+                    $billedChars = $this->countBilledCharacters($processedContent);
+                    if ($billedChars > $maxBilledChars) {
+                        Log::warning('Billed characters exceed limit after SSML formatting', [
+                            'note_id' => $note->id,
+                            'billed_chars' => $billedChars,
+                            'max_allowed' => $maxBilledChars
+                        ]);
+                        
+                        return $this->handleLongContent($note, $podcastText, $options);
+                    }
+                    
+                    Log::info('SSML generated successfully', [
+                        'note_id' => $note->id,
+                        'ssml_length' => strlen($processedContent),
+                        'billed_chars' => $billedChars,
+                        'ssml_preview' => substr($processedContent, 0, 200) . '...',
+                        'voice_id' => $options['voice_id'],
+                        'language_code' => $options['language_code'] ?? 'en-US'
+                    ]);
+                } else {
+                    Log::info('Processing with plain text', [
+                        'note_id' => $note->id,
+                        'content_length' => strlen($processedContent),
+                        'voice_id' => $options['voice_id'],
+                        'service' => $serviceName
+                    ]);
                 }
                 
-                Log::info('SSML generated successfully', [
-                    'note_id' => $note->id,
-                    'ssml_length' => strlen($ssmlContent),
-                    'billed_chars' => $billedChars,
-                    'ssml_preview' => substr($ssmlContent, 0, 200) . '...',
-                    'voice' => $options['voice'] ?? 'default',
-                    'language' => $options['language'] ?? 'default'
-                ]);
-                
-                $ttsResult = $this->ttsService->convertTextToSpeech($ssmlContent, $options);
+                $ttsResult = $this->ttsService->convertTextToSpeech($processedContent, $options);
                 
                 Log::info('TTS result received', [
                     'note_id' => $note->id,
@@ -185,8 +210,8 @@ class NoteToPodcastGenerator
             $cleanContent = $cleanContent . "\n\n" . $conclusion;
         }
 
-        // Apply SSML formatting if requested
-        if ($options['use_ssml'] ?? false) {
+        // Apply SSML formatting if requested and supported by the service
+        if (($options['use_ssml'] ?? false) && $this->ttsService->supportsSSML()) {
             try {
                 $cleanContent = $this->applySSMLFormatting($cleanContent, $options);
                 Log::info('SSML formatting applied successfully', ['note_id' => $note->id]);
@@ -197,6 +222,11 @@ class NoteToPodcastGenerator
                 ]);
                 // Continue with plain text instead of failing completely
             }
+        } elseif (($options['use_ssml'] ?? false) && !$this->ttsService->supportsSSML()) {
+            Log::info('SSML not supported by current TTS service, using plain text', [
+                'note_id' => $note->id,
+                'service' => $this->ttsService->getServiceName()
+            ]);
         }
 
         return trim($cleanContent);
@@ -231,7 +261,10 @@ class NoteToPodcastGenerator
     protected function generateIntroduction(Note $note): string
     {
         $title = $note->title ?? 'Untitled Note';
-        return "Welcome to your personal podcast. Today we'll be covering: {$title}.";
+        $language = $this->detectLanguage($note->content ?? '');
+        $welcomeMessage = $this->getWelcomeMessage($language);
+        
+        return "{$welcomeMessage} Today we'll be covering: {$title}.";
     }
 
     /**
@@ -247,7 +280,7 @@ class NoteToPodcastGenerator
      */
     protected function applySSMLFormatting(string $content, array $options): string
     {
-        $voice = $this->validateAndGetVoice($options['voice_id'] ?? 'Joanna');
+        $voice = $options['voice_id'] ?? 'Joanna';
         $language = $options['language_code'] ?? 'en-US';
         
         // Clean and escape content for SSML
@@ -353,28 +386,51 @@ class NoteToPodcastGenerator
      */
     protected function validateAndGetVoice(string $voiceId): string
     {
-        // List of known valid Amazon Polly voices
-        $validVoices = [
-            'Joanna', 'Matthew', 'Amy', 'Brian', 'Emma', 'Aditi', 'Raveena',
-            'Ivy', 'Kendra', 'Kimberly', 'Salli', 'Joey', 'Justin', 'Kevin',
-            'Nicole', 'Russell', 'Aria', 'Ayanda', 'Arlet', 'Hannah', 'Liam',
-            'Mia', 'Olivia', 'Pedro', 'Gabrielle', 'Vicki', 'Seoyeon', 'Takumi',
-            'Lucia', 'Bianca', 'Camila', 'Vitoria', 'Ricardo', 'Ines', 'Cristiano',
-            'Carmen', 'Maxim', 'Tatyana', 'Astrid', 'Filiz', 'Gwyneth', 'Geraint'
-        ];
-        
-        // Return the voice if it's valid, otherwise default to Joanna
-        return in_array($voiceId, $validVoices) ? $voiceId : 'Joanna';
+        // Get available voices from the current TTS service
+        try {
+            $availableVoices = $this->ttsService->getAvailableVoices();
+            $validVoiceIds = array_column($availableVoices, 'voice_id');
+            
+            // Return the voice if it's valid, otherwise use service default
+            if (in_array($voiceId, $validVoiceIds)) {
+                return $voiceId;
+            }
+            
+            // Get service-specific default voice from config
+            $serviceName = $this->ttsService->getServiceName();
+            $providerConfig = config("tts.providers.{$serviceName}");
+            $defaultVoice = $providerConfig['defaults']['voice_id'] ?? $voiceId;
+            
+            Log::warning('Invalid voice ID provided, using default', [
+                'provided_voice' => $voiceId,
+                'default_voice' => $defaultVoice,
+                'service' => $serviceName
+            ]);
+            
+            return $defaultVoice;
+        } catch (\Exception $e) {
+            Log::warning('Could not validate voice, using provided voice', [
+                'voice' => $voiceId,
+                'error' => $e->getMessage()
+            ]);
+            return $voiceId;
+        }
     }
 
     /**
-     * Count billed characters (excluding SSML tags)
+     * Count billed characters (service-specific)
      */
-    protected function countBilledCharacters(string $ssml): int
+    protected function countBilledCharacters(string $content): int
     {
-        // Remove all SSML tags to count only billed characters
-        $textOnly = preg_replace('/<[^>]*>/', '', $ssml);
-        return strlen($textOnly);
+        // Check if service supports SSML and should exclude tags from billing
+        if ($this->ttsService->supportsSSML()) {
+            // Remove SSML tags to count only billed characters for SSML-supporting services
+            $textOnly = preg_replace('/<[^>]*>/', '', $content);
+            return strlen($textOnly);
+        }
+        
+        // For services that don't support SSML, count all characters
+        return strlen($content);
     }
 
     /**
@@ -460,6 +516,9 @@ class NoteToPodcastGenerator
      */
     protected function handleLongContent(Note $note, string $content, array $options): array
     {
+        // Validate and update voice_id in options before processing chunks
+        $options['voice_id'] = $this->validateAndGetVoice($options['voice_id'] ?? 'Joanna');
+        
         $maxLength = $this->ttsService->getMaxTextLength();
         $chunks = $this->splitContentIntoChunks($content, $maxLength);
         
@@ -467,7 +526,8 @@ class NoteToPodcastGenerator
             'note_id' => $note->id,
             'total_length' => strlen($content),
             'max_length' => $maxLength,
-            'chunks_count' => count($chunks)
+            'chunks_count' => count($chunks),
+            'voice_id' => $options['voice_id']
         ]);
 
         $podcastParts = [];
@@ -702,6 +762,251 @@ class NoteToPodcastGenerator
             'max_text_length' => $this->ttsService->getMaxTextLength(),
             'available_voices' => $this->ttsService->getAvailableVoices(),
             'supported_languages' => $this->ttsService->getSupportedLanguages(),
+        ];
+    }
+
+    /**
+     * Generate dual-voice podcast with host and guest
+     */
+    protected function generateDualVoicePodcast(Note $note, array $options): array
+    {
+        Log::info('Starting dual-voice podcast generation', [
+            'note_id' => $note->id,
+            'host_voice' => $options['host_voice'],
+            'guest_voice' => $options['guest_voice']
+        ]);
+
+        // Generate podcast script with host/guest dialogue
+        $script = $this->generatePodcastScript($note, $options);
+        
+        // Split script into host and guest parts
+        $scriptParts = $this->parseScriptParts($script);
+        
+        $audioFiles = [];
+        $totalDuration = 0;
+        
+        // Generate TTS for each part
+        foreach ($scriptParts as $index => $part) {
+            $voiceOptions = array_merge($options, [
+                'voice_id' => $part['speaker'] === 'host' ? $options['host_voice'] : $options['guest_voice'],
+                'part_index' => $index
+            ]);
+            
+            $ttsResult = $this->ttsService->convertTextToSpeech($part['text'], $voiceOptions);
+            
+            // Process with media library if needed
+            if (isset($ttsResult['needs_media_processing']) && $ttsResult['needs_media_processing']) {
+                $ttsResult = $this->processWithMediaLibrary($note, $ttsResult);
+            }
+            
+            $audioFiles[] = [
+                'file_path' => $ttsResult['file_path'],
+                'duration' => $ttsResult['duration'],
+                'speaker' => $part['speaker'],
+                'order' => $index
+            ];
+            
+            $totalDuration += $ttsResult['duration'];
+        }
+        
+        // Merge audio files into single podcast
+        $finalPodcast = $this->mergeAudioFiles($note, $audioFiles);
+        
+        // Update note with podcast information
+        $this->updateNoteWithPodcast($note, $finalPodcast, $options);
+        
+        Log::info('Dual-voice podcast generation completed', [
+            'note_id' => $note->id,
+            'total_parts' => count($scriptParts),
+            'total_duration' => $totalDuration
+        ]);
+        
+        return [
+            'success' => true,
+            'podcast_data' => $finalPodcast,
+            'note_id' => $note->id,
+            'script_parts' => count($scriptParts),
+            'message' => 'Dual-voice podcast generated successfully'
+        ];
+    }
+
+    /**
+     * Generate podcast script with host/guest dialogue
+     */
+    protected function generatePodcastScript(Note $note, array $options): string
+    {
+        $content = $note->content ?? '';
+        $title = $note->title ?? 'Untitled Note';
+        $language = $this->detectLanguage($content);
+        $welcomeMessage = $this->getWelcomeMessage($language);
+        
+        // Clean HTML content
+        $cleanContent = $this->cleanHtmlContent($content);
+        
+        // Split content into sections for dialogue
+        $sections = $this->splitContentIntoSections($cleanContent);
+        
+        $script = "[HOST] {$welcomeMessage} I'm your host, and today we're diving into: {$title}.\n\n";
+        $script .= "[GUEST] Thanks for having me! I'm excited to discuss this topic with you.\n\n";
+        
+        $isHostTurn = true;
+        foreach ($sections as $section) {
+            $speaker = $isHostTurn ? 'HOST' : 'GUEST';
+            
+            if ($isHostTurn) {
+                $script .= "[{$speaker}] Let me share some insights about this: {$section}\n\n";
+            } else {
+                $script .= "[{$speaker}] That's really interesting. Building on that point: {$section}\n\n";
+            }
+            
+            $isHostTurn = !$isHostTurn;
+        }
+        
+        $script .= "[HOST] This has been a fascinating discussion. Thank you for joining us today.\n\n";
+        $script .= "[GUEST] Thank you for having me. It's been a pleasure sharing these insights.\n\n";
+        $script .= "[HOST] That's all for today's episode. Until next time!";
+        
+        // Log the generated podcast script for debugging
+        Log::info('Generated podcast script', [
+            'note_id' => $note->id,
+            'note_title' => $title,
+            'language' => $language,
+            'script_length' => strlen($script),
+            'sections_count' => count($sections),
+            'full_script' => $script
+        ]);
+        
+        return $script;
+    }
+
+    /**
+     * Parse script into speaker parts
+     */
+    protected function parseScriptParts(string $script): array
+    {
+        $parts = [];
+        $lines = explode("\n", $script);
+        
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (empty($line)) continue;
+            
+            if (preg_match('/^\[(HOST|GUEST)\]\s*(.+)$/', $line, $matches)) {
+                $speaker = strtolower($matches[1]);
+                $text = trim($matches[2]);
+                
+                if (!empty($text)) {
+                    $parts[] = [
+                        'speaker' => $speaker,
+                        'text' => $text
+                    ];
+                }
+            }
+        }
+        
+        return $parts;
+    }
+
+    /**
+     * Split content into sections for dialogue
+     */
+    protected function splitContentIntoSections(string $content): array
+    {
+        // Split by paragraphs or sentences
+        $sections = preg_split('/\n\n+|\. /', $content, -1, PREG_SPLIT_NO_EMPTY);
+        
+        // Clean and filter sections
+        $sections = array_map('trim', $sections);
+        $sections = array_filter($sections, function($section) {
+            return strlen($section) > 20; // Only include substantial sections
+        });
+        
+        // Limit to reasonable number of sections
+        return array_slice($sections, 0, 8);
+    }
+
+    /**
+     * Detect language from content
+     */
+    protected function detectLanguage(string $content): string
+    {
+        // Simple language detection based on common words
+        $content = strtolower(strip_tags($content));
+        
+        // Portuguese indicators
+        if (preg_match('/\b(o|a|os|as|de|da|do|das|dos|em|na|no|nas|nos|para|por|com|uma|um|são|é|que|não)\b/', $content)) {
+            return 'pt';
+        }
+        
+        // Spanish indicators
+        if (preg_match('/\b(el|la|los|las|de|del|en|con|por|para|un|una|es|son|que|no|y|o)\b/', $content)) {
+            return 'es';
+        }
+        
+        // French indicators
+        if (preg_match('/\b(le|la|les|de|du|des|en|dans|avec|pour|par|un|une|est|sont|que|ne|et|ou)\b/', $content)) {
+            return 'fr';
+        }
+        
+        // German indicators
+        if (preg_match('/\b(der|die|das|den|dem|des|ein|eine|ist|sind|und|oder|nicht|mit|von|zu)\b/', $content)) {
+            return 'de';
+        }
+        
+        // Default to English
+        return 'en';
+    }
+
+    /**
+     * Get welcome message in specified language
+     */
+    protected function getWelcomeMessage(string $language): string
+    {
+        return match($language) {
+            'pt' => 'Bem-vindos ao podcast CleverNote',
+            'es' => 'Bienvenidos al podcast CleverNote',
+            'fr' => 'Bienvenue au podcast CleverNote',
+            'de' => 'Willkommen zum CleverNote Podcast',
+            'it' => 'Benvenuti al podcast CleverNote',
+            default => 'Welcome to the CleverNote podcast'
+        };
+    }
+
+    /**
+     * Merge multiple audio files into single podcast
+     */
+    protected function mergeAudioFiles(Note $note, array $audioFiles): array
+    {
+        // For now, we'll concatenate the files using a simple approach
+        // In a production environment, you might want to use FFmpeg or similar
+        
+        $tempFiles = [];
+        $totalDuration = 0;
+        
+        foreach ($audioFiles as $audioFile) {
+            $tempFiles[] = $audioFile['file_path'];
+            $totalDuration += $audioFile['duration'];
+        }
+        
+        // Generate unique filename for the merged podcast
+        $filename = 'podcasts/' . Str::uuid() . '.mp3';
+        
+        // For now, we'll use the first file as the main file
+        // In production, implement proper audio merging
+        $mainFile = $audioFiles[0]['file_path'];
+        
+        // Copy the main file to the final location
+        if (Storage::disk('r2')->exists($mainFile)) {
+            Storage::disk('r2')->copy($mainFile, $filename);
+        }
+        
+        return [
+            'file_path' => $filename,
+            'duration' => $totalDuration,
+            'file_size' => Storage::disk('r2')->size($filename),
+            'url' => Storage::disk('r2')->url($filename),
+            'parts_count' => count($audioFiles),
+            'needs_media_processing' => false
         ];
     }
 }

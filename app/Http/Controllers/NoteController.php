@@ -311,6 +311,9 @@ class NoteController extends Controller
         // Validate the request
         $validated = $request->validate([
             'voice_id' => 'nullable|string|max:50',
+            'host_voice_id' => 'nullable|string|max:50',
+            'guest_voice_id' => 'nullable|string|max:50',
+            'podcast_mode' => 'nullable|string|in:single,dual',
             'language_code' => 'nullable|string|max:10',
             'engine' => 'nullable|string|in:standard,neural',
             'include_intro' => 'nullable|boolean',
@@ -345,15 +348,28 @@ class NoteController extends Controller
             ], 400);
         }
 
-        // Set default options from config
+        // Get current TTS provider and set default options
+        $currentProvider = config('tts.default');
+        $providerDefaults = config("tts.providers.{$currentProvider}.defaults", []);
+        
         $options = array_merge([
-            'voice_id' => config('tts.providers.amazon_polly.defaults.voice_id'),
-            'language_code' => config('tts.providers.amazon_polly.defaults.language_code'),
-            'engine' => config('tts.providers.amazon_polly.defaults.engine'),
+            'voice_id' => $providerDefaults['voice_id'] ?? ($currentProvider === 'murf' ? 'en-US-natalie' : 'Joanna'),
+            'language_code' => $providerDefaults['language_code'] ?? 'en-US',
+            'engine' => $providerDefaults['engine'] ?? 'standard',
             'include_intro' => config('tts.settings.podcast_defaults.include_intro'),
             'include_conclusion' => config('tts.settings.podcast_defaults.include_conclusion'),
             'use_ssml' => config('tts.settings.podcast_defaults.use_ssml'),
+            'podcast_mode' => 'single',
         ], $validated);
+
+        // Handle dual voice mode
+        if ($options['podcast_mode'] === 'dual') {
+            if (empty($options['host_voice_id']) || empty($options['guest_voice_id'])) {
+                return response()->json([
+                    'error' => 'Both host and guest voices are required for dual-voice podcasts.'
+                ], 400);
+            }
+        }
 
         // Update note status to processing
         $note->update([

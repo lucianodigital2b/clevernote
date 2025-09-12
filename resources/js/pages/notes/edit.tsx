@@ -43,7 +43,18 @@ import axios from 'axios';
 import {
     Dialog,
     DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
 } from "@/components/ui/dialog";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { MathExtension } from "@aarkue/tiptap-math-extension";
 import "katex/dist/katex.min.css";
 import Image from '@tiptap/extension-image'
@@ -66,6 +77,15 @@ export default function Edit({ note }: { note: Note }) {
     const [isFailed, setIsFailed] = useState(note.status === 'failed');
     const [isProcessing, setIsProcessing] = useState(note.status === 'processing');
     const [currentNote, setCurrentNote] = useState(note);
+    
+    // Sync currentNote with note prop when it changes
+    useEffect(() => {
+        setCurrentNote(note);
+        // Also sync podcastError state
+        setPodcastError(
+            note.podcast_status === 'failed' ? note.podcast_failure_reason || 'Podcast generation failed' : null
+        );
+    }, [note]);
     
     // Word count utility function
     const getWordCount = (htmlContent: string): number => {
@@ -364,7 +384,7 @@ export default function Edit({ note }: { note: Note }) {
     // Add new state for podcast loading modal
     const [isPodcastLoading, setIsPodcastLoading] = useState(false);
     const [podcastError, setPodcastError] = useState<string | null>(
-        currentNote.podcast_status === 'failed' ? currentNote.podcast_failure_reason || 'Podcast generation failed' : null
+        note.podcast_status === 'failed' ? note.podcast_failure_reason || 'Podcast generation failed' : null
     );
     
     // Add ref to store podcast polling interval
@@ -372,6 +392,114 @@ export default function Edit({ note }: { note: Note }) {
     
     // Add ref for the podcast audio player
     const podcastPlayerRef = useRef<any>(null);
+    
+    // Add state for podcast configuration modal
+    const [isPodcastConfigOpen, setIsPodcastConfigOpen] = useState(false);
+    const [selectedHostVoice, setSelectedHostVoice] = useState('en-US-natalie');
+    const [selectedGuestVoice, setSelectedGuestVoice] = useState('en-US-cooper');
+    const [selectedLanguage, setSelectedLanguage] = useState('en-US');
+    const [podcastMode, setPodcastMode] = useState<'single' | 'dual'>('dual');
+    
+    // Murf voices organized by language
+    const murfVoices = {
+        'en-US': [
+            { id: 'en-US-natalie', name: 'Natalie (Female, US)' },
+            { id: 'en-US-cooper', name: 'Cooper (Male, US)' },
+            { id: 'en-US-imani', name: 'Imani (Female, US)' },
+            { id: 'en-US-marcus', name: 'Marcus (Male, US)' },
+            { id: 'en-US-sarah', name: 'Sarah (Female, US)' },
+            { id: 'en-US-james', name: 'James (Male, US)' },
+            { id: 'en-US-lily', name: 'Lily (Female, US)' },
+            { id: 'en-US-david', name: 'David (Male, US)' }
+        ],
+        'en-GB': [
+            { id: 'en-UK-hazel', name: 'Hazel (Female, British)' },
+            { id: 'en-UK-oliver', name: 'Oliver (Male, British)' },
+            { id: 'en-UK-charlotte', name: 'Charlotte (Female, British)' },
+            { id: 'en-UK-william', name: 'William (Male, British)' }
+        ],
+        'en-AU': [
+            { id: 'en-AU-ruby', name: 'Ruby (Female, Australian)' },
+            { id: 'en-AU-jack', name: 'Jack (Male, Australian)' }
+        ],
+        'es-ES': [
+            { id: 'es-ES-sofia', name: 'Sofia (Female, Spanish)' },
+            { id: 'es-ES-diego', name: 'Diego (Male, Spanish)' },
+            { id: 'es-ES-lucia', name: 'Lucia (Female, Spanish)' }
+        ],
+        'es-MX': [
+            { id: 'es-MX-isabella', name: 'Isabella (Female, Mexican)' },
+            { id: 'es-MX-carlos', name: 'Carlos (Male, Mexican)' }
+        ],
+        'pt-BR': [
+            { id: 'pt-BR-ana', name: 'Ana (Female, Brazilian)' },
+            { id: 'pt-BR-pedro', name: 'Pedro (Male, Brazilian)' },
+            { id: 'pt-BR-maria', name: 'Maria (Female, Brazilian)' }
+        ],
+        'fr-FR': [
+            { id: 'fr-FR-claire', name: 'Claire (Female, French)' },
+            { id: 'fr-FR-antoine', name: 'Antoine (Male, French)' },
+            { id: 'fr-FR-camille', name: 'Camille (Female, French)' }
+        ],
+        'de-DE': [
+            { id: 'de-DE-anna', name: 'Anna (Female, German)' },
+            { id: 'de-DE-max', name: 'Max (Male, German)' },
+            { id: 'de-DE-emma', name: 'Emma (Female, German)' }
+        ],
+        'it-IT': [
+            { id: 'it-IT-giulia', name: 'Giulia (Female, Italian)' },
+            { id: 'it-IT-marco', name: 'Marco (Male, Italian)' },
+            { id: 'it-IT-francesca', name: 'Francesca (Female, Italian)' }
+        ],
+        'ja-JP': [
+            { id: 'ja-JP-yuki', name: 'Yuki (Female, Japanese)' },
+            { id: 'ja-JP-hiroshi', name: 'Hiroshi (Male, Japanese)' }
+        ],
+        'ko-KR': [
+            { id: 'ko-KR-soyeon', name: 'Soyeon (Female, Korean)' },
+            { id: 'ko-KR-minho', name: 'Minho (Male, Korean)' }
+        ],
+        'zh-CN': [
+            { id: 'zh-CN-mei', name: 'Mei (Female, Chinese)' },
+            { id: 'zh-CN-wei', name: 'Wei (Male, Chinese)' }
+        ]
+    };
+    
+    const languages = [
+        { code: 'en-US', name: 'English (US)' },
+        { code: 'en-GB', name: 'English (UK)' },
+        { code: 'en-AU', name: 'English (Australia)' },
+        { code: 'es-ES', name: 'Spanish (Spain)' },
+        { code: 'es-MX', name: 'Spanish (Mexico)' },
+        { code: 'pt-BR', name: 'Portuguese (Brazil)' },
+        { code: 'fr-FR', name: 'French' },
+        { code: 'de-DE', name: 'German' },
+        { code: 'it-IT', name: 'Italian' },
+        { code: 'ja-JP', name: 'Japanese' },
+        { code: 'ko-KR', name: 'Korean' },
+        { code: 'zh-CN', name: 'Chinese (Mandarin)' }
+    ];
+    
+    // Get available voices for selected language
+    const availableVoices = murfVoices[selectedLanguage] || [];
+    
+    // Update selected voices when language changes
+    useEffect(() => {
+        const voices = murfVoices[selectedLanguage] || [];
+        if (voices.length > 0) {
+            // Set default host voice (prefer female voices)
+            const femaleVoices = voices.filter(v => v.name.includes('Female'));
+            const maleVoices = voices.filter(v => v.name.includes('Male'));
+            
+            if (!voices.find(v => v.id === selectedHostVoice)) {
+                setSelectedHostVoice(femaleVoices.length > 0 ? femaleVoices[0].id : voices[0].id);
+            }
+            
+            if (!voices.find(v => v.id === selectedGuestVoice)) {
+                setSelectedGuestVoice(maleVoices.length > 0 ? maleVoices[0].id : (voices[1] || voices[0]).id);
+            }
+        }
+    }, [selectedLanguage, selectedHostVoice, selectedGuestVoice]);
 
     const handleCreateCrossword = async () => {
         setIsCrosswordLoading(true);
@@ -450,7 +578,19 @@ export default function Edit({ note }: { note: Note }) {
         }
     };
 
-    const handleGeneratePodcast = async () => {
+    const handleGeneratePodcast = () => {
+        // If podcast is already processing, just show status
+        if (currentNote.podcast_status === 'processing') {
+            toastConfig.info("Podcast generation is already in progress");
+            return;
+        }
+        
+        // Open configuration modal
+        setIsPodcastConfigOpen(true);
+    };
+    
+    const handleConfirmPodcastGeneration = async () => {
+        setIsPodcastConfigOpen(false);
         setIsPodcastLoading(true);
         setPodcastError(null); // Clear any previous errors
         
@@ -461,20 +601,22 @@ export default function Edit({ note }: { note: Note }) {
         }
         
         try {
-            // If podcast is already processing, just show status
-            if (currentNote.podcast_status === 'processing') {
-                setIsPodcastLoading(false);
-                toastConfig.info("Podcast generation is already in progress");
-                return;
-            }
-
-            // Generate new podcast
-            const response = await axios.post(`/notes/${note.id}/generate-podcast`, {
-                voice: 'Joanna', // Default voice
+            // Generate new podcast with selected voices and language
+            const podcastData = {
+                language_code: selectedLanguage,
                 add_intro: true,
                 add_conclusion: true,
-                use_ssml: true
-            });
+                use_ssml: true,
+                ...(podcastMode === 'dual' ? {
+                    host_voice: selectedHostVoice,
+                    guest_voice: selectedGuestVoice,
+                    dual_voice: true
+                } : {
+                    voice_id: selectedHostVoice
+                })
+            };
+            
+            const response = await axios.post(`/notes/${note.id}/generate-podcast`, podcastData);
             
             if (response.data && response.data.message) {
                 // Start polling for podcast status
@@ -562,14 +704,15 @@ export default function Edit({ note }: { note: Note }) {
             color: 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700 dark:text-white dark:border-transparent',
             loading: isMindmapLoading
         },
-        { 
-            icon: currentNote.podcast_status === 'completed' ? Play : Mic, 
-            label: currentNote.podcast_status === 'completed' ? 'Listen to Podcast' : 'Generate Podcast', 
-            description: currentNote.podcast_status === 'completed' ? 'Play the generated audio version' : 'Convert note to audio podcast',
-            action: currentNote.podcast_status === 'completed' ? handlePlayPodcast : handleGeneratePodcast,
+        // Only show podcast action if not completed - when completed, the audio player is always visible
+        ...(currentNote.podcast_status !== 'completed' ? [{ 
+            icon: Mic, 
+            label: 'Generate Podcast', 
+            description: 'Convert note to audio podcast',
+            action: handleGeneratePodcast,
             color: 'bg-orange-50 hover:bg-orange-100 border-orange-200 text-orange-700 dark:text-white dark:border-transparent',
             loading: isPodcastLoading || currentNote.podcast_status === 'processing'
-        },
+        }] : []),
         // { 
         //     icon: Grid3X3, 
         //     label: note.crosswords && note.crosswords.length > 0 ? t('review_crossword') : t('create_crossword'), 
@@ -580,6 +723,8 @@ export default function Edit({ note }: { note: Note }) {
         // },
     ];
 
+    
+    console.log(currentNote);
     
     const editor = useEditor({
         extensions: [
@@ -1511,6 +1656,129 @@ export default function Edit({ note }: { note: Note }) {
                 onOpenChange={setIsMindmapLoading} 
             />
 
+            {/* Podcast Configuration Modal */}
+            <Dialog open={isPodcastConfigOpen} onOpenChange={setIsPodcastConfigOpen}>
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Configure Podcast Settings</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="language">Language</Label>
+                            <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a language" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {languages.map((lang) => (
+                                        <SelectItem key={lang.code} value={lang.code}>
+                                            {lang.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <Label>Podcast Style</Label>
+                            <div className="flex gap-2">
+                                <Button
+                                    type="button"
+                                    variant={podcastMode === 'single' ? 'default' : 'outline'}
+                                    size="sm"
+                                    onClick={() => setPodcastMode('single')}
+                                    className="flex-1"
+                                >
+                                    Single Voice
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant={podcastMode === 'dual' ? 'default' : 'outline'}
+                                    size="sm"
+                                    onClick={() => setPodcastMode('dual')}
+                                    className="flex-1"
+                                >
+                                    Host & Guest
+                                </Button>
+                            </div>
+                        </div>
+
+                        {podcastMode === 'dual' ? (
+                            <>
+                                <div className="space-y-2">
+                                    <Label htmlFor="hostVoice">Host Voice</Label>
+                                    <Select value={selectedHostVoice} onValueChange={setSelectedHostVoice}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select host voice" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {availableVoices.map((voice) => (
+                                                <SelectItem key={voice.id} value={voice.id}>
+                                                    {voice.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="guestVoice">Guest Voice</Label>
+                                    <Select value={selectedGuestVoice} onValueChange={setSelectedGuestVoice}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select guest voice" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {availableVoices.map((voice) => (
+                                                <SelectItem key={voice.id} value={voice.id}>
+                                                    {voice.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="space-y-2">
+                                <Label htmlFor="voice">Voice</Label>
+                                <Select value={selectedHostVoice} onValueChange={setSelectedHostVoice}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a voice" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {availableVoices.map((voice) => (
+                                            <SelectItem key={voice.id} value={voice.id}>
+                                                {voice.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+                        
+                        {podcastMode === 'dual' && (
+                            <div className="text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                                <div className="flex items-start gap-2">
+                                    <Mic className="w-4 h-4 mt-0.5 text-blue-600 dark:text-blue-400" />
+                                    <div>
+                                        <p className="font-medium text-blue-900 dark:text-blue-100">Dual-Voice Podcast</p>
+                                        <p className="text-blue-700 dark:text-blue-300">Your note will be transformed into a conversation between a host and guest, podcast" in your note's language.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsPodcastConfigOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button 
+                            onClick={handleConfirmPodcastGeneration}
+                            disabled={!selectedHostVoice || !selectedLanguage || (podcastMode === 'dual' && !selectedGuestVoice)}
+                        >
+                            Generate Podcast
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
                   
         </AppLayout>
     );
