@@ -63,9 +63,11 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
+import { Feedback } from './dialogs/feedback';
 
 export default function Edit({ note }: { note: Note }) {
     const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+    const [showDetailedFeedback, setShowDetailedFeedback] = useState(false);
     const [feedbackReason, setFeedbackReason] = useState('');
     const [deleteRelatedItems, setDeleteRelatedItems] = useState(false);
 
@@ -104,18 +106,19 @@ export default function Edit({ note }: { note: Note }) {
 
 
   
-  const handleSubmitFeedback = async (isPositive: boolean) => {
+  const handleSubmitFeedback = async (isPositive: boolean, reason?: string) => {
     
     try {
         const res = await axios.post(`/feedback`, {
             feedbackable_type: 'note',
             feedbackable_id: note.id,
             is_positive: isPositive,
-            reason: isPositive ? null : feedbackReason,
+            reason: isPositive ? null : (reason || feedbackReason),
         })
 
         
         setFeedbackModalOpen(false);
+        setShowDetailedFeedback(false);
         setFeedbackReason('');
 
         toastConfig.success('Thanks for the feedback');
@@ -937,10 +940,9 @@ export default function Edit({ note }: { note: Note }) {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => {
-                                    // For negative feedback, we might want to show the reason input
                                     setFeedbackModalOpen(false);
-                                    // You can add a separate modal for detailed feedback if needed
-                                    handleSubmitFeedback(false);
+                                    // Open the detailed feedback modal for negative feedback
+                                    setShowDetailedFeedback(true);
                                 }}
                                 className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-600/5"
                             >
@@ -1533,7 +1535,7 @@ export default function Edit({ note }: { note: Note }) {
                                         <Button 
                                             variant="ghost" 
                                             size="sm"
-                                            onClick={() => handleSubmitFeedback(false)}
+                                            onClick={() => setFeedbackModalOpen(true)}
                                             className="text-red-600 hover:bg-red-50"
                                         >
                                             <ThumbsDown className="w-4 h-4 mr-1" /> 
@@ -1779,7 +1781,16 @@ export default function Edit({ note }: { note: Note }) {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Detailed Feedback Modal */}
+            <Feedback 
+                isOpen={showDetailedFeedback} 
+                onClose={() => setShowDetailedFeedback(false)}
+                onSubmit={(reason) => handleSubmitFeedback(false, reason)}
+                feedbackReason={feedbackReason}
+                setFeedbackReason={setFeedbackReason}
+            />
                   
         </AppLayout>
-    );
+    )
 }

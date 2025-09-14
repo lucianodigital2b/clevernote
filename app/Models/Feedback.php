@@ -11,7 +11,9 @@ class Feedback extends Model
         'user_id',
         'is_positive',
         'reason',
-        'metadata'
+        'metadata',
+        'feedbackable_id',
+        'feedbackable_type'
     ];
 
     protected $casts = [

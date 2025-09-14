@@ -850,28 +850,12 @@ class NoteToPodcastGenerator
         // Clean HTML content
         $cleanContent = $this->cleanHtmlContent($content);
         
-        // Split content into sections for dialogue
-        $sections = $this->splitContentIntoSections($cleanContent);
+        // Extract key topics and insights from content
+        $topics = $this->extractKeyTopics($cleanContent);
+        $insights = $this->extractKeyInsights($cleanContent);
         
-        $script = "[HOST] {$welcomeMessage} I'm your host, and today we're diving into: {$title}.\n\n";
-        $script .= "[GUEST] Thanks for having me! I'm excited to discuss this topic with you.\n\n";
-        
-        $isHostTurn = true;
-        foreach ($sections as $section) {
-            $speaker = $isHostTurn ? 'HOST' : 'GUEST';
-            
-            if ($isHostTurn) {
-                $script .= "[{$speaker}] Let me share some insights about this: {$section}\n\n";
-            } else {
-                $script .= "[{$speaker}] That's really interesting. Building on that point: {$section}\n\n";
-            }
-            
-            $isHostTurn = !$isHostTurn;
-        }
-        
-        $script .= "[HOST] This has been a fascinating discussion. Thank you for joining us today.\n\n";
-        $script .= "[GUEST] Thank you for having me. It's been a pleasure sharing these insights.\n\n";
-        $script .= "[HOST] That's all for today's episode. Until next time!";
+        // Generate conversational script
+        $script = $this->buildConversationalScript($title, $topics, $insights, $language, $welcomeMessage);
         
         // Log the generated podcast script for debugging
         Log::info('Generated podcast script', [
@@ -879,8 +863,8 @@ class NoteToPodcastGenerator
             'note_title' => $title,
             'language' => $language,
             'script_length' => strlen($script),
-            'sections_count' => count($sections),
-            'full_script' => $script
+            'topics_count' => count($topics),
+            'insights_count' => count($insights)
         ]);
         
         return $script;
@@ -915,21 +899,141 @@ class NoteToPodcastGenerator
     }
 
     /**
-     * Split content into sections for dialogue
+     * Extract key topics from content
      */
-    protected function splitContentIntoSections(string $content): array
+    protected function extractKeyTopics(string $content): array
     {
-        // Split by paragraphs or sentences
-        $sections = preg_split('/\n\n+|\. /', $content, -1, PREG_SPLIT_NO_EMPTY);
+        // Split content into meaningful chunks
+        $paragraphs = preg_split('/\n\n+/', $content, -1, PREG_SPLIT_NO_EMPTY);
+        $topics = [];
         
-        // Clean and filter sections
-        $sections = array_map('trim', $sections);
-        $sections = array_filter($sections, function($section) {
-            return strlen($section) > 20; // Only include substantial sections
-        });
+        foreach ($paragraphs as $paragraph) {
+            $paragraph = trim($paragraph);
+            if (strlen($paragraph) > 50) {
+                // Extract first sentence or main idea
+                $sentences = preg_split('/[.!?]+/', $paragraph, -1, PREG_SPLIT_NO_EMPTY);
+                if (!empty($sentences)) {
+                    $mainIdea = trim($sentences[0]);
+                    if (strlen($mainIdea) > 20) {
+                        $topics[] = $mainIdea;
+                    }
+                }
+            }
+        }
         
-        // Limit to reasonable number of sections
-        return array_slice($sections, 0, 8);
+        return array_slice($topics, 0, 6); // Limit to 6 main topics
+    }
+    
+    /**
+     * Extract key insights and details from content
+     */
+    protected function extractKeyInsights(string $content): array
+    {
+        $insights = [];
+        
+        // Look for bullet points, numbered lists, or key phrases
+        $lines = explode("\n", $content);
+        
+        foreach ($lines as $line) {
+            $line = trim($line);
+            
+            // Check for bullet points or numbered items
+            if (preg_match('/^[•\-\*]\s*(.+)$/', $line, $matches) || 
+                preg_match('/^\d+\.\s*(.+)$/', $line, $matches)) {
+                $insight = trim($matches[1]);
+                if (strlen($insight) > 15) {
+                    $insights[] = $insight;
+                }
+            }
+            // Look for sentences with key indicators
+            elseif (preg_match('/(important|key|crucial|essential|significant|note that|remember|consider)/i', $line) && strlen($line) > 30) {
+                $insights[] = $line;
+            }
+        }
+        
+        // If no specific insights found, extract some sentences from paragraphs
+        if (empty($insights)) {
+            $sentences = preg_split('/[.!?]+/', $content, -1, PREG_SPLIT_NO_EMPTY);
+            foreach ($sentences as $sentence) {
+                $sentence = trim($sentence);
+                if (strlen($sentence) > 40 && strlen($sentence) < 200) {
+                    $insights[] = $sentence;
+                }
+            }
+        }
+        
+        return array_slice($insights, 0, 8); // Limit to 8 insights
+    }
+    
+    /**
+     * Build conversational script with natural flow
+     */
+    protected function buildConversationalScript(string $title, array $topics, array $insights, string $language, string $welcomeMessage): string
+    {
+        $script = "";
+        
+        // Opening
+        $script .= "[HOST] {$welcomeMessage} I'm your host, and today we have a fascinating topic to explore: {$title}. I'm joined by our expert guest to dive deep into this subject.\n\n";
+        $script .= "[GUEST] Thank you for having me! I'm really excited to discuss this topic. There's so much valuable information to unpack here.\n\n";
+        
+        // Introduction and overview
+        if (!empty($topics)) {
+            $script .= "[HOST] Let's start with an overview. What would you say are the main areas we should focus on today?\n\n";
+            $script .= "[GUEST] Great question! From what I've analyzed, there are several key areas worth exploring. " . $topics[0] . ". This sets the foundation for everything else we'll discuss.\n\n";
+            
+            if (count($topics) > 1) {
+                $script .= "[HOST] That's a solid starting point. What else should our listeners know?\n\n";
+                $script .= "[GUEST] Well, another crucial aspect is: " . $topics[1] . ". This really builds on what we just covered.\n\n";
+            }
+        }
+        
+        // Deep dive into topics with insights
+        $topicIndex = 2;
+        $insightIndex = 0;
+        
+        while ($topicIndex < count($topics) && $insightIndex < count($insights)) {
+            // Host asks about next topic
+            $script .= "[HOST] That's really insightful. Now, I'm curious about something else. Can you tell us more about: " . $topics[$topicIndex] . "?\n\n";
+            
+            // Guest responds with insight
+            if ($insightIndex < count($insights)) {
+                $script .= "[GUEST] Absolutely! This is where it gets interesting. " . $insights[$insightIndex] . ". It's one of those things that really makes a difference when you understand it properly.\n\n";
+                $insightIndex++;
+            }
+            
+            // Host follows up
+            if ($insightIndex < count($insights)) {
+                $script .= "[HOST] That's a great point. I think our listeners would also benefit from knowing that " . $insights[$insightIndex] . ". How does that fit into the bigger picture?\n\n";
+                $insightIndex++;
+            }
+            
+            // Guest elaborates
+            if ($insightIndex < count($insights)) {
+                $script .= "[GUEST] Exactly! And here's something else to consider: " . $insights[$insightIndex] . ". This really ties everything together.\n\n";
+                $insightIndex++;
+            }
+            
+            $topicIndex++;
+        }
+        
+        // Add any remaining insights as discussion points
+        while ($insightIndex < count($insights)) {
+            if ($insightIndex % 2 == 0) {
+                $script .= "[HOST] Before we wrap up, there's another important point: " . $insights[$insightIndex] . ". What are your thoughts on this?\n\n";
+            } else {
+                $script .= "[GUEST] That's crucial to understand. " . $insights[$insightIndex] . ". It's something I always emphasize when discussing this topic.\n\n";
+            }
+            $insightIndex++;
+        }
+        
+        // Closing
+        $script .= "[HOST] This has been such an enlightening conversation. Before we close, what would be your key takeaway for our listeners?\n\n";
+        $script .= "[GUEST] I'd say the most important thing is to really understand these concepts and how they connect. Each point we've discussed builds on the others, and that's what makes this topic so valuable to explore.\n\n";
+        $script .= "[HOST] Perfectly said! Thank you so much for sharing your expertise with us today. This has been incredibly valuable.\n\n";
+        $script .= "[GUEST] Thank you for having me! It's been a pleasure discussing this topic and I hope your listeners found it as engaging as I did.\n\n";
+        $script .= "[HOST] And thank you to our listeners for joining us today. Until next time, keep learning and stay curious!";
+        
+        return $script;
     }
 
     /**
