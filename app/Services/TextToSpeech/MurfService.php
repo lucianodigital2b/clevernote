@@ -126,7 +126,7 @@ class MurfService implements TextToSpeechServiceInterface
 
             // Save audio content to local storage
             Storage::disk('local')->put($filename, $audioResponse->body());
-            $filePath = storage_path('app' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $filename));
+            $filePath = Storage::disk('local')->path($filename);
             
             // Get file metadata
             $fileSize = Storage::disk('local')->size($filename);
@@ -151,6 +151,7 @@ class MurfService implements TextToSpeechServiceInterface
                 'language_code' => $params['multiNativeLocale'] ?? null,
                 'engine' => 'murf_gen2',
                 'service' => 'murf',
+                'needs_media_processing' => true,
                 'metadata' => [
                     'characters_count' => strlen($text),
                     'words_count' => str_word_count($text),
@@ -298,8 +299,8 @@ class MurfService implements TextToSpeechServiceInterface
 
     public function getMaxTextLength(): int
     {
-        // Murf API doesn't specify a hard limit in the docs, but we'll use a reasonable limit
-        return 50000; // 50k characters should be safe for most use cases
+        // Murf API has a 3000 character limit per request
+        return 3000;
     }
 
     public function getServiceName(): string

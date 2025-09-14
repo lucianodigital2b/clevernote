@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\FocusSession;
 use App\Models\Tag;
+use App\Models\User;
 use App\Models\UserStatistics;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;

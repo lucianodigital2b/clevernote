@@ -544,7 +544,7 @@ class NoteToPodcastGenerator
             
             // Debug: Check if file exists immediately after TTS
             if (isset($ttsResult['temp_file_path'])) {
-                $fullTempPath = storage_path('app/' . $ttsResult['temp_file_path']);
+                $fullTempPath = $ttsResult['full_path'] ?? Storage::disk('local')->path($ttsResult['temp_file_path']);
                 Log::info('TTS Result file check', [
                     'note_id' => $note->id,
                     'chunk_index' => $index,
@@ -647,7 +647,8 @@ class NoteToPodcastGenerator
     {
         try {
             $tempFilePath = $ttsResult['temp_file_path'];
-            $fullTempPath = Storage::disk('local')->path($tempFilePath);
+            // Use the full_path provided by the TTS service if available, otherwise construct it
+            $fullTempPath = $ttsResult['full_path'] ?? Storage::disk('local')->path($tempFilePath);
             
             Log::info('Starting media library processing', [
                 'note_id' => $note->id,
@@ -739,13 +740,19 @@ class NoteToPodcastGenerator
                 'generated_at' => now()->toISOString(),
                 'metadata' => $ttsResult['metadata'] ?? [],
                 'media_id' => $ttsResult['media_id'] ?? null,
-                'uses_media_library' => isset($ttsResult['media_id'])
+                'uses_media_library' => isset($ttsResult['media_id']),
+                'media_url' => $ttsResult['media_url'] ?? null
             ]),
             'podcast_failure_reason' => null
         ];
 
-        // Only set podcast_file_path if not using media library
-        if (!isset($ttsResult['media_id'])) {
+        // Set podcast_file_path for both media library and direct storage
+        // For media library, we store the relative path for compatibility
+        // For direct storage, we store the actual file path
+        if (isset($ttsResult['media_id'])) {
+            // For media library, store a reference path that can be used by the model's getPodcastUrlAttribute
+            $updateData['podcast_file_path'] = 'media/' . $ttsResult['media_id'];
+        } else {
             $updateData['podcast_file_path'] = $ttsResult['file_path'] ?? null;
         }
 

@@ -191,8 +191,21 @@ class Note extends Model implements HasMedia
             return $podcastMedia->getUrl();
         }
 
+        // Check if podcast_file_path is a media reference
+        if ($this->podcast_file_path && str_starts_with($this->podcast_file_path, 'media/')) {
+            $mediaId = str_replace('media/', '', $this->podcast_file_path);
+            $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::find($mediaId);
+            if ($media) {
+                return $media->getUrl();
+            }
+        }
+
         // Fallback to direct storage URL for backward compatibility
-        return \Storage::disk('r2')->url($this->podcast_file_path);
+        if ($this->podcast_file_path && !str_starts_with($this->podcast_file_path, 'media/')) {
+            return \Storage::disk('r2')->url($this->podcast_file_path);
+        }
+
+        return null;
     }
 
     /**
