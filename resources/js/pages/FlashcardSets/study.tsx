@@ -48,6 +48,8 @@ const Study = ({ flashcardSet }: Props) => {
     const [isFlipped, setIsFlipped] = useState(false);
     const [isComplete, setIsComplete] = useState(false);
     const [xpReward, setXpReward] = useState<XPReward | null>(null);
+    const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
+    const [isAnimating, setIsAnimating] = useState(false);
     
     // Check if we're in fast review mode
     const urlParams = new URLSearchParams(window.location.search);
@@ -95,11 +97,17 @@ const Study = ({ flashcardSet }: Props) => {
 
 
     const handlePrevious = () => {
-        if (dueIndexes.length === 0 || currentIndex === null) return;
+        if (dueIndexes.length === 0 || currentIndex === null || isAnimating) return;
         const idx = dueIndexes.indexOf(currentIndex);
         if (idx > 0) {
-            setCurrentIndex(dueIndexes[idx - 1]);
-            setIsFlipped(false);
+            setIsAnimating(true);
+            setSlideDirection('right');
+            setTimeout(() => {
+                setCurrentIndex(dueIndexes[idx - 1]);
+                setIsFlipped(false);
+                setSlideDirection(null);
+                setIsAnimating(false);
+            }, 150);
         }
     };
 
@@ -127,11 +135,17 @@ const Study = ({ flashcardSet }: Props) => {
 
     // Fast mode navigation
     const handleNext = () => {
-        if (dueIndexes.length === 0 || currentIndex === null) return;
+        if (dueIndexes.length === 0 || currentIndex === null || isAnimating) return;
         const currentIdx = dueIndexes.indexOf(currentIndex);
         if (currentIdx < dueIndexes.length - 1) {
-            setCurrentIndex(dueIndexes[currentIdx + 1]);
-            setIsFlipped(false);
+            setIsAnimating(true);
+            setSlideDirection('left');
+            setTimeout(() => {
+                setCurrentIndex(dueIndexes[currentIdx + 1]);
+                setIsFlipped(false);
+                setSlideDirection(null);
+                setIsAnimating(false);
+            }, 150);
         } else {
             // Reached the end, mark as complete
             setIsComplete(true);
@@ -242,7 +256,20 @@ const Study = ({ flashcardSet }: Props) => {
         // In fast mode, automatically advance to next card after recall
         if (isFastMode) {
             setTimeout(() => {
-                handleNext();
+                if (dueIndexes.length === 0 || currentIndex === null || isAnimating) return;
+                const currentIdx = dueIndexes.indexOf(currentIndex);
+                if (currentIdx < dueIndexes.length - 1) {
+                    setIsAnimating(true);
+                    setSlideDirection('left');
+                    setTimeout(() => {
+                        setCurrentIndex(dueIndexes[currentIdx + 1]);
+                        setIsFlipped(false);
+                        setSlideDirection(null);
+                        setIsAnimating(false);
+                    }, 150);
+                } else {
+                    setIsComplete(true);
+                }
             }, 300); // Small delay to show the selection
         }
     };
@@ -329,10 +356,19 @@ const Study = ({ flashcardSet }: Props) => {
                         </div>
                     )}
                     <div 
-                        className="relative min-h-[300px] sm:min-h-[400px] perspective-1000 cursor-pointer"
+                        className="relative min-h-[300px] sm:min-h-[400px] perspective-1000 cursor-pointer overflow-hidden rounded-2xl"
                         onClick={handleFlip}
+                        style={{
+                            boxShadow: '0 4px 16px rgba(147, 51, 234, 0.10)'
+                        }}
                     >
-                        <div className={`absolute w-full h-full transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
+                        <div className={`absolute inset-0 transition-all duration-300 transform-style-3d ${
+                            isFlipped ? 'rotate-y-180' : ''
+                        } ${
+                            slideDirection === 'left' ? '-translate-x-full opacity-0' : 
+                            slideDirection === 'right' ? 'translate-x-full opacity-0' : 
+                            'translate-x-0 opacity-100'
+                        }`}>
                             {/* Front Side */}
                             <Card className={`absolute w-full h-full backface-hidden ${isFlipped ? 'opacity-0' : 'opacity-100'} flex flex-col`}>
                                 <CardHeader className="flex-none">

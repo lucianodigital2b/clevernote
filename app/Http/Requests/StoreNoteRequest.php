@@ -26,6 +26,7 @@ class StoreNoteRequest extends FormRequest
             'folder_id' => 'nullable|integer|exists:folders,id',
             'audio_file' => 'nullable|file|mimes:mp3,ogg,flac,wav',
             'pdf_file' => 'nullable|file|mimes:pdf,doc,docx,txt,ppt,pptx',
+            'image_file' => 'nullable|file|mimes:jpg,jpeg,png,gif,bmp,webp|max:10240', // 10MB max
             'link' => 'nullable|string|url', 
             'content' => 'nullable|string', 
             'transcription' => 'nullable|string', 

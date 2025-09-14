@@ -10,6 +10,7 @@ use App\Http\Requests\UpdateNoteRequest;
 use App\Jobs\GenerateFlashcardsFromNote;
 use App\Jobs\GenerateNotePodcastJob;
 use App\Jobs\ProcessAudioNote;
+use App\Jobs\ProcessImageNote;
 use App\Jobs\ProcessLinkNote;
 use App\Jobs\ProcessPdfNote;
 use Illuminate\Http\Request;
@@ -90,7 +91,7 @@ class NoteController extends Controller
             }
             
             // Determine if this note requires processing
-            $requiresProcessing = isset($validated['pdf_file']) || isset($validated['audio_file']) || isset($validated['link']);
+            $requiresProcessing = isset($validated['pdf_file']) || isset($validated['audio_file']) || isset($validated['image_file']) || isset($validated['link']);
             
             // Create the note with appropriate status
             $note = Note::create([
@@ -134,6 +135,16 @@ class NoteController extends Controller
 
                 // Dispatch job for audio processing
                 ProcessAudioNote::dispatch($note->id, $validated, $path);
+
+            } else if (isset($validated['image_file'])) {
+                $imageFile = $validated['image_file'];
+                $path = $imageFile->store('images', 'public');
+
+                // Remove file instance from validated data
+                unset($validated['image_file']);
+
+                // Dispatch job for image processing
+                ProcessImageNote::dispatch($note->id, $validated, $path);
 
             } else if (isset($validated['link'])) {
                 // Dispatch job for link processing
