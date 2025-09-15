@@ -164,7 +164,8 @@ class SyncRevenueCatSubscriptions extends Command
                             'platform' => $platform,
                             'product_id' => $productId,
                             'original_transaction_id' => $entitlement['original_purchase_date'],
-                            'is_trial' => false
+                            'is_trial' => false,
+                            'type' => 'premium'
                         ]);
                         
                         $this->line("\nCreated subscription for user {$user->id}: {$productId} ({$platform})");
