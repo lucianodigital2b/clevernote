@@ -48,9 +48,9 @@ Route::get('/billing/checkout', fn () => Inertia::render('Billing/Checkout'))->n
 Route::post('/subscribe', [SubscriptionController::class, 'subscribe'])->name('billing.subscribe');
 Route::get('/setup-intent', [SubscriptionController::class, 'createSetupIntent'])->name('billing.setup-intent');
 
-// RevenueCat webhook (no authentication required)
+// RevenueCat webhook (requires Bearer token authentication)
 Route::post('/webhooks/revenuecat', [App\Http\Controllers\RevenueCatWebhookController::class, 'handle'])
-    ->name('webhooks.revenuecat');
+->name('webhooks.revenuecat');
 
 Route::middleware(['auth'])->group(function () {
     // Folder routes

@@ -25,8 +25,8 @@ class RevenueCatWebhookController extends Controller
     public function handle(Request $request)
     {
         try {
-            // Verify webhook signature if needed
-            // $this->verifyWebhookSignature($request);
+            // Verify webhook authentication header
+            $this->verifyWebhookAuth($request);
 
             $payload = $request->all();
             $eventType = $payload['event_type'] ?? null;
@@ -322,12 +322,31 @@ class RevenueCatWebhookController extends Controller
     }
 
     /**
+     * Verify webhook authentication header
+     */
+    protected function verifyWebhookAuth(Request $request): void
+    {
+        $authHeader = $request->header('Authorization');
+        $expectedToken = 'd3tQvaSQg#5t';
+        
+        if (!$authHeader || $authHeader !== "Bearer {$expectedToken}") {
+            Log::warning('RevenueCat webhook: Invalid or missing authorization header', [
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'provided_header' => $authHeader ? 'Bearer ***' : null
+            ]);
+            
+            abort(401, 'Unauthorized');
+        }
+    }
+
+    /**
      * Verify webhook signature (implement if needed)
      */
     protected function verifyWebhookSignature(Request $request): void
     {
         // Implement webhook signature verification if RevenueCat provides it
-        // This would typically involve checking a signature header against
+        // This would typically invoke checking a signature header against
         // a shared secret to ensure the webhook is authentic
     }
 }
