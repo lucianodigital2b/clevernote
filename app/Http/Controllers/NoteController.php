@@ -81,7 +81,7 @@ class NoteController extends Controller
             $validated['user_id'] = $user->id;
 
             // Check subscription status and note count (including trial users)
-            if ($user->notes_count >= 3 && !$user->hasActiveSubscriptionOrTrial()) {
+            if ($user->notes_count >= 3 && !$user->hasAnyActiveSubscription()) {
                 if ($request->wantsJson()) {
                     return response()->json(['error' => 'You have reached the maximum number of notes for free users. Please subscribe to create more notes.'], 403);
                 }

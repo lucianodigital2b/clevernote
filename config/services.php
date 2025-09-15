@@ -70,5 +70,11 @@ return [
 
     'murf' => [
         'api_key' => env('MURF_API_KEY')
+    ],
+
+    'revenuecat' => [
+        'public_key' => env('REVENUECAT_PUBLIC_KEY'),
+        'secret_key' => env('REVENUECAT_SECRET_KEY'),
+        'project_id' => env('REVENUECAT_PROJECT_ID'),
     ]
 ];

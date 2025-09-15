@@ -33,7 +33,8 @@ class User extends Authenticatable implements HasMedia
     protected $fillable = [
         'name', 'email', 'password', 'google_id', 'apple_id',
         'preferred_language', 'discovery_source',
-        'primary_subject_interest', 'learning_goals', 'onboarding_completed', 'notes_count', 'survey_data', 'study_plan', 'xp', 'level', 'last_login', 'registered_from_mobile'
+        'primary_subject_interest', 'learning_goals', 'onboarding_completed', 'notes_count', 'survey_data', 'study_plan', 'xp', 'level', 'last_login', 'registered_from_mobile',
+        'revenuecat_user_id'
     ];
 
     /**
@@ -78,9 +79,31 @@ class User extends Authenticatable implements HasMedia
 
     public function activeSubscriptions()
     {
-        return $this->hasMany(\Laravel\Cashier\Subscription::class)
-            ->whereNull('ends_at') // not cancelled
-            ->where('stripe_status', 'active'); // still billed
+        return $this->hasMany(Subscription::class)->active();
+    }
+
+    /**
+     * Get all subscriptions (both Stripe and RevenueCat)
+     */
+    public function allSubscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * Get Stripe subscriptions only
+     */
+    public function stripeSubscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class)->stripe();
+    }
+
+    /**
+     * Get RevenueCat subscriptions only
+     */
+    public function revenueCatSubscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class)->revenueCat();
     }
 
     public function notes(): HasMany
@@ -193,34 +216,21 @@ class User extends Authenticatable implements HasMedia
     }
 
     /**
-     * Check if user is currently on trial
+     * Check if user is currently on trial (unified method)
      */
     public function onTrial(): bool
     {
-        return $this->subscriptions()
-            ->where('stripe_status', 'trialing')
-            ->where(function ($query) {
-                $query->whereNull('ends_at')
-                    ->orWhere('ends_at', '>', now());
-            })
-            ->exists();
+        return $this->allSubscriptions()->get()->some(function ($subscription) {
+            return $subscription->onTrial();
+        });
     }
 
     /**
-     * Check if user has active subscription or is on trial
+     * Check if user has active subscription or is on trial (unified method)
      */
     public function hasActiveSubscriptionOrTrial(): bool
     {
-        return $this->subscriptions()
-            ->where(function ($query) {
-                $query->where('stripe_status', 'active')
-                    ->orWhere('stripe_status', 'trialing');
-            })
-            ->where(function ($query) {
-                $query->whereNull('ends_at')
-                    ->orWhere('ends_at', '>', now());
-            })
-            ->exists();
+        return $this->activeSubscriptions()->exists() || $this->onTrial();
     }
 
     /**
@@ -228,6 +238,58 @@ class User extends Authenticatable implements HasMedia
      */
     public function shouldHidePremiumBanners(): bool
     {
-        return $this->hasActiveSubscriptionOrTrial();
+        return $this->hasAnyActiveSubscription();
+    }
+
+    /**
+     * Check if user has any active subscription (unified method)
+     */
+    public function hasAnyActiveSubscription(): bool
+    {
+        return $this->activeSubscriptions()->exists();
+    }
+
+    /**
+     * Get all subscription details (unified method)
+     */
+    public function getSubscriptionDetails(): array
+    {
+        $activeSubscriptions = $this->activeSubscriptions()->get();
+        
+        if ($activeSubscriptions->isEmpty()) {
+            return [
+                'has_active_subscription' => false,
+                'subscriptions' => [],
+                'primary_subscription' => null
+            ];
+        }
+
+        $subscriptionData = $activeSubscriptions->map(function ($subscription) {
+            return [
+                'provider' => $subscription->provider,
+                'platform' => $subscription->platform ?? ($subscription->provider === 'stripe' ? 'web' : 'unknown'),
+                'expires_at' => $subscription->getExpirationDate(),
+                'product_id' => $subscription->provider === 'stripe' ? $subscription->stripe_price : $subscription->revenuecat_product_id,
+                'is_trial' => $subscription->onTrial(),
+                'is_active' => $subscription->active()
+            ];
+        });
+
+        // Primary subscription is the one that expires last
+        $primarySubscription = $activeSubscriptions->sortByDesc(function ($subscription) {
+            return $subscription->getExpirationDate();
+        })->first();
+
+        return [
+            'has_active_subscription' => true,
+            'subscriptions' => $subscriptionData->toArray(),
+            'primary_subscription' => [
+                'provider' => $primarySubscription->provider,
+                'platform' => $primarySubscription->platform ?? ($primarySubscription->provider === 'stripe' ? 'web' : 'unknown'),
+                'expires_at' => $primarySubscription->getExpirationDate(),
+                'product_id' => $primarySubscription->provider === 'stripe' ? $primarySubscription->stripe_price : $primarySubscription->revenuecat_product_id,
+                'is_trial' => $primarySubscription->onTrial()
+            ]
+        ];
     }
 }

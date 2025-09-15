@@ -49,7 +49,7 @@ class AuthenticatedSessionController extends Controller
 
         // Check if user has an active subscription
         $user = $request->user();
-        $hasActiveSubscription = $user->activeSubscriptions()->exists();
+        $hasActiveSubscription = $user->hasAnyActiveSubscription();
 
         // If no active subscription, set session flag to show upgrade modal
         if (!$hasActiveSubscription) {

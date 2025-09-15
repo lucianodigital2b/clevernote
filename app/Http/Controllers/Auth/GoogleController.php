@@ -47,7 +47,7 @@ class GoogleController extends Controller
             }
             
             // Check if user has an active subscription
-             $hasActiveSubscription = $user->activeSubscriptions()->exists();
+             $hasActiveSubscription = $user->hasAnyActiveSubscription();
 
              // If no active subscription, set session flag to show upgrade modal
              if (!$hasActiveSubscription) {

@@ -20,6 +20,7 @@ use App\Http\Controllers\QuizSharingController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\Api\NewsController;
+use App\Http\Controllers\RevenueCatController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -134,6 +135,11 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth'])->group(function () {
 
     Route::post('/check-subscription', [SubscriptionController::class, 'checkSubscription']);
+    
+    // RevenueCat mobile subscription routes
+    Route::post('/revenuecat/link', [RevenueCatController::class, 'linkUser']);
+    Route::get('/revenuecat/status', [RevenueCatController::class, 'getSubscriptionStatus']);
+    Route::post('/revenuecat/refresh', [RevenueCatController::class, 'refreshSubscription']);
     Route::post('/notes/{note}/media', [NoteController::class, 'upload']);
     Route::post('/flashcard-sets/{flashcardSet}/media', [\App\Http\Controllers\FlashcardSetController::class, 'uploadMedia']);
     Route::post('/flashcards/{flashcard}/media', [\App\Http\Controllers\FlashcardController::class, 'uploadMedia']);
@@ -158,6 +164,8 @@ Route::post('register', [RegisteredUserController::class, 'store']);
 Route::post('auth/google/callback', [\App\Http\Controllers\Auth\GoogleController::class, 'handleMobileGoogleAuth']);
 Route::post('auth/apple/callback', [\App\Http\Controllers\Auth\AppleController::class, 'loginWithApple'])
     ->name('auth.apple.callback');
+
+
     
 Route::get('/test', function(){
     return 'test';

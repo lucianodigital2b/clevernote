@@ -310,20 +310,62 @@ class SubscriptionController extends Controller
     {
         $user = $request->user();
         
-        $hasActiveSubscription = $user->subscriptions()
-            ->where(function ($query) {
-                $query->where('stripe_status', 'active')
-                    ->orWhere('stripe_status', 'trialing');
-            })
-            ->where(function ($query) {
-                $query->whereNull('ends_at')
-                    ->orWhere('ends_at', '>', now());
-            })
-            ->exists();
+        // Use unified subscription methods
+        $hasActiveSubscription = $user->hasAnyActiveSubscription();
+        $subscriptionDetails = $user->getSubscriptionDetails();
+        
+        // Determine primary subscription type
+        $subscriptionType = 'none';
+        if ($hasActiveSubscription && $subscriptionDetails['primary_subscription']) {
+            $subscriptionType = $subscriptionDetails['primary_subscription']['provider'];
+        }
 
         return response()->json([
-            'hasActiveSubscription' => $hasActiveSubscription
+            'hasActiveSubscription' => $hasActiveSubscription,
+            'subscriptionType' => $subscriptionType,
+            'subscriptionDetails' => $subscriptionDetails,
+            // Legacy compatibility
+            'mobileSubscription' => $this->getLegacyMobileSubscriptionFormat($subscriptionDetails)
         ]);
+    }
+
+    /**
+     * Convert unified subscription details to legacy mobile subscription format for backward compatibility
+     */
+    private function getLegacyMobileSubscriptionFormat(array $subscriptionDetails): array
+    {
+        if (!$subscriptionDetails['has_active_subscription']) {
+            return [
+                'has_active_subscription' => false,
+                'platform' => null,
+                'expires_at' => null,
+                'product_id' => null,
+                'is_trial' => false
+            ];
+        }
+
+        // Find RevenueCat subscription for legacy format
+        $revenueCatSubscription = collect($subscriptionDetails['subscriptions'])
+            ->firstWhere('provider', 'revenuecat');
+
+        if ($revenueCatSubscription) {
+            return [
+                'has_active_subscription' => true,
+                'platform' => $revenueCatSubscription['platform'],
+                'expires_at' => $revenueCatSubscription['expires_at'],
+                'product_id' => $revenueCatSubscription['product_id'],
+                'is_trial' => $revenueCatSubscription['is_trial']
+            ];
+        }
+
+        // If no RevenueCat subscription, return false for mobile
+        return [
+            'has_active_subscription' => false,
+            'platform' => null,
+            'expires_at' => null,
+            'product_id' => null,
+            'is_trial' => false
+        ];
     }
 
     /**
