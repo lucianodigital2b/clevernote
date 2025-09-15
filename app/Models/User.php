@@ -23,7 +23,6 @@ class User extends Authenticatable implements HasMedia
     use HasFactory, Notifiable, Billable, HasApiTokens, Referrable, InteractsWithMedia;
 
     protected $with = ['subscriptions', 'activeSubscriptions'];
-    protected $withCount = ['notes'];
 
     /**
      * The attributes that are mass assignable.

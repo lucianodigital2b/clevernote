@@ -19,6 +19,8 @@ return new class extends Migration
             $table->enum('difficulty', ['easy', 'medium', 'hard'])->nullable();
             $table->timestamps();
         });
+
+
     }
 
     /**

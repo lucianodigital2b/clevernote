@@ -10,7 +10,7 @@ class Subscription extends CashierSubscription
 {
     protected $fillable = [
         'user_id',
-        'name',
+        'type',
         'stripe_id',
         'stripe_status',
         'stripe_price',
@@ -121,7 +121,9 @@ class Subscription extends CashierSubscription
                 'revenuecat_customer_id' => $data['customer_id']
             ],
             [
-                'name' => 'default', // Required by Cashier
+                'type' => 'default', // Required by Cashier
+                'stripe_id' => 'rc_' . $data['customer_id'], // Dummy stripe_id for RevenueCat
+                'stripe_status' => 'active', // Required by Cashier
                 'revenuecat_entitlement_id' => $data['entitlement_id'],
                 'revenuecat_product_id' => $data['product_id'],
                 'platform' => $data['platform'] ?? 'unknown',
