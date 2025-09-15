@@ -13,5 +13,6 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         'api/check-subscription',
+        'api/webhooks/revenuecat',
     ];
 }

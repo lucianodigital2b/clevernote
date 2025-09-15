@@ -170,3 +170,11 @@ Route::post('auth/apple/callback', [\App\Http\Controllers\Auth\AppleController::
 Route::get('/test', function(){
     return 'test';
 });
+
+Route::post('/test-webhook', function(){
+    return response()->json(['status' => 'success', 'message' => 'webhook test working']);
+});
+
+// RevenueCat webhook (requires Bearer token authentication)
+Route::post('/webhooks/revenuecat', [\App\Http\Controllers\RevenueCatWebhookController::class, 'handle'])
+    ->name('webhooks.revenuecat');
