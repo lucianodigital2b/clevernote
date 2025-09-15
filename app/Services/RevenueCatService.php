@@ -229,7 +229,7 @@ class RevenueCatService
                 'original_purchase_date' => isset($entitlement['purchased_at']) ? 
                     \Carbon\Carbon::createFromTimestampMs($entitlement['purchased_at'])->toISOString() : null,
                 'store' => $entitlement['store'] ?? 'unknown',
-                'is_sandbox' => $entitlement['environment'] === 'SANDBOX'
+                'is_sandbox' => ($entitlement['environment'] ?? 'PRODUCTION') === 'SANDBOX'
             ];
         }
         
