@@ -304,4 +304,24 @@ class DeepSeekService extends AbstractAIService
         
         return $operationMessages[$operation] ?? "An error occurred during {$operation}. Please try again.";
      }
+
+    public function createMindMap(Note $note) {
+        $language = $language ?? $this->defaultLanguage;
+
+        $prompt = AIPrompts::mindmapPrompt($note->content);
+        return $this->sendRequest($prompt);
+    }
+
+    public function generateFlashcardsFromNote(string $content, ?string $language = null): array {
+        $language = $language ?? $this->defaultLanguage;
+        $prompt = AIPrompts::flashcardPrompt($content, $language);
+        return $this->sendRequest($prompt);
+    }
+
+    public function generateContent(string $prompt): string {
+        $response = $this->sendRequest($prompt);
+
+        return json_encode($response);
+        
+    }
  }
