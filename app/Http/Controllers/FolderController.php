@@ -60,6 +60,10 @@ class FolderController extends Controller
         $validated['user_id'] = Auth::id();
         
         $folder = $this->folderService->createFolder($validated);
+
+        if($request->wantsJson()){
+            return response()->json($folder);
+        }
         
         return redirect()->back()
             ->with('success', 'Folder created successfully.');
@@ -107,7 +111,11 @@ class FolderController extends Controller
         $this->authorize('update', $folder);
         
         $folder = $this->folderService->updateFolder($folder, $request->validated());
-        
+
+        if($request->wantsJson()){
+            return response()->json($folder);
+        }
+
         return redirect()->route('folders.show', $folder)
             ->with('success', 'Folder updated successfully.');
     }
@@ -115,7 +123,7 @@ class FolderController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Folder $folder)
+    public function destroy(Folder $folder, Request $request)
     {
         // Authorize that the user owns this folder
         $this->authorize('delete', $folder);
@@ -124,7 +132,11 @@ class FolderController extends Controller
         // You might want to implement a more sophisticated approach
         // like moving them to parent folder or trash
         $folder->delete();
-        
+
+        if($request->wantsJson()){
+            return response()->json(['message' => 'Folder deleted successfully.']);
+        }
+
         return redirect()->route('folders.index')
             ->with('success', 'Folder deleted successfully.');
     }
