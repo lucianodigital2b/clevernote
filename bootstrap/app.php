@@ -28,14 +28,14 @@ return Application::configure(basePath: dirname(__DIR__))
             EnsureOnboardingCompleted::class,
         ]);
         
-        $middleware->web(replace: [
-            \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class => VerifyCsrfToken::class,
-        ]);
+        // $middleware->web(replace: [
+        //     \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class => VerifyCsrfToken::class,
+        // ]);
         
         // Exclude RevenueCat webhook from CSRF verification
-        $middleware->validateCsrfTokens(except: [
-            'api/webhooks/revenuecat',
-        ]);
+        // $middleware->validateCsrfTokens(except: [
+        //     'api/webhooks/revenuecat',
+        // ]);
         
         $middleware->alias([
             'admin.email' => RestrictToAdminEmail::class,
