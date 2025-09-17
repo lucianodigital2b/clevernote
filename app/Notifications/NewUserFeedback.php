@@ -15,6 +15,11 @@ class NewUserFeedback extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
+        // Only send in production environment
+        if (!app()->isProduction()) {
+            return [];
+        }
+        
         return ['mail'];
     }
 

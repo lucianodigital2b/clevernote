@@ -16,7 +16,7 @@ class DeepSeekService extends AbstractAIService
     private const MAX_RETRIES = 3;
     private const RETRY_DELAY = 2; // seconds
     private const MIN_CONTENT_LENGTH = 10;
-    private const MAX_CONTENT_LENGTH = 500000; // ~125k tokens
+    private const MAX_CONTENT_LENGTH = 2000000; // ~500k tokens (GPT-4o supports 128k context, being conservative)
 
     protected function initialize()
     {
@@ -74,14 +74,32 @@ class DeepSeekService extends AbstractAIService
             return $result;
             
         } catch (\Exception $e) {
-            Log::error('Failed to create study note', [
-                'error' => $e->getMessage(),
+            Log::error('DeepSeek createStudyNote failed', [
+                'error_message' => $e->getMessage(),
+                'error_class' => get_class($e),
                 'transcription_length' => strlen($transcription),
                 'language' => $language,
                 'trace' => $e->getTraceAsString()
             ]);
+
+            // Provide more specific error messages based on the exception type
+            if (strpos($e->getMessage(), 'AI service returned empty response') !== false) {
+                throw new \Exception('The AI service returned an empty response. This might be due to API issues or content filtering.');
+            }
             
-            throw new \Exception($this->getErrorMessage($e, 'study note creation'));
+            if (strpos($e->getMessage(), 'Invalid JSON response') !== false) {
+                throw new \Exception('The AI service returned malformed data. Please try again or contact support if the issue persists.');
+            }
+            
+            if (strpos($e->getMessage(), 'AI response missing required field') !== false) {
+                throw new \Exception('The AI service response is incomplete. The content might be too complex or the service might be experiencing issues.');
+            }
+            
+            if (strpos($e->getMessage(), 'AI response has empty') !== false) {
+                throw new \Exception('The AI service generated incomplete study notes. The source content might need to be more detailed or clearer.');
+            }
+
+            throw new \Exception($this->getErrorMessage($e, 'createStudyNote'));
         }
     }
 
@@ -185,13 +203,43 @@ class DeepSeekService extends AbstractAIService
      */
     private function validateStudyNoteResponse(array $response): void
     {
-        if (!isset($response['title']) || !isset($response['content'])) {
-            throw new \Exception('Invalid study note response structure');
+        Log::info('Validating study note response', [
+            'response_keys' => array_keys($response),
+            'response_structure' => $response
+        ]);
+
+        if (!isset($response['title'])) {
+            Log::error('Missing title in study note response', [
+                'response' => $response
+            ]);
+            throw new \Exception('AI response missing required field: title');
         }
-        
-        if (empty(trim($response['title'])) || empty(trim($response['content']))) {
-            throw new \Exception('Study note response contains empty required fields');
+
+        if (!isset($response['content'])) {
+            Log::error('Missing content in study note response', [
+                'response' => $response
+            ]);
+            throw new \Exception('AI response missing required field: content');
         }
+
+        if (empty($response['title'])) {
+            Log::error('Empty title in study note response', [
+                'response' => $response
+            ]);
+            throw new \Exception('AI response has empty title field');
+        }
+
+        if (empty($response['content'])) {
+            Log::error('Empty content in study note response', [
+                'response' => $response
+            ]);
+            throw new \Exception('AI response has empty content field');
+        }
+
+        Log::info('Study note response validation passed', [
+            'title_length' => strlen($response['title']),
+            'content_length' => strlen($response['content'])
+        ]);
     }
 
     /**

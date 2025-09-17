@@ -26,8 +26,8 @@ abstract class AbstractAIService
         $estimatedTokens = $this->estimateTokenCount($this->getSystemPrompt() . $prompt);
         
         // GPT-4o has a context limit of ~128k tokens, but we'll be conservative
-        // and chunk if we exceed 30k tokens to leave room for response and system prompts
-        if ($estimatedTokens > 30000) {
+        // and chunk if we exceed 80k tokens to leave room for response and system prompts
+        if ($estimatedTokens > 80000) {
             Log::info("Content exceeds token limit ({$estimatedTokens} tokens), using chunked processing");
             return $this->sendChunkedRequest($prompt, $additionalParams);
         }
@@ -85,7 +85,7 @@ abstract class AbstractAIService
         $promptTemplate = $this->getPromptTemplate($prompt);
         
         // Split content into chunks
-        $chunks = $this->chunkContent($content, 15000); // Further reduced chunk size for API limits
+        $chunks = $this->chunkContent($content, 60000); // Increased chunk size to reduce API calls and avoid rate limits
         $results = [];
         
         Log::info("Processing content in " . count($chunks) . " chunks");
@@ -243,22 +243,44 @@ abstract class AbstractAIService
     {
         $content = $response->json('choices.0.message.content');
 
+        // Log::info('AI API Response Content', [
+        //     'service' => static::class,
+        //     'content_length' => strlen($content ?? ''),
+        //     'content_preview' => substr($content ?? '', 0, 200) . '...',
+        //     'raw_content' => $content
+        // ]);
 
-        // $data = json_decode(str_replace(["\\n", "\\", "\n", "\r"], '', trim($content, "\"\"\\")), true);
+        if (empty($content)) {
+            Log::error('Empty AI API Response', [
+                'service' => static::class,
+                'full_response' => $response->json()
+            ]);
+            throw new \Exception('AI service returned empty response');
+        }
+
         $data = json_decode($content, true);
         
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            Log::error('JSON Parsing Error', [
+                'service' => static::class,
+                'error' => json_last_error_msg(),
+                'response' => $content
+            ]);
+            throw new \Exception('Invalid JSON response: ' . json_last_error_msg());
+        }
 
-        // Log::error(print_r($data, true));
+        if ($data === null) {
+            Log::error('Null JSON Data', [
+                'service' => static::class,
+                'content' => $content
+            ]);
+            throw new \Exception('AI service returned null data');
+        }
 
-        // if (json_last_error() !== JSON_ERROR_NONE) {
-        //     Log::error('JSON Parsing Error', [
-        //         'service' => static::class,
-        //         'error' => json_last_error_msg(),
-        //         'response' => $content
-        //     ]);
-        //     throw new \Exception('Invalid JSON response: ' . json_last_error_msg());
-        // }
-        
+        Log::info('Successfully parsed AI response', [
+            'service' => static::class,
+            'data_keys' => array_keys($data)
+        ]);
 
         return $data;
     }
