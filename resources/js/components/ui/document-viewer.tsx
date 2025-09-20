@@ -715,7 +715,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
     return (
         <div className={`h-full flex ${isFullscreen ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900' : ''} ${className}`}>
             {/* Document Viewer Section - Only show when fileUrl exists */}
-            {/* {fileUrl && (
+            {fileUrl && (
                 <div className={`${isFullscreen ? 'w-1/2' : 'w-1/2'} flex flex-col`}>
                     <Card className="h-full rounded-2xl border-0 shadow-lg overflow-hidden">
                         <div className="flex-1 overflow-hidden">
@@ -723,10 +723,10 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
                         </div>
                     </Card>
                 </div>
-            )} */}
+            )}
 
             {/* Tabs Section - Always visible, full width when no fileUrl */}
-            <div className={`${fileUrl ? 'w-1/2 ml-4' : 'w-full'} w-full flex flex-col`}>
+            <div className={`${fileUrl ? 'w-1/2 ml-4' : 'w-full'} flex flex-col`}>
                 <Card className="h-full rounded-2xl border-0 shadow-lg overflow-hidden">
                     {/* Tab Headers */}
                     <div className="p-4 border-b  dark:bg-gray-800/50">
