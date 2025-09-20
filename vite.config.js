@@ -18,4 +18,8 @@ export default defineConfig({
     esbuild: {
         jsx: 'automatic',
     },
+    optimizeDeps: {
+        include: ['pdfjs-dist']
+    },
+    assetsInclude: ['**/*.worker.js', '**/*.worker.min.js']
 });

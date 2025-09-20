@@ -287,6 +287,70 @@
     .glass-card {
         @apply bg-white/70 backdrop-blur-md border border-white/20 rounded-2xl;
     }
+
+    /* Table Styles */
+    .table-container {
+        @apply overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm;
+    }
+
+    .styled-table {
+        @apply w-full border-collapse bg-white dark:bg-gray-800;
+    }
+
+    .styled-table th {
+        @apply bg-gray-50 dark:bg-gray-700 px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600;
+    }
+
+    .styled-table td {
+        @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-600;
+    }
+
+    .styled-table tbody tr {
+        @apply hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200;
+    }
+
+    .styled-table tbody tr:nth-child(even) {
+        @apply bg-gray-25 dark:bg-gray-800/50;
+    }
+
+    .styled-table tbody tr:hover {
+        @apply bg-blue-50 dark:bg-blue-900/20;
+    }
+
+    /* Title Styles */
+    .page-title {
+        @apply text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight;
+    }
+
+    .section-title {
+        @apply text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4 leading-tight;
+    }
+
+    .subsection-title {
+        @apply text-2xl md:text-3xl font-semibold text-gray-700 dark:text-gray-200 mb-3 leading-snug;
+    }
+
+    .card-title {
+        @apply text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-2;
+    }
+
+    .content-title {
+        @apply text-lg md:text-xl font-medium text-gray-700 dark:text-gray-200 mb-2;
+    }
+
+    .small-title {
+        @apply text-base font-medium text-gray-600 dark:text-gray-300 mb-1;
+    }
+
+    /* Title with decorative underline */
+    .decorated-title {
+        @apply relative pb-3 mb-6;
+    }
+
+    .decorated-title::after {
+        content: '';
+        @apply absolute bottom-0 left-0 w-16 h-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full;
+    }
     
     .hero-gradient {
       background: linear-gradient(180deg, rgba(238, 242, 255, 0.5) 0%, rgba(240, 253, 250, 0.5) 100%);
@@ -431,19 +495,118 @@
   }
 
   blockquote {
-    border-left: 3px solid var(--gray-3);
+    border-left: 4px solid #3b82f6;
     margin: 1.5rem 0;
-    padding-left: 1rem;
-    padding: 1.5rem;
-    background-color: transparent;
-    border-radius: 1rem;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(147, 51, 234, 0.05) 100%);
+    border-radius: 0.75rem;
+    position: relative;
+    font-style: italic;
+    color: var(--gray-700);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  blockquote::before {
+    content: '"';
+    position: absolute;
+    top: 0.5rem;
+    left: 1rem;
+    font-size: 3rem;
+    color: #3b82f6;
+    opacity: 0.3;
+    font-family: Georgia, serif;
+    line-height: 1;
+  }
+
+  blockquote p {
+    margin: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Enhanced blockquote styles */
+  .blockquote-info {
+    border-left-color: #06b6d4;
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.05) 0%, rgba(14, 165, 233, 0.05) 100%);
+  }
+
+  .blockquote-info::before {
+    color: #06b6d4;
+  }
+
+  .blockquote-warning {
+    border-left-color: #f59e0b;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(251, 191, 36, 0.05) 100%);
+  }
+
+  .blockquote-warning::before {
+    color: #f59e0b;
+  }
+
+  .blockquote-success {
+    border-left-color: #10b981;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(34, 197, 94, 0.05) 100%);
+  }
+
+  .blockquote-success::before {
+    color: #10b981;
+  }
+
+  .blockquote-error {
+    border-left-color: #ef4444;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(248, 113, 113, 0.05) 100%);
+  }
+
+  .blockquote-error::before {
+    color: #ef4444;
   }
 
   /* Dark mode blockquote styles */
   .dark blockquote {
-    background-color: var(--background);
-    border-left-color: var(--border);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%);
+    border-left-color: #60a5fa;
     color: var(--foreground);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .dark blockquote::before {
+    color: #60a5fa;
+  }
+
+  .dark .blockquote-info {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%);
+    border-left-color: #22d3ee;
+  }
+
+  .dark .blockquote-info::before {
+    color: #22d3ee;
+  }
+
+  .dark .blockquote-warning {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%);
+    border-left-color: #fbbf24;
+  }
+
+  .dark .blockquote-warning::before {
+    color: #fbbf24;
+  }
+
+  .dark .blockquote-success {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(34, 197, 94, 0.1) 100%);
+    border-left-color: #34d399;
+  }
+
+  .dark .blockquote-success::before {
+    color: #34d399;
+  }
+
+  .dark .blockquote-error {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(248, 113, 113, 0.1) 100%);
+    border-left-color: #f87171;
+  }
+
+  .dark .blockquote-error::before {
+    color: #f87171;
   }
 
   hr {

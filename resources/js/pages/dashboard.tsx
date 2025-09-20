@@ -132,7 +132,6 @@ export default function Dashboard() {
         }
     };
 
-    console.log(isNewsModalOpen)
     // Add back the getIconComponent function
     const getIconComponent = (iconName: string) => {
         switch (iconName) {
@@ -392,38 +391,84 @@ export default function Dashboard() {
                             
                             {/* Pagination Controls */}
                             {totalPages > 1 && (
-                                <div className="flex justify-center mt-6 gap-2">
-                                    <Button 
-                                        variant="outline" 
-                                        size="sm"
-                                        disabled={page === 1}
-                                        onClick={() => setPage(p => Math.max(1, p - 1))}
-                                    >
-                                        Previous
-                                    </Button>
-                                    
-                                    <div className="flex items-center gap-1">
-                                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
-                                            <Button
-                                                key={pageNum}
-                                                variant={pageNum === page ? "default" : "outline"}
-                                                size="sm"
-                                                onClick={() => setPage(pageNum)}
-                                                className="w-8 h-8 p-0"
-                                            >
-                                                {pageNum}
-                                            </Button>
-                                        ))}
+                                <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
+                                    {/* Pagination Info */}
+                                    <div className="text-sm text-neutral-500">
+                                        Showing {((page - 1) * pageSize) + 1} to {Math.min(page * pageSize, notesData?.meta?.total || 0)} of {notesData?.meta?.total || 0} notes
                                     </div>
                                     
-                                    <Button 
-                                        variant="outline" 
-                                        size="sm"
-                                        disabled={page === totalPages}
-                                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                                    >
-                                        Next
-                                    </Button>
+                                    {/* Pagination Controls */}
+                                    <div className="flex justify-center gap-2">
+                                        <Button 
+                                            variant="outline" 
+                                            size="sm"
+                                            disabled={page === 1}
+                                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                                        >
+                                            Previous
+                                        </Button>
+                                        
+                                        <div className="flex items-center gap-1">
+                                            {/* Show first page */}
+                                            {page > 3 && (
+                                                <>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => setPage(1)}
+                                                        className="w-8 h-8 p-0"
+                                                    >
+                                                        1
+                                                    </Button>
+                                                    {page > 4 && <span className="px-2 text-neutral-500">...</span>}
+                                                </>
+                                            )}
+                                            
+                                            {/* Show pages around current page */}
+                                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                                const startPage = Math.max(1, Math.min(page - 2, totalPages - 4));
+                                                const pageNum = startPage + i;
+                                                
+                                                if (pageNum > totalPages) return null;
+                                                
+                                                return (
+                                                    <Button
+                                                        key={pageNum}
+                                                        variant={pageNum === page ? "default" : "outline"}
+                                                        size="sm"
+                                                        onClick={() => setPage(pageNum)}
+                                                        className="w-8 h-8 p-0"
+                                                    >
+                                                        {pageNum}
+                                                    </Button>
+                                                );
+                                            })}
+                                            
+                                            {/* Show last page */}
+                                            {page < totalPages - 2 && (
+                                                <>
+                                                    {page < totalPages - 3 && <span className="px-2 text-neutral-500">...</span>}
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => setPage(totalPages)}
+                                                        className="w-8 h-8 p-0"
+                                                    >
+                                                        {totalPages}
+                                                    </Button>
+                                                </>
+                                            )}
+                                        </div>
+                                        
+                                        <Button 
+                                            variant="outline" 
+                                            size="sm"
+                                            disabled={page === totalPages}
+                                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                        >
+                                            Next
+                                        </Button>
+                                    </div>
                                 </div>
                             )}
                         </>

@@ -16,13 +16,18 @@ class DeepSeekService extends AbstractAIService
     private const MAX_RETRIES = 3;
     private const RETRY_DELAY = 2; // seconds
     private const MIN_CONTENT_LENGTH = 10;
-    private const MAX_CONTENT_LENGTH = 2000000; // ~500k tokens (GPT-4o supports 128k context, being conservative)
+    private const MAX_CONTENT_LENGTH = 5000000; // ~1.25M tokens (DeepSeek supports large context windows)
+
+    public function getServiceName(): string
+    {
+        return 'deepseek';
+    }
 
     protected function initialize()
     {
-        $this->apiKey = config('services.openai.api_key');
-        $this->apiEndpoint = 'https://api.openai.com/v1/chat/completions';
-        $this->model = 'gpt-4o';
+        $this->apiKey = config('services.deepseek.api_key');
+        $this->apiEndpoint = 'https://api.deepseek.com/v1/chat/completions';
+        $this->model = 'deepseek-chat';
     }
 
     protected function getSystemPrompt(): string
@@ -35,6 +40,9 @@ class DeepSeekService extends AbstractAIService
         try {
             // Input validation
             $this->validateInput($transcription, 'transcription');
+            
+            // Additional validation for extremely large content
+            $this->validateContentForProcessing($transcription);
             
             $language = $language ?? $this->defaultLanguage;
             
@@ -118,6 +126,36 @@ class DeepSeekService extends AbstractAIService
         
         if (strlen($content) > self::MAX_CONTENT_LENGTH) {
             throw new \Exception("The {$fieldName} is too long (maximum " . self::MAX_CONTENT_LENGTH . " characters)");
+        }
+    }
+
+    /**
+     * Additional validation for processing extremely large content
+     */
+    private function validateContentForProcessing(string $content): void
+    {
+        $contentLength = strlen($content);
+        
+        // Warn for very large content that might cause performance issues
+        if ($contentLength > 1500000) { // 1.5M characters
+            Log::warning('Processing extremely large content', [
+                'content_length' => $contentLength,
+                'estimated_tokens' => (int) ceil($contentLength / 4)
+            ]);
+            
+            // For content over 3M characters, reject to prevent system overload
+            if ($contentLength > 3000000) {
+                throw new \Exception("Content is too large to process safely (over 3M characters). Please split into smaller sections.");
+            }
+        }
+        
+        // Estimate token count and validate against API limits
+        $estimatedTokens = (int) ceil($contentLength / 4);
+        if ($estimatedTokens > 100000) { // Conservative limit considering system prompts
+            Log::info('Large content will be processed in chunks', [
+                'content_length' => $contentLength,
+                'estimated_tokens' => $estimatedTokens
+            ]);
         }
     }
 

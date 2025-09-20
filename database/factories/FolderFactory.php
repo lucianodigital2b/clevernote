@@ -17,7 +17,8 @@ class FolderFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->words(2, true),
+            'user_id' => \App\Models\User::factory(),
         ];
     }
 }

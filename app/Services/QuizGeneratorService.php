@@ -36,5 +36,8 @@ class QuizGeneratorService extends AbstractAIService
         return $this->sendRequest($prompt);
     }
 
-
+    protected function getServiceName(): string
+    {
+        return 'QuizGeneratorService';
+    }
 }

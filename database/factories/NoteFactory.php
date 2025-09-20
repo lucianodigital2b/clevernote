@@ -17,7 +17,16 @@ class NoteFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'folder_id' => \App\Models\Folder::factory(),
+            'user_id' => \App\Models\User::factory(),
+            'uuid' => $this->faker->uuid(),
+            'title' => $this->faker->sentence(),
+            'status' => 'pending',
+            'content' => $this->faker->paragraphs(3, true),
+            'transcription' => null,
+            'summary' => $this->faker->paragraph(),
+            'is_pinned' => false,
+            'podcast_status' => null,
         ];
     }
 }

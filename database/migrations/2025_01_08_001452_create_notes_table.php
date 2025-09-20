@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('notes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('folder_id')->constrained('folders')->onDelete('cascade');
+            $table->foreignId('folder_id')->nullable()->constrained('folders')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->uuid();
             $table->string('title');

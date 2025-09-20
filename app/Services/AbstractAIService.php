@@ -84,11 +84,39 @@ abstract class AbstractAIService
         $content = $this->extractContentFromPrompt($prompt);
         $promptTemplate = $this->getPromptTemplate($prompt);
         
+        // Calculate appropriate chunk size based on content length
+        $contentLength = strlen($content);
+        $maxChunks = 3; // Limit to maximum 3 chunks for better processing
+        
+        // ULTRA-CONSERVATIVE FIX: Template overhead is 4000+ tokens, need minimal chunks
+        // Using extremely small chunks to account for massive template overhead
+        $maxTokensPerChunk = $this->getMaxTokensPerChunk($contentLength);
+        
+        Log::info("Calculated max tokens per chunk", [
+            'service' => $this->getServiceName(),
+            'content_length' => $contentLength,
+            'max_tokens_per_chunk' => $maxTokensPerChunk
+        ]);
+        
+        // Calculate target chunk size to ensure we don't exceed maxChunks
+        $targetChunkSize = (int) ceil($contentLength / $maxChunks);
+        $chunkSize = min($maxTokensPerChunk, $targetChunkSize);
+        
         // Split content into chunks
-        $chunks = $this->chunkContent($content, 60000); // Increased chunk size to reduce API calls and avoid rate limits
+        $chunks = $this->chunkContent($content, $chunkSize);
+        
+        // If we still have too many chunks, merge them to stay within the 3-chunk limit
+        if (count($chunks) > $maxChunks) {
+            $chunks = $this->limitChunksToMaximum($chunks, $maxChunks);
+        }
+        
         $results = [];
         
-        Log::info("Processing content in " . count($chunks) . " chunks");
+        Log::info("Processing content in " . count($chunks) . " chunks", [
+            'content_length' => $contentLength,
+            'chunk_size' => $chunkSize,
+            'max_tokens_per_chunk' => $maxTokensPerChunk
+        ]);
         
         foreach ($chunks as $index => $chunk) {
             try {
@@ -183,6 +211,26 @@ abstract class AbstractAIService
         return $chunks;
     }
     
+    /**
+     * Limit chunks to maximum number by merging smaller chunks
+     */
+    protected function limitChunksToMaximum(array $chunks, int $maxChunks): array
+    {
+        if (count($chunks) <= $maxChunks) {
+            return $chunks;
+        }
+        
+        $limitedChunks = [];
+        $chunksPerGroup = (int) ceil(count($chunks) / $maxChunks);
+        
+        for ($i = 0; $i < count($chunks); $i += $chunksPerGroup) {
+            $groupChunks = array_slice($chunks, $i, $chunksPerGroup);
+            $limitedChunks[] = implode("\n\n", $groupChunks);
+        }
+        
+        return $limitedChunks;
+    }
+    
     protected function buildChunkPrompt(string $template, string $chunk, int $chunkNumber, int $totalChunks): string
     {
         $chunkInfo = "\n\n[CHUNK {$chunkNumber} OF {$totalChunks}]\n";
@@ -236,6 +284,39 @@ abstract class AbstractAIService
         Log::info('Successfully combined ' . count($results) . ' chunk results');
         return $combined;
     }
+    
+    /**
+     * Get maximum tokens per chunk based on service and content size
+     * EXTREME FIX: Template overhead is 8000+ tokens, need microscopic chunks
+     */
+    protected function getMaxTokensPerChunk(int $contentLength): int
+    {
+        $serviceName = $this->getServiceName();
+        
+        // Microscopic base limits per service (extreme conservative)
+        $baseLimits = [
+            'deepseek' => 10,    // Was 25, now microscopic
+            'openai' => 12,      // Was 30, now microscopic  
+            'claude' => 15       // Was 40, now microscopic
+        ];
+        
+        $baseLimit = $baseLimits[$serviceName] ?? 10;
+        
+        // For very large content, reduce to absolute minimum
+        if ($contentLength > 500000) {
+            $baseLimit = 5;      // Absolute minimum for huge content
+        } elseif ($contentLength > 100000) {
+            $baseLimit = (int) ($baseLimit * 0.7); // Reduce by 30%
+        }
+        
+        // Ensure minimum of 5 tokens (absolute floor)
+        return max(5, $baseLimit);
+    }
+    
+    /**
+     * Get the service name for token limit calculations
+     */
+    abstract protected function getServiceName(): string;
 
     abstract protected function getSystemPrompt(): string;
 

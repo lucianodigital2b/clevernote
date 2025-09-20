@@ -20,6 +20,19 @@ type QuizContentProps = {
 
 export function QuizContent({ title, questions, onComplete }: QuizContentProps) {
     const { t } = useTranslation();
+    
+    // Safety check for questions array
+    if (!questions || questions.length === 0) {
+        return (
+            <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                    <h2 className="text-xl font-semibold mb-2">{t('quiz_no_questions')}</h2>
+                    <p className="text-gray-500">{t('quiz_no_questions_description')}</p>
+                </div>
+            </div>
+        );
+    }
+    
     const handleReset = () => {
         setShuffledQuestions([...questions].sort(() => Math.random() - 0.5));
         setCurrentQuestionIndex(0);
@@ -131,6 +144,19 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
     const [answers, setAnswers] = useState<Array<{ question_id: string; option_id: string }>>([]);
 
     const currentQuestion = shuffledQuestions[currentQuestionIndex];
+    
+    // Additional safety check for currentQuestion
+    if (!currentQuestion) {
+        return (
+            <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                    <h2 className="text-xl font-semibold mb-2">{t('quiz_loading')}</h2>
+                    <p className="text-gray-500">{t('quiz_loading_description')}</p>
+                </div>
+            </div>
+        );
+    }
+    
     const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
     const handleOptionSelect = (optionId: string) => {
@@ -144,7 +170,7 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
         setIsAnswered(true);
         setShowExplanation(true);
 
-        const selectedOption = currentQuestion.options.find(option => option.id === selectedOptionId);
+        const selectedOption = currentQuestion.options?.find(option => option.id === selectedOptionId);
         if (selectedOption?.is_correct) {
             setScore(score + 1);
         }
@@ -175,7 +201,7 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
             return `border-2 ${selectedOptionId === optionId ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' : 'border-gray-200 dark:border-neutral-700 hover:border-indigo-300 dark:hover:border-indigo-600'}`;
         }
 
-        const option = currentQuestion.options.find(opt => opt.id === optionId);
+        const option = currentQuestion.options?.find(opt => opt.id === optionId);
         if (option?.is_correct) {
             return 'border-2 border-green-500 bg-green-50 dark:bg-green-900/20';
         }
@@ -394,7 +420,7 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
 
                 <div className="space-y-2 sm:space-y-3">
                     <AnimatePresence>
-                        {currentQuestion.options.map((option) => (
+                        {currentQuestion.options?.map((option) => (
                             <motion.div
                                 key={option.id}
                                 initial={{ opacity: 0, y: 20 }}
@@ -427,7 +453,7 @@ export function QuizContent({ title, questions, onComplete }: QuizContentProps) 
                                     )}
                                 </div>
                             </motion.div>
-                        ))}
+                        )) || []}
                     </AnimatePresence>
                 </div>
 

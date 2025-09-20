@@ -78,8 +78,9 @@ class AIPrompts
             - Preserve technical terms and proper nouns in original form
             - Focus on creating a comprehensive study resource, not just a summary
             
-            Transcription to transform:
-            {$content}
+        Content to transform:
+        {$content}
+            
         EOT;
     }
 

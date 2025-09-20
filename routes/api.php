@@ -140,6 +140,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/revenuecat/link', [RevenueCatController::class, 'linkUser']);
     Route::get('/revenuecat/status', [RevenueCatController::class, 'getSubscriptionStatus']);
     Route::post('/revenuecat/refresh', [RevenueCatController::class, 'refreshSubscription']);
+
+    
     Route::post('/notes/{note}/media', [NoteController::class, 'upload']);
     Route::post('/flashcard-sets/{flashcardSet}/media', [\App\Http\Controllers\FlashcardSetController::class, 'uploadMedia']);
     Route::post('/flashcards/{flashcard}/media', [\App\Http\Controllers\FlashcardController::class, 'uploadMedia']);

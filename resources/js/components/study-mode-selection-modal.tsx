@@ -15,25 +15,31 @@ interface StudyModeSelectionModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     flashcardSetId: number | null;
+    onModeSelect?: (mode: 'fast' | 'spaced') => void;
 }
 
 export const StudyModeSelectionModal: React.FC<StudyModeSelectionModalProps> = ({
     open,
     onOpenChange,
-    flashcardSetId
+    flashcardSetId,
+    onModeSelect
 }) => {
     const { t } = useTranslation();
 
     const handleFastReviewMode = () => {
         onOpenChange(false);
-        if (flashcardSetId) {
+        if (onModeSelect) {
+            onModeSelect('fast');
+        } else if (flashcardSetId) {
             router.visit(`/flashcard-sets/${flashcardSetId}/study?mode=fast`);
         }
     };
 
     const handleSpacedRepetitionMode = () => {
         onOpenChange(false);
-        if (flashcardSetId) {
+        if (onModeSelect) {
+            onModeSelect('spaced');
+        } else if (flashcardSetId) {
             router.visit(`/flashcard-sets/${flashcardSetId}/study`);
         }
     };

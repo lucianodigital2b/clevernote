@@ -19,8 +19,17 @@ class NoteService
 
         $fullPath = storage_path('app/public/' . $path);
         
+        // Check if file exists before attempting to get its size
+        if (!file_exists($fullPath)) {
+            throw new \RuntimeException('PDF file not found at path: ' . $fullPath);
+        }
+        
         // Check file size - increased limit but with chunking strategy
         $fileSize = filesize($fullPath);
+        if ($fileSize === false) {
+            throw new \RuntimeException('Unable to determine PDF file size');
+        }
+        
         if ($fileSize > 200 * 1024 * 1024) { // 200MB hard limit
             throw new \RuntimeException('PDF file is too large (max 200MB allowed)');
         }
@@ -413,10 +422,13 @@ class NoteService
             });
         }
 
+        // Use per_page from filters, default to 10 if not provided
+        $perPage = isset($filters['per_page']) ? (int) $filters['per_page'] : 10;
+        
         return $query->with(['tags', 'folder'])
                     ->orderBy('is_pinned', 'desc')
                     ->orderBy('updated_at', 'desc')
-                    ->paginate(5);
+                    ->paginate($perPage);
     }
 
     /**
