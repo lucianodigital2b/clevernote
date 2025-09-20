@@ -37,9 +37,10 @@ return [
             'region' => 'auto', // R2 doesn't use regions
             'bucket' => env('R2_BUCKET'),
             'endpoint' => env('R2_ENDPOINT'), // important!
-            'use_path_style_endpoint' => true, // required for R2
+            'use_path_style_endpoint' => false, // set to false for custom domain
             'url' => env('R2_CUSTOM_DOMAIN'),
             'visibility' => 'public',
+            'root' => '', // ensure no root prefix is added
         ],
 
         'local' => [
