@@ -36,10 +36,9 @@ return [
             'secret' => env('R2_SECRET_ACCESS_KEY'),
             'region' => 'auto', // R2 doesn't use regions
             'bucket' => env('R2_BUCKET'),
-            'endpoint' => env('R2_ENDPOINT'), // important!
+            'endpoint' => env('R2_CUSTOM_DOMAIN'), // Use custom domain as endpoint
             'use_path_style_endpoint' => false, // set to false for custom domain
             'url' => env('R2_CUSTOM_DOMAIN'),
-            'bucket_endpoint' => true, // use custom domain directly without bucket prefix
             'visibility' => 'public',
             'root' => '', // ensure no root prefix is added
         ],
