@@ -699,19 +699,6 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
         return null;
     };
 
-    if (!fileUrl && !isLoading) {
-        return (
-            <Card className={`h-full rounded-2xl border-0 shadow-lg ${className}`}>
-                <CardContent className="flex items-center justify-center h-full">
-                    <div className="text-center text-muted-foreground">
-                        <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                        <p>No document selected</p>
-                    </div>
-                </CardContent>
-            </Card>
-        );
-    }
-
     if (isLoading) {
         return (
             <Card className={`h-full rounded-2xl border-0 shadow-lg ${className}`}>
@@ -727,18 +714,20 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
 
     return (
         <div className={`h-full flex ${isFullscreen ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900' : ''} ${className}`}>
-            {/* Document Viewer Section */}
-            <div className={`${isFullscreen ? 'w-1/2' : 'w-1/2'} flex flex-col`}>
-                <Card className="h-full rounded-2xl border-0 shadow-lg overflow-hidden">
-                    {/* Content */}
-                    <div className="flex-1 overflow-hidden">
-                        {fileType === 'pdf' ? renderPDFViewer() : renderOfficeViewer()}
-                    </div>
-                </Card>
-            </div>
+            {/* Document Viewer Section - Only show when fileUrl exists */}
+            {fileUrl && (
+                <div className={`${isFullscreen ? 'w-1/2' : 'w-1/2'} flex flex-col`}>
+                    <Card className="h-full rounded-2xl border-0 shadow-lg overflow-hidden">
+                        {/* Content */}
+                        <div className="flex-1 overflow-hidden">
+                            {fileType === 'pdf' ? renderPDFViewer() : renderOfficeViewer()}
+                        </div>
+                    </Card>
+                </div>
+            )}
 
-            {/* Tabs Section - Always visible */}
-            <div className="w-1/2 flex flex-col ml-4">
+            {/* Tabs Section - Always visible, full width when no fileUrl */}
+            <div className={`${fileUrl ? 'w-1/2 ml-4' : 'w-full'} flex flex-col`}>
                 <Card className="h-full rounded-2xl border-0 shadow-lg overflow-hidden">
                     {/* Tab Headers */}
                     <div className="p-4 border-b  dark:bg-gray-800/50">
