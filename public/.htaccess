@@ -23,3 +23,8 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Serve .mjs files with correct MIME type for ES modules
+<IfModule mod_mime.c>
+    AddType application/javascript .mjs
+</IfModule>
