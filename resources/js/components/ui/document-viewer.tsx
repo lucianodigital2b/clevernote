@@ -423,14 +423,166 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
                 return (
                     <div className="flex-1 p-4">
                         <ScrollArea className="h-full">
-                            <div className="prose prose-sm max-w-none dark:prose-invert">
-                                <h3 className="text-lg font-semibold mb-4">{note?.title || 'Note Content'}</h3>
+                            <div className="max-w-none">
                                 <div 
-                                    className="text-sm leading-relaxed"
+                                    className="note-content text-gray-800 dark:text-gray-200 leading-relaxed"
                                     dangerouslySetInnerHTML={{ __html: note?.content || 'No content available' }}
+                                    style={{
+                                        fontSize: '15px',
+                                        lineHeight: '1.7'
+                                    }}
                                 />
                             </div>
                         </ScrollArea>
+                        <style jsx>{`
+                            .note-content h1 {
+                                font-size: 1.875rem;
+                                font-weight: 700;
+                                margin: 2rem 0 1rem 0;
+                                color: inherit;
+                                line-height: 1.3;
+                            }
+                            .note-content h2 {
+                                font-size: 1.5rem;
+                                font-weight: 600;
+                                margin: 1.75rem 0 0.875rem 0;
+                                color: inherit;
+                                line-height: 1.4;
+                            }
+                            .note-content h3 {
+                                font-size: 1.25rem;
+                                font-weight: 600;
+                                margin: 1.5rem 0 0.75rem 0;
+                                color: inherit;
+                                line-height: 1.4;
+                            }
+                            .note-content h4 {
+                                font-size: 1.125rem;
+                                font-weight: 600;
+                                margin: 1.25rem 0 0.625rem 0;
+                                color: inherit;
+                                line-height: 1.4;
+                            }
+                            .note-content h5, .note-content h6 {
+                                font-size: 1rem;
+                                font-weight: 600;
+                                margin: 1rem 0 0.5rem 0;
+                                color: inherit;
+                                line-height: 1.4;
+                            }
+                            .note-content p {
+                                margin: 1rem 0;
+                                line-height: 1.7;
+                            }
+                            .note-content ul, .note-content ol {
+                                margin: 1rem 0;
+                                padding-left: 1.5rem;
+                            }
+                            .note-content li {
+                                margin: 0.5rem 0;
+                                line-height: 1.6;
+                            }
+                            .note-content blockquote {
+                                margin: 1.5rem 0;
+                                padding: 1rem 1.5rem;
+                                border-left: 4px solid #e5e7eb;
+                                background-color: #f9fafb;
+                                font-style: italic;
+                                color: #6b7280;
+                            }
+                            .dark .note-content blockquote {
+                                border-left-color: #4b5563;
+                                background-color: #1f2937;
+                                color: #9ca3af;
+                            }
+                            .note-content table {
+                                width: 100%;
+                                margin: 1.5rem 0;
+                                border-collapse: collapse;
+                                border: 1px solid #e5e7eb;
+                                border-radius: 0.5rem;
+                                overflow: hidden;
+                            }
+                            .dark .note-content table {
+                                border-color: #4b5563;
+                            }
+                            .note-content th {
+                                background-color: #f3f4f6;
+                                padding: 0.75rem 1rem;
+                                text-align: left;
+                                font-weight: 600;
+                                border-bottom: 1px solid #e5e7eb;
+                            }
+                            .dark .note-content th {
+                                background-color: #374151;
+                                border-bottom-color: #4b5563;
+                            }
+                            .note-content td {
+                                padding: 0.75rem 1rem;
+                                border-bottom: 1px solid #f3f4f6;
+                            }
+                            .dark .note-content td {
+                                border-bottom-color: #374151;
+                            }
+                            .note-content code {
+                                background-color: #f3f4f6;
+                                padding: 0.125rem 0.375rem;
+                                border-radius: 0.25rem;
+                                font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+                                font-size: 0.875rem;
+                                color: #dc2626;
+                            }
+                            .dark .note-content code {
+                                background-color: #374151;
+                                color: #fca5a5;
+                            }
+                            .note-content pre {
+                                background-color: #f8fafc;
+                                border: 1px solid #e2e8f0;
+                                border-radius: 0.5rem;
+                                padding: 1rem;
+                                margin: 1.5rem 0;
+                                overflow-x: auto;
+                                font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+                                font-size: 0.875rem;
+                                line-height: 1.5;
+                            }
+                            .dark .note-content pre {
+                                background-color: #1e293b;
+                                border-color: #475569;
+                            }
+                            .note-content pre code {
+                                background: none;
+                                padding: 0;
+                                color: inherit;
+                            }
+                            .note-content a {
+                                color: #2563eb;
+                                text-decoration: underline;
+                                text-decoration-color: transparent;
+                                transition: text-decoration-color 0.2s;
+                            }
+                            .note-content a:hover {
+                                text-decoration-color: currentColor;
+                            }
+                            .dark .note-content a {
+                                color: #60a5fa;
+                            }
+                            .note-content strong {
+                                font-weight: 600;
+                            }
+                            .note-content em {
+                                font-style: italic;
+                            }
+                            .note-content hr {
+                                margin: 2rem 0;
+                                border: none;
+                                border-top: 1px solid #e5e7eb;
+                            }
+                            .dark .note-content hr {
+                                border-top-color: #4b5563;
+                            }
+                        `}</style>
                     </div>
                 );
             case 'quiz':
