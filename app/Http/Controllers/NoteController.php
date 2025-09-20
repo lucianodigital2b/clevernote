@@ -91,13 +91,13 @@ class NoteController extends Controller
             }
             
             // Determine if this note requires processing
-            $requiresProcessing = isset($validated['pdf_file']) || isset($validated['audio_file']) || isset($validated['image_file']) || isset($validated['link']);
+            $requiresProcessing = isset($validated['pdf_file']) || isset($validated['audio_file']) || isset($validated['image_file']) || isset($validated['link']) || isset($validated['text_content']);
             
             // Create the note with appropriate status
             $note = Note::create([
                 'user_id' => $validated['user_id'],
                 'title' => $validated['title'] ?? ($requiresProcessing ? 'Processing Note' : 'New Note'),
-                'content' => $validated['content'] ?? '', // Use provided content or empty string
+                'content' => isset($validated['text_content']) ? '' : ($validated['content'] ?? ''), // Don't set content for text_content, let job process it
                 'status' => $requiresProcessing ? 'processing' : 'completed',
                 'folder_id' => $validated['folder_id'] ?? null,
                 'icon' => $validated['icon'] ?? 'file',
@@ -107,7 +107,7 @@ class NoteController extends Controller
             ]);
 
             // Increment user's notes count
-            $user->increment('notes_count');
+            // $user->increment('notes_count');
 
             if (isset($validated['pdf_file'])) {
                 $file = $validated['pdf_file'];
@@ -125,6 +125,14 @@ class NoteController extends Controller
 
                 // Dispatch job for PDF/Doc processing
                 ProcessPdfNote::dispatch($note->id, $validated, $path, $extension);
+
+            } else if (isset($validated['text_content'])) {
+                // Remove text_content from validated data before passing to job
+                $textContent = $validated['text_content'];
+                unset($validated['text_content']);
+
+                // Dispatch job for text processing
+                ProcessPdfNote::dispatch($note->id, $validated, null, null, $textContent);
 
             } else if (isset($validated['audio_file'])) {
                 $audioFile = $validated['audio_file'];

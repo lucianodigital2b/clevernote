@@ -29,6 +29,7 @@ class ProcessPdfNote implements ShouldQueue
     protected $validatedData;
     protected $filePath;
     protected $extension;
+    protected $textContent;
 
     /**
      * The number of seconds the job can run before timing out.
@@ -47,12 +48,13 @@ class ProcessPdfNote implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(int $noteId, array $validatedData, string $filePath, string $extension)
+    public function __construct(int $noteId, array $validatedData, string $filePath = null, string $extension = null, string $textContent = null)
     {
         $this->noteId = $noteId;
         $this->validatedData = $validatedData;
         $this->filePath = $filePath;
         $this->extension = $extension;
+        $this->textContent = $textContent;
     }
 
     /**
@@ -65,6 +67,12 @@ class ProcessPdfNote implements ShouldQueue
         try {
             // Update note status to processing
             $note->update(['status' => 'processing']);
+
+            // Check if this is text-only processing
+            if ($this->textContent && !$this->filePath) {
+                $this->processTextWithPrism($note, $this->textContent);
+                return;
+            }
 
             $fullPath = Storage::disk('public')->path($this->filePath);
             
@@ -105,14 +113,12 @@ class ProcessPdfNote implements ShouldQueue
             $studyNote = $this->parseStudyNoteResponse($response->text);
             
             // Update note with processed content
-            $noteData = array_merge($this->validatedData, [
+            $note->update([
                 'content' => $studyNote['content'],
                 'title' => $studyNote['title'],
                 'summary' => $studyNote['summary'],
                 'status' => 'processed'
             ]);
-
-            $note->update($noteData);
             
             // Log successful processing
             Log::info("Successfully processed PDF note with OpenAI", [

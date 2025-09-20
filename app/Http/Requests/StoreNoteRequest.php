@@ -29,11 +29,30 @@ class StoreNoteRequest extends FormRequest
             'image_file' => 'nullable|file|mimes:jpg,jpeg,png,gif,bmp,webp|max:10240', // 10MB max
             'link' => 'nullable|string|url', 
             'content' => 'nullable|string', 
+            'text_content' => 'nullable|string|max:50000', // Limit text content to 50,000 characters
             'transcription' => 'nullable|string', 
             'summary' => 'nullable|string', 
             'is_pinned' => 'nullable|boolean',
             'language' => 'nullable|string',
             'icon' => 'nullable|string',
         ];
+    }
+
+    /**
+     * Configure the validator instance.
+     */
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            // Ensure at least one content source is provided
+            $hasFile = $this->hasFile('pdf_file') || $this->hasFile('audio_file') || $this->hasFile('image_file');
+            $hasTextContent = !empty($this->input('text_content'));
+            $hasLink = !empty($this->input('link'));
+            $hasContent = !empty($this->input('content'));
+
+            if (!$hasFile && !$hasTextContent && !$hasLink && !$hasContent) {
+                $validator->errors()->add('content', 'Please provide either a file, text content, link, or content to create a note.');
+            }
+        });
     }
 }

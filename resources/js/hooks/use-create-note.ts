@@ -14,6 +14,7 @@ export function useCreateNote() {
         folder_id: string;
         audio_file?: File | Blob;
         pdf_file?: File;
+        text_content?: string;
         link?: string;
         language?: string;
     }) => {
@@ -31,6 +32,8 @@ export function useCreateNote() {
             formData.append('type', type);
 
             if (data.language) formData.append('language', data.language);
+            
+            if (data.text_content) formData.append('text_content', data.text_content);
             
             if ((type === 'record' || type === 'audio') && data.audio_file) {
                 formData.append('audio_file', data.audio_file);
