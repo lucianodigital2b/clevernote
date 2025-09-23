@@ -56,11 +56,8 @@ import 'reactflow/dist/style.css';
 import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
 
-// Set up PDF.js worker - use react-pdf's internal pdfjs-dist to avoid version mismatch
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    'react-pdf/node_modules/pdfjs-dist/build/pdf.worker.min.mjs',
-    import.meta.url,
-).toString();
+// Set up PDF.js worker - use unpkg.com CDN to avoid MIME type issues
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface DocumentViewerProps {
     fileUrl?: string;
