@@ -253,6 +253,8 @@ export default function Edit({ note }: { note: Note }) {
                             clearInterval(intervalId);
                             setIsFlashcardModalOpen(false);
                             toastConfig.success("Flashcards generated successfully");
+                            // Refresh the page to show updated flashcards
+                            window.location.reload();
                             
                         } else if (flashcardData.status === 'failed') {
                             clearInterval(intervalId);
@@ -314,6 +316,8 @@ export default function Edit({ note }: { note: Note }) {
                             clearInterval(intervalId);
                             setIsQuizModalOpen(false);
                             toastConfig.success("Quiz generated successfully");
+                            // Refresh the page to show updated quiz
+                            window.location.reload();
                             
                         } else if (quizData.status === 'failed') {
                             clearInterval(intervalId);
@@ -359,6 +363,8 @@ export default function Edit({ note }: { note: Note }) {
                             clearInterval(intervalId);
                             setIsMindmapLoading(false);
                             toastConfig.success("Mindmap generated successfully");
+                            // Refresh the page to show updated mindmap
+                            window.location.reload();
                             
                         } else if (mindmapData.status === 'failed') {
                             clearInterval(intervalId);
@@ -644,6 +650,8 @@ export default function Edit({ note }: { note: Note }) {
                                 podcast_generated_at: podcastData.podcast_generated_at
                             }));
                             toastConfig.success("Podcast generated successfully!");
+                            // Refresh the page to show updated podcast
+                            window.location.reload();
                             
                         } else if (podcastData.podcast_status === 'failed') {
                             if (podcastPollingIntervalRef.current) {

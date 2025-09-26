@@ -37,8 +37,11 @@ class GenerateFlashcardsFromNote implements ShouldQueue
             
             $flashcards = $deepSeekService->generateFlashcardsFromNote($note->content);
             
+            // Handle both possible response structures: direct array or wrapped in 'flashcards' key
+            $flashcardData = isset($flashcards['flashcards']) ? $flashcards['flashcards'] : $flashcards;
+            
             // Save flashcards and attach them to the flashcard set
-            $createdFlashcards = collect($flashcards['flashcards'])->map(function ($card) use ($note) {
+            $createdFlashcards = collect($flashcardData)->map(function ($card) use ($note) {
                 return Flashcard::create([
                     'folder_id' => $note->folder_id ?? null,
                     'question' => $card['question'],
@@ -56,7 +59,7 @@ class GenerateFlashcardsFromNote implements ShouldQueue
         } catch (\Exception $e) {
             // Update flashcard set status to failed
             $flashcardSet->update(['status' => 'failed']);
-            Log::error(print_r($flashcards, true));
+            Log::error('AI Response: ' . print_r($flashcards ?? 'No response', true));
             Log::error('Failed to generate flashcard: ' . $e->getMessage());
             throw $e;
         }
