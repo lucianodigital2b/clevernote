@@ -133,7 +133,6 @@ class AppleController extends Controller
             if ($decoded->iss !== 'https://appleid.apple.com') {
                 throw new \Exception('Invalid issuer');
             }
-            Log::error(print_r($decoded, true));
 
             if ($decoded->aud !== config('services.apple.client_id')) {
                 throw new \Exception('Invalid audience');

@@ -129,6 +129,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{group}/regenerate-invite', [GroupController::class, 'regenerateInviteCode']);
         Route::get('/{group}/leaderboard', [GroupController::class, 'leaderboard']);
     });
+
+    // Chat with Notes routes
+    Route::prefix('chat')->middleware('chat.throttle:10,1')->group(function () {
+        Route::post('/notes/{note}', [\App\Http\Controllers\ChatController::class, 'chatWithNote'])
+            ->name('api.chat.note');
+        Route::get('/notes/{note}/suggestions', [\App\Http\Controllers\ChatController::class, 'getChatSuggestions'])
+            ->name('api.chat.suggestions');
+    });
 });
 
 

@@ -39,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
         
         $middleware->alias([
             'admin.email' => RestrictToAdminEmail::class,
+            'chat.throttle' => \App\Http\Middleware\ChatThrottleMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
