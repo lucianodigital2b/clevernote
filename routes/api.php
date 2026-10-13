@@ -173,7 +173,7 @@ Route::post('register', [RegisteredUserController::class, 'store']);
 
 Route::post('auth/google/callback', [\App\Http\Controllers\Auth\GoogleController::class, 'handleMobileGoogleAuth']);
 Route::post('auth/apple/callback', [\App\Http\Controllers\Auth\AppleController::class, 'loginWithApple'])
-    ->name('auth.apple.callback');
+    ->name('api.auth.apple.callback');
 
 
     
