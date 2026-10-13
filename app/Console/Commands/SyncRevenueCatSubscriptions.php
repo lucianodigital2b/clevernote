@@ -26,17 +26,14 @@ class SyncRevenueCatSubscriptions extends Command
 
     protected RevenueCatService $revenueCatService;
 
-    public function __construct(RevenueCatService $revenueCatService)
-    {
-        parent::__construct();
-        $this->revenueCatService = $revenueCatService;
-    }
-
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(RevenueCatService $revenueCatService)
     {
+        // Resolvido aqui e não no construtor: comando é instanciado em todo `artisan`.
+        $this->revenueCatService = $revenueCatService;
+
         $this->info('Starting RevenueCat subscription sync...');
         
         $isDryRun = $this->option('dry-run');

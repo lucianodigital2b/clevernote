@@ -24,17 +24,14 @@ class GenerateAppleJWT extends Command
 
     private AppleJWTService $appleJWTService;
 
-    public function __construct(AppleJWTService $appleJWTService)
-    {
-        parent::__construct();
-        $this->appleJWTService = $appleJWTService;
-    }
-
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(AppleJWTService $appleJWTService)
     {
+        // Resolvido aqui e não no construtor: comando é instanciado em todo `artisan`.
+        $this->appleJWTService = $appleJWTService;
+
         try {
             $months = (int) $this->option('months');
             

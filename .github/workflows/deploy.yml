@@ -35,12 +35,18 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
+      # O RevenueCatService lança exceção sem REVENUECAT_PROJECT_ID, e o package:discover
+      # do composer já resolve ele: o .env tem que existir antes.
+      - name: .env de CI
+        run: |
+          cp .env.example .env
+          echo "REVENUECAT_PROJECT_ID=ci" >> .env
+
       - name: Composer
         run: composer install --no-interaction --prefer-dist --no-progress
 
       - name: Rotas e config
         run: |
-          cp .env.example .env
           php artisan key:generate
           php artisan route:cache
           php artisan config:cache
