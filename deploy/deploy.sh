@@ -44,6 +44,10 @@ $PHP artisan migrate --force
 $PHP artisan optimize
 # O systemd (clevernote-horizon.service) sobe o Horizon de novo com o código novo.
 $PHP artisan horizon:terminate
+# Octane (FrankenPHP, clevernote-octane.service) mantém o app na memória: recarrega os workers.
+if systemctl is-active --quiet clevernote-octane; then
+    $PHP artisan octane:reload
+fi
 
 echo "$SHA" > public/REVISION
 echo "==> no ar: $SHA"
