@@ -24,10 +24,10 @@ class RevenueCatWebhookController extends Controller
      */
     public function handle(Request $request)
     {
-        try {
-            // Verify webhook authentication header
-            // $this->verifyWebhookAuth($request);
+        // Fora do try: o abort(401) não pode cair no catch e virar 500.
+        $this->verifyWebhookAuth($request);
 
+        try {
             $payload = $request->all();
             $eventType = $payload['event_type'] ?? null;
             $event = $payload['event'] ?? [];
@@ -326,10 +326,11 @@ class RevenueCatWebhookController extends Controller
      */
     protected function verifyWebhookAuth(Request $request): void
     {
-        $authHeader = $request->header('Authorization');
-        $expectedToken = 'd3tQvaSQg#5t';
-        
-        if (!$authHeader || $authHeader !== "Bearer {$expectedToken}") {
+        $authHeader = (string) $request->header('Authorization');
+        $expectedToken = (string) config('services.revenuecat.webhook_token');
+
+        // Sem token configurado, recusa tudo em vez de aceitar qualquer header.
+        if ($expectedToken === '' || ! hash_equals("Bearer {$expectedToken}", $authHeader)) {
             Log::warning('RevenueCat webhook: Invalid or missing authorization header', [
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),

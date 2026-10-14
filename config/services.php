@@ -76,5 +76,6 @@ return [
         'public_key' => env('REVENUECAT_PUBLIC_KEY'),
         'secret_key' => env('REVENUECAT_SECRET_KEY'),
         'project_id' => env('REVENUECAT_PROJECT_ID'),
+        'webhook_token' => env('REVENUECAT_WEBHOOK_TOKEN'),
     ]
 ];
